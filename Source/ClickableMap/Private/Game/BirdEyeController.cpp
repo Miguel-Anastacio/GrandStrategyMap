@@ -10,8 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
-#include "Engine/LocalPlayer.h"
-
+#include "Game/MapPawn.h"
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 ABirdEyeController::ABirdEyeController()
@@ -26,7 +25,6 @@ void ABirdEyeController::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-
 	//Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
@@ -50,6 +48,7 @@ void ABirdEyeController::SetupInputComponent()
 
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
+		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		//// Setup touch input events
 		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ATP_TopDownPlayerController::OnInputStarted);
@@ -135,5 +134,9 @@ void ABirdEyeController::MouseClick()
 void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
 {
 	FVector2D input = instance.GetValue().Get<FVector2D>();
+	//FVector2D input = FVector2D(rawInput.Y, rawInput.X);
+	input.Y *= -1;
+	AMapPawn* pawn = GetPawn<AMapPawn>();
+	pawn->MoveCamera(input);
 
 }

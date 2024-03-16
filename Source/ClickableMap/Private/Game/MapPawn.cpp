@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 // Sets default values
 AMapPawn::AMapPawn()
 {
@@ -24,7 +25,7 @@ AMapPawn::AMapPawn()
 	CameraBoom->SetupAttachment(CollisionComponent);
 
 
-	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent>(TEXT("Movement Component"));
+	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent, UFloatingPawnMovement>(TEXT("Movement Component"));
 	MovementComponent->UpdatedComponent = CollisionComponent;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
