@@ -50,8 +50,6 @@ public:
 	UInputAction* SelectAction;
 
 protected:
-	/** True if the controlled character should navigate to the mouse cursor. */
-	uint32 bMoveToMouseCursor : 1;
 
 	virtual void SetupInputComponent() override;
 	
@@ -69,9 +67,12 @@ protected:
 	void MouseClick();
 	void CameraMovement(const FInputActionInstance& instance);
 
+	UPROPERTY(EditAnywhere, Category = "Mouse Click")
+	float zOffset = 300.0f;
+	/** True if the controlled character should navigate to the mouse cursor. */
+	uint32 bMoveToMouseCursor : 1;
 private:
 	FVector CachedDestination;
-
 	bool bIsTouch; // Is it a touch device
 	float FollowTime; // For how long it has been pressed
 };

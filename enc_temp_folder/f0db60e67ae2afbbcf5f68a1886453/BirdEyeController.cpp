@@ -141,7 +141,6 @@ void ABirdEyeController::MouseClick()
 		FCollisionQueryParams params;
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
-		params.bReturnFaceIndex = true;
 		//params.
 		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
 			return;
@@ -151,18 +150,16 @@ void ABirdEyeController::MouseClick()
 		AInteractiveMap* map = Cast<AInteractiveMap>(hit.GetActor());
 		if (map)
 		{
-			FVector2D uvs = FVector2D(0, 0);
+			FVector2D uvs;
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			if (map->GetMapRenderTarget())
 			{
 				FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
 
-				TMap<FVector, FString> table = map->GetLookUpTable();
-				FString* name = table.Find(FVector(color.R, color.G, color.B));
+				FString* name = map->GetLookUpTable().Find(FVector(color.R, color.G, color.B));
 				if (name)
 				{
 					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, (*name));
-					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
 				}
 				else
 				{
