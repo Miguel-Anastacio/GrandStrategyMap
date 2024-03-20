@@ -39,3 +39,9 @@ FColor FProvinceIDData::ConvertHexStringToRGB(FString color)
     return ColorValue;
 }
 UE_ENABLE_OPTIMIZATION
+
+FProvinceData::FProvinceData(const FString& name, const FString& owner, int64 population)
+    : Name(name), Owner(owner), Population(population)
+{
+
+}

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "MapUtils.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FProvinceIDData : public FTableRowBase
 {
@@ -45,7 +46,44 @@ struct FProvinceIDData : public FTableRowBase
     FColor ConvertHexStringToRGB(FString color);
 };
 
+USTRUCT(BlueprintType)
+struct FProvinceData : public FTableRowBase
+{
+    GENERATED_BODY()
 
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    FString Name;
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    FString Owner;
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    int64 Population = 0;
+
+    FProvinceData(const FString& name, const FString& owner, int64 population);
+    FProvinceData() {};
+
+    // Add more province data here
+};
+
+USTRUCT(BlueprintType)
+struct FCountryData : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    FString Name;
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    FColor Color;
+    //UPROPERTY(BlueprintReadWrite, Category = "ID")
+    //int64 Population;
+
+    UPROPERTY(BlueprintReadWrite, Category = "ID")
+    TArray<int32> Provinces;
+
+    FCountryData() {};
+    FCountryData(const FString& name, const FColor& color) : Name(name), Color(color)
+    {};
+    // Add more country data here
+};
 
 //class UTextureRenderTarget;
 //UCLASS()
