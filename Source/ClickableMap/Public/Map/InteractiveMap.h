@@ -23,10 +23,14 @@ public:
 	UTextureRenderTarget2D* GetMapRenderTarget() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TMap<FVector, FString> GetLookUpTable() const;
+	TMap<FVector, FName> GetLookUpTable() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FString GetProvinceID(const FVector& color) const;
+	FName GetProvinceID(const FVector& color) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetProvinceData(FName name, FProvinceData& out_data);
+
+	FProvinceData* GetProvinceData(FName name);
 
 protected:
 	// Called when the game starts or when spawned
@@ -35,6 +39,10 @@ protected:
 
 	void SaveMapTextureData();
 	void CreateLookUpTable();
+
+	void ReadProvinceDataTable();
+	void ReadCountryDataTable();
+
 	void CreatePoliticalMapTexture();
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
@@ -50,11 +58,17 @@ protected:
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GameplayMapMaterial;
+
+	// NOT IN USE
 	UPROPERTY(EditAnywhere)
 	UTextureRenderTarget2D* TestPoliticalMapRenderTarget;
 
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* MapDataTable;
+	UPROPERTY(EditAnywhere, Category = "Data")
+	UDataTable* ProvinceDataTable;
+	UPROPERTY(EditAnywhere, Category = "Data")
+	UDataTable* CountryDataTable;
 
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
@@ -67,13 +81,13 @@ protected:
 	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<FVector, FString> LookUpTable;
+	TMap<FVector, FName> LookUpTable;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<FString, FProvinceData> ProvinceDataMap;
+	TMap<FName, FProvinceData> ProvinceDataMap;
 
 	UPROPERTY(BlueprintReadOnly)
-	TMap<FString, FCountryData> CountryData;
+	TMap<FName, FCountryData> CountryData;
 	
 	TArray<FColor> MapColorCodeTextureData;
 

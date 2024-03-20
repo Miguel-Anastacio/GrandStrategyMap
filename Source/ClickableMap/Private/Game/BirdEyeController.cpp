@@ -157,11 +157,12 @@ void ABirdEyeController::MouseClick()
 			{
 				FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
 
-				TMap<FVector, FString> table = map->GetLookUpTable();
-				FString* name = table.Find(FVector(color.R, color.G, color.B));
-				if (name)
+				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+				FProvinceData* data = map->GetProvinceData(id);
+				if (data)
 				{
-					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, (*name));
+					//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
+					data->PrintProvinceData();
 					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
 				}
 				else

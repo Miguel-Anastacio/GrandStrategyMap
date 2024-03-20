@@ -2,7 +2,7 @@
 #include "Map/MapUtils.h"
 
 UE_DISABLE_OPTIMIZATION
-int32 FProvinceIDData::HexToDecimal(const FString& hex)
+int32 FProvinceIDData::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
 {
     FString temp = hex.Reverse();
     auto chars = temp.GetCharArray();
@@ -10,7 +10,7 @@ int32 FProvinceIDData::HexToDecimal(const FString& hex)
     int32 total = 0;
     for (int i = 0; i < temp.Len(); i++)
     {
-        int32* value = HexMap.Find(temp[i]);
+        const int32* value = HexMap.Find(temp[i]);
         if (value)
         {
             total += FMath::Pow(16.f, i) * (*value);
@@ -22,26 +22,36 @@ int32 FProvinceIDData::HexToDecimal(const FString& hex)
     }
     return total;
 }
-FColor FProvinceIDData::ConvertHexStringToRGB(FString color)
+FColor FProvinceIDData::ConvertHexStringToRGB(const FString& color, const TMap<TCHAR, int32>& HexMap)
 {
-    color.RemoveAt(0, 1);
-    FString r = color.LeftChop(6);
-    FString g = color.Mid(2, 2);
-    FString b = color.Mid(4, 2);
-    FString alpha = color.RightChop(6);
+    if (color.StartsWith(FString("#")))
+    {
+        FString noPrefix = color.RightChop(1);
+        FString r = noPrefix.LeftChop(6);
+        FString g = noPrefix.Mid(2, 2);
+        FString b = noPrefix.Mid(4, 2);
+        FString alpha = noPrefix.RightChop(6);
 
-    FColor ColorValue;
-    ColorValue.R = HexToDecimal(r);
-    ColorValue.G = HexToDecimal(g);
-    ColorValue.B = HexToDecimal(b);
-    ColorValue.A = HexToDecimal(alpha);
-    
-    return ColorValue;
+        FColor ColorValue;
+        ColorValue.R = HexToDecimal(r, HexMap);
+        ColorValue.G = HexToDecimal(g, HexMap);
+        ColorValue.B = HexToDecimal(b, HexMap);
+        ColorValue.A = HexToDecimal(alpha, HexMap);
+
+        return ColorValue;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Color is not hexadecimal format"));
+    return FColor();
 }
 UE_ENABLE_OPTIMIZATION
 
-FProvinceData::FProvinceData(const FString& name, const FString& owner, int64 population)
-    : Name(name), Owner(owner), Population(population)
+void FProvinceData::PrintProvinceData()
 {
-
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, ProvinceName);
+        GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, Owner.ToString());
+        GEngine->AddOnScreenDebugMessage(2, 2.0f, FColor::Green, FString::Printf(TEXT("%lld"), Population));
+    }
 }

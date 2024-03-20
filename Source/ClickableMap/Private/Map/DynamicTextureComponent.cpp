@@ -245,6 +245,7 @@ void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UT
 	int32 width = texture->GetSizeX();
 	int32 height = texture->GetSizeX();
 
+
 	for (int32 y = 0; y < height; y++)
 	{
 		for (int32 x = 0; x < width; x++) 

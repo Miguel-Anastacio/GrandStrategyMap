@@ -30,7 +30,6 @@ UE_DISABLE_OPTIMIZATION
 void AInteractiveMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 	//DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 	//UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
 	////set paramater with Set***ParamaterValue
@@ -44,8 +43,12 @@ void AInteractiveMap::PostInitializeComponents()
 void AInteractiveMap::BeginPlay()
 {
 	Super::BeginPlay();
+	GameplayMapMesh->SetVisibility(true);
+	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 
 	CreateLookUpTable();
+	ReadProvinceDataTable();
+	ReadCountryDataTable();
 	SaveMapTextureData();
 
 	//CreatePoliticalMapTexture();
@@ -145,7 +148,7 @@ void AInteractiveMap::SaveMapTextureData()
 
 
 
-			FString* id = LookUpTable.Find(FVector(R, G, B));
+			FName* id = LookUpTable.Find(FVector(R, G, B));
 			if (id)
 			{
 				FProvinceData* province = ProvinceDataMap.Find(*id);
@@ -206,8 +209,15 @@ void AInteractiveMap::Tick(float DeltaTime)
 }
 void AInteractiveMap::CreateLookUpTable()
 {
-	TArray<FName> RowNames = MapDataTable->GetRowNames();
+	if (!MapDataTable)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Map table not loaded"));
+		return;
+	}
 
+	TArray<FName> RowNames = MapDataTable->GetRowNames();
+	TMap<TCHAR, int32> HexMap; 
+	InitHexMap(HexMap);
 	for (auto& name : RowNames)
 	{
 		FProvinceIDData* Item = MapDataTable->FindRow<FProvinceIDData>(name, "");
@@ -215,19 +225,50 @@ void AInteractiveMap::CreateLookUpTable()
 		{
 			FString temp = Item->Color;
 			temp += FString("FF");
-			FColor sRGBColor = Item->ConvertHexStringToRGB(temp);
+			FColor sRGBColor = Item->ConvertHexStringToRGB(temp, HexMap);
 
-			LookUpTable.Add(FVector(sRGBColor.R, sRGBColor.G, sRGBColor.B), Item->Name);
+			LookUpTable.Add(FVector(sRGBColor.R, sRGBColor.G, sRGBColor.B), name);
 
 			// for now init provinces with test values
 			int64 value = FMath::RandRange(1000, 5000);
-			ProvinceDataMap.Emplace(Item->Name, FProvinceData(Item->Name, FString("Spain"), value));
 			
 		}
 	}
+}
+void AInteractiveMap::ReadProvinceDataTable()
+{
+	if (!ProvinceDataTable)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Province Data not loaded"));
+		return;
+	}
+	TArray<FName> RowNames = ProvinceDataTable->GetRowNames();
+	for (auto& name : RowNames)
+	{
+		FProvinceData* Item = ProvinceDataTable->FindRow<FProvinceData>(name, "");
+		if (Item)
+		{
+			ProvinceDataMap.Emplace(name, (*Item));
+		}
+	}
 
-	// Test Country
-	CountryData.Emplace(TEXT("Spain"), FCountryData(FString("Spain"), FColor(255, 0, 0, 255)));
+}
+void AInteractiveMap::ReadCountryDataTable()
+{
+	if (!CountryDataTable)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Country Data not loaded"));
+		return;
+	}
+	TArray<FName> RowNames = CountryDataTable->GetRowNames();
+	for (auto& name : RowNames)
+	{
+		FCountryData* Item = CountryDataTable->FindRow<FCountryData>(name, "");
+		if (Item)
+		{
+			CountryData.Emplace(FName(*Item->CountryName), (*Item));
+		}
+	}
 }
 void AInteractiveMap::CreatePoliticalMapTexture()
 {
@@ -292,18 +333,41 @@ UTextureRenderTarget2D* AInteractiveMap::GetMapRenderTarget() const
 	return MapRenderTarget;
 }
 
-TMap<FVector,FString> AInteractiveMap::GetLookUpTable() const
+TMap<FVector, FName> AInteractiveMap::GetLookUpTable() const
 {
 	return LookUpTable;
 }
 
-FString AInteractiveMap::GetProvinceID(const FVector& color) const
+FName AInteractiveMap::GetProvinceID(const FVector& color) const
 {
-	const FString* ID = LookUpTable.Find(color);
+	const FName* ID = LookUpTable.Find(color);
 	if (ID)
 	{
 		return (*ID);
 	}
 
-	return FString();
+	return FName();
+}
+
+// to be able to use in BP
+void AInteractiveMap::GetProvinceData(FName name, FProvinceData& out_data)
+{
+	FProvinceData* data = ProvinceDataMap.Find(name);
+	if (data)
+	{
+		out_data = (*data);
+	}
+
+	//return nullptr;
+}
+
+FProvinceData* AInteractiveMap::GetProvinceData(FName name)
+{
+	FProvinceData* data = ProvinceDataMap.Find(name);
+	if (data)
+	{
+		return data;
+	}
+
+	return nullptr;
 }
