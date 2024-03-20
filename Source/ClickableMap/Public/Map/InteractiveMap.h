@@ -7,7 +7,17 @@
 #include "MapUtils.h"
 #include "InteractiveMap.generated.h"
 
+UENUM(BlueprintType)
+enum class MapMode : uint8
+{
+	POLITICAL UMETA(DisplayName = "Political"),
+	RELIGIOUS   UMETA(DisplayName = "Religious"),
+	CULTURAL   UMETA(DisplayName = "Cultural"),
+	Terrain   UMETA(DisplayName = "Terrain")
+};
+
 class UTextureRenderTarget2D;
+class UDynamicTextureComponent;
 UCLASS()
 class CLICKABLEMAP_API AInteractiveMap : public AActor
 {
@@ -30,12 +40,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetProvinceData(FName name, FProvinceData& out_data);
 
+	UFUNCTION(BlueprintCallable)
+	void SetMapMode(MapMode mode);
+
 	FProvinceData* GetProvinceData(FName name);
+
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
+
+	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
+	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
+	bool GetCountryColor(const FVector& color, FColor& out_countryColor);
+	FColor GetReligionColor(const FVector& lookUpColor);
 
 	void SaveMapTextureData();
 	void CreateLookUpTable();
@@ -44,6 +64,7 @@ protected:
 	void ReadCountryDataTable();
 
 	void CreatePoliticalMapTexture();
+	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
@@ -53,7 +74,9 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<class UDynamicTextureComponent> DynamicTextureComponent;
+	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;	
+	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
+	TObjectPtr<UDynamicTextureComponent> ReligiousMapTextureComponent;
 	// Material that show the current gameplay map
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
@@ -76,6 +99,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UTexture2D> PoliticalMapTexture;
+	UPROPERTY()
+	TObjectPtr<UTexture2D> ReligiousMapTexture;
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
@@ -92,5 +117,6 @@ protected:
 	TArray<FColor> MapColorCodeTextureData;
 
 	TArray<float> PixelColorPoliticalTexture;
+	TArray<float> PixelColorReligiousTexture;
 
 };

@@ -53,6 +53,7 @@ public:
 	UTexture2D* GetTexture() const;
 
 	//UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
+	//void InitializeTexture(uint32 width, uint32 height, UTexture* texture);
 	void InitializeTexture(uint32 width, uint32 height);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter = FLinearColor::White);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);

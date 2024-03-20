@@ -174,6 +174,34 @@ void UDynamicTextureComponent::InitializeTexture()
 	UpdateTexture();
 }
 
+//void UDynamicTextureComponent::InitializeTexture(UTexture2D* texture)
+//{
+//	// Get Total Pixels in Texture
+//	TextureTotalPixels = TextureWidth * TextureHeight;
+//
+//	// Get Total Bytes of Texture - Each pixel has 4 bytes for RGBA
+//	TextureDataSize = TextureTotalPixels * 4;
+//	TextureDataSqrtSize = TextureWidth * 4;
+//
+//	// Initialize Texture Data Array
+//	TextureData = new uint8[TextureDataSize];
+//
+//	// Create Dynamic Texture Object
+//	texture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
+//	texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+//	texture->SRGB = 0;
+//	texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+//	texture->Filter = TextureFilter::TF_Nearest;
+//	texture->AddToRoot();
+//	texture->UpdateResource();
+//
+//	//Create Update Region Struct Instance
+//	TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, TextureWidth, TextureHeight);
+//
+//	FillTexture(FLinearColor::Green);
+//	UpdateTexture();
+////}
+
 void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 {
 	if (DynamicTexture == nullptr)
@@ -234,8 +262,11 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 		});
 }
 
-
-
+//
+//void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height, UTexture* texture)
+//{
+//
+//}
 
 void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height)
 {

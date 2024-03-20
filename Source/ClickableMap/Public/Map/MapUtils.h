@@ -27,6 +27,25 @@ static void InitHexMap(TMap<TCHAR, int32>& HexMap)
 };
 
 USTRUCT(BlueprintType)
+struct FReligion 
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FString ReligionName;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FColor Color;
+
+    FReligion() : ReligionName(FString("")), Color(FColor()) {};
+
+
+    FReligion(const FString& name, FColor color) :
+        ReligionName(name), Color(color) {};
+
+    // Add more province data here
+};
+
+USTRUCT(BlueprintType)
 struct FProvinceIDData : public FTableRowBase
 {
     GENERATED_BODY()
@@ -57,7 +76,6 @@ struct FProvinceIDData : public FTableRowBase
     FString Name;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString Color;
-
     //TMap<TCHAR, int32> HexMap;
     // assuming format AABBCCTT (AA = R, BB = G, CC = B, TT = Alpha)
     int32 HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap);
@@ -75,11 +93,14 @@ struct FProvinceData : public FTableRowBase
     FName Owner;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     int64 Population;
-    FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0) {};
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FReligion Religion;
+
+    FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FReligion()) {};
 
 
-    FProvinceData(const FString& name, FName owner, int64 population) : 
-        ProvinceName(name), Owner(owner), Population(population) {};
+    FProvinceData(const FString& name, FName owner, int64 population, FReligion religion) : 
+        ProvinceName(name), Owner(owner), Population(population), Religion(religion) {};
 
     void PrintProvinceData();
     // Add more province data here
@@ -105,6 +126,8 @@ struct FCountryData : public FTableRowBase
     {};
     // Add more country data here
 };
+
+
 
 //class UTextureRenderTarget;
 //UCLASS()

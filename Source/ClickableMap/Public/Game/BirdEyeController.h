@@ -48,6 +48,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SelectAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MouseMoveAction;
 
 protected:
 
@@ -66,6 +68,7 @@ protected:
 
 	void MouseClick();
 	void CameraMovement(const FInputActionInstance& instance);
+	void MouseMovement();
 
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;

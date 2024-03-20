@@ -52,6 +52,7 @@ void ABirdEyeController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
+		EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		//// Setup touch input events
 		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ATP_TopDownPlayerController::OnInputStarted);
@@ -170,8 +171,6 @@ void ABirdEyeController::MouseClick()
 					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
 				}
 			}
-
-
 		}
 
 	}
@@ -186,4 +185,9 @@ void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->MoveCamera(input);
 
+}
+
+void ABirdEyeController::MouseMovement()
+{
+	
 }

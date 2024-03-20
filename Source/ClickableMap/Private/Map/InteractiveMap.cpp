@@ -23,7 +23,8 @@ AInteractiveMap::AInteractiveMap()
 	GameplayMapMesh->SetupAttachment(RootComponent);
 
 
-	DynamicTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
+	PoliticalMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
+	ReligiousMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Religious Map Texture"));
 }
 
 UE_DISABLE_OPTIMIZATION
@@ -44,7 +45,8 @@ void AInteractiveMap::BeginPlay()
 {
 	Super::BeginPlay();
 	GameplayMapMesh->SetVisibility(true);
-	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	PoliticalMapTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	ReligiousMapTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 
 	CreateLookUpTable();
 	ReadProvinceDataTable();
@@ -52,18 +54,16 @@ void AInteractiveMap::BeginPlay()
 	SaveMapTextureData();
 
 	//CreatePoliticalMapTexture();
-
+	CreateMapTexture(PoliticalMapTextureComponent, PixelColorPoliticalTexture, PoliticalMapTexture);
+	CreateMapTexture(ReligiousMapTextureComponent, PixelColorReligiousTexture, ReligiousMapTexture);
 
 	//if (PoliticalMapTexture)
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("Political map texture is valid"));
 	//}
-	CreatePoliticalMapTexture();
 
-	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
-	GameplayMapMesh->SetMaterial(0, DynMaterial);
-	DynamicTextureComponent->DynamicMaterial = DynMaterial;
-	DynamicTextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", PoliticalMapTexture);
+	GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+
 
 
 	////set paramater with Set***ParamaterValue
@@ -74,7 +74,56 @@ void AInteractiveMap::BeginPlay()
 	
 }
 
+void AInteractiveMap::SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A)
+{
+	pixelArray[index] = R;
+	pixelArray[index + 1] = G;
+	pixelArray[index + 2] = B;
+	pixelArray[index + 3] = A;
+}
+void AInteractiveMap::SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color)
+{
+	pixelArray[index] = color.R;
+	pixelArray[index + 1] = color.G;
+	pixelArray[index + 2] = color.B;
+	pixelArray[index + 3] = color.A;
+}
+bool AInteractiveMap::GetCountryColor(const FVector& color, FColor& out_countryColor)
+{
+	FName* id = LookUpTable.Find(color);
+	if (id)
+	{
+		FProvinceData* province = ProvinceDataMap.Find(*id);
+		if (!province)
+			return false;
+		FCountryData* country = CountryData.Find(province->Owner);
+		if (!country)
+			return false;
 
+		out_countryColor = country->Color;
+		return true;
+	}
+	else
+	{
+		//SetPixelColor(index, PixelColorPoliticalTexture, 0, 0, 0, 0);
+		return false;
+	}
+	return true;
+}
+FColor AInteractiveMap::GetReligionColor(const FVector& lookUpColor)
+{
+	FColor color = FColor(0, 0, 0, 0);
+	FName* id = LookUpTable.Find(lookUpColor);
+	if (id)
+	{
+		FProvinceData* province = ProvinceDataMap.Find(*id);
+		if (!province)
+			return color;
+
+		color = province->Religion.Color;
+	}
+	return color;
+}
 void AInteractiveMap::SaveMapTextureData()
 {
 	if (!IsValid(MapLookUpTexture))
@@ -92,6 +141,7 @@ void AInteractiveMap::SaveMapTextureData()
 	const uint8* Data = static_cast<const uint8*>(TextureData);
 
 	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
+	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
 	{
@@ -103,38 +153,11 @@ void AInteractiveMap::SaveMapTextureData()
 			uint8 R = Data[Index + 2];
 			uint8 A = Data[Index + 3];
 
+			FColor pixelColor = FColor(0, 0, 0, 0);
+			GetCountryColor(FVector(R, G, B), pixelColor);
+			SetPixelColor(Index, PixelColorPoliticalTexture, pixelColor);
 
-			FName* id = LookUpTable.Find(FVector(R, G, B));
-			if (id)
-			{
-				FProvinceData* province = ProvinceDataMap.Find(*id);
-				if (!province)
-					break;
-				FCountryData* country = CountryData.Find(province->Owner);
-				if (!country)
-					break;
-
-				// r
-				PixelColorPoliticalTexture[Index] = country->Color.R;
-				// g
-				PixelColorPoliticalTexture[Index + 1] = country->Color.G;
-				// b
-				PixelColorPoliticalTexture[Index + 2] = country->Color.B;
-				// a
-				PixelColorPoliticalTexture[Index + 3] = country->Color.A;
-			}
-			else
-			{
-				PixelColorPoliticalTexture[Index] = 0;
-				// g
-				PixelColorPoliticalTexture[Index + 1] = 0;
-				// b
-				PixelColorPoliticalTexture[Index + 2] = 0;
-				// a
-				PixelColorPoliticalTexture[Index + 3] = 0;
-			}
-
-
+			SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(FVector(R, G, B)));
 
 			MapColorCodeTextureData.Add(FColor(R, G, B, A));
 		}
@@ -216,9 +239,25 @@ void AInteractiveMap::ReadCountryDataTable()
 }
 void AInteractiveMap::CreatePoliticalMapTexture()
 {
-	DynamicTextureComponent->DrawFromDataBuffer(0, 0, MapLookUpTexture, PixelColorPoliticalTexture);
-	DynamicTextureComponent->UpdateTexture();
-	PoliticalMapTexture = DynamicTextureComponent->GetTexture();
+	PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, MapLookUpTexture, PixelColorPoliticalTexture);
+	PoliticalMapTextureComponent->UpdateTexture();
+	PoliticalMapTexture = PoliticalMapTextureComponent->GetTexture();
+
+	// Set material
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
+	PoliticalMapTextureComponent->DynamicMaterial = DynMaterial;
+	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", PoliticalMapTexture);
+}
+void AInteractiveMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture)
+{
+	textureCompoment->DrawFromDataBuffer(0, 0, MapLookUpTexture, pixelArray);
+	textureCompoment->UpdateTexture();
+	texture = textureCompoment->GetTexture();
+
+	// Set material
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
+	textureCompoment->DynamicMaterial = DynMaterial;
+	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", texture);
 }
 UE_ENABLE_OPTIMIZATION
 
@@ -255,6 +294,26 @@ void AInteractiveMap::GetProvinceData(FName name, FProvinceData& out_data)
 	//return nullptr;
 }
 
+void AInteractiveMap::SetMapMode(MapMode mode)
+{
+	switch (mode)
+	{
+	case MapMode::POLITICAL:
+		GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		break;
+	case MapMode::RELIGIOUS:
+		GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		break;
+	case MapMode::CULTURAL:
+		break;
+	case MapMode::Terrain:
+		break;
+	default:
+		break;
+	}
+}
+
+
 FProvinceData* AInteractiveMap::GetProvinceData(FName name)
 {
 	FProvinceData* data = ProvinceDataMap.Find(name);
@@ -265,3 +324,4 @@ FProvinceData* AInteractiveMap::GetProvinceData(FName name)
 
 	return nullptr;
 }
+
