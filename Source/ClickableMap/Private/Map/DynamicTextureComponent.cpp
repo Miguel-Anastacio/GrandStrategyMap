@@ -25,8 +25,13 @@ void UDynamicTextureComponent::BeginPlay()
 
 	// ...
 
+}
 
-
+void UDynamicTextureComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	FMemory::Free(TextureData);
+	FMemory::Free(TextureRegion);
 }
 
 // Called every frame
