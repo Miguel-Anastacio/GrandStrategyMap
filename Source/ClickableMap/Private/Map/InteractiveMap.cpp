@@ -5,6 +5,7 @@
 #include "Map/MapUtils.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
+#include "Map/DynamicTextureComponent.h"
 // Sets default values
 AInteractiveMap::AInteractiveMap()
 {
@@ -20,9 +21,25 @@ AInteractiveMap::AInteractiveMap()
 
 	GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gameplay Map"));
 	GameplayMapMesh->SetupAttachment(RootComponent);
+
+
+	DynamicTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 }
 
 UE_DISABLE_OPTIMIZATION
+void AInteractiveMap::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	//DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	//UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
+	////set paramater with Set***ParamaterValue
+	//DynMaterial->SetTextureParameterValue("PoliticalMapTexture", PoliticalMapTexture);
+	//GameplayMapMesh->SetMaterial(0, DynMaterial);
+
+	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), TestPoliticalMapRenderTarget, DynMaterial);
+
+}
 // Called when the game starts or when spawned
 void AInteractiveMap::BeginPlay()
 {
@@ -30,19 +47,30 @@ void AInteractiveMap::BeginPlay()
 
 	CreateLookUpTable();
 	SaveMapTextureData();
+
+	//CreatePoliticalMapTexture();
+
+
+	//if (PoliticalMapTexture)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Political map texture is valid"));
+	//}
 	CreatePoliticalMapTexture();
 
-	//create dynamic material anywhere u like, Constructor or anywhere .
 	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
-	//set paramater with Set***ParamaterValue
-	DynMaterial->SetTextureParameterValue("PoliticalMapTexture", PoliticalMapTexture);
 	GameplayMapMesh->SetMaterial(0, DynMaterial);
+	DynamicTextureComponent->DynamicMaterial = DynMaterial;
+	DynamicTextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", PoliticalMapTexture);
 
-	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), TestPoliticalMapRenderTarget, DynMaterial);
-	//UKismetRenderingLibrary::rendertarger
+
+	////set paramater with Set***ParamaterValue
+	//DynMaterial->SetTextureParameterValue("Texture", PoliticalMapTexture);
+
+	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), TestPoliticalMapRenderTarget, DynMaterial);
 
 	
 }
+
 
 void AInteractiveMap::SaveMapTextureData()
 {
@@ -50,13 +78,13 @@ void AInteractiveMap::SaveMapTextureData()
 		return;
 
 
-	TextureCompressionSettings OldCompressionSettings = MapLookUpTexture->CompressionSettings;
-	TextureMipGenSettings OldMipGenSettings = MapLookUpTexture->MipGenSettings;
-	bool OldSRGB = MapLookUpTexture->SRGB;
+	//TextureCompressionSettings OldCompressionSettings = MapLookUpTexture->CompressionSettings;
+	//TextureMipGenSettings OldMipGenSettings = MapLookUpTexture->MipGenSettings;
+	//bool OldSRGB = MapLookUpTexture->SRGB;
 
-	MapLookUpTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-	MapLookUpTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-	MapLookUpTexture->SRGB = false;
+	//MapLookUpTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+	//MapLookUpTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+	//MapLookUpTexture->SRGB = false;
 	////MapTexture->UpdateResource();
 	//FTexture2DMipMap* MipMap = &MapTexture->PlatformData->Mips[0];
 	//FByteBulkData* ImageData = &MipMap->BulkData;
@@ -103,31 +131,70 @@ void AInteractiveMap::SaveMapTextureData()
 	// Assume texture format is RGBA
 	const uint8* Data = static_cast<const uint8*>(TextureData);
 
+	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
 	{
 		for (int32 X = 0; X < Width; ++X)
 		{
 			int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
-			uint8 R = Data[Index];
+			uint8 B = Data[Index];
 			uint8 G = Data[Index + 1];
-			uint8 B = Data[Index + 2];
+			uint8 R = Data[Index + 2];
 			uint8 A = Data[Index + 3];
 
+
+
+			FString* id = LookUpTable.Find(FVector(R, G, B));
+			if (id)
+			{
+				FProvinceData* province = ProvinceDataMap.Find(*id);
+				if (!province)
+					break;
+				FCountryData* country = CountryData.Find(province->Owner);
+				if (!country)
+					break;
+
+				// r
+				PixelColorPoliticalTexture[Index] = country->Color.R;
+				// g
+				PixelColorPoliticalTexture[Index + 1] = country->Color.G;
+				// b
+				PixelColorPoliticalTexture[Index + 2] = country->Color.B;
+				// a
+				PixelColorPoliticalTexture[Index + 3] = country->Color.A;
+			}
+			else
+			{
+				PixelColorPoliticalTexture[Index] = 0;
+				// g
+				PixelColorPoliticalTexture[Index + 1] = 0;
+				// b
+				PixelColorPoliticalTexture[Index + 2] = 0;
+				// a
+				PixelColorPoliticalTexture[Index + 3] = 0;
+			}
+
+
+
 			MapColorCodeTextureData.Add(FColor(R, G, B, A));
-			if (MapColorCodeTextureData.Last() != FColor(0, 0, 0, 0))
+			/*if (FColor(R, G, B, 255) == FColor(95, 70, 144, 255))
 			{
 				int t = 0;
 			}
+			else if(FColor(R, G, B, 0) != FColor(0, 0, 0, 0))
+			{
+				int abd = 4;
+			}*/
 			// Do something with the color (R, G, B, A)
 		}
 	}
 
 	// Unlock the texture
 	Mip.BulkData.Unlock();
-	MapLookUpTexture->CompressionSettings = OldCompressionSettings;
+	/*MapLookUpTexture->CompressionSettings = OldCompressionSettings;
 	MapLookUpTexture->MipGenSettings = OldMipGenSettings;
-	MapLookUpTexture->SRGB = OldSRGB;
+	MapLookUpTexture->SRGB = OldSRGB;*/
 	MapLookUpTexture->UpdateResource();
 }
 
@@ -160,60 +227,63 @@ void AInteractiveMap::CreateLookUpTable()
 	}
 
 	// Test Country
-	CountryData.Emplace(TEXT("Spain"), FCountryData(FString("Spain"), FColor(1.0f, 0, 0, 1.0f)));
+	CountryData.Emplace(TEXT("Spain"), FCountryData(FString("Spain"), FColor(255, 0, 0, 255)));
 }
 void AInteractiveMap::CreatePoliticalMapTexture()
 {
-	// Create custom texture and retrieve raw image data
-	PoliticalMapTexture = UTexture2D::CreateTransient(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
-	FTexture2DMipMap* MipMap = &PoliticalMapTexture->PlatformData->Mips[0];
-	FByteBulkData* ImageData = &MipMap->BulkData;
-	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
+	int32 width = MapLookUpTexture->GetSizeX();
+	int32 height = MapLookUpTexture->GetSizeY();
+	uint32 texDataSize = width * height * 4;
 
+	uint8* politicalMapData = new uint8[texDataSize];
 	//RawImageData is formatted as such :
 	//[Pixel1 B] [Pixel1 G] [Pixel1 R] [Pixel1 A] [Pixel2 B] [Pixel2 G] [Pixel2 R] [Pixel2 A] …
-	for (int y = 0; y < PoliticalMapTexture->GetSizeY(); y++)
-	{
-		for (int x = 0; x < PoliticalMapTexture->GetSizeX(); x++)
-		{
-			int32 ogIndex = (y * PoliticalMapTexture->GetSizeX() + x);
-			FColor originalColor = MapColorCodeTextureData[ogIndex];
+	//for (int y = 0; y < height; y++)
+	//{
+	//	for (int x = 0; x < height; x++)
+	//	{
+	//		int32 ogIndex = (y * width+ x);
+	//		FColor originalColor = MapColorCodeTextureData[ogIndex];
 
-			int32 index = (y * PoliticalMapTexture->GetSizeX() + x) * 4;
-			
-			FString* id = LookUpTable.Find(FVector(originalColor));
-			if (id)
-			{
-				FProvinceData* province = ProvinceDataMap.Find(*id);
-				if (!province)
-					break;
-				FCountryData* country = CountryData.Find(province->Owner);
-				if (!country)
-					break;
+	//		int32 index = (y * width + x) * 4;
 
-				// r
-				RawImageData[index] = country->Color.R;
-				// g
-				RawImageData[index+1] = country->Color.G;
-				// b
-				RawImageData[index+2] = country->Color.B;
-				// a
-				RawImageData[index+3] = country->Color.A;
-			}
-			else
-			{
-				RawImageData[index] = 0;
-					// g
-				RawImageData[index + 1] = 0;
-					// b
-				RawImageData[index + 2] = 0;
-					// a
-				RawImageData[index + 3] = 0;
-			}
-		}
-	}
+	//		FString* id = LookUpTable.Find(FVector(originalColor.R, originalColor.G, originalColor.B));
+	//		if (id)
+	//		{
+	//			FProvinceData* province = ProvinceDataMap.Find(*id);
+	//			if (!province)
+	//				break;
+	//			FCountryData* country = CountryData.Find(province->Owner);
+	//			if (!country)
+	//				break;
 
-	int a = 3;
+	//			// r
+	//			politicalMapData[index] = country->Color.R;
+	//			// g
+	//			politicalMapData[index+1] = country->Color.G;
+	//			// b
+	//			politicalMapData[index+2] = country->Color.B;
+	//			// a
+	//			politicalMapData[index+3] = country->Color.A;
+	//		}
+	//		else
+	//		{
+	//			politicalMapData[index] = 0;
+	//				// g
+	//			politicalMapData[index + 1] = 0;
+	//				// b
+	//			politicalMapData[index + 2] = 0;
+	//				// a
+	//			politicalMapData[index + 3] = 0;
+	//		}
+	//	}
+	//}
+
+	DynamicTextureComponent->DrawFromDataBuffer(0, 0, MapLookUpTexture, PixelColorPoliticalTexture);
+	DynamicTextureComponent->UpdateTexture();
+	PoliticalMapTexture = DynamicTextureComponent->GetTexture();
+
+	FMemory::Free(politicalMapData);
 }
 UE_ENABLE_OPTIMIZATION
 

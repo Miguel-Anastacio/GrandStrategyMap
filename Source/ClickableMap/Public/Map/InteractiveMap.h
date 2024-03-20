@@ -31,17 +31,21 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+
 	void SaveMapTextureData();
 	void CreateLookUpTable();
 	void CreatePoliticalMapTexture();
 protected:
-	UPROPERTY(EditAnywhere, Category = "Selection", BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
-	UPROPERTY(EditAnywhere, Category = "Selection", BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
-	UPROPERTY(EditAnywhere, Category = "Selection", BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
 
+	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
+	TObjectPtr<class UDynamicTextureComponent> DynamicTextureComponent;
 	// Material that show the current gameplay map
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
@@ -72,5 +76,7 @@ protected:
 	TMap<FString, FCountryData> CountryData;
 	
 	TArray<FColor> MapColorCodeTextureData;
+
+	TArray<float> PixelColorPoliticalTexture;
 
 };
