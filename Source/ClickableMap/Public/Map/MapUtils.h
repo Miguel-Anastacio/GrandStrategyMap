@@ -27,22 +27,46 @@ static void InitHexMap(TMap<TCHAR, int32>& HexMap)
 };
 
 USTRUCT(BlueprintType)
-struct FReligion 
+struct FColoredData
 {
     GENERATED_BODY()
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FString ReligionName;
+    FString DataName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FColor Color;
 
-    FReligion() : ReligionName(FString("")), Color(FColor()) {};
+    FColoredData() : DataName(FString("")), Color(FColor()) {};
 
+
+    FColoredData(const FString& name, FColor color) :
+        DataName(name), Color(color) {};
+
+};
+
+USTRUCT(BlueprintType)
+struct FReligion : public FColoredData
+{
+    GENERATED_BODY()
+
+    FReligion() : FColoredData() {};
 
     FReligion(const FString& name, FColor color) :
-        ReligionName(name), Color(color) {};
+        FColoredData(name, color) {};
 
-    // Add more province data here
+    // Add more religion data here
+};
+USTRUCT(BlueprintType)
+struct FPopCulture : public FColoredData
+{
+    GENERATED_BODY()
+
+    FPopCulture() : FColoredData() {};
+
+    FPopCulture(const FString& name, FColor color) :
+        FColoredData(name, color) {};
+
+    // Add more culture data here
 };
 
 USTRUCT(BlueprintType)
@@ -95,12 +119,13 @@ struct FProvinceData : public FTableRowBase
     int64 Population;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FReligion Religion;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FPopCulture Culture;
 
     FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FReligion()) {};
 
-
-    FProvinceData(const FString& name, FName owner, int64 population, FReligion religion) : 
-        ProvinceName(name), Owner(owner), Population(population), Religion(religion) {};
+    FProvinceData(const FString& name, FName owner, int64 population, const FReligion& religion, const FPopCulture& culture) :
+        ProvinceName(name), Owner(owner), Population(population), Religion(religion), Culture(culture) {};
 
     void PrintProvinceData();
     // Add more province data here
@@ -126,42 +151,3 @@ struct FCountryData : public FTableRowBase
     {};
     // Add more country data here
 };
-
-
-
-//class UTextureRenderTarget;
-//UCLASS()
-//class CLICKABLEMAP_API AInteractiveMap : public AActor
-//{
-//	GENERATED_BODY()
-//	
-//public:	
-//	// Sets default values for this actor's properties
-//	AInteractiveMap();
-//	// Called every frame
-//	virtual void Tick(float DeltaTime) override;
-//
-//	UFUNCTION(BlueprintCallable, BlueprintPure)
-//	UTextureRenderTarget* GetMapRenderTarget() const;
-//
-//	UFUNCTION(BlueprintCallable, BlueprintPure)
-//	TMap<FVector, FString> GetLookUpTable() const;
-//
-//	UFUNCTION(BlueprintCallable, BlueprintPure)
-//	FString GetProvinceID(const FVector& color) const;
-//
-//protected:
-//	// Called when the game starts or when spawned
-//	virtual void BeginPlay() override;
-//
-//	void CreateLookUpTable();
-//protected:
-//	UPROPERTY(EditAnywhere, Category = "Data")
-//	UDataTable* MapDataTable;
-//
-//	UPROPERTY(BlueprintReadOnly)
-//	TObjectPtr<UTextureRenderTarget> MapRenderTarget;
-//
-//	UPROPERTY(BlueprintReadOnly)
-//	TMap<FVector, FString> LookUpTable;
-//};

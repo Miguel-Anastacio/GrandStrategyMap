@@ -25,6 +25,8 @@ AInteractiveMap::AInteractiveMap()
 
 	PoliticalMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 	ReligiousMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Religious Map Texture"));
+	CultureMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Culture Map Texture"));
+	
 }
 
 UE_DISABLE_OPTIMIZATION
@@ -47,6 +49,7 @@ void AInteractiveMap::BeginPlay()
 	GameplayMapMesh->SetVisibility(true);
 	PoliticalMapTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 	ReligiousMapTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	CultureMapTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
 
 	CreateLookUpTable();
 	ReadProvinceDataTable();
@@ -56,6 +59,7 @@ void AInteractiveMap::BeginPlay()
 	//CreatePoliticalMapTexture();
 	CreateMapTexture(PoliticalMapTextureComponent, PixelColorPoliticalTexture, PoliticalMapTexture);
 	CreateMapTexture(ReligiousMapTextureComponent, PixelColorReligiousTexture, ReligiousMapTexture);
+	CreateMapTexture(CultureMapTextureComponent, PixelColorCultureMapTexture, CultureMapTexture);
 
 	//if (PoliticalMapTexture)
 	//{
@@ -110,19 +114,39 @@ bool AInteractiveMap::GetCountryColor(const FVector& color, FColor& out_countryC
 	}
 	return true;
 }
-FColor AInteractiveMap::GetReligionColor(const FVector& lookUpColor)
+
+FColor AInteractiveMap::GetCountryColor(const FProvinceData* data)
 {
 	FColor color = FColor(0, 0, 0, 0);
-	FName* id = LookUpTable.Find(lookUpColor);
-	if (id)
+	if (data)
 	{
-		FProvinceData* province = ProvinceDataMap.Find(*id);
-		if (!province)
+		FCountryData* country = CountryData.Find(data->Owner);
+		if (!country)
 			return color;
 
-		color = province->Religion.Color;
+		return country->Color;
 	}
 	return color;
+}
+
+FColor AInteractiveMap::GetReligionColor(const FProvinceData* data)
+{
+	FColor color = FColor(0, 0, 0, 0);
+
+	if (data)
+	{
+		return data->Religion.Color;
+	}
+	return FColor(0, 0, 0, 0);
+}
+FColor AInteractiveMap::GetCultureColor(const FProvinceData* data)
+{
+	FColor color = FColor(0, 0, 0, 0);
+	if (data)
+	{
+		return data->Culture.Color;
+	}
+	return FColor(0, 0, 0, 0);
 }
 void AInteractiveMap::SaveMapTextureData()
 {
@@ -142,6 +166,8 @@ void AInteractiveMap::SaveMapTextureData()
 
 	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
 	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);
+	PixelColorCultureMapTexture.AddDefaulted(Width * Height * 4);
+
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
 	{
@@ -154,10 +180,23 @@ void AInteractiveMap::SaveMapTextureData()
 			uint8 A = Data[Index + 3];
 
 			FColor pixelColor = FColor(0, 0, 0, 0);
-			GetCountryColor(FVector(R, G, B), pixelColor);
-			SetPixelColor(Index, PixelColorPoliticalTexture, pixelColor);
+			FName* id = LookUpTable.Find(FVector(R, G, B));
+			if (id)
+			{
+				FProvinceData* province = GetProvinceData(*id);
 
-			SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(FVector(R, G, B)));
+				SetPixelColor(Index, PixelColorPoliticalTexture, GetCountryColor(province));
+				SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(province));
+				SetPixelColor(Index, PixelColorCultureMapTexture, GetCultureColor(province));
+
+			}
+			else
+			{
+				SetPixelColor(Index, PixelColorPoliticalTexture, pixelColor);
+				SetPixelColor(Index, PixelColorReligiousTexture, pixelColor);
+				SetPixelColor(Index, PixelColorCultureMapTexture, pixelColor);
+			}
+
 
 			MapColorCodeTextureData.Add(FColor(R, G, B, A));
 		}
@@ -305,6 +344,7 @@ void AInteractiveMap::SetMapMode(MapMode mode)
 		GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
 		break;
 	case MapMode::CULTURAL:
+		GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
 		break;
 	case MapMode::Terrain:
 		break;

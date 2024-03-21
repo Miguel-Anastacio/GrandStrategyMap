@@ -55,7 +55,9 @@ protected:
 	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
 	bool GetCountryColor(const FVector& color, FColor& out_countryColor);
-	FColor GetReligionColor(const FVector& lookUpColor);
+	FColor GetCountryColor(const FProvinceData* data);
+	FColor GetReligionColor(const FProvinceData* data);
+	FColor GetCultureColor(const FProvinceData* data);
 
 	void SaveMapTextureData();
 	void CreateLookUpTable();
@@ -77,6 +79,8 @@ protected:
 	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;	
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> ReligiousMapTextureComponent;
+	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
+	TObjectPtr<UDynamicTextureComponent> CultureMapTextureComponent;
 	// Material that show the current gameplay map
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
@@ -101,6 +105,8 @@ protected:
 	TObjectPtr<UTexture2D> PoliticalMapTexture;
 	UPROPERTY()
 	TObjectPtr<UTexture2D> ReligiousMapTexture;
+	UPROPERTY()
+	TObjectPtr<UTexture2D> CultureMapTexture;
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
@@ -118,5 +124,6 @@ protected:
 
 	TArray<float> PixelColorPoliticalTexture;
 	TArray<float> PixelColorReligiousTexture;
+	TArray<float> PixelColorCultureMapTexture;
 
 };
