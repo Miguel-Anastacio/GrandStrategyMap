@@ -6,6 +6,8 @@
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Map/DynamicTextureComponent.h"
+#include "Game/MapPawn.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AInteractiveMap::AInteractiveMap()
 {
@@ -33,14 +35,6 @@ UE_DISABLE_OPTIMIZATION
 void AInteractiveMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	//DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
-	//UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
-	////set paramater with Set***ParamaterValue
-	//DynMaterial->SetTextureParameterValue("PoliticalMapTexture", PoliticalMapTexture);
-	//GameplayMapMesh->SetMaterial(0, DynMaterial);
-
-	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), TestPoliticalMapRenderTarget, DynMaterial);
-
 }
 // Called when the game starts or when spawned
 void AInteractiveMap::BeginPlay()
@@ -68,14 +62,12 @@ void AInteractiveMap::BeginPlay()
 
 	GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 
-
-
-	////set paramater with Set***ParamaterValue
-	//DynMaterial->SetTextureParameterValue("Texture", PoliticalMapTexture);
-
-	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), TestPoliticalMapRenderTarget, DynMaterial);
-
-	
+	// set referene in player class
+	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if (player)
+	{
+		player->SetInteractiveMap(this);
+	}
 }
 
 void AInteractiveMap::SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A)
@@ -363,5 +355,14 @@ FProvinceData* AInteractiveMap::GetProvinceData(FName name)
 	}
 
 	return nullptr;
+}
+
+void AInteractiveMap::SetBorderVisibility(bool status)
+{
+	/*if (!IsValid(MapBorderMesh))
+	{
+		UE_LOG(LogTemp, Error, "Border Mesh not Created")
+	}*/
+	MapBorderMesh->SetVisibility(status);
 }
 

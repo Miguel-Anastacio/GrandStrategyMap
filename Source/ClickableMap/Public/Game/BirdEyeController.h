@@ -45,12 +45,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* CameraMoveAction;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CameraRotAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SelectAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MouseMoveAction;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MouseScrollAction;
 protected:
 
 	virtual void SetupInputComponent() override;
@@ -69,7 +71,7 @@ protected:
 	void MouseClick();
 	void CameraMovement(const FInputActionInstance& instance);
 	void MouseMovement();
-
+	void CameraZoom(const FInputActionInstance& instance);
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;
 	/** True if the controlled character should navigate to the mouse cursor. */

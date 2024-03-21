@@ -9,6 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class USphereComponent;
+class AInteractiveMap;
 UCLASS(BlueprintType)
 class CLICKABLEMAP_API AMapPawn : public APawn
 {
@@ -20,8 +21,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void MoveCamera(FVector2D input);
+	void ZoomCamera(float input);
 
-
+	void SetInteractiveMap(AInteractiveMap* map);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,6 +43,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Camera| Movement");
 	float CameraMoveSpeed = 10.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
+	float ZoomSpeed = 10.0f;
+
+	// x is min distance to map Y is max distance 
+	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
+	FVector2D ZoomLimit = FVector2D(500.0f,3000.0f);
+
+	// distance at which camera runs slightly
+	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
+	float ZoomCameraRot = 2000.0f;
+
+	UPROPERTY()
+	TWeakObjectPtr<AInteractiveMap> GameMap;
 	//// Called to bind functionality to input
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Map/InteractiveMap.h"
 // Sets default values
 AMapPawn::AMapPawn()
 {
@@ -49,6 +50,39 @@ void AMapPawn::Tick(float DeltaTime)
 void AMapPawn::MoveCamera(FVector2D input)
 {
 	AddMovementInput(FVector(input.X, input.Y, 0), CameraMoveSpeed);
+}
+
+void AMapPawn::ZoomCamera(float input)
+{
+	float newZoom = CameraBoom->TargetArmLength + input * ZoomSpeed;
+	if (newZoom > ZoomLimit.X && newZoom < ZoomLimit.Y)
+	{
+		CameraBoom->TargetArmLength = newZoom;
+	}
+	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
+	{
+		CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
+		// hide borders
+		if (GameMap.Get())
+		{
+			GameMap->SetBorderVisibility(false);
+		}
+	}
+	else
+	{
+		// Show borders
+		if (GameMap.Get())
+		{
+			GameMap->SetBorderVisibility(true);
+		}
+
+		CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
+	}
+}
+
+void AMapPawn::SetInteractiveMap(AInteractiveMap* map)
+{
+	GameMap = map;
 }
 
 //// Called to bind functionality to input

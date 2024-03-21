@@ -45,7 +45,8 @@ public:
 
 	FProvinceData* GetProvinceData(FName name);
 
-
+	UFUNCTION(BlueprintCallable)
+	void SetBorderVisibility(bool status);
 
 protected:
 	// Called when the game starts or when spawned
