@@ -55,10 +55,13 @@ void AInteractiveMap::BeginPlay()
 	CreateMapTexture(ReligiousMapTextureComponent, PixelColorReligiousTexture, ReligiousMapTexture);
 	CreateMapTexture(CultureMapTextureComponent, PixelColorCultureMapTexture, CultureMapTexture);
 
+	//PoliticalMapTextureComponent-
 	//if (PoliticalMapTexture)
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("Political map texture is valid"));
 	//}
+	PoliticalMapTextureComponent->FillTexture(FLinearColor::Blue);
+	//PoliticalMapTextureComponent->UpdateTexture();
 
 	GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 
@@ -338,7 +341,7 @@ void AInteractiveMap::SetMapMode(MapMode mode)
 	case MapMode::CULTURAL:
 		GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
 		break;
-	case MapMode::Terrain:
+	case MapMode::TERRAIN:
 		break;
 	default:
 		break;

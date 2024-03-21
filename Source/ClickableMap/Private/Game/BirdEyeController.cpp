@@ -51,8 +51,8 @@ void ABirdEyeController::SetupInputComponent()
 
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
-		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
-		EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
+		//EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
+		//EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
 		//// Setup touch input events
@@ -196,6 +196,7 @@ void ABirdEyeController::MouseMovement()
 void ABirdEyeController::CameraZoom(const FInputActionInstance& instance)
 {
 	float input = instance.GetValue().Get<float>();
+	input *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->ZoomCamera(input);
 }

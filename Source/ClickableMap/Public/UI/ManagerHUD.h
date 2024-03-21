@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LayerManagerHUD.h"
+#include "GameFramework/HUD.h"
 #include "ManagerHUD.generated.h"
 
 /**
  * 
  */
-//class UGrandStrategyHUDWidget;
+class UGrandStrategyHUDWidget;
 UCLASS()
-class CLICKABLEMAP_API AManagerHUD : public ALayerManagerHUD
+class CLICKABLEMAP_API AManagerHUD : public AHUD
 {
 	GENERATED_BODY()
 	
@@ -21,11 +21,10 @@ public:
 protected:
 	void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UGrandStrategyHUDWidget> HudWidgetClass;
 
-	//UPROPERTY(EditAnywhere, Category = "Widgets")
-	//TSubclassOf<UGrandStrategyHUDWidget> HudWidgetClass;
-
-	//UPROPERTY()
-	//TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
+	UPROPERTY()
+	TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
 	
 };

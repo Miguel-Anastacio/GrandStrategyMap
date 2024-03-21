@@ -4,16 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "WidgetReactionInterface.h"
+#include "UObject/Object.h"
 #include "ButtonWidget.generated.h"
 
-
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUISelectionInputSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomButtonClickedSignature, class UButtonWidget*, Button);
 /**
  * Custom Button - create custom looks for it by creating BP widgets that inherit from this one
  */
 UCLASS(Abstract, BlueprintType)
-class MANAGERUI_API UButtonWidget : public UUserWidget, public IWidgetReactionInterface
+class CLICKABLEMAP_API UButtonWidget  : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -22,10 +21,11 @@ public:
 	class UButton* GetButton() const { return Button; };
 
 	virtual void NativePreConstruct() override;
-
+	virtual void NativeOnInitialized() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Text")
 	FText Text;
 
+	FCustomButtonClickedSignature OnClickedDelegate;
 	//// Delegate to use when we wish to trigger the button through an input action
 	//// Mostly used to trigger 
 	//UPROPERTY(BlueprintCallable, BlueprintAssignable)
@@ -34,6 +34,9 @@ public:
 protected:
 	//UFUNCTION()
 	//	void OnInputActionUI();
+	UFUNCTION()
+	void OnButtonClicked();
+
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> Button;
 

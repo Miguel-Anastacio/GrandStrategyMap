@@ -5,16 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MapUtils.h"
+#include "MapEnums.h"
 #include "InteractiveMap.generated.h"
-
-UENUM(BlueprintType)
-enum class MapMode : uint8
-{
-	POLITICAL UMETA(DisplayName = "Political"),
-	RELIGIOUS   UMETA(DisplayName = "Religious"),
-	CULTURAL   UMETA(DisplayName = "Cultural"),
-	Terrain   UMETA(DisplayName = "Terrain")
-};
 
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;

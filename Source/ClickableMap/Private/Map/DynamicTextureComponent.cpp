@@ -162,7 +162,9 @@ void UDynamicTextureComponent::InitializeTexture()
 	DynamicTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
 	DynamicTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 	DynamicTexture->SRGB = 0;
+#if WITH_EDITORONLY_DATA
 	DynamicTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+#endif
 	DynamicTexture->Filter = TextureFilter::TF_Nearest;
 	DynamicTexture->AddToRoot();
 	DynamicTexture->UpdateResource();

@@ -3,10 +3,15 @@
 
 #include "UI/ManagerHUD.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/Widgets/GrandStrategyHUDWidget.h"
 void AManagerHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//HudWidget = CreateWidget<UGrandStrategyHUDWidget>(GetOwningPlayerController(), HudWidgetClass);
-	//HudWidget->AddToViewport();
+	if (HudWidgetClass)
+	{
+		HudWidget = CreateWidget<UGrandStrategyHUDWidget>(GetOwningPlayerController(), HudWidgetClass);
+		HudWidget->AddToViewport();
+
+	}
 }
