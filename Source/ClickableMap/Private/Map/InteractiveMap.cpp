@@ -60,7 +60,7 @@ void AInteractiveMap::BeginPlay()
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("Political map texture is valid"));
 	//}
-	PoliticalMapTextureComponent->FillTexture(FLinearColor::Blue);
+	//PoliticalMapTextureComponent->FillTexture(FLinearColor::Blue);
 	//PoliticalMapTextureComponent->UpdateTexture();
 
 	GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
