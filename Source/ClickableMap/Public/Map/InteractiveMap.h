@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MapUtils.h"
@@ -10,6 +9,17 @@
 
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
+
+USTRUCT()
+struct FLookUpTextureData
+{
+	GENERATED_BODY()
+
+	TArray<float> PixelData;
+	TMap<int32, FName> PixedIndexID;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapDataChangedSignature, MapMode, mode, FName, provinceID);
 UCLASS()
 class CLICKABLEMAP_API AInteractiveMap : public AActor
 {
@@ -27,10 +37,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TMap<FVector, FName> GetLookUpTable() const;
 
+	//UFUNCTION(BlueprintCallable, BlueprintPure)
+	TMap<FName, FProvinceData>* GetProvinceDataMap() const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetProvinceID(const FVector& color) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetProvinceData(FName name, FProvinceData& out_data);
+
+	//UFUNCTION(BlueprintCallable, BlueprintPure)
+	//F GetProvinceID(const FVector& color) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMapMode(MapMode mode);
@@ -40,6 +56,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetBorderVisibility(bool status);
 
+	// Update Data
+	UFUNCTION(BlueprintCallable)
+	void UpdateProvinceData(const FProvinceData& data, FName id);
+
+
+public:
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FMapDataChangedSignature MapDataChangedDelegate;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,6 +73,7 @@ protected:
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
 	bool GetCountryColor(const FVector& color, FColor& out_countryColor);
 	FColor GetCountryColor(const FProvinceData* data);
+	//FColor GetCountryColor(const FProvinceData* data);
 	FColor GetReligionColor(const FProvinceData* data);
 	FColor GetCultureColor(const FProvinceData* data);
 
@@ -60,6 +85,12 @@ protected:
 
 	void CreatePoliticalMapTexture();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor);
+
+	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceID);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
@@ -67,6 +98,8 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;	
@@ -95,11 +128,11 @@ protected:
 
 
 	UPROPERTY()
-	TObjectPtr<UTexture2D> PoliticalMapTexture;
+	UTexture2D* PoliticalMapTexture;
 	UPROPERTY()
-	TObjectPtr<UTexture2D> ReligiousMapTexture;
+	UTexture2D* ReligiousMapTexture;
 	UPROPERTY()
-	TObjectPtr<UTexture2D> CultureMapTexture;
+	UTexture2D* CultureMapTexture;
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
@@ -113,7 +146,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FCountryData> CountryData;
 	
-	TArray<FColor> MapColorCodeTextureData;
+	//TArray<FLookUpTextureData> MapColorCodeTextureData;
+	FLookUpTextureData MapColorCodeTextureData;
 
 	TArray<float> PixelColorPoliticalTexture;
 	TArray<float> PixelColorReligiousTexture;

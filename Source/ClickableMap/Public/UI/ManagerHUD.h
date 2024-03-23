@@ -4,27 +4,43 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+
 #include "ManagerHUD.generated.h"
 
 /**
  * 
  */
+struct FProvinceData;
 class UGrandStrategyHUDWidget;
+class UProvinceEditorWidget;
 UCLASS()
 class CLICKABLEMAP_API AManagerHUD : public AHUD
 {
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION(BlueprintCallable)
+	void DisplayProvinceEditorWidget(const FProvinceData& provinceData, FName id);
 
+	//bool IsProvinceDataValidRef() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetInteractiveMapReference(class AInteractiveMap* map);
 
 protected:
 	void BeginPlay() override;
 
+
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UGrandStrategyHUDWidget> HudWidgetClass;
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UProvinceEditorWidget> ProvincedEditorWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
 	
+	UPROPERTY()
+	TObjectPtr<UProvinceEditorWidget> ProvinceEditorWidget;
+
+	class AInteractiveMap* GameMapReference;
 };

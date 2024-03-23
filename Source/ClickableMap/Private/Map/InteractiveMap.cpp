@@ -25,6 +25,9 @@ AInteractiveMap::AInteractiveMap()
 	GameplayMapMesh->SetupAttachment(RootComponent);
 
 
+	TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Terrain Map"));
+	TerrainMapMesh->SetupAttachment(RootComponent);
+
 	PoliticalMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 	ReligiousMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Religious Map Texture"));
 	CultureMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Culture Map Texture"));
@@ -163,6 +166,8 @@ void AInteractiveMap::SaveMapTextureData()
 	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);
 	PixelColorCultureMapTexture.AddDefaulted(Width * Height * 4);
 
+	MapColorCodeTextureData.PixelData.AddDefaulted(Width * Height * 4);
+
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
 	{
@@ -184,6 +189,11 @@ void AInteractiveMap::SaveMapTextureData()
 				SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(province));
 				SetPixelColor(Index, PixelColorCultureMapTexture, GetCultureColor(province));
 
+				// this pixel belongs to a province so safe its indexes on the map
+				//FName* indexPixel = MapColorCodeTextureData.PixedIndexID.Find((*id));
+				
+				MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));
+					
 			}
 			else
 			{
@@ -192,8 +202,7 @@ void AInteractiveMap::SaveMapTextureData()
 				SetPixelColor(Index, PixelColorCultureMapTexture, pixelColor);
 			}
 
-
-			MapColorCodeTextureData.Add(FColor(R, G, B, A));
+			SetPixelColor(Index, MapColorCodeTextureData.PixelData, FColor(R, G, B, A));
 		}
 	}
 
@@ -293,6 +302,101 @@ void AInteractiveMap::CreateMapTexture(UDynamicTextureComponent* textureCompomen
 	textureCompoment->DynamicMaterial = DynMaterial;
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", texture);
 }
+
+void AInteractiveMap::UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor)
+{
+	FColor oldColor;
+	switch (mode)
+	{
+	case MapMode::POLITICAL:
+	
+		oldColor = GetCountryColor(ProvinceDataMap.Find(provinceID));
+		if (oldColor == FColor(0, 0, 0, 0))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Province or Country data not found"));
+			return;
+		}
+		UpdatePixelArray(PixelColorPoliticalTexture, oldColor, newColor, PoliticalMapTextureComponent->GetTexture(), {provinceID});
+		PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, PoliticalMapTextureComponent->GetTexture(), PixelColorPoliticalTexture);
+		PoliticalMapTextureComponent->UpdateTexture();
+
+		break;
+	case MapMode::RELIGIOUS:
+
+		break;
+	case MapMode::CULTURAL:
+
+		break;
+	case MapMode::TERRAIN:
+
+		break;
+	default:
+		break;
+	}
+}
+void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs)
+{
+	int32 Width = texture->GetSizeX();
+	int32 Height = texture->GetSizeY();
+
+	if (pixelArray.Num() != Width * Height * 4)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Mismatch size between texture and pixel array when updating texture"));
+		return;
+	}
+
+	for (int32 y = 0; y < Height; y++)
+	{
+		for (int32 x = 0; x < Width; x++)
+		{
+			int32 Index = (y * Width + x) * 4;
+			
+			//FColor(30, )
+			FColor color = FColor(pixelArray[Index],
+				pixelArray[Index + 1],
+				pixelArray[Index + 2],
+				pixelArray[Index + 3]);
+
+			if (color != oldColor)
+				continue;
+
+			FName* id = LookUpTable.Find(FVector(MapColorCodeTextureData.PixelData[Index],
+											MapColorCodeTextureData.PixelData[Index + 1],
+											MapColorCodeTextureData.PixelData[Index + 2]));
+			if (!id)
+				continue;
+
+			bool found = false;
+			for (auto& idToUpdate : provinceIDs)
+			{
+				if ((*id) == idToUpdate)
+				{
+					// get province id from the array that holds the original look up texture pixel data
+					int8 R = MapColorCodeTextureData.PixelData[Index];
+					int8 G = MapColorCodeTextureData.PixelData[Index + 1];
+					int8 B = MapColorCodeTextureData.PixelData[Index + 2];
+					int8 A = MapColorCodeTextureData.PixelData[Index + 3];
+
+					FColor test = FColor(MapColorCodeTextureData.PixelData[Index],
+						MapColorCodeTextureData.PixelData[Index + 1],
+						MapColorCodeTextureData.PixelData[Index + 2],
+						MapColorCodeTextureData.PixelData[Index + 3]);
+
+
+					pixelArray[Index] = newColor.R;
+					pixelArray[Index + 1] = newColor.G;
+					pixelArray[Index + 2] = newColor.B;
+					pixelArray[Index + 3] = newColor.A;
+					found = true;
+				}
+
+				if (found)
+					break;
+
+			}
+		}
+	}
+}
 UE_ENABLE_OPTIMIZATION
 
 UTextureRenderTarget2D* AInteractiveMap::GetMapRenderTarget() const
@@ -317,6 +421,32 @@ FName AInteractiveMap::GetProvinceID(const FVector& color) const
 }
 
 // to be able to use in BP
+
+void AInteractiveMap::SetMapMode(MapMode mode)
+{
+	switch (mode)
+	{
+	case MapMode::POLITICAL:
+		GameplayMapMesh->SetVisibility(true);
+		GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		break;
+	case MapMode::RELIGIOUS:
+		GameplayMapMesh->SetVisibility(true);
+		GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		break;
+	case MapMode::CULTURAL:
+		GameplayMapMesh->SetVisibility(true);
+		GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+		break;
+	case MapMode::TERRAIN:
+		TerrainMapMesh->SetVisibility(true);
+		GameplayMapMesh->SetVisibility(false);
+		break;
+	default:
+		break;
+	}
+}
+
 void AInteractiveMap::GetProvinceData(FName name, FProvinceData& out_data)
 {
 	FProvinceData* data = ProvinceDataMap.Find(name);
@@ -324,30 +454,7 @@ void AInteractiveMap::GetProvinceData(FName name, FProvinceData& out_data)
 	{
 		out_data = (*data);
 	}
-
-	//return nullptr;
 }
-
-void AInteractiveMap::SetMapMode(MapMode mode)
-{
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-		GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
-		break;
-	case MapMode::RELIGIOUS:
-		GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
-		break;
-	case MapMode::CULTURAL:
-		GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
-		break;
-	case MapMode::TERRAIN:
-		break;
-	default:
-		break;
-	}
-}
-
 
 FProvinceData* AInteractiveMap::GetProvinceData(FName name)
 {
@@ -367,5 +474,31 @@ void AInteractiveMap::SetBorderVisibility(bool status)
 		UE_LOG(LogTemp, Error, "Border Mesh not Created")
 	}*/
 	MapBorderMesh->SetVisibility(status);
+}
+
+void AInteractiveMap::UpdateProvinceData(const FProvinceData& data, FName id)
+{
+	FProvinceData* province = ProvinceDataMap.Find(id);
+	if (province)
+	{
+		if (province->Owner != data.Owner)
+		{
+			FCountryData* newOwnerCountry = CountryData.Find(data.Owner);
+			if (!newOwnerCountry)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Invalid owner - update not possible"));
+				return;
+			}
+
+			//newOwnerCountry->Provinces.ad
+			UpdateMapTexture(MapMode::POLITICAL, id, newOwnerCountry->Color);
+		}
+		(*province) = data;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid province id - update not possible"));
+	}
+	
 }
 

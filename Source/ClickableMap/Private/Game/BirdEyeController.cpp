@@ -14,7 +14,7 @@
 #include "Map/InteractiveMap.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "UI/ManagerHUD.h"
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 ABirdEyeController::ABirdEyeController()
 {
@@ -165,6 +165,13 @@ void ABirdEyeController::MouseClick()
 				{
 					//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
 					data->PrintProvinceData();
+					AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+					if (hud)
+					{
+						hud->DisplayProvinceEditorWidget(*data, id);
+						hud->SetInteractiveMapReference(map);
+					}
+
 					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
 				}
 				else
