@@ -16,6 +16,8 @@ struct FLookUpTextureData
 	GENERATED_BODY()
 
 	TArray<float> PixelData;
+	// useles for now and a waste of memory
+	// keep around for now, might be useful eventually
 	TMap<int32, FName> PixedIndexID;
 };
 
@@ -38,7 +40,7 @@ public:
 	TMap<FVector, FName> GetLookUpTable() const;
 
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
-	TMap<FName, FProvinceData>* GetProvinceDataMap() const;
+	//TMap<FName, FProvinceData>* GetProvinceDataMap() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetProvinceID(const FVector& color) const;
@@ -60,6 +62,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateProvinceData(const FProvinceData& data, FName id);
 
+	UFUNCTION(BlueprintCallable)
+	FColor GetColorFromLookUpTexture(FVector2D uv);
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
@@ -89,9 +93,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor);
 
-	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceID);
+	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 
+	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv);
 protected:
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	TObjectPtr<class UArrowComponent> MapRoot;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
@@ -111,10 +118,13 @@ protected:
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GameplayMapMaterial;
-
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* BorderMaterial;
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* HQXFilterMaterial;
 	// NOT IN USE
 	UPROPERTY(EditAnywhere)
-	UTextureRenderTarget2D* TestPoliticalMapRenderTarget;
+	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* MapDataTable;
@@ -134,6 +144,8 @@ protected:
 	UPROPERTY()
 	UTexture2D* CultureMapTexture;
 
+	// IN USE but Obsolete
+	// removed at final cleanup
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
 

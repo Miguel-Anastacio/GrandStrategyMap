@@ -35,6 +35,54 @@ void ABirdEyeController::BeginPlay()
 	}
 }
 
+void ABirdEyeController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	FHitResult hit;
+	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hit))
+	{
+		FVector start = hit.ImpactPoint;
+		FVector end = hit.ImpactPoint;
+		start.Z = hit.ImpactPoint.Z + zOffset;
+		end.Z = hit.ImpactPoint.Z - zOffset;
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(this);
+		params.bTraceComplex = true;
+		params.bReturnFaceIndex = true;
+		//params.
+		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
+			return;
+		if (!IsValid(hit.GetActor()))
+			return;
+
+		AInteractiveMap* map = Cast<AInteractiveMap>(hit.GetActor());
+		if (map)
+		{
+			FVector2D uvs = FVector2D(0, 0);
+			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
+			if (map->GetMapRenderTarget())
+			{
+				//FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
+
+				FColor color = map->GetColorFromLookUpTexture(uvs);
+				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+				FProvinceData* data = map->GetProvinceData(id);
+				if (data)
+				{
+					//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
+					data->PrintProvinceData();
+					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
+				}
+				else
+				{
+					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
+				}
+			}
+		}
+
+	}
+}
+
 void ABirdEyeController::SetupInputComponent()
 {
 	// set up gameplay key bindings
@@ -157,8 +205,9 @@ void ABirdEyeController::MouseClick()
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			if (map->GetMapRenderTarget())
 			{
-				FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
-
+				//FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
+				FColor color = map->GetColorFromLookUpTexture(uvs);
+				
 				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
 				FProvinceData* data = map->GetProvinceData(id);
 				if (data)

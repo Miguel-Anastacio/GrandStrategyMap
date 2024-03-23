@@ -1,18 +1,15 @@
 
 //upscaling multiplier amount
-#define UPSCALE 10.
-
-//image mipmap level, for base upscaling
-#define ML 0
+// #define UPSCALE 20.
 
 //equality threshold of 2 colors before forming lines
-#define THRESHOLD .1
+#define THRESHOLD 1
 
 //line thickness
-float LINE_THICKNESS;
+
 
 //anti aliasing scaling, smaller value make lines more blurry
-#define AA_SCALE (UPSCALE*1.)
+#define AA_SCALE 100.0
 
 // //draw diagonal line connecting 2 pixels if within threshold
 // bool diag(inout vec4 sum, float2 uv, float2 p1, float2 p2) {
@@ -32,13 +29,19 @@ float LINE_THICKNESS;
 
 struct Functions
 {
-	bool diag(Texture2D texture, SamplerState texSampler, float2 uv, float2 p1, float2 p2, inout float4 sum)
+	float LINE_THICKNESS;
+	bool diag(Texture2D texture, SamplerState texSampler, float2 uv, float2 p1, float2 p2, inout float4 sum, float2 offset)
 	{
 		// Texture2D Texture; 
+		// float PixelSize = 
 		// SamplerState TextureSampler;
 		// MaterialFloat2 TextureCoord;
-		float4 v1 = texture.Sample(texSampler, uv + p1);
-		float4 v2 = texture.Sample(texSampler, uv + p2);
+		float4 v1 = texture.Sample(texSampler, uv + p1*offset);
+		float4 v2 = texture.Sample(texSampler, uv + p2*offset);
+		// float4 v1 = tex2d(texture, uv + p1);
+
+		// float4 v2 = tex2d(texture, uv + p2);
+
 		// float4 v1 = 
 		if(length(v1 - v2)< THRESHOLD)
 		{
@@ -66,38 +69,42 @@ struct Functions
   
 };
 
-float2 ip = TextureCoord/UPSCALE;
+float2 ip = TextureCoord * (1/PixelSize);
 
-float4 s = Texture.Sample(TextureSampler, ip);
-
+float4 s = Texture.Sample(TextureSampler, TextureCoord);
+// return s;
+float w, h;
+Texture.GetDimensions(w, h);
+float2 offset = float2(1.0/w, 1.0/h);
 Functions f;
-LINE_THICKNESS = .4;
-if (f.diag(Texture, TextureSampler, ip, float2(-1,0), float2(0,1), s)) 
+f.LINE_THICKNESS = 0.4;
+if (f.diag(Texture, TextureSampler, ip, float2(-1,0), float2(0,1), s, offset)) 
 {
-	LINE_THICKNESS = 0.3;
-	f.diag(Texture, TextureSampler, ip, float2(-1,0), float2(1,1), s);
-	f.diag(Texture, TextureSampler, ip, float2(-1,-1), float2(0,1), s);
+	f.LINE_THICKNESS = 0.3;
+	f.diag(Texture, TextureSampler, ip, float2(-1,0), float2(1,1), s, offset);
+	f.diag(Texture, TextureSampler, ip, float2(-1,-1), float2(0,1), s, offset);
 }
-LINE_THICKNESS = 0.4;
-if (f.diag(Texture, TextureSampler, ip, float2(0,1), float2(1,0), s)) 
+f.LINE_THICKNESS = 0.4;
+if (f.diag(Texture, TextureSampler, ip, float2(0,1), float2(1,0), s, offset)) 
 {
-	LINE_THICKNESS = 0.3;
-	f.diag(Texture, TextureSampler, ip, float2(0,1), float2(1,-1));
-	f.diag(Texture, TextureSampler, ip, float2(-1,1), float2(1,0));
+	f.LINE_THICKNESS = 0.3;
+	f.diag(Texture, TextureSampler, ip, float2(0,1), float2(1,-1), s, offset);
+	f.diag(Texture, TextureSampler, ip, float2(-1,1), float2(1,0), s,offset);
 }
-LINE_THICKNESS = 0.4;
-if (f.diag(Texture, TextureSampler, ip, float2(1,0), float2(0,-1), s)) 
+f.LINE_THICKNESS = 0.4;
+if (f.diag(Texture, TextureSampler, ip, float2(1,0), float2(0,-1), s, offset)) 
 {
-	LINE_THICKNESS = 0.3;
-	f.diag(Texture, TextureSampler, ip, float2(1,0), float2(-1,-1), s);
-	f.diag(Texture, TextureSampler, ip, float2(1,1), float2(0,-1), s);
+	f.LINE_THICKNESS = 0.3;
+	f.diag(Texture, TextureSampler, ip, float2(1,0), float2(-1,-1), s,offset);
+	f.diag(Texture, TextureSampler, ip, float2(1,1), float2(0,-1), s,offset);
+
 }
-LINE_THICKNESS = 0.4;
-if (f.diag(Texture, TextureSampler, ip, float2(0,-1), float2(-1,0), s)) 
+f.LINE_THICKNESS = 0.4;
+if (f.diag(Texture, TextureSampler, ip, float2(0,-1), float2(-1,0), s, offset)) 
 {
-	LINE_THICKNESS = 0.3;
-	f.diag(Texture, TextureSampler, ip, float2(0,-1), float2(-1,1), s);
-	f.diag(Texture, TextureSampler, ip, float2(1,-1), float2(-1,0), s);
+	f.LINE_THICKNESS = 0.3;
+	f.diag(Texture, TextureSampler, ip, float2(0,-1), float2(-1,1), s, offset);
+	f.diag(Texture, TextureSampler, ip, float2(1,-1), float2(-1,0), s, offset);
 }
 
 return s;

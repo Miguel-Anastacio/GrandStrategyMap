@@ -8,12 +8,14 @@
 #include "Map/DynamicTextureComponent.h"
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/ArrowComponent.h"
 // Sets default values
 AInteractiveMap::AInteractiveMap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	MapRoot = CreateDefaultSubobject<UArrowComponent>(TEXT("Root"));
+	RootComponent = MapRoot;
 
 	MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Selection"));
 	MapSelectMesh->SetupAttachment(RootComponent);
@@ -74,6 +76,16 @@ void AInteractiveMap::BeginPlay()
 	{
 		player->SetInteractiveMap(this);
 	}
+	UMaterialInstanceDynamic* borderMaterialInstance = UMaterialInstanceDynamic::Create(BorderMaterial, this);
+	//BorderMaterialRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 1024, 1024);
+	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), BorderMaterialRenderTarget, borderMaterialInstance);
+
+	UMaterialInstanceDynamic* filteredBorderMaterialInstance = UMaterialInstanceDynamic::Create(HQXFilterMaterial, this);
+	filteredBorderMaterialInstance->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
+	MapBorderMesh->SetMaterial(0, filteredBorderMaterialInstance);
+
+
+
 }
 
 void AInteractiveMap::SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A)
@@ -360,6 +372,7 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 			if (color != oldColor)
 				continue;
 
+			// get province id from the array that holds the original look up texture pixel data
 			FName* id = LookUpTable.Find(FVector(MapColorCodeTextureData.PixelData[Index],
 											MapColorCodeTextureData.PixelData[Index + 1],
 											MapColorCodeTextureData.PixelData[Index + 2]));
@@ -367,22 +380,12 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 				continue;
 
 			bool found = false;
+			// cycle through provinces to update 
+			// if it matches the id of this pixel then update the color
 			for (auto& idToUpdate : provinceIDs)
 			{
 				if ((*id) == idToUpdate)
 				{
-					// get province id from the array that holds the original look up texture pixel data
-					int8 R = MapColorCodeTextureData.PixelData[Index];
-					int8 G = MapColorCodeTextureData.PixelData[Index + 1];
-					int8 B = MapColorCodeTextureData.PixelData[Index + 2];
-					int8 A = MapColorCodeTextureData.PixelData[Index + 3];
-
-					FColor test = FColor(MapColorCodeTextureData.PixelData[Index],
-						MapColorCodeTextureData.PixelData[Index + 1],
-						MapColorCodeTextureData.PixelData[Index + 2],
-						MapColorCodeTextureData.PixelData[Index + 3]);
-
-
 					pixelArray[Index] = newColor.R;
 					pixelArray[Index + 1] = newColor.G;
 					pixelArray[Index + 2] = newColor.B;
@@ -397,7 +400,6 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION
 
 UTextureRenderTarget2D* AInteractiveMap::GetMapRenderTarget() const
 {
@@ -420,7 +422,6 @@ FName AInteractiveMap::GetProvinceID(const FVector& color) const
 	return FName();
 }
 
-// to be able to use in BP
 
 void AInteractiveMap::SetMapMode(MapMode mode)
 {
@@ -447,6 +448,7 @@ void AInteractiveMap::SetMapMode(MapMode mode)
 	}
 }
 
+// to be able to use in BP
 void AInteractiveMap::GetProvinceData(FName name, FProvinceData& out_data)
 {
 	FProvinceData* data = ProvinceDataMap.Find(name);
@@ -502,3 +504,41 @@ void AInteractiveMap::UpdateProvinceData(const FProvinceData& data, FName id)
 	
 }
 
+FColor AInteractiveMap::GetColorFromLookUpTexture(FVector2D uv)
+{
+	return GetColorFromUV(MapLookUpTexture, uv);
+}
+
+FColor AInteractiveMap::GetColorFromUV(UTexture2D* texture, FVector2D uv)
+{
+	if(!texture)
+		return FColor();
+
+	int32 width = texture->GetSizeX();
+	int32 height = texture->GetSizeY();
+
+	//int32 Index = (y * Width + x) * 4;
+	int32 y = uv.Y * height;
+	int32 x = uv.X * width;
+
+	int32 index = (y * width + x) * 4;
+	//int32 index = uv.X * width /** MapSelectMesh->GetComponentScale().X*/ * uv.Y * height/* * MapSelectMesh->GetComponentScale().X*/;
+	//index = uv.X * width * uv.Y * height * 4;
+	
+	index = index % 4 + index;
+
+	if (index < 0 || index > width * height * 4 - 4)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid index from uvs"));
+		return FColor();
+	}
+
+	FColor color = FColor(MapColorCodeTextureData.PixelData[index],
+		MapColorCodeTextureData.PixelData[index + 1],
+		MapColorCodeTextureData.PixelData[index + 2],
+		MapColorCodeTextureData.PixelData[index + 3]);
+
+	return color;
+}
+
+UE_ENABLE_OPTIMIZATION
