@@ -425,6 +425,7 @@ FName AInteractiveMap::GetProvinceID(const FVector& color) const
 
 void AInteractiveMap::SetMapMode(MapMode mode)
 {
+
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
@@ -446,6 +447,7 @@ void AInteractiveMap::SetMapMode(MapMode mode)
 	default:
 		break;
 	}
+	CurrentMapMode = mode;
 }
 
 // to be able to use in BP
@@ -507,6 +509,27 @@ void AInteractiveMap::UpdateProvinceData(const FProvinceData& data, FName id)
 FColor AInteractiveMap::GetColorFromLookUpTexture(FVector2D uv)
 {
 	return GetColorFromUV(MapLookUpTexture, uv);
+}
+
+void AInteractiveMap::UpdateProvinceHovered(const FColor& color)
+{
+	switch (CurrentMapMode)
+	{
+	case MapMode::POLITICAL:
+		//color /= 255.0f;
+		PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		break;
+	case MapMode::RELIGIOUS:
+		ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		break;
+	case MapMode::CULTURAL:
+		CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		break;
+	case MapMode::TERRAIN:
+		break;
+	default:
+		break;
+	}
 }
 
 FColor AInteractiveMap::GetColorFromUV(UTexture2D* texture, FVector2D uv)

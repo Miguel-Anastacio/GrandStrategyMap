@@ -66,17 +66,23 @@ void ABirdEyeController::Tick(float DeltaTime)
 
 				FColor color = map->GetColorFromLookUpTexture(uvs);
 				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
-				FProvinceData* data = map->GetProvinceData(id);
-				if (data)
+				if (id != FName())
 				{
-					//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
-					data->PrintProvinceData();
-					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
+					map->UpdateProvinceHovered(color);
 				}
-				else
-				{
-					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
-				}
+
+
+				//FProvinceData* data = map->GetProvinceData(id);
+				//if (data)
+				//{
+				//	//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
+				//	data->PrintProvinceData();
+				//	//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
+				//}
+				//else
+				//{
+				//	GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
+				//}
 			}
 		}
 
@@ -209,19 +215,21 @@ void ABirdEyeController::MouseClick()
 				FColor color = map->GetColorFromLookUpTexture(uvs);
 				
 				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+				if (id != FName())
+				{
+					map->UpdateProvinceHovered(color);
+				}
+
+
 				FProvinceData* data = map->GetProvinceData(id);
 				if (data)
 				{
-					//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
-					data->PrintProvinceData();
 					AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 					if (hud)
 					{
 						hud->DisplayProvinceEditorWidget(*data, id);
 						hud->SetInteractiveMapReference(map);
 					}
-
-					//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
 				}
 				else
 				{

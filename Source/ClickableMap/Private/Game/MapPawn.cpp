@@ -65,7 +65,7 @@ void AMapPawn::ZoomCamera(float input)
 		// hide borders
 		if (GameMap.Get())
 		{
-			GameMap->SetBorderVisibility(false);
+			//GameMap->SetBorderVisibility(false);
 		}
 	}
 	else
@@ -73,7 +73,7 @@ void AMapPawn::ZoomCamera(float input)
 		// Show borders
 		if (GameMap.Get())
 		{
-			GameMap->SetBorderVisibility(true);
+			//GameMap->SetBorderVisibility(true);
 		}
 
 		CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));

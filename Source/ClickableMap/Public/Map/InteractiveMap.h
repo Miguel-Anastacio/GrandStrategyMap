@@ -65,6 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FColor GetColorFromLookUpTexture(FVector2D uv);
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateProvinceHovered(const FColor& color);
+
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FMapDataChangedSignature MapDataChangedDelegate;
@@ -122,7 +125,7 @@ protected:
 	UMaterialInterface* BorderMaterial;
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* HQXFilterMaterial;
-	// NOT IN USE
+
 	UPROPERTY(EditAnywhere)
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 
@@ -158,6 +161,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FCountryData> CountryData;
 	
+	MapMode CurrentMapMode = MapMode::POLITICAL;
+
 	//TArray<FLookUpTextureData> MapColorCodeTextureData;
 	FLookUpTextureData MapColorCodeTextureData;
 
