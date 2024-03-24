@@ -9,8 +9,8 @@ void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName pro
 {
 	NameCustomInput->SetValues(FText::FromString(data.ProvinceName), FText::FromString(FString("______")));
 	OwnerCustomInput->SetValues(FText::FromString(data.Owner.ToString()), FText::FromString(FString("______")));
-	ReligionCustomInput->SetValues(FText::FromString(data.Religion.DataName), FText::FromString(FString("______")));
-	CultureCustomInput->SetValues(FText::FromString(data.Culture.DataName), FText::FromString(FString("______")));
+	ReligionCustomInput->SetValues(FText::FromString(data.Religion.ToString()), FText::FromString(FString("______")));
+	CultureCustomInput->SetValues(FText::FromString(data.Culture.ToString()), FText::FromString(FString("______")));
 	PopulationCustomInput->SetValues(FText::AsNumber(data.Population), FText::FromString(FString("______")));
 
 	ProvinceSelectedData = data;
@@ -75,7 +75,7 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			if (GameMapReference)
 			{
 				FString value = Text.ToString();
-				ProvinceSelectedData.Religion.DataName = value;
+				ProvinceSelectedData.Religion = FName(*value);
 				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
 
 				editedText->SetValues(Text, FText::FromString(FString("______")));
@@ -91,7 +91,7 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			if (GameMapReference)
 			{
 				FString value = Text.ToString();
-				ProvinceSelectedData.Culture.DataName = value;
+				ProvinceSelectedData.Culture = FName(*value);
 				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
 
 				editedText->SetValues(Text, FText::FromString(FString("______")));

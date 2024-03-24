@@ -88,6 +88,7 @@ protected:
 
 	void ReadProvinceDataTable();
 	void ReadCountryDataTable();
+	//void ReadDataTable();
 
 	//void CreatePoliticalMapTexture();
 
@@ -98,6 +99,29 @@ protected:
 	void UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor);
 
 	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
+
+
+	template<class Data, class ID>
+	bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
+	{
+		if (!dataTable)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Data not loaded"));
+			return false;
+		}
+		TArray<FName> RowNames = dataTable->GetRowNames();
+		for (auto& name : RowNames)
+		{
+			Data* Item = dataTable->FindRow<Data>(name, "");
+			if (Item)
+			{
+				mapToUpdate.Emplace(name, (*Item));
+			}
+		}
+
+		return true;
+	}
+
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
@@ -137,6 +161,9 @@ protected:
 	UDataTable* ProvinceDataTable;
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* CountryDataTable;
+	UPROPERTY(EditAnywhere, Category = "Data")
+	UDataTable* VisualPropertiesDataTable;
+
 
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
@@ -168,6 +195,9 @@ protected:
 	TMap<FString, FColor> Religions;
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Cultures;
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FName, FColoredData> VisualPropertiesDataMap;
 
 	UPROPERTY(BlueprintReadWrite)
 	MapMode CurrentMapMode = MapMode::POLITICAL;

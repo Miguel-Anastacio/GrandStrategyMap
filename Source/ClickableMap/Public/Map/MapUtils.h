@@ -26,48 +26,49 @@ static void InitHexMap(TMap<TCHAR, int32>& HexMap)
     HexMap.Add('F', 15);
 };
 
+// Properties that have a map color associated with 
 USTRUCT(BlueprintType)
-struct FColoredData
+struct FColoredData : public FTableRowBase
 {
     GENERATED_BODY()
-
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    //FName Type;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FString DataName;
+    FName DataName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FColor Color;
 
     FColoredData() : DataName(FString("")), Color(FColor()) {};
-
 
     FColoredData(const FString& name, FColor color) :
         DataName(name), Color(color) {};
 
 };
 
-USTRUCT(BlueprintType)
-struct FReligion : public FColoredData
-{
-    GENERATED_BODY()
-
-    FReligion() : FColoredData() {};
-
-    FReligion(const FString& name, FColor color) :
-        FColoredData(name, color) {};
-
-    // Add more religion data here
-};
-USTRUCT(BlueprintType)
-struct FPopCulture : public FColoredData
-{
-    GENERATED_BODY()
-
-    FPopCulture() : FColoredData() {};
-
-    FPopCulture(const FString& name, FColor color) :
-        FColoredData(name, color) {};
-
-    // Add more culture data here
-};
+//USTRUCT(BlueprintType)
+//struct FReligion : public FColoredData
+//{
+//    GENERATED_BODY()
+//
+//    FReligion() : FColoredData() {};
+//
+//    FReligion(const FString& name, FColor color) :
+//        FColoredData(name, color) {};
+//
+//    // Add more religion data here
+//};
+//USTRUCT(BlueprintType)
+//struct FPopCulture : public FColoredData
+//{
+//    GENERATED_BODY()
+//
+//    FPopCulture() : FColoredData() {};
+//
+//    FPopCulture(const FString& name, FColor color) :
+//        FColoredData(name, color) {};
+//
+//    // Add more culture data here
+//};
 
 USTRUCT(BlueprintType)
 struct FProvinceIDData : public FTableRowBase
@@ -75,7 +76,6 @@ struct FProvinceIDData : public FTableRowBase
     GENERATED_BODY()
     FProvinceIDData() {};
 
-    // This is the tooltip for our test variable.
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString Name;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
@@ -97,14 +97,17 @@ struct FProvinceData : public FTableRowBase
     FName Owner;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     int64 Population;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    /*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FReligion Religion;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FPopCulture Culture;
+    FPopCulture Culture;*/
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FName Religion;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FName Culture;
+    FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FName()) {};
 
-    FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FReligion()) {};
-
-    FProvinceData(const FString& name, FName owner, int64 population, const FReligion& religion, const FPopCulture& culture) :
+    FProvinceData(const FString& name, FName owner, int64 population, FName religion, FName culture) :
         ProvinceName(name), Owner(owner), Population(population), Religion(religion), Culture(culture) {};
 
     void PrintProvinceData();
