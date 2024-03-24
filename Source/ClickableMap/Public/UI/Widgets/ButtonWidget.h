@@ -32,8 +32,6 @@ public:
 	//FOnUISelectionInputSignature UIInputActionDelegate;
 
 protected:
-	//UFUNCTION()
-	//	void OnInputActionUI();
 	UFUNCTION()
 	void OnButtonClicked();
 

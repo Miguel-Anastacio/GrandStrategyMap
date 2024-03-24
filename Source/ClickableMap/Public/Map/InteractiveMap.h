@@ -141,6 +141,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
 
+	// Useless
 	UPROPERTY()
 	UTexture2D* PoliticalMapTexture;
 	UPROPERTY()
@@ -155,25 +156,29 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FVector, FName> LookUpTable;
-
+	// Data Populated by the data tables
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FProvinceData> ProvinceDataMap;
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FCountryData> CountryData;
 
+	// Populated when reading the ProvinceDataTable
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Religions;
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Cultures;
 
+	UPROPERTY(BlueprintReadWrite)
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
-	//TArray<FLookUpTextureData> MapColorCodeTextureData;
+	// Hold pixel data of the lookup texture
 	FLookUpTextureData MapColorCodeTextureData;
-
+	// Hold pixel data of the political map texture
 	TArray<float> PixelColorPoliticalTexture;
+	// Hold pixel data of the religious map texture
 	TArray<float> PixelColorReligiousTexture;
+	// Hold pixel data of the culture map texture
 	TArray<float> PixelColorCultureMapTexture;
 
 };

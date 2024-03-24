@@ -24,24 +24,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetProvinceEditorVisibility(ESlateVisibility visibility);
 
-	//bool IsProvinceDataValidRef() const;
-
 	UFUNCTION(BlueprintCallable)
 	void SetInteractiveMapReference(class AInteractiveMap* map);
 
 protected:
 	void BeginPlay() override;
 
-
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UGrandStrategyHUDWidget> HudWidgetClass;
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UProvinceEditorWidget> ProvincedEditorWidgetClass;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UProvinceEditorWidget> ProvinceEditorWidget;
 
 	class AInteractiveMap* GameMapReference;

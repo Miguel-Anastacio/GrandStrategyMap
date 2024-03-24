@@ -38,7 +38,6 @@ AMapPawn::AMapPawn()
 void AMapPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -84,11 +83,3 @@ void AMapPawn::SetInteractiveMap(AInteractiveMap* map)
 {
 	GameMap = map;
 }
-
-//// Called to bind functionality to input
-//void AMapPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-//{
-//	Super::SetupPlayerInputComponent(PlayerInputComponent);
-//
-//}
-

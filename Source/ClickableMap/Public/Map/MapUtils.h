@@ -73,27 +73,7 @@ USTRUCT(BlueprintType)
 struct FProvinceIDData : public FTableRowBase
 {
     GENERATED_BODY()
-    FProvinceIDData() 
-    {
-        
-      /*  HexMap.Add('0', 0);
-        HexMap.Add('1', 1);
-        HexMap.Add('2', 2);
-        HexMap.Add('3', 3);
-        HexMap.Add('4', 4);
-        HexMap.Add('5', 5);
-        HexMap.Add('6', 6);
-        HexMap.Add('7', 7);
-        HexMap.Add('8', 8);
-        HexMap.Add('9', 9);
-        HexMap.Add('A', 10);
-        HexMap.Add('B', 11);
-        HexMap.Add('C', 12);
-        HexMap.Add('D', 13);
-        HexMap.Add('E', 14);
-        HexMap.Add('F', 15);*/
-
-    };
+    FProvinceIDData() {};
 
     // This is the tooltip for our test variable.
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")

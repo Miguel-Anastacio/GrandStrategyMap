@@ -211,18 +211,7 @@ void AInteractiveMap::SaveMapTextureData()
 				// this pixel belongs to a province so safe its indexes on the map
 				//FName* indexPixel = MapColorCodeTextureData.PixedIndexID.Find((*id));
 				
-				MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));
-
-				if (!Religions.Contains(province->Religion.DataName))
-				{
-					Religions.Add(province->Religion.DataName, province->Religion.Color);
-				}
-
-				if (!Cultures.Contains(province->Culture.DataName))
-				{
-					Cultures.Add(province->Culture.DataName, province->Culture.Color);
-				}
-				
+				MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));	
 					
 			}
 			else
@@ -288,6 +277,16 @@ void AInteractiveMap::ReadProvinceDataTable()
 		if (Item)
 		{
 			ProvinceDataMap.Emplace(name, (*Item));
+
+			if (!Religions.Contains(Item->Religion.DataName))
+			{
+				Religions.Add(Item->Religion.DataName, Item->Religion.Color);
+			}
+
+			if (!Cultures.Contains(Item->Culture.DataName))
+			{
+				Cultures.Add(Item->Culture.DataName, Item->Culture.Color);
+			}
 		}
 	}
 
