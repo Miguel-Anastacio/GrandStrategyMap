@@ -1,23 +1,18 @@
 #include "UI/Widgets/ProvinceEditorWidget.h"
+#include "UI/Widgets/CustomEditableText.h"
 #include "Components/EditableText.h"
 #include "Components/RichTextBlock.h"
 #include "Map/InteractiveMap.h"
 //#include "ProvinceEditorWidget.h"
-
+UE_DISABLE_OPTIMIZATION
 void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName provinceID)
 {
-	if (ProvinceName)
-	{
-		ProvinceName->SetText(FText::FromString(data.ProvinceName));
-	}
-	if (OwnerName)
-	{
-		OwnerName->SetText(FText::FromName(data.Owner));
-	}
-	if (NameInput)
-		NameInput->SetText(FText::FromString(FString("______")));
-	if (OwnerInput)
-		OwnerInput->SetText(FText::FromString(FString("______")));
+	NameCustomInput->SetValues(FText::FromString(data.ProvinceName), FText::FromString(FString("______")));
+	OwnerCustomInput->SetValues(FText::FromString(data.Owner.ToString()), FText::FromString(FString("______")));
+	ReligionCustomInput->SetValues(FText::FromString(data.Religion.DataName), FText::FromString(FString("______")));
+	CultureCustomInput->SetValues(FText::FromString(data.Culture.DataName), FText::FromString(FString("______")));
+	PopulationCustomInput->SetValues(FText::AsNumber(data.Population), FText::FromString(FString("______")));
+
 	ProvinceSelectedData = data;
 	ProvinceSelectedID = provinceID;
 }
@@ -30,68 +25,102 @@ void UProvinceEditorWidget::SetInteractiveMapReference(AInteractiveMap* map)
 void UProvinceEditorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	
-	if (NameInput)
-		NameInput->OnTextCommitted.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceName);
-	if (OwnerInput)
-		OwnerInput->OnTextCommitted.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceOwner);
-	//if (OwnerInput)
-	//	OwnerInput->OnTextCommitted.AddDynamic(this, &UUWTableParameters::UpdateTableLegHeight);
+		
+	OwnerCustomInput->TextCommitDelegate.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceData);
+	NameCustomInput->TextCommitDelegate.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceData);
+	ReligionCustomInput->TextCommitDelegate.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceData);
+	CultureCustomInput->TextCommitDelegate.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceData);
+	PopulationCustomInput->TextCommitDelegate.AddDynamic(this, &UProvinceEditorWidget::UpdateProvinceData);
+
 }
 
-void UProvinceEditorWidget::UpdateProvinceName(const FText& Text, ETextCommit::Type CommitMethod)
+void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod)
 {
-	if (CommitMethod == ETextCommit::OnEnter)
+	if (editedText == OwnerCustomInput)
 	{
-		if (ProvinceName)
+		if (CommitMethod == ETextCommit::OnEnter)
 		{
-			ProvinceName->SetText(Text);
+			if (GameMapReference)
+			{
+				FString dummy = Text.ToString();
+				ProvinceSelectedData.Owner = FName(*dummy);
+				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+
+			}
+			editedText->SetValues(Text, FText::FromString(FString("______")));
 		}
-
-		if (GameMapReference)
-		{
-			ProvinceSelectedData.ProvinceName = Text.ToString();
-			GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
-		}
-
-
-		/*FString string = Text.ToString();
-		if (string.IsNumeric())
-		{
-			float width = FCString::Atof(*string);
-			for (auto& table : m_AllTablesSelected)
-				table->UpdateMeshWidth(width);
-		}*/
-		NameInput->SetText(FText::FromString(FString("______")));
-	}
-}
-
-void UProvinceEditorWidget::UpdateProvinceOwner(const FText& Text, ETextCommit::Type CommitMethod)
-{
-	if (CommitMethod == ETextCommit::OnEnter)
-	{
-		if (OwnerName)
-		{
-			OwnerName->SetText(Text);
-		}
-
-		if (GameMapReference)
-		{
-			FString dummy = Text.ToString();
-			ProvinceSelectedData.Owner = FName(*dummy);
-			GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
-		}
-
-		OwnerInput->SetText(FText::FromString(FString("______")));
+		return;
 	}
 
-
-		/*FString string = Text.ToString();
-		if (string.IsNumeric())
+	if (editedText == NameCustomInput)
+	{
+		if (CommitMethod == ETextCommit::OnEnter)
 		{
-			float width = FCString::Atof(*string);
-			for (auto& table : m_AllTablesSelected)
-				table->UpdateMeshWidth(width);
-		}*/
+			if (GameMapReference)
+			{
+				FString value = Text.ToString();
+				ProvinceSelectedData.ProvinceName = value;
+				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+
+				editedText->SetValues(Text, FText::FromString(FString("______")));
+			}
+		}
+		return;
+	}
+
+	if (editedText == ReligionCustomInput)
+	{
+		if (CommitMethod == ETextCommit::OnEnter)
+		{
+			if (GameMapReference)
+			{
+				FString value = Text.ToString();
+				ProvinceSelectedData.Religion.DataName = value;
+				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+
+				editedText->SetValues(Text, FText::FromString(FString("______")));
+			}
+		}
+		return;
+	}
+
+	if (editedText == CultureCustomInput)
+	{
+		if (CommitMethod == ETextCommit::OnEnter)
+		{
+			if (GameMapReference)
+			{
+				FString value = Text.ToString();
+				ProvinceSelectedData.Culture.DataName = value;
+				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+
+				editedText->SetValues(Text, FText::FromString(FString("______")));
+			}
+		}
+		return;
+	}
+
+	if (editedText == PopulationCustomInput)
+	{
+		if (CommitMethod == ETextCommit::OnEnter)
+		{
+			if (!Text.IsNumeric())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Invalid value in population, please insert a number"));
+				editedText->SetValues(Text, FText::FromString(FString("______")));
+			}
+			if (GameMapReference)
+			{
+				FString value = Text.ToString();
+				ProvinceSelectedData.Population = FCString::Atoi(*value);
+				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+				editedText->SetValues(Text, FText::FromString(FString("______")));
+			}
+		}
+		return;
+	}
+
 }
 
+
+UE_ENABLE_OPTIMIZATION

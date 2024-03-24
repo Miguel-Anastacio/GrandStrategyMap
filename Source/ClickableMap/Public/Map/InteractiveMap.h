@@ -160,7 +160,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FCountryData> CountryData;
-	
+
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FString, FColor> Religions;
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FString, FColor> Cultures;
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
 	//TArray<FLookUpTextureData> MapColorCodeTextureData;

@@ -75,12 +75,14 @@ protected:
 	void CameraZoom(const FInputActionInstance& instance);
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;
+	bool ProvinceSelected = false;
 	/** True if the controlled character should navigate to the mouse cursor. */
 	uint32 bMoveToMouseCursor : 1;
 private:
 	FVector CachedDestination;
 	bool bIsTouch; // Is it a touch device
 	float FollowTime; // For how long it has been pressed
+
 };
 
 

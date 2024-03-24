@@ -2,19 +2,20 @@
 
 #include "Game/BirdEyeController.h"
 #include "GameFramework/Pawn.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
+//#include "Blueprint/AIBlueprintHelperLibrary.h"
+//#include "NiagaraSystem.h"
+//#include "NiagaraFunctionLibrary.h"
 //#include "TP_TopDownCharacter.h"
-#include "Engine/World.h"
+//#include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Game/MapPawn.h"
 #include "Map/InteractiveMap.h"
-#include "Kismet/KismetRenderingLibrary.h"
+//#include "Kismet/KismetRenderingLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/ManagerHUD.h"
+#include "Components/SlateWrapperTypes.h"
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 ABirdEyeController::ABirdEyeController()
 {
@@ -60,33 +61,19 @@ void ABirdEyeController::Tick(float DeltaTime)
 		{
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			if (map->GetMapRenderTarget())
+			FColor color = map->GetColorFromLookUpTexture(uvs);
+			FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+			if (id != FName() && !ProvinceSelected)
 			{
-				//FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
-
-				FColor color = map->GetColorFromLookUpTexture(uvs);
-				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
-				if (id != FName())
-				{
-					map->UpdateProvinceHovered(color);
-				}
-
-
-				//FProvinceData* data = map->GetProvinceData(id);
-				//if (data)
-				//{
-				//	//GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, data->ProvinceName);
-				//	data->PrintProvinceData();
-				//	//UE_LOG(LogTemp, Warning, TEXT("%s"), map->GetLookUpTable[]);
-				//}
-				//else
-				//{
-				//	GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
-				//}
+				map->UpdateProvinceHovered(color);
 			}
 		}
 
+		return;
 	}
+
+	//map->UpdateProvinceHovered(FColor(9, 0, 0, 0));
+
 }
 
 void ABirdEyeController::SetupInputComponent()
@@ -97,23 +84,13 @@ void ABirdEyeController::SetupInputComponent()
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		// Setup mouse input events
-	/*	EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Started, this, &ATP_TopDownPlayerController::OnInputStarted);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Triggered, this, &ATP_TopDownPlayerController::OnSetDestinationTriggered);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Completed, this, &ATP_TopDownPlayerController::OnSetDestinationReleased);
-		EnhancedInputComponent->BindAction(SetDestinationClickAction, ETriggerEvent::Canceled, this, &ATP_TopDownPlayerController::OnSetDestinationReleased);*/
-
+		//// Setup touch input events
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
 		//EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 		//EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
-		//// Setup touch input events
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Started, this, &ATP_TopDownPlayerController::OnInputStarted);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Triggered, this, &ATP_TopDownPlayerController::OnTouchTriggered);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Completed, this, &ATP_TopDownPlayerController::OnTouchReleased);
-		//EnhancedInputComponent->BindAction(SetDestinationTouchAction, ETriggerEvent::Canceled, this, &ATP_TopDownPlayerController::OnTouchReleased);
 	}
 	else
 	{
@@ -188,6 +165,7 @@ UE_DISABLE_OPTIMIZATION
 void ABirdEyeController::MouseClick()
 {
 	FHitResult hit;
+	ProvinceSelected = false;
 	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hit))
 	{
 		FVector start = hit.ImpactPoint;
@@ -205,40 +183,49 @@ void ABirdEyeController::MouseClick()
 			return;
 
 		AInteractiveMap* map = Cast<AInteractiveMap>(hit.GetActor());
+
 		if (map)
 		{
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			if (map->GetMapRenderTarget())
-			{
-				//FLinearColor color = UKismetRenderingLibrary::ReadRenderTargetRawUV(GetWorld(), map->GetMapRenderTarget(), uvs.X, uvs.Y);
-				FColor color = map->GetColorFromLookUpTexture(uvs);
+			FColor color = map->GetColorFromLookUpTexture(uvs);
 				
-				FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
-				if (id != FName())
-				{
-					map->UpdateProvinceHovered(color);
-				}
+			FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+			
+			FProvinceData* data = map->GetProvinceData(id);
+			if (data)
+			{
+				map->UpdateProvinceHovered(color);
 
-
-				FProvinceData* data = map->GetProvinceData(id);
-				if (data)
+				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+				if (hud)
 				{
-					AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-					if (hud)
-					{
-						hud->DisplayProvinceEditorWidget(*data, id);
-						hud->SetInteractiveMapReference(map);
-					}
-				}
-				else
-				{
-					GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
+					hud->DisplayProvinceEditorWidget(*data, id);
+					hud->SetInteractiveMapReference(map);
+					ProvinceSelected = true;
 				}
 			}
+			else
+			{
+				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+				if (hud)
+				{
+					hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+				}
+				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
+			}
 		}
-
 	}
+	
+	if (!ProvinceSelected)
+	{
+		AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+		if (hud)
+		{
+			hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+
 }
 
 UE_ENABLE_OPTIMIZATION

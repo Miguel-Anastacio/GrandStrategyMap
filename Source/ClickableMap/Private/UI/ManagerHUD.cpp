@@ -22,6 +22,13 @@ void AManagerHUD::DisplayProvinceEditorWidget(const FProvinceData& provinceData,
 	ProvinceEditorWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	ProvinceEditorWidget->SetProvinceData(provinceData, id);
 }
+void AManagerHUD::SetProvinceEditorVisibility(ESlateVisibility visibility)
+{
+	if (ProvinceEditorWidget)
+	{
+		ProvinceEditorWidget->SetVisibility(visibility);
+	}
+}
 //bool AManagerHUD::IsProvinceDataValidRef() const
 //{
 //	if (ProvinceDataMapRef)

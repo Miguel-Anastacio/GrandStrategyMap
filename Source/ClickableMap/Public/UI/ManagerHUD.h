@@ -21,6 +21,8 @@ class CLICKABLEMAP_API AManagerHUD : public AHUD
 public:
 	UFUNCTION(BlueprintCallable)
 	void DisplayProvinceEditorWidget(const FProvinceData& provinceData, FName id);
+	UFUNCTION(BlueprintCallable)
+	void SetProvinceEditorVisibility(ESlateVisibility visibility);
 
 	//bool IsProvinceDataValidRef() const;
 

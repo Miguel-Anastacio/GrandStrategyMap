@@ -11,7 +11,8 @@
 
 class UButtonWidget;
 class UEditableText;
-class URichTextBlock;
+class URichTextBlock; 
+class UCustomEditableText;
 UCLASS(Abstract, BlueprintType)
 class CLICKABLEMAP_API UProvinceEditorWidget : public UUserWidget
 {
@@ -29,21 +30,33 @@ protected:
 //	UFUNCTION()
 //	void SetMapMode(UButtonWidget* button);
 //
-protected:	
+protected:
 	UPROPERTY(meta = (BindWidget))
-	URichTextBlock* ProvinceName;
+	UCustomEditableText* NameCustomInput;
 	UPROPERTY(meta = (BindWidget))
-	UEditableText* NameInput;
+	UCustomEditableText* OwnerCustomInput;
+	UPROPERTY(meta = (BindWidget))
+	UCustomEditableText* ReligionCustomInput;
+	UPROPERTY(meta = (BindWidget))
+	UCustomEditableText* CultureCustomInput;
+	UPROPERTY(meta = (BindWidget))
+	UCustomEditableText* PopulationCustomInput;
+	//UPROPERTY(meta = (BindWidget))
+	//URichTextBlock* ProvinceName;
+	//UPROPERTY(meta = (BindWidget))
+	//UEditableText* NameInput;
 
-	UPROPERTY(meta = (BindWidget))
-	URichTextBlock* OwnerName;
-	UPROPERTY(meta = (BindWidget))
-	UEditableText* OwnerInput;
+	//UPROPERTY(meta = (BindWidget))
+	//URichTextBlock* OwnerName;
+	//UPROPERTY(meta = (BindWidget))
+	//UEditableText* OwnerInput;
 
+	//UFUNCTION()
+	//void UpdateProvinceName(const FText& Text, ETextCommit::Type CommitMethod);
+	//UFUNCTION()
+	//void UpdateProvinceOwner(const FText& Text, ETextCommit::Type CommitMethod);
 	UFUNCTION()
-	void UpdateProvinceName(const FText& Text, ETextCommit::Type CommitMethod);
-	UFUNCTION()
-	void UpdateProvinceOwner(const FText& Text, ETextCommit::Type CommitMethod);
+	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
 	//UPROPERTY(meta = (BindWidget))
 	//UTextBlock* NameText;
 	//UPROPERTY(meta = (BindWidget))
