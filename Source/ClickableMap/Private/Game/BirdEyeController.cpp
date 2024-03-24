@@ -2,17 +2,11 @@
 
 #include "Game/BirdEyeController.h"
 #include "GameFramework/Pawn.h"
-//#include "Blueprint/AIBlueprintHelperLibrary.h"
-//#include "NiagaraSystem.h"
-//#include "NiagaraFunctionLibrary.h"
-//#include "TP_TopDownCharacter.h"
-//#include "Engine/World.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Game/MapPawn.h"
 #include "Map/InteractiveMap.h"
-//#include "Kismet/KismetRenderingLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/ManagerHUD.h"
 #include "Components/SlateWrapperTypes.h"
@@ -21,8 +15,6 @@ ABirdEyeController::ABirdEyeController()
 {
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
-	CachedDestination = FVector::ZeroVector;
-	FollowTime = 0.f;
 }
 
 void ABirdEyeController::BeginPlay()
@@ -98,69 +90,6 @@ void ABirdEyeController::SetupInputComponent()
 	}
 }
 
-//void ATP_TopDownPlayerController::OnInputStarted()
-//{
-//	StopMovement();
-//}
-//
-//// Triggered every frame when the input is held down
-//void ATP_TopDownPlayerController::OnSetDestinationTriggered()
-//{
-//	// We flag that the input is being pressed
-//	FollowTime += GetWorld()->GetDeltaSeconds();
-//	
-//	// We look for the location in the world where the player has pressed the input
-//	FHitResult Hit;
-//	bool bHitSuccessful = false;
-//	if (bIsTouch)
-//	{
-//		bHitSuccessful = GetHitResultUnderFinger(ETouchIndex::Touch1, ECollisionChannel::ECC_Visibility, true, Hit);
-//	}
-//	else
-//	{
-//		bHitSuccessful = GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, Hit);
-//	}
-//
-//	// If we hit a surface, cache the location
-//	if (bHitSuccessful)
-//	{
-//		CachedDestination = Hit.Location;
-//	}
-//	
-//	// Move towards mouse pointer or touch
-//	APawn* ControlledPawn = GetPawn();
-//	if (ControlledPawn != nullptr)
-//	{
-//		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-//		ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
-//	}
-//}
-//
-//void ATP_TopDownPlayerController::OnSetDestinationReleased()
-//{
-//	// If it was a short press
-//	if (FollowTime <= ShortPressThreshold)
-//	{
-//		// We move there and spawn some particles
-//		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-//		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
-//	}
-//
-//	FollowTime = 0.f;
-//}
-//
-//// Triggered every frame when the input is held down
-//void ATP_TopDownPlayerController::OnTouchTriggered()
-//{
-//	bIsTouch = true;
-//	OnSetDestinationTriggered();
-//}
-//
-//void ATP_TopDownPlayerController::OnTouchReleased()
-//{
-//	bIsTouch = false;
-//	OnSetDestinationReleased();
-//}
 UE_DISABLE_OPTIMIZATION
 void ABirdEyeController::MouseClick()
 {

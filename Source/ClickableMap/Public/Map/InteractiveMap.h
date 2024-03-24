@@ -46,24 +46,22 @@ public:
 	FName GetProvinceID(const FVector& color) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetProvinceData(FName name, FProvinceData& out_data);
+	FProvinceData* GetProvinceData(FName name);
+
+	UFUNCTION(BlueprintCallable)
+	FColor GetColorFromLookUpTexture(FVector2D uv);
 
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
 	//F GetProvinceID(const FVector& color) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMapMode(MapMode mode);
-
-	FProvinceData* GetProvinceData(FName name);
-
 	UFUNCTION(BlueprintCallable)
 	void SetBorderVisibility(bool status);
 
 	// Update Data
 	UFUNCTION(BlueprintCallable)
 	void UpdateProvinceData(const FProvinceData& data, FName id);
-
-	UFUNCTION(BlueprintCallable)
-	FColor GetColorFromLookUpTexture(FVector2D uv);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateProvinceHovered(const FColor& color);
@@ -84,13 +82,16 @@ protected:
 	FColor GetReligionColor(const FProvinceData* data);
 	FColor GetCultureColor(const FProvinceData* data);
 
+	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv);
+
 	void SaveMapTextureData();
-	void CreateLookUpTable();
 
 	void ReadProvinceDataTable();
 	void ReadCountryDataTable();
 
-	void CreatePoliticalMapTexture();
+	//void CreatePoliticalMapTexture();
+
+	void CreateLookUpTable();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
 
 	UFUNCTION(BlueprintCallable)
@@ -98,7 +99,6 @@ protected:
 
 	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 
-	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv);
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UArrowComponent> MapRoot;
@@ -121,14 +121,16 @@ protected:
 	// Political religious or terrain
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GameplayMapMaterial;
+
+	// Border Material 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* BorderMaterial;
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* HQXFilterMaterial;
-
 	UPROPERTY(EditAnywhere)
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 
+	// Data
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* MapDataTable;
 	UPROPERTY(EditAnywhere, Category = "Data")
@@ -138,7 +140,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
-
 
 	UPROPERTY()
 	UTexture2D* PoliticalMapTexture;
@@ -165,6 +166,7 @@ protected:
 	TMap<FString, FColor> Religions;
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Cultures;
+
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
 	//TArray<FLookUpTextureData> MapColorCodeTextureData;

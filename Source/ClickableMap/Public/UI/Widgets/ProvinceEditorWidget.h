@@ -26,10 +26,9 @@ public:
 
 protected:
 	void NativeOnInitialized() override;
-	//void NativeOnInitialized() override;
-//	UFUNCTION()
-//	void SetMapMode(UButtonWidget* button);
-//
+	UFUNCTION()
+	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UCustomEditableText* NameCustomInput;
@@ -41,26 +40,7 @@ protected:
 	UCustomEditableText* CultureCustomInput;
 	UPROPERTY(meta = (BindWidget))
 	UCustomEditableText* PopulationCustomInput;
-	//UPROPERTY(meta = (BindWidget))
-	//URichTextBlock* ProvinceName;
-	//UPROPERTY(meta = (BindWidget))
-	//UEditableText* NameInput;
 
-	//UPROPERTY(meta = (BindWidget))
-	//URichTextBlock* OwnerName;
-	//UPROPERTY(meta = (BindWidget))
-	//UEditableText* OwnerInput;
-
-	//UFUNCTION()
-	//void UpdateProvinceName(const FText& Text, ETextCommit::Type CommitMethod);
-	//UFUNCTION()
-	//void UpdateProvinceOwner(const FText& Text, ETextCommit::Type CommitMethod);
-	UFUNCTION()
-	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
-	//UPROPERTY(meta = (BindWidget))
-	//UTextBlock* NameText;
-	//UPROPERTY(meta = (BindWidget))
-	//UEditableText* NameInput;
 
 	FName ProvinceSelectedID;
 	FProvinceData ProvinceSelectedData;

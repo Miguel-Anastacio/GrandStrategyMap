@@ -309,17 +309,17 @@ void AInteractiveMap::ReadCountryDataTable()
 		}
 	}
 }
-void AInteractiveMap::CreatePoliticalMapTexture()
-{
-	PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, MapLookUpTexture, PixelColorPoliticalTexture);
-	PoliticalMapTextureComponent->UpdateTexture();
-	PoliticalMapTexture = PoliticalMapTextureComponent->GetTexture();
-
-	// Set material
-	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
-	PoliticalMapTextureComponent->DynamicMaterial = DynMaterial;
-	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", PoliticalMapTexture);
-}
+//void AInteractiveMap::CreatePoliticalMapTexture()
+//{
+//	PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, MapLookUpTexture, PixelColorPoliticalTexture);
+//	PoliticalMapTextureComponent->UpdateTexture();
+//	PoliticalMapTexture = PoliticalMapTextureComponent->GetTexture();
+//
+//	// Set material
+//	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
+//	PoliticalMapTextureComponent->DynamicMaterial = DynMaterial;
+//	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", PoliticalMapTexture);
+//}
 void AInteractiveMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture)
 {
 	textureCompoment->DrawFromDataBuffer(0, 0, MapLookUpTexture, pixelArray);

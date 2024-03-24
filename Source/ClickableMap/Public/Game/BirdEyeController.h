@@ -23,26 +23,18 @@ class ABirdEyeController : public APlayerController
 public:
 	ABirdEyeController();
 
-	/** Time Threshold to know if it was a short press */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	float ShortPressThreshold;
+	///** Time Threshold to know if it was a short press */
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	//float ShortPressThreshold;
 
-	/** FX Class that we will spawn when clicking */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UNiagaraSystem* FXCursor;
+	///** FX Class that we will spawn when clicking */
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	//UNiagaraSystem* FXCursor;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 	
-	///** Jump Input Action */
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	//UInputAction* SetDestinationClickAction;
-
-	///** Jump Input Action */
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	//UInputAction* SetDestinationTouchAction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* CameraMoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -55,33 +47,23 @@ public:
 	UInputAction* MouseScrollAction;
 protected:
 
+	// To add mapping context
 	virtual void SetupInputComponent() override;
 	
-	// To add mapping context
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaTime) override;
 
-	/** Input handlers for SetDestination action. */
-	//void OnInputStarted();
-	//void OnSetDestinationTriggered();
-	//void OnSetDestinationReleased();
-	//void OnTouchTriggered();
-	//void OnTouchReleased();
-
-
+	UFUNCTION(BlueprintCallable)
 	void MouseClick();
+	UFUNCTION(BlueprintCallable)
 	void CameraMovement(const FInputActionInstance& instance);
 	void MouseMovement();
+	UFUNCTION(BlueprintCallable)
 	void CameraZoom(const FInputActionInstance& instance);
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;
+
 	bool ProvinceSelected = false;
-	/** True if the controlled character should navigate to the mouse cursor. */
-	uint32 bMoveToMouseCursor : 1;
-private:
-	FVector CachedDestination;
-	bool bIsTouch; // Is it a touch device
-	float FollowTime; // For how long it has been pressed
 
 };
 

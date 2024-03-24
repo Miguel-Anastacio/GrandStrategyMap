@@ -22,8 +22,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)
 	void MoveCamera(FVector2D input);
+
+	UFUNCTION(BlueprintCallable)
 	void ZoomCamera(float input);
 
+	UFUNCTION(BlueprintCallable)
 	void SetInteractiveMap(AInteractiveMap* map);
 protected:
 	// Called when the game starts or when spawned
@@ -58,11 +61,5 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<AInteractiveMap> GameMap;
-
-
-	//FVector2D MousePos;
-	
-	//// Called to bind functionality to input
-	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };
