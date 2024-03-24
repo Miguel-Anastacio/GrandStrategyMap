@@ -3,6 +3,7 @@
 #include "Components/Button.h"
 #include "Map/InteractiveMap.h"
 #include "Kismet/GameplayStatics.h"
+#include "DataManager/DataManagerFunctionLibrary.h"
 // Fill out your copyright notice in the Description page of Project Settings.
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
@@ -34,6 +35,11 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 	{
 		TerrainMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
 	}
+
+	if (SaveDataButton)
+	{
+		SaveDataButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SaveProvinceDataToJson);
+	}
 }
 
 void UGrandStrategyHUDWidget::SetMapMode(UButtonWidget* button)
@@ -62,5 +68,20 @@ void UGrandStrategyHUDWidget::SetMapMode(UButtonWidget* button)
 	{
 		GameMap->SetMapMode(MapMode::TERRAIN);
 		return;
+	}
+}
+
+void UGrandStrategyHUDWidget::SaveProvinceDataToJson(UButtonWidget* button)
+{
+	TMap<FName, FProvinceData>* provinceMapData = GameMap->GetProvinceDataMap();
+	if (!provinceMapData)
+		return;
+
+	bool result;
+	FString outMessageInfo;
+	UDataManagerFunctioLibrary::WriteMapToJsonFile(FString("D:\\Dev\\Unreal\\GrandStrategyMap\\InGameEditor\\save.json"), *provinceMapData, result, outMessageInfo);
+	if (!result)
+	{
+		GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
 	}
 }

@@ -40,16 +40,16 @@ public:
 	TMap<FVector, FName> GetLookUpTable() const;
 
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
-	//TMap<FName, FProvinceData>* GetProvinceDataMap() const;
+	TMap<FName, FProvinceData>* GetProvinceDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetProvinceID(const FVector& color) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	void GetProvinceData(FName name, FProvinceData& out_data);
+	void GetProvinceData(FName name, FProvinceData& out_data) const;
 	FProvinceData* GetProvinceData(FName name);
 
 	UFUNCTION(BlueprintCallable)
-	FColor GetColorFromLookUpTexture(FVector2D uv);
+	FColor GetColorFromLookUpTexture(FVector2D uv) const;
 
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
 	//F GetProvinceID(const FVector& color) const;
@@ -61,7 +61,7 @@ public:
 
 	// Update Data
 	UFUNCTION(BlueprintCallable)
-	void UpdateProvinceData(const FProvinceData& data, FName id);
+	bool UpdateProvinceData(const FProvinceData& data, FName id);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateProvinceHovered(const FColor& color);
@@ -76,18 +76,20 @@ protected:
 
 	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
-	bool GetCountryColor(const FVector& color, FColor& out_countryColor);
-	FColor GetCountryColor(const FProvinceData* data);
+	bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
+	FColor GetCountryColor(const FProvinceData* data) const;
 	//FColor GetCountryColor(const FProvinceData* data);
-	FColor GetReligionColor(const FProvinceData* data);
-	FColor GetCultureColor(const FProvinceData* data);
 
-	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv);
+	
+	FColor GetReligionColor(const FProvinceData* data) const;
+	FColor GetCultureColor(const FProvinceData* data) const;
+
+	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
 
 	void SaveMapTextureData();
 
-	void ReadProvinceDataTable();
-	void ReadCountryDataTable();
+	//void ReadProvinceDataTable();
+	//void ReadCountryDataTable();
 	//void ReadDataTable();
 
 	//void CreatePoliticalMapTexture();
@@ -191,11 +193,13 @@ protected:
 	TMap<FName, FCountryData> CountryData;
 
 	// Populated when reading the ProvinceDataTable
+	// Not in USE
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Religions;
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FString, FColor> Cultures;
 
+	// Province properties that have a map color associated
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FColoredData> VisualPropertiesDataMap;
 

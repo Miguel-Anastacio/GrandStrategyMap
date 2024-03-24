@@ -44,10 +44,12 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			{
 				FString dummy = Text.ToString();
 				ProvinceSelectedData.Owner = FName(*dummy);
-				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
+				{
+					editedText->SetValues(Text, FText::FromString(FString("______")));
+				}
 
 			}
-			editedText->SetValues(Text, FText::FromString(FString("______")));
 		}
 		return;
 	}
@@ -60,9 +62,11 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			{
 				FString value = Text.ToString();
 				ProvinceSelectedData.ProvinceName = value;
-				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
+				{
+					editedText->SetValues(Text, FText::FromString(FString("______")));
+				}
 
-				editedText->SetValues(Text, FText::FromString(FString("______")));
 			}
 		}
 		return;
@@ -76,9 +80,11 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			{
 				FString value = Text.ToString();
 				ProvinceSelectedData.Religion = FName(*value);
-				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
+				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
+				{
+					editedText->SetValues(Text, FText::FromString(FString("______")));
+				}
 
-				editedText->SetValues(Text, FText::FromString(FString("______")));
 			}
 		}
 		return;
@@ -92,9 +98,10 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			{
 				FString value = Text.ToString();
 				ProvinceSelectedData.Culture = FName(*value);
-				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
-
-				editedText->SetValues(Text, FText::FromString(FString("______")));
+				if(GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
+				{
+					editedText->SetValues(Text, FText::FromString(FString("______")));
+				}
 			}
 		}
 		return;
@@ -113,8 +120,11 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 			{
 				FString value = Text.ToString();
 				ProvinceSelectedData.Population = FCString::Atoi(*value);
-				GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID);
-				editedText->SetValues(Text, FText::FromString(FString("______")));
+				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
+				{
+					editedText->SetValues(Text, FText::FromString(FString("______")));
+
+				}
 			}
 		}
 		return;

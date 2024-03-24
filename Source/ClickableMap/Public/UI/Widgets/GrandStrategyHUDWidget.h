@@ -22,6 +22,8 @@ protected:
 	UFUNCTION()
 	void SetMapMode(UButtonWidget* button);
 
+	UFUNCTION()
+	void SaveProvinceDataToJson(UButtonWidget* button);
 protected:	
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UButtonWidget> PoliticalMapButton;
@@ -32,6 +34,15 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UButtonWidget> TerrainMapButton;
 	
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
+	TObjectPtr<class UButtonWidget> SaveDataButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
+	FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
+	FString FileName = FString("save");
+
+	//int FilesCreated;
 
 	class AInteractiveMap* GameMap;
 };

@@ -31,8 +31,8 @@ USTRUCT(BlueprintType)
 struct FColoredData : public FTableRowBase
 {
     GENERATED_BODY()
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    //FName Type;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FName Type;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FName DataName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
@@ -43,6 +43,19 @@ struct FColoredData : public FTableRowBase
     FColoredData(const FString& name, FColor color) :
         DataName(name), Color(color) {};
 
+    // Serialize to JSON
+    void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject, FName key) const
+    {
+        OutJsonObject->SetStringField(TEXT("Name"), key.ToString());
+        OutJsonObject->SetStringField(TEXT("Type"), Type.ToString());
+        OutJsonObject->SetStringField(TEXT("DataName"), DataName.ToString());
+        TSharedPtr<FJsonObject> ColorObject = MakeShared<FJsonObject>();
+        ColorObject->SetNumberField(TEXT("R"), Color.R);
+        ColorObject->SetNumberField(TEXT("G"), Color.G);
+        ColorObject->SetNumberField(TEXT("B"), Color.B);
+        ColorObject->SetNumberField(TEXT("A"), Color.A);
+        OutJsonObject->SetObjectField(TEXT("Color"), ColorObject);
+    }
 };
 
 //USTRUCT(BlueprintType)
@@ -87,6 +100,20 @@ struct FProvinceIDData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
+struct FProvinceIDDataRGB: public FTableRowBase
+{
+    GENERATED_BODY()
+    FProvinceIDDataRGB() {};
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FString Name;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    FColor Color;
+
+};
+
+
+USTRUCT(BlueprintType)
 struct FProvinceData : public FTableRowBase
 {
     GENERATED_BODY()
@@ -97,21 +124,30 @@ struct FProvinceData : public FTableRowBase
     FName Owner;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     int64 Population;
-    /*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FReligion Religion;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FPopCulture Culture;*/
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FName Religion;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FName Culture;
+    // Add more province data here
     FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FName()) {};
 
     FProvinceData(const FString& name, FName owner, int64 population, FName religion, FName culture) :
         ProvinceName(name), Owner(owner), Population(population), Religion(religion), Culture(culture) {};
 
     void PrintProvinceData();
-    // Add more province data here
+
+    // Serialize to JSON
+    void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject, FName key) const
+    {
+        OutJsonObject->SetStringField(TEXT("Name"), key.ToString());
+        OutJsonObject->SetStringField(TEXT("ProvinceName"), ProvinceName);
+        OutJsonObject->SetStringField(TEXT("Owner"), Owner.ToString());
+        OutJsonObject->SetNumberField(TEXT("Population"), Population);
+        OutJsonObject->SetStringField(TEXT("Religion"), Religion.ToString());
+        OutJsonObject->SetStringField(TEXT("Culture"), Culture.ToString());
+        // Add more fields as needed
+    }
 };
 
 USTRUCT(BlueprintType)
@@ -124,13 +160,29 @@ struct FCountryData : public FTableRowBase
     FString CountryName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FColor Color;
-    //UPROPERTY(BlueprintReadWrite, Category = "ID")
-    //int64 Population;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    TArray<int32> Provinces;
+    TArray<FName> Provinces;
 
     FCountryData(const FString& name, const FColor& color) : CountryName(name), Color(color)
     {};
+
+    // Serialize to JSON
+    void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject, FName key) const
+    {
+        OutJsonObject->SetStringField(TEXT("Name"), key.ToString());
+        OutJsonObject->SetStringField(TEXT("ProvinceName"), CountryName);
+        TSharedPtr<FJsonObject> ColorObject = MakeShared<FJsonObject>();
+        ColorObject->SetNumberField(TEXT("R"), Color.R);
+        ColorObject->SetNumberField(TEXT("G"), Color.G);
+        ColorObject->SetNumberField(TEXT("B"), Color.B);
+        ColorObject->SetNumberField(TEXT("A"), Color.A);
+        OutJsonObject->SetObjectField(TEXT("Color"), ColorObject);
+        TArray<TSharedPtr<FJsonValue>> EmptyArray;
+        OutJsonObject->SetArrayField(TEXT("Provinces"), EmptyArray);
+
+        //OutJsonObject->
+        // Add more fields as needed
+    }
     // Add more country data here
 };
