@@ -77,12 +77,12 @@ void AInteractiveMap::BeginPlay()
 		player->SetInteractiveMap(this);
 	}
 
-	UMaterialInstanceDynamic* borderMaterialInstance = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), BorderMaterialRenderTarget, borderMaterialInstance);
+	//UMaterialInstanceDynamic* borderMaterialInstance = UMaterialInstanceDynamic::Create(BorderMaterial, this);
+	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), BorderMaterialRenderTarget, borderMaterialInstance);
 
-	UMaterialInstanceDynamic* filteredBorderMaterialInstance = UMaterialInstanceDynamic::Create(HQXFilterMaterial, this);
-	filteredBorderMaterialInstance->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
-	MapBorderMesh->SetMaterial(0, filteredBorderMaterialInstance);
+	//UMaterialInstanceDynamic* filteredBorderMaterialInstance = UMaterialInstanceDynamic::Create(HQXFilterMaterial, this);
+	//filteredBorderMaterialInstance->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
+	//MapBorderMesh->SetMaterial(0, filteredBorderMaterialInstance);
 
 }
 
@@ -189,7 +189,19 @@ void AInteractiveMap::SaveMapTextureData()
 	int32 Height = MapLookUpTexture->GetSizeY();
 
 	// Assume texture format is RGBA
+	//TArray<uint8>* data = static_cast<TArray<uint8>*>(TextureData);
+
+	//if (data)
+	//{
+	//	int size = data->Num();
+	//	int a = 0;
+	//}
 	const uint8* Data = static_cast<const uint8*>(TextureData);
+	//while ()
+	//{
+
+	//}
+	//int32 
 
 	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
 	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);

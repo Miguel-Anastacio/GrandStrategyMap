@@ -89,8 +89,8 @@ struct FProvinceIDData : public FTableRowBase
     GENERATED_BODY()
     FProvinceIDData() {};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FString Name;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    //FString Name;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString Color;
     //TMap<TCHAR, int32> HexMap;
