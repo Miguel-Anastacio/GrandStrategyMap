@@ -55,7 +55,7 @@ public:
 	//F GetProvinceID(const FVector& color) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetMapMode(MapMode mode);
+	virtual void SetMapMode(MapMode mode);
 	UFUNCTION(BlueprintCallable)
 	void SetBorderVisibility(bool status);
 
