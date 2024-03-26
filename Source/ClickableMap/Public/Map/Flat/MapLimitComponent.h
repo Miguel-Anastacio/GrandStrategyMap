@@ -3,22 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SceneComponent.h"
+#include "Components/ChildActorComponent.h"
 #include "MapLimitComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
-class CLICKABLEMAP_API UMapLimitComponent : public USceneComponent
+class CLICKABLEMAP_API UMapLimitComponent : public UChildActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
 	UMapLimitComponent();
+	UFUNCTION(BlueprintCallable)
 	void UpdateGameplayMapMesh(class UMaterialInstanceDynamic* mat);
+	UFUNCTION(BlueprintCallable)
 	void InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder,
 		UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	class UMapVisualComponent* GetVisualComponent();
 protected:
 	// Called when the game starts
@@ -30,9 +33,9 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
-	TObjectPtr<class UCapsuleComponent> LimitCapsule;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> Root;
+	TObjectPtr<class UCapsuleComponent> Capsule;
+	// UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> Root;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")

@@ -17,12 +17,12 @@ class CLICKABLEMAP_API AFlatInteractiveMap : public AInteractiveMap
 
 	AFlatInteractiveMap();
 	void BeginPlay() override;
-	void SetMapMode(MapMode mode) override;
+	//void SetMapMode(MapMode mode) override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
-	TObjectPtr<UMapLimitComponent> LeftLimitComponent;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
-	TObjectPtr<UMapLimitComponent> RightLimitComponent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
+	//TObjectPtr<UMapLimitComponent> LeftLimitComponent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
+	//TObjectPtr<UMapLimitComponent> RightLimitComponent;
 	
 };

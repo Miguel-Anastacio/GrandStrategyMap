@@ -14,8 +14,8 @@ UMapLimitComponent::UMapLimitComponent()
 	MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
 	MapVisualComponent->SetupAttachment(this);
 
-	LimitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Limit"));
-	LimitCapsule->SetupAttachment(MapVisualComponent);
+	Capsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Limit Capsule"));
+	Capsule->SetupAttachment(MapVisualComponent);
 
 }
 
@@ -29,9 +29,9 @@ void UMapLimitComponent::UpdateGameplayMapMesh(UMaterialInstanceDynamic* mat)
 void UMapLimitComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (LimitCapsule)
+	if (Capsule)
 	{
-		LimitCapsule->OnComponentBeginOverlap.AddDynamic(this, &UMapLimitComponent::OnOverlapBegin);
+		Capsule->OnComponentBeginOverlap.AddDynamic(this, &UMapLimitComponent::OnOverlapBegin);
 	}
 }
 UE_DISABLE_OPTIMIZATION
@@ -59,7 +59,7 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 
 	const float xPos = owner->GetActorLocation().X + distanceToMapCenter;
 
-	player->SetActorLocation(FVector(owner->GetActorLocation().X, currentPlayerPos.Y, currentPlayerPos.Z));
+	player->SetActorLocation(owner->GetActorLocation(), true);
 	
 	UE_LOG(LogTemp, Error, TEXT("Overlap Begin %s"), *GetName());
 	TimeSinceOverlap = 0.0f;

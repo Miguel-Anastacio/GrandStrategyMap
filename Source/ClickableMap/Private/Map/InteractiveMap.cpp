@@ -47,6 +47,11 @@ void AInteractiveMap::BeginPlay()
 	Super::BeginPlay();
 	GameplayMapMesh->SetVisibility(true);
 
+	if (!MapLookUpTexture)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Map Look up Texture not assigned"));
+		return;
+	}
 	int32 width = MapLookUpTexture->GetSizeX();
 	int32 height = MapLookUpTexture->GetSizeY();
 	PoliticalMapTextureComponent->InitializeTexture(width, height);
@@ -511,8 +516,7 @@ FName AInteractiveMap::GetProvinceID(const FVector& color) const
 	return FName();
 }
 
-
-void AInteractiveMap::SetMapMode(MapMode mode)
+void AInteractiveMap::SetMapMode_Implementation(MapMode mode)
 {
 	switch (mode)
 	{

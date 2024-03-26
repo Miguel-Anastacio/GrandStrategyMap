@@ -17,13 +17,17 @@ class CLICKABLEMAP_API UMapVisualComponent : public USceneComponent
 public:	
 	// Sets default values for this component's properties
 	UMapVisualComponent();
+	UFUNCTION(BlueprintCallable)
 	void InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, 
 		UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
+	UFUNCTION(BlueprintCallable)
 	UStaticMeshComponent* InitMeshComponent(UStaticMeshComponent* original);
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat);
 
+	UFUNCTION(BlueprintCallable)
 	UStaticMeshComponent* GetMeshComponent(MapMode mode);
 public:	
 	// Called every frame
