@@ -127,7 +127,7 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UArrowComponent> MapRoot;
+	TObjectPtr<class UStaticMeshComponent> MapRoot;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)

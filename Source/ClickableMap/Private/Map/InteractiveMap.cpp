@@ -8,13 +8,13 @@
 #include "Map/DynamicTextureComponent.h"
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/ArrowComponent.h"
+#include "Components/PrimitiveComponent.h"
 // Sets default values
 AInteractiveMap::AInteractiveMap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	MapRoot = CreateDefaultSubobject<UArrowComponent>(TEXT("Root"));
+	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
 
 	MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Selection"));

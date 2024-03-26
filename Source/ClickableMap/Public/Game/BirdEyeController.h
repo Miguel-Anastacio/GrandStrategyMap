@@ -46,7 +46,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MouseScrollAction;
 protected:
-
 	// To add mapping context
 	virtual void SetupInputComponent() override;
 	
@@ -60,11 +59,25 @@ protected:
 	void MouseMovement();
 	UFUNCTION(BlueprintCallable)
 	void CameraZoom(const FInputActionInstance& instance);
+
+	UFUNCTION(BlueprintCallable)
+	void StartMovement(const FVector2D& mousePos);
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;
 
-	bool ProvinceSelected = false;
+	bool bProvinceSelected = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool bMoveCamera;
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FVector2D MoveInput;
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FVector2D ViewportCenter;
+
+
+	//class AInteractiveMap* Map;
+	UPROPERTY(Transient)
+	class AMapPawn* MapPawn;
 };
 
 

@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/ManagerHUD.h"
 #include "Components/SlateWrapperTypes.h"
+#include "GameFramework/GameUserSettings.h"
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 ABirdEyeController::ABirdEyeController()
 {
@@ -26,6 +27,8 @@ void ABirdEyeController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
+
+	MapPawn = GetPawn<AMapPawn>();
 }
 
 void ABirdEyeController::Tick(float DeltaTime)
@@ -55,17 +58,17 @@ void ABirdEyeController::Tick(float DeltaTime)
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			FColor color = map->GetColorFromLookUpTexture(uvs);
 			FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
-			if (id != FName() && !ProvinceSelected)
+			if (id != FName() && !bProvinceSelected)
 			{
 				map->UpdateProvinceHovered(color);
 			}
 		}
-
-		return;
 	}
 
-	//map->UpdateProvinceHovered(FColor(9, 0, 0, 0));
-
+	if (bMoveCamera)
+	{
+		MapPawn->MoveCamera(MoveInput);
+	}
 }
 
 void ABirdEyeController::SetupInputComponent()
@@ -94,7 +97,7 @@ UE_DISABLE_OPTIMIZATION
 void ABirdEyeController::MouseClick()
 {
 	FHitResult hit;
-	ProvinceSelected = false;
+	bProvinceSelected = false;
 	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hit))
 	{
 		FVector start = hit.ImpactPoint;
@@ -115,6 +118,8 @@ void ABirdEyeController::MouseClick()
 
 		if (map)
 		{
+			//Map = map;
+
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			FColor color = map->GetColorFromLookUpTexture(uvs);
@@ -131,7 +136,7 @@ void ABirdEyeController::MouseClick()
 				{
 					hud->DisplayProvinceEditorWidget(*data, id);
 					hud->SetInteractiveMapReference(map);
-					ProvinceSelected = true;
+					bProvinceSelected = true;
 				}
 			}
 			else
@@ -145,8 +150,7 @@ void ABirdEyeController::MouseClick()
 			}
 		}
 	}
-	
-	if (!ProvinceSelected)
+	if (!bProvinceSelected)
 	{
 		AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 		if (hud)
@@ -157,7 +161,6 @@ void ABirdEyeController::MouseClick()
 
 }
 
-UE_ENABLE_OPTIMIZATION
 void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
 {
 	FVector2D input = instance.GetValue().Get<FVector2D>();
@@ -180,3 +183,17 @@ void ABirdEyeController::CameraZoom(const FInputActionInstance& instance)
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->ZoomCamera(input);
 }
+
+void ABirdEyeController::StartMovement(const FVector2D& mousePos)
+{
+	bMoveCamera = true;
+	FVector2D ViewportSize = FVector2D(GEngine->GameUserSettings->GetLastConfirmedScreenResolution());
+	ViewportCenter = ViewportSize * 0.5f;
+
+	MoveInput = mousePos - ViewportCenter; 
+	MoveInput.Normalize();
+
+	
+}
+
+UE_ENABLE_OPTIMIZATION

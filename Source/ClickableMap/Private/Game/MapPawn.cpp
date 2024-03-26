@@ -60,7 +60,7 @@ void AMapPawn::ZoomCamera(float input)
 	}
 	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
 	{
-		CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
+		//CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
 		// hide borders
 		if (GameMap.Get())
 		{
@@ -75,7 +75,7 @@ void AMapPawn::ZoomCamera(float input)
 			//GameMap->SetBorderVisibility(true);
 		}
 
-		CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
+		//CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
 	}
 }
 
