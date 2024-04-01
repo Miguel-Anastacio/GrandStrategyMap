@@ -36,6 +36,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "MapRotation")
 	float MapRotSpeed = 20.0f;
 
-	UPROPERTY(Transient)
-	class AInteractiveMap* Map;
+	//UPROPERTY(Transient)
+	//class AInteractiveMap* Map;
 };

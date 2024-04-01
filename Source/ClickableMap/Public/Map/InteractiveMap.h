@@ -139,14 +139,14 @@ protected:
 
 
 
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
 
 	// -------------------------VISUAL DATA--------------------------------------
 	UPROPERTY(EditAnywhere, Category = "Map")

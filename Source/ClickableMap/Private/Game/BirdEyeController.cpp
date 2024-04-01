@@ -51,18 +51,31 @@ void ABirdEyeController::Tick(float DeltaTime)
 		if (!IsValid(hit.GetActor()))
 			return;
 
-		AInteractiveMap* map = Cast<AInteractiveMap>(hit.GetActor());
-		if (map)
+		if(!Map)
+			Map = Cast<AInteractiveMap>(hit.GetActor());
+
+		if (Map)
 		{
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			FColor color = map->GetColorFromLookUpTexture(uvs);
-			FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+			FColor color = Map->GetColorFromLookUpTexture(uvs);
+			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B));
+
+
 			if (id != FName() && !bProvinceSelected)
 			{
-				map->UpdateProvinceHovered(color);
+				Map->UpdateProvinceHovered(color);
+			}
+			else if (!bProvinceSelected)
+			{
+				Map->UpdateProvinceHovered(color);
 			}
 		}
+	}
+	else
+	{
+		if (Map)
+			Map->UpdateProvinceHovered(FColor(0, 0, 0, 0));
 	}
 
 	if (bMoveCamera)

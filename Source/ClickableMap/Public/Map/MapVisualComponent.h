@@ -17,6 +17,9 @@ class CLICKABLEMAP_API UMapVisualComponent : public USceneComponent
 public:	
 	// Sets default values for this component's properties
 	UMapVisualComponent();
+	
+	void AttachMeshes(USceneComponent* root);
+
 	UFUNCTION(BlueprintCallable)
 	void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual);
 
@@ -27,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UStaticMeshComponent* InitMeshComponent(UStaticMeshComponent* original);
 
+	UFUNCTION(BlueprintCallable)
+	void InitMeshProperty(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate);
 	UFUNCTION(BlueprintCallable)
 	void UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat);
 
@@ -48,8 +53,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class USceneComponent> RootComponent;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class USceneComponent> RootComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<UStaticMeshComponent> MapSelectMesh;
