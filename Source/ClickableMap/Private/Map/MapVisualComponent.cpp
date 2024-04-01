@@ -82,6 +82,7 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
     UE_LOG(LogTemp, Error, TEXT("Original Mesh is not valid"));
     return nullptr;
 }
+
 void UMapVisualComponent::InitMeshProperty(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate)
 {
     if (!original)
