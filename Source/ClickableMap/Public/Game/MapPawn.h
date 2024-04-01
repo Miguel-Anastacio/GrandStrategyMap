@@ -23,6 +23,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveCamera(FVector2D input);
 
+	void Stop();
+
 	UFUNCTION(BlueprintCallable)
 	void ZoomCamera(float input);
 
@@ -41,9 +43,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	TObjectPtr<UCameraComponent> Camera;
 
-	/** DefaultPawn movement component */
-	UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UPawnMovementComponent> MovementComponent;
+	///** DefaultPawn movement component */
+	//UPROPERTY(Category = Pawn, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<UPawnMovementComponent> MovementComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Camera| Movement");
 	float CameraMoveSpeed = 10.0f;
@@ -55,9 +57,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
 	FVector2D ZoomLimit = FVector2D(500.0f,3000.0f);
 
-	// distance at which camera runs slightly
+	// distance at which camera turns slightly
 	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
 	float ZoomCameraRot = 2000.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
+	float CameraCollisionScaleOnZoom = 2.0f;
 
 	UPROPERTY()
 	TWeakObjectPtr<AInteractiveMap> GameMap;

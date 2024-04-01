@@ -18,6 +18,9 @@ public:
 	// Sets default values for this component's properties
 	UMapVisualComponent();
 	UFUNCTION(BlueprintCallable)
+	void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual);
+
+	UFUNCTION(BlueprintCallable)
 	void InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, 
 		UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
@@ -29,6 +32,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UStaticMeshComponent* GetMeshComponent(MapMode mode);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UStaticMeshComponent* GetMapSelectMeshComponent();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UStaticMeshComponent* GetMapGameplayMeshComponent();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UStaticMeshComponent* GetMapBorderMeshComponent();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UStaticMeshComponent* GetMapTerrainMeshComponent();
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

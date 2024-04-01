@@ -69,6 +69,10 @@ void ABirdEyeController::Tick(float DeltaTime)
 	{
 		MapPawn->MoveCamera(MoveInput);
 	}
+	else
+	{
+		MapPawn->Stop();
+	}
 }
 
 void ABirdEyeController::SetupInputComponent()

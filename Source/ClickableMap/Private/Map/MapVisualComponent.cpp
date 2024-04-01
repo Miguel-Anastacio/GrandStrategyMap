@@ -9,11 +9,17 @@ UMapVisualComponent::UMapVisualComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
-    //RootComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Limit Capsule"));
-    //LimitCapsule->SetupAttachment(MapSelectMesh);
 	// ...
+}
+
+void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
+{
+    MapSelectMesh = InitMeshComponent(mapVisual->GetMapSelectMeshComponent());
+    MapBorderMesh = InitMeshComponent(mapVisual->GetMapBorderMeshComponent());
+    GameplayMapMesh = InitMeshComponent(mapVisual->GetMapGameplayMeshComponent());
+    TerrainMapMesh = InitMeshComponent(mapVisual->GetMapTerrainMeshComponent());
 }
 
 void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
@@ -80,6 +86,26 @@ UStaticMeshComponent* UMapVisualComponent::GetMeshComponent(MapMode mode)
         break;
     }
     return nullptr;
+}
+
+UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
+{
+    return MapSelectMesh;
+}
+
+UStaticMeshComponent* UMapVisualComponent::GetMapGameplayMeshComponent()
+{
+    return GameplayMapMesh;
+}
+
+UStaticMeshComponent* UMapVisualComponent::GetMapBorderMeshComponent()
+{
+    return MapBorderMesh;
+}
+
+UStaticMeshComponent* UMapVisualComponent::GetMapTerrainMeshComponent()
+{
+    return TerrainMapMesh;
 }
 
 // Called when the game starts

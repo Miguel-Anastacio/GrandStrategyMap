@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Map/MapVisualComponent.h"
+#include "Game/MapPawn.h"
 // Sets default values for this component's properties
 UMapLimitComponent::UMapLimitComponent()
 {
@@ -40,10 +41,10 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	if (!OtherActor)
 		return;
 
-	if (TimeSinceOverlap < 1.0f)
-		return;
+	/*if (TimeSinceOverlap < 2.0f)
+		return;*/
 
-	APawn* player = Cast<APawn>(OtherActor);
+	AMapPawn* player = Cast<AMapPawn>(OtherActor);
 	if (!player)
 		return;
 
@@ -57,12 +58,14 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	const FVector currentPlayerPos = player->GetActorLocation();
 	const float distanceToMapCenter = currentPlayerPos.X - OverlappedComp->GetComponentLocation().X;
 
-	const float xPos = owner->GetActorLocation().X + distanceToMapCenter;
+	const float xPos = owner->GetActorLocation().X + distanceToMapCenter  /* + player->GetVelocity().X * TimeSinceOverlap * 1*/;
 
-	player->SetActorLocation(owner->GetActorLocation(), true);
+	//player->Stop();
+	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y , currentPlayerPos.Z));
 	
 	UE_LOG(LogTemp, Error, TEXT("Overlap Begin %s"), *GetName());
-	TimeSinceOverlap = 0.0f;
+	//TimeSinceOverlap = 0.0f;
+	//TimeSinceOverlap = 0.0f;
 
 }
 
@@ -70,7 +73,7 @@ void UMapLimitComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	TimeSinceOverlap += DeltaTime;
+	TimeSinceOverlap = DeltaTime;
 }
 
 void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
