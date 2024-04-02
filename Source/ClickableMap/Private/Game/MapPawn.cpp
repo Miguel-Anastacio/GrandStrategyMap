@@ -5,8 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
-#include "GameFramework/PawnMovementComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
+//#include "GameFramework/PawnMovementComponent.h"
+//#include "GameFramework/FloatingPawnMovement.h"
 #include "Map/InteractiveMap.h"
 // Sets default values
 AMapPawn::AMapPawn()
@@ -26,8 +26,8 @@ AMapPawn::AMapPawn()
 	CameraBoom->SetupAttachment(CollisionComponent);
 
 
-	MovementComponent = CreateDefaultSubobject<UPawnMovementComponent, UFloatingPawnMovement>(TEXT("Movement Component"));
-	MovementComponent->UpdatedComponent = CollisionComponent;
+	//MovementComponent = CreateDefaultSubobject<UPawnMovementComponent, UFloatingPawnMovement>(TEXT("Movement Component"));
+	//MovementComponent->UpdatedComponent = CollisionComponent;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom);
@@ -38,6 +38,9 @@ AMapPawn::AMapPawn()
 void AMapPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	// adjust the size of the collision component depending on the zoom distance
+	FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
+	CollisionComponent->SetWorldScale3D(scale);
 }
 
 // Called every frame
@@ -48,7 +51,15 @@ void AMapPawn::Tick(float DeltaTime)
 
 void AMapPawn::MoveCamera(FVector2D input)
 {
-	AddMovementInput(FVector(input.X, input.Y, 0), CameraMoveSpeed);
+	//AddMovementInput(FVector(input.X, input.Y, 0), CameraMoveSpeed);
+	FVector vel = FVector(input.X, input.Y, 0) * CameraMoveSpeed;
+	CollisionComponent->SetPhysicsLinearVelocity(vel);
+
+}
+
+void AMapPawn::Stop()
+{
+	CollisionComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
 }
 
 void AMapPawn::ZoomCamera(float input)
@@ -57,7 +68,15 @@ void AMapPawn::ZoomCamera(float input)
 	if (newZoom > ZoomLimit.X && newZoom < ZoomLimit.Y)
 	{
 		CameraBoom->TargetArmLength = newZoom;
+		// adjust the size of the collision component depending on the zoom distance
+		FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
+		CollisionComponent->SetWorldScale3D(scale);
 	}
+
+
+
+
+
 	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
 	{
 		//CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));

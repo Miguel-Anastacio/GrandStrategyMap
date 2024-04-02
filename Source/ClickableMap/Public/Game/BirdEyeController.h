@@ -75,7 +75,8 @@ protected:
 	FVector2D ViewportCenter;
 
 
-	//class AInteractiveMap* Map;
+	UPROPERTY(Transient)
+	class AInteractiveMap* Map;
 	UPROPERTY(Transient)
 	class AMapPawn* MapPawn;
 };

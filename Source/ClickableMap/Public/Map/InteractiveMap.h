@@ -54,8 +54,11 @@ public:
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
 	//F GetProvinceID(const FVector& color) const;
 
-	UFUNCTION(BlueprintCallable)
-	virtual void SetMapMode(MapMode mode);
+	UFUNCTION(BlueprintNativeEvent)
+	void SetMapMode(MapMode mode);
+	
+	void SetMapMode_Implementation(MapMode mode);
+
 	UFUNCTION(BlueprintCallable)
 	void SetBorderVisibility(bool status);
 
@@ -80,7 +83,6 @@ protected:
 	FColor GetCountryColor(const FProvinceData* data) const;
 	//FColor GetCountryColor(const FProvinceData* data);
 
-	
 	FColor GetReligionColor(const FProvinceData* data) const;
 	FColor GetCultureColor(const FProvinceData* data) const;
 
@@ -94,48 +96,61 @@ protected:
 
 	//void CreatePoliticalMapTexture();
 
+	
 	void CreateLookUpTable();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
 
+	// Visual Data
 	UFUNCTION(BlueprintCallable)
 	void UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor);
 
 	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 
+	//// This function also exists in function library, maybe remove from here
+	//template<class Data, class ID>
+	//bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
+	//{
+	//	if (!dataTable)
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("Data not loaded"));
+	//		return false;
+	//	}
+	//	TArray<FName> RowNames = dataTable->GetRowNames();
+	//	for (auto& name : RowNames)
+	//	{
+	//		Data* Item = dataTable->FindRow<Data>(name, "");
+	//		if (Item)
+	//		{
+	//			mapToUpdate.Emplace(name, (*Item));
+	//		}
+	//	}
 
-	template<class Data, class ID>
-	bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
-	{
-		if (!dataTable)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Data not loaded"));
-			return false;
-		}
-		TArray<FName> RowNames = dataTable->GetRowNames();
-		for (auto& name : RowNames)
-		{
-			Data* Item = dataTable->FindRow<Data>(name, "");
-			if (Item)
-			{
-				mapToUpdate.Emplace(name, (*Item));
-			}
-		}
-
-		return true;
-	}
+	//	return true;
+	//}
 
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapRoot;
+
+	// VISUAL
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
+	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
+
+
+
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
+
+	// -------------------------VISUAL DATA--------------------------------------
+	UPROPERTY(EditAnywhere, Category = "Map")
+	TObjectPtr<UTexture2D> MapLookUpTexture;
 
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;	
@@ -148,6 +163,16 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GameplayMapMaterial;
 
+
+	// Hold pixel data of the lookup texture
+	FLookUpTextureData MapColorCodeTextureData;
+	// Hold pixel data of the political map texture
+	TArray<float> PixelColorPoliticalTexture;
+	// Hold pixel data of the religious map texture
+	TArray<float> PixelColorReligiousTexture;
+	// Hold pixel data of the culture map texture
+	TArray<float> PixelColorCultureMapTexture;
+
 	// Border Material 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* BorderMaterial;
@@ -155,8 +180,9 @@ protected:
 	UMaterialInterface* HQXFilterMaterial;
 	UPROPERTY(EditAnywhere)
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
+	// -----------------------------------------------------------------------------
 
-	// Data
+	//------------------------------- Data -----------------------------------------
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* MapDataTable;
 	UPROPERTY(EditAnywhere, Category = "Data")
@@ -165,24 +191,6 @@ protected:
 	UDataTable* CountryDataTable;
 	UPROPERTY(EditAnywhere, Category = "Data")
 	UDataTable* VisualPropertiesDataTable;
-
-
-	UPROPERTY(EditAnywhere, Category = "Map")
-	TObjectPtr<UTexture2D> MapLookUpTexture;
-
-	// Useless
-	UPROPERTY()
-	UTexture2D* PoliticalMapTexture;
-	UPROPERTY()
-	UTexture2D* ReligiousMapTexture;
-	UPROPERTY()
-	UTexture2D* CultureMapTexture;
-
-	// IN USE but Obsolete
-	// removed at final cleanup
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
-
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FVector, FName> LookUpTable;
 	// Data Populated by the data tables
@@ -203,16 +211,25 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, FColoredData> VisualPropertiesDataMap;
 
+	//------------------------------------------------------------------------------
+
 	UPROPERTY(BlueprintReadWrite)
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
-	// Hold pixel data of the lookup texture
-	FLookUpTextureData MapColorCodeTextureData;
-	// Hold pixel data of the political map texture
-	TArray<float> PixelColorPoliticalTexture;
-	// Hold pixel data of the religious map texture
-	TArray<float> PixelColorReligiousTexture;
-	// Hold pixel data of the culture map texture
-	TArray<float> PixelColorCultureMapTexture;
+
+	// Useless
+	UPROPERTY()
+	UTexture2D* PoliticalMapTexture;
+	UPROPERTY()
+	UTexture2D* ReligiousMapTexture;
+	UPROPERTY()
+	UTexture2D* CultureMapTexture;
+
+	// IN USE but Obsolete
+	// removed at final cleanup
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
+
+
 
 };

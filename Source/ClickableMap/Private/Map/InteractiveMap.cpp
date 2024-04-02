@@ -9,31 +9,38 @@
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
+#include "Map/MapVisualComponent.h"
+#include "DataManager/DataManagerFunctionLibrary.h"
 // Sets default values
 AInteractiveMap::AInteractiveMap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
+	MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
+	MapVisualComponent->SetupAttachment(RootComponent);
+	MapVisualComponent->AttachMeshes(RootComponent);
+	//
+	//MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Selection"));
+	//MapSelectMesh->SetupAttachment(RootComponent);
 
-	MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Selection"));
-	MapSelectMesh->SetupAttachment(RootComponent);
+	//MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Border"));
+	//MapBorderMesh->SetupAttachment(RootComponent);
 
-	MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map Border"));
-	MapBorderMesh->SetupAttachment(RootComponent);
+	//GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gameplay Map"));
+	//GameplayMapMesh->SetupAttachment(RootComponent);
 
-	GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gameplay Map"));
-	GameplayMapMesh->SetupAttachment(RootComponent);
+	//TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Terrain Map"));
+	//TerrainMapMesh->SetupAttachment(RootComponent);
 
-
-	TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Terrain Map"));
-	TerrainMapMesh->SetupAttachment(RootComponent);
 
 	PoliticalMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 	ReligiousMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Religious Map Texture"));
 	CultureMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Culture Map Texture"));
-	
+
+	//MapVisualComponent->ConstructDefaultMesh();
 }
 
 UE_DISABLE_OPTIMIZATION
@@ -45,8 +52,14 @@ void AInteractiveMap::PostInitializeComponents()
 void AInteractiveMap::BeginPlay()
 {
 	Super::BeginPlay();
-	GameplayMapMesh->SetVisibility(true);
+	//GameplayMapMesh->SetVisibility(true);
+	MapVisualComponent->GetMapGameplayMeshComponent()->SetVisibility(true);
 
+	if (!MapLookUpTexture)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Map Look up Texture not assigned"));
+		return;
+	}
 	int32 width = MapLookUpTexture->GetSizeX();
 	int32 height = MapLookUpTexture->GetSizeY();
 	PoliticalMapTextureComponent->InitializeTexture(width, height);
@@ -55,10 +68,9 @@ void AInteractiveMap::BeginPlay()
 
 	CreateLookUpTable();
 
-
-	ReadDataTable(ProvinceDataTable, ProvinceDataMap);
-	ReadDataTable(CountryDataTable, CountryData);
-	ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
+	UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap);
+	UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryData);
+	UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
 	
 
 	SaveMapTextureData();
@@ -68,7 +80,9 @@ void AInteractiveMap::BeginPlay()
 	CreateMapTexture(CultureMapTextureComponent, PixelColorCultureMapTexture, CultureMapTexture);
 
 
-	GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+	MapVisualComponent->GetMapGameplayMeshComponent()->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+
+	//GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 
 	// set referene in player class
 	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
@@ -187,21 +201,7 @@ void AInteractiveMap::SaveMapTextureData()
 	// Get the dimensions of the texture
 	int32 Width = MapLookUpTexture->GetSizeX();
 	int32 Height = MapLookUpTexture->GetSizeY();
-
-	// Assume texture format is RGBA
-	//TArray<uint8>* data = static_cast<TArray<uint8>*>(TextureData);
-
-	//if (data)
-	//{
-	//	int size = data->Num();
-	//	int a = 0;
-	//}
 	const uint8* Data = static_cast<const uint8*>(TextureData);
-	//while ()
-	//{
-
-	//}
-	//int32 
 
 	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
 	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);
@@ -511,26 +511,41 @@ FName AInteractiveMap::GetProvinceID(const FVector& color) const
 	return FName();
 }
 
-
-void AInteractiveMap::SetMapMode(MapMode mode)
+void AInteractiveMap::SetMapMode_Implementation(MapMode mode)
 {
+	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
-		GameplayMapMesh->SetVisibility(true);
-		GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		//GameplayMapMesh->SetVisibility(true);
+		//GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+
+		mesh->SetVisibility(true);
+		mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+
 		break;
 	case MapMode::RELIGIOUS:
-		GameplayMapMesh->SetVisibility(true);
-		GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		//GameplayMapMesh->SetVisibility(true);
+		//GameplayMapMesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+
+		mesh->SetVisibility(true);
+		mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+
 		break;
 	case MapMode::CULTURAL:
-		GameplayMapMesh->SetVisibility(true);
-		GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+		//GameplayMapMesh->SetVisibility(true);
+		//GameplayMapMesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+
+		mesh->SetVisibility(true);
+		mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+
 		break;
 	case MapMode::TERRAIN:
-		TerrainMapMesh->SetVisibility(true);
-		GameplayMapMesh->SetVisibility(false);
+		//TerrainMapMesh->SetVisibility(true);
+		//GameplayMapMesh->SetVisibility(false);
+
+		mesh->SetVisibility(false);
+		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(true);
 		break;
 	default:
 		break;
@@ -566,7 +581,9 @@ void AInteractiveMap::SetBorderVisibility(bool status)
 	{
 		UE_LOG(LogTemp, Error, "Border Mesh not Created")
 	}*/
-	MapBorderMesh->SetVisibility(status);
+	//MapBorderMesh->SetVisibility(status);
+
+	MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
 }
 
 bool AInteractiveMap::UpdateProvinceData(const FProvinceData& data, FName id) 
@@ -645,13 +662,13 @@ void AInteractiveMap::UpdateProvinceHovered(const FColor& color)
 	{
 	case MapMode::POLITICAL:
 		//color /= 255.0f;
-		PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::RELIGIOUS:
-		ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::CULTURAL:
-		CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHiglighted", color);
+		CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::TERRAIN:
 		break;
