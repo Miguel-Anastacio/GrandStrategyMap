@@ -30,7 +30,7 @@ void UDynamicTextureComponent::BeginPlay()
 void UDynamicTextureComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	FMemory::Free(TextureData);
+	//FMemory::Free(TextureData);
 	FMemory::Free(TextureRegion);
 }
 
@@ -156,8 +156,8 @@ void UDynamicTextureComponent::InitializeTexture()
 	TextureDataSqrtSize = TextureWidth * 4;
 
 	// Initialize Texture Data Array
-	TextureData = new uint8[TextureDataSize];
-
+	//TextureData = new uint8[TextureDataSize];
+	TextureData.AddDefaulted(TextureDataSize);
 	// Create Dynamic Texture Object
 	DynamicTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
 	DynamicTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
@@ -235,7 +235,7 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	RegionData->Regions = TextureRegion;
 	RegionData->SrcPitch = TextureDataSqrtSize;
 	RegionData->SrcBpp = 4;
-	RegionData->SrcData = TextureData;
+	RegionData->SrcData = TextureData.GetData();
 
 	ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)(
 		[RegionData, bFreeData, Texture](FRHICommandListImmediate& RHICmdList)

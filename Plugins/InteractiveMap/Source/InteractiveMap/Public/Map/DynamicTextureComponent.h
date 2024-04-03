@@ -36,6 +36,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
 	void SetPixelColor(int32 X, int32 Y, FLinearColor Color);
+	void SetPixelValue(int32 X, int32 Y, FColor Color);
 
 	//UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
 	//void DrawRectangle(int32 StartX, int32 StartY, int32 Width, int32 Height, FLinearColor Color);
@@ -57,6 +58,9 @@ public:
 	void InitializeTexture(uint32 width, uint32 height);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter = FLinearColor::White);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
+	//void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
+
+	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
 
 protected:
 	// Called when the game starts
@@ -69,7 +73,9 @@ public:
 
 private:
 	// Array that contains the Texture Data
-	uint8* TextureData;
+	TArray<uint8> TextureData;
+	//uint8* TextureData;
+
 
 	// Total Bytes of Texture Data
 	uint32 TextureDataSize;
@@ -91,7 +97,6 @@ private:
 	void InitializeTexture();
 private:
 
-	void SetPixelValue(int32 X, int32 Y, FColor Color);
 
 
 

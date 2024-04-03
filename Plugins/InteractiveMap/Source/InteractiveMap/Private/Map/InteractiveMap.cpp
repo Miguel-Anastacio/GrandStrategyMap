@@ -67,19 +67,19 @@ void AInteractiveMap::BeginPlay()
 	UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
 	SetCountryProvinces();
 
-	// Visual Data
-	SaveMapTextureData();
-
 	// Visual
 	int32 width = MapLookUpTexture->GetSizeX();
 	int32 height = MapLookUpTexture->GetSizeY();
 	PoliticalMapTextureComponent->InitializeTexture(width, height);
 	ReligiousMapTextureComponent->InitializeTexture(width, height);
 	CultureMapTextureComponent->InitializeTexture(width, height);
+	// Visual Data
+	SaveMapTextureData();
 
-	CreateMapTexture(PoliticalMapTextureComponent, PixelColorPoliticalTexture, PoliticalMapTexture);
-	CreateMapTexture(ReligiousMapTextureComponent, PixelColorReligiousTexture, ReligiousMapTexture);
-	CreateMapTexture(CultureMapTextureComponent, PixelColorCultureMapTexture, CultureMapTexture);
+
+	CreateMapTexture(PoliticalMapTextureComponent, PoliticalMapTexture);
+	CreateMapTexture(ReligiousMapTextureComponent, ReligiousMapTexture);
+	CreateMapTexture(CultureMapTextureComponent, CultureMapTexture);
 
 	MapVisualComponent->GetMapGameplayMeshComponent()->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 
@@ -196,9 +196,9 @@ void AInteractiveMap::SaveMapTextureData()
 	int32 Height = MapLookUpTexture->GetSizeY();
 	const uint8* Data = static_cast<const uint8*>(TextureData);
 
-	PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
+	/*PixelColorPoliticalTexture.AddDefaulted(Width * Height * 4);
 	PixelColorReligiousTexture.AddDefaulted(Width * Height * 4);
-	PixelColorCultureMapTexture.AddDefaulted(Width * Height * 4);
+	PixelColorCultureMapTexture.AddDefaulted(Width * Height * 4);*/
 
 	MapColorCodeTextureData.PixelData.AddDefaulted(Width * Height * 4);
 
@@ -231,9 +231,14 @@ void AInteractiveMap::SaveMapTextureData()
 					int a = 2;
 				}
 
-				SetPixelColor(Index, PixelColorPoliticalTexture, GetCountryColor(province));
-				SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(province));
-				SetPixelColor(Index, PixelColorCultureMapTexture, GetCultureColor(province));
+				//SetPixelColor(Index, PixelColorPoliticalTexture, GetCountryColor(province));
+				PoliticalMapTextureComponent->SetPixelValue(X, Y, GetCountryColor(province));
+
+				//SetPixelColor(Index, PixelColorReligiousTexture, GetReligionColor(province));
+				ReligiousMapTextureComponent->SetPixelValue(X, Y, GetReligionColor(province));
+
+				//SetPixelColor(Index, PixelColorCultureMapTexture, GetCultureColor(province));
+				CultureMapTextureComponent->SetPixelValue(X, Y, GetCultureColor(province));
 
 				// this pixel belongs to a province so safe its indexes on the map
 				//FName* indexPixel = MapColorCodeTextureData.PixedIndexID.Find((*id));
@@ -243,9 +248,13 @@ void AInteractiveMap::SaveMapTextureData()
 			}
 			else
 			{
-				SetPixelColor(Index, PixelColorPoliticalTexture, pixelColor);
-				SetPixelColor(Index, PixelColorReligiousTexture, pixelColor);
-				SetPixelColor(Index, PixelColorCultureMapTexture, pixelColor);
+				//SetPixelColor(Index, PixelColorPoliticalTexture, pixelColor);
+				//SetPixelColor(Index, PixelColorReligiousTexture, pixelColor);
+				//SetPixelColor(Index, PixelColorCultureMapTexture, pixelColor);
+
+				PoliticalMapTextureComponent->SetPixelValue(X, Y, pixelColor);
+				ReligiousMapTextureComponent->SetPixelValue(X, Y, pixelColor);
+				CultureMapTextureComponent->SetPixelValue(X, Y, pixelColor);
 			}
 
 		}
@@ -315,9 +324,9 @@ void AInteractiveMap::SetCountryProvinces()
 	}
 }
 
-void AInteractiveMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture)
+void AInteractiveMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment, UTexture2D* texture)
 {
-	textureCompoment->DrawFromDataBuffer(0, 0, MapLookUpTexture, pixelArray);
+	//textureCompoment->DrawFromDataBuffer(0, 0, MapLookUpTexture, pixelArray);
 	textureCompoment->UpdateTexture();
 	texture = textureCompoment->GetTexture();
 
@@ -331,7 +340,6 @@ void AInteractiveMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID
 {
 	FColor oldColor;
 	UDynamicTextureComponent* textureComponent = nullptr;
-	TArray<float>* dataBuffer = nullptr;
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
@@ -344,7 +352,6 @@ void AInteractiveMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID
 		}
 
 		textureComponent = PoliticalMapTextureComponent;
-		dataBuffer = &PixelColorPoliticalTexture;
 
 		break;
 	case MapMode::RELIGIOUS:
@@ -357,7 +364,6 @@ void AInteractiveMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID
 		}
 
 		textureComponent = ReligiousMapTextureComponent;
-		dataBuffer = &PixelColorReligiousTexture;
 
 		break;
 	case MapMode::CULTURAL:
@@ -369,7 +375,6 @@ void AInteractiveMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID
 		}
 
 		textureComponent = CultureMapTextureComponent;
-		dataBuffer = &PixelColorCultureMapTexture;
 
 		break;
 	case MapMode::TERRAIN:
@@ -379,17 +384,17 @@ void AInteractiveMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID
 		break;
 	}
 
-	if (!textureComponent || !dataBuffer)
+	if (!textureComponent)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Invalid Map Mode"));
 		return;
 	}
 
-	UpdatePixelArray(*dataBuffer, oldColor, newColor, textureComponent->GetTexture(), {provinceID});
-	textureComponent->DrawFromDataBuffer(0, 0, textureComponent->GetTexture(), *dataBuffer);
+	UpdatePixelArray(*textureComponent->GetTextureData(), oldColor, newColor, textureComponent->GetTexture(), {provinceID});
+	//textureComponent->DrawFromDataBuffer(0, 0, textureComponent->GetTexture(), *dataBuffer);
 	textureComponent->UpdateTexture();
 }
-void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs)
+void AInteractiveMap::UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs)
 {
 	int32 Width = texture->GetSizeX();
 	int32 Height = texture->GetSizeY();
@@ -407,9 +412,9 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 			int32 Index = (y * Width + x) * 4;
 			
 			//FColor(30, )
-			FColor color = FColor(pixelArray[Index],
+			FColor color = FColor(pixelArray[Index + 2],
 				pixelArray[Index + 1],
-				pixelArray[Index + 2],
+				pixelArray[Index],
 				pixelArray[Index + 3]);
 
 			if (color != oldColor)
@@ -429,9 +434,9 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 			{
 				if ((*id) == idToUpdate)
 				{
-					pixelArray[Index] = newColor.R;
+					pixelArray[Index + 2] = newColor.R;
 					pixelArray[Index + 1] = newColor.G;
-					pixelArray[Index + 2] = newColor.B;
+					pixelArray[Index + 0] = newColor.B;
 					pixelArray[Index + 3] = newColor.A;
 					found = true;
 				}
@@ -443,6 +448,60 @@ void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& 
 		}
 	}
 }
+//void AInteractiveMap::UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs)
+//{
+//	int32 Width = texture->GetSizeX();
+//	int32 Height = texture->GetSizeY();
+//
+//	if (pixelArray.Num() != Width * Height * 4)
+//	{
+//		UE_LOG(LogTemp, Error, TEXT("Mismatch size between texture and pixel array when updating texture"));
+//		return;
+//	}
+//
+//	for (int32 y = 0; y < Height; y++)
+//	{
+//		for (int32 x = 0; x < Width; x++)
+//		{
+//			int32 Index = (y * Width + x) * 4;
+//			
+//			//FColor(30, )
+//			FColor color = FColor(pixelArray[Index ],
+//				pixelArray[Index + 1],
+//				pixelArray[Index + 2],
+//				pixelArray[Index + 3]);
+//
+//			if (color != oldColor)
+//				continue;
+//
+//			// get province id from the array that holds the original look up texture pixel data
+//			FName* id = LookUpTable.Find(FVector(MapColorCodeTextureData.PixelData[Index],
+//											MapColorCodeTextureData.PixelData[Index + 1],
+//											MapColorCodeTextureData.PixelData[Index + 2]));
+//			if (!id)
+//				continue;
+//
+//			bool found = false;
+//			// cycle through provinces to update 
+//			// if it matches the id of this pixel then update the color
+//			for (auto& idToUpdate : provinceIDs)
+//			{
+//				if ((*id) == idToUpdate)
+//				{
+//					pixelArray[Index] = newColor.R;
+//					pixelArray[Index + 1] = newColor.G;
+//					pixelArray[Index + 2] = newColor.B;
+//					pixelArray[Index + 3] = newColor.A;
+//					found = true;
+//				}
+//
+//				if (found)
+//					break;
+//
+//			}
+//		}
+//	}
+//}
 
 
 
@@ -649,10 +708,10 @@ bool AInteractiveMap::UpdateCountryColor(const FLinearColor& color, FName id)
 	if (!country)
 		return false;
 
-	UpdatePixelArray(PixelColorPoliticalTexture, country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
+	UpdatePixelArray(*PoliticalMapTextureComponent->GetTextureData(), country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
 	country->Color = color.ToFColor(true);
 
-	PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, PoliticalMapTextureComponent->GetTexture(), PixelColorPoliticalTexture);
+	//PoliticalMapTextureComponent->DrawFromDataBuffer(0, 0, PoliticalMapTextureComponent->GetTexture(), PixelColorPoliticalTexture);
 	PoliticalMapTextureComponent->UpdateTexture();
 	return true;
 }

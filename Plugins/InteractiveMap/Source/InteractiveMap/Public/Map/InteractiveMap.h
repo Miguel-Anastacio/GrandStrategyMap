@@ -112,12 +112,13 @@ protected:
 
 
 	// Visual Data
-	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
+	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, UTexture2D* texture);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
 
-	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
+	//void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
+	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	//void UpdatePixelArrayB(TArray<float>& pixelArray,const UTexture2D* texture, const TArray<FName>& provinceIDs, const FColor& oldColor);
 
 
@@ -147,12 +148,13 @@ protected:
 
 	// Hold pixel data of the lookup texture
 	FLookUpTextureData MapColorCodeTextureData;
-	// Hold pixel data of the political map texture
-	TArray<float> PixelColorPoliticalTexture;
-	// Hold pixel data of the religious map texture
-	TArray<float> PixelColorReligiousTexture;
-	// Hold pixel data of the culture map texture
-	TArray<float> PixelColorCultureMapTexture;
+
+	//// Hold pixel data of the political map texture
+	//TArray<float> PixelColorPoliticalTexture;
+	//// Hold pixel data of the religious map texture
+	//TArray<float> PixelColorReligiousTexture;
+	//// Hold pixel data of the culture map texture
+	//TArray<float> PixelColorCultureMapTexture;
 
 	// Border Material 
 	UPROPERTY(EditAnywhere)
