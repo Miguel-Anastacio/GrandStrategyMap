@@ -41,6 +41,8 @@ public:
 
 	//UFUNCTION(BlueprintCallable, BlueprintPure)
 	TMap<FName, FProvinceData>* GetProvinceDataMap();
+	TMap<FName, FCountryData>* GetCountryDataMap();
+	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FName GetProvinceID(const FVector& color) const;
@@ -59,15 +61,28 @@ public:
 	
 	void SetMapMode_Implementation(MapMode mode);
 
-	UFUNCTION(BlueprintCallable)
-	void SetBorderVisibility(bool status);
+	// Get Actual name of thing from tag/id
+	template<class T>
+	const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
+	{
+		const T* data = mapToSearch.Find(tag);
+
+		return data;
+	}
 
 	// Update Data
 	UFUNCTION(BlueprintCallable)
 	bool UpdateProvinceData(const FProvinceData& data, FName id);
+	UFUNCTION(BlueprintCallable)
+	bool UpdateCountryData(const FCountryData& data, FName id);
+	bool UpdateCountryColor(const FLinearColor& color, FName id);
 
+
+	// Update Visual
 	UFUNCTION(BlueprintCallable)
 	void UpdateProvinceHovered(const FColor& color);
+	UFUNCTION(BlueprintCallable)
+	void SetBorderVisibility(bool status);
 
 public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
@@ -79,9 +94,9 @@ protected:
 
 	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
+
 	bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
 	FColor GetCountryColor(const FProvinceData* data) const;
-	//FColor GetCountryColor(const FProvinceData* data);
 
 	FColor GetReligionColor(const FProvinceData* data) const;
 	FColor GetCultureColor(const FProvinceData* data) const;
@@ -90,43 +105,20 @@ protected:
 
 	void SaveMapTextureData();
 
-	//void ReadProvinceDataTable();
-	//void ReadCountryDataTable();
-	//void ReadDataTable();
-
-	//void CreatePoliticalMapTexture();
-
-	
+	// DATA
 	void CreateLookUpTable();
-	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
+	void SetCountryProvinces();
+
+
 
 	// Visual Data
+	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, const TArray<float>& pixelArray, UTexture2D* texture);
+
 	UFUNCTION(BlueprintCallable)
-	void UpdateMapTexture(MapMode mode, FName provinceID, const FColor& newColor);
+	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
 
 	void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
-
-	//// This function also exists in function library, maybe remove from here
-	//template<class Data, class ID>
-	//bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
-	//{
-	//	if (!dataTable)
-	//	{
-	//		UE_LOG(LogTemp, Error, TEXT("Data not loaded"));
-	//		return false;
-	//	}
-	//	TArray<FName> RowNames = dataTable->GetRowNames();
-	//	for (auto& name : RowNames)
-	//	{
-	//		Data* Item = dataTable->FindRow<Data>(name, "");
-	//		if (Item)
-	//		{
-	//			mapToUpdate.Emplace(name, (*Item));
-	//		}
-	//	}
-
-	//	return true;
-	//}
+	//void UpdatePixelArrayB(TArray<float>& pixelArray,const UTexture2D* texture, const TArray<FName>& provinceIDs, const FColor& oldColor);
 
 
 protected:
@@ -136,17 +128,6 @@ protected:
 	// VISUAL
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
-
-
-
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UStaticMeshComponent> MapSelectMesh;
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UStaticMeshComponent> MapBorderMesh;
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UStaticMeshComponent> GameplayMapMesh;
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UStaticMeshComponent> TerrainMapMesh;
 
 	// -------------------------VISUAL DATA--------------------------------------
 	UPROPERTY(EditAnywhere, Category = "Map")
@@ -216,8 +197,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
-
-	// Useless
+	// ----------------------------------------- Useless ---------------------------
 	UPROPERTY()
 	UTexture2D* PoliticalMapTexture;
 	UPROPERTY()

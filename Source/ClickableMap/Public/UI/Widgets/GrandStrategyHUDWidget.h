@@ -23,7 +23,7 @@ protected:
 	void SetMapMode(UButtonWidget* button);
 
 	UFUNCTION()
-	void SaveProvinceDataToJson(UButtonWidget* button);
+	void SaveDataToJson(UButtonWidget* button);
 protected:	
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UButtonWidget> PoliticalMapButton;
@@ -36,11 +36,19 @@ protected:
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UButtonWidget> SaveDataButton;
-
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
+	TObjectPtr<class UButtonWidget> SaveCountryButton;
+	
+	// Save Province Data File
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
 	FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileName = FString("save");
+	FString FileName = FString("ProvinceCustom");
+	//// Save Country Editing File
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
+	//FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
+	FString FileNameCountry = FString("CountryCustom");
 
 	//int FilesCreated;
 

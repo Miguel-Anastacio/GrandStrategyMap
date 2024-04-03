@@ -81,8 +81,6 @@ public:
 		{
 			TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
 			pair.Value.SerializeToJson(structObject, pair.Key);
-
-
 			jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
 		}
 

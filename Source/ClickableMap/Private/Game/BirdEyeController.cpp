@@ -74,7 +74,7 @@ void ABirdEyeController::Tick(float DeltaTime)
 	}
 	else
 	{
-		if (Map)
+		if (Map && !bProvinceSelected)
 			Map->UpdateProvinceHovered(FColor(0, 0, 0, 0));
 	}
 
@@ -99,10 +99,11 @@ void ABirdEyeController::SetupInputComponent()
 		//// Setup touch input events
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
-		//EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 		//EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
+		
+		EnhancedInputComponent->BindAction(OpenCountryEditorAction, ETriggerEvent::Started, this, &ABirdEyeController::ToggleCountryEditor);
 	}
 	else
 	{
@@ -131,28 +132,27 @@ void ABirdEyeController::MouseClick()
 		if (!IsValid(hit.GetActor()))
 			return;
 
-		AInteractiveMap* map = Cast<AInteractiveMap>(hit.GetActor());
+		if (!Map)
+			Map = Cast<AInteractiveMap>(hit.GetActor());
 
-		if (map)
+		if (Map)
 		{
-			//Map = map;
-
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			FColor color = map->GetColorFromLookUpTexture(uvs);
+			FColor color = Map->GetColorFromLookUpTexture(uvs);
 				
-			FName id = map->GetProvinceID(FVector(color.R, color.G, color.B));
+			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B));
 			
-			FProvinceData* data = map->GetProvinceData(id);
+			FProvinceData* data = Map->GetProvinceData(id);
 			if (data)
 			{
-				map->UpdateProvinceHovered(color);
+				Map->UpdateProvinceHovered(color);
 
 				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 				if (hud)
 				{
+					hud->SetInteractiveMapReference(Map);
 					hud->DisplayProvinceEditorWidget(*data, id);
-					hud->SetInteractiveMapReference(map);
 					bProvinceSelected = true;
 				}
 			}
@@ -188,11 +188,6 @@ void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
 
 }
 
-void ABirdEyeController::MouseMovement()
-{
-	
-}
-
 void ABirdEyeController::CameraZoom(const FInputActionInstance& instance)
 {
 	float input = instance.GetValue().Get<float>();
@@ -211,6 +206,28 @@ void ABirdEyeController::StartMovement(const FVector2D& mousePos)
 	MoveInput.Normalize();
 
 	
+}
+
+void ABirdEyeController::ToggleCountryEditor()
+{
+	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+
+	if (hud)
+	{
+		if (!Map)
+		{
+			TArray<AActor*> FoundActors;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInteractiveMap::StaticClass(), FoundActors);
+			if (FoundActors.Num() > 0)
+			{
+				Map = Cast<AInteractiveMap>(FoundActors[0]);
+				hud->SetInteractiveMapReference(Map);
+			}
+		}
+		
+		hud->SetInteractiveMapReference(Map);
+		hud->ToggleCountryEditorVisibility();
+	}
 }
 
 UE_ENABLE_OPTIMIZATION

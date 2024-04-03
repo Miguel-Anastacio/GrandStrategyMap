@@ -38,7 +38,11 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 
 	if (SaveDataButton)
 	{
-		SaveDataButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SaveProvinceDataToJson);
+		SaveDataButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SaveDataToJson);
+	}
+	if (SaveCountryButton)
+	{
+		SaveCountryButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SaveDataToJson);
 	}
 }
 
@@ -71,17 +75,41 @@ void UGrandStrategyHUDWidget::SetMapMode(UButtonWidget* button)
 	}
 }
 
-void UGrandStrategyHUDWidget::SaveProvinceDataToJson(UButtonWidget* button)
+void UGrandStrategyHUDWidget::SaveDataToJson(UButtonWidget* button)
 {
-	TMap<FName, FProvinceData>* provinceMapData = GameMap->GetProvinceDataMap();
-	if (!provinceMapData)
-		return;
-
-	bool result;
-	FString outMessageInfo;
-	UDataManagerFunctioLibrary::WriteMapToJsonFile(FString("D:\\Dev\\Unreal\\GrandStrategyMap\\InGameEditor\\save.json"), *provinceMapData, result, outMessageInfo);
-	if (!result)
+	if (button == SaveDataButton)
 	{
-		GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
+		TMap<FName, FProvinceData>* provinceMapData = GameMap->GetProvinceDataMap();
+		if (!provinceMapData)
+			return;
+
+		bool result;
+		FString outMessageInfo;
+		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileName, *provinceMapData, result, outMessageInfo);
+		if (!result)
+		{
+			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
+		}
+
+		return;
 	}
+
+	if (button == SaveCountryButton)
+	{
+		TMap<FName, FCountryData>* countryDataMap = GameMap->GetCountryDataMap();
+		if (!countryDataMap)
+			return;
+
+		bool result;
+		FString outMessageInfo;
+		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
+		if (!result)
+		{
+			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
+		}
+
+		return;
+	}
+
+
 }

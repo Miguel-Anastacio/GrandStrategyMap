@@ -7,10 +7,18 @@
 UE_DISABLE_OPTIMIZATION
 void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName provinceID)
 {
+
+	const FCountryData* owner = GameMapReference->GetDataFromID(data.Owner, *GameMapReference->GetCountryDataMap());
+	const FColoredData* culture = GameMapReference->GetDataFromID(data.Culture, *GameMapReference->GetVisualPropertiesDataMap());
+	const FColoredData* religion = GameMapReference->GetDataFromID(data.Religion, *GameMapReference->GetVisualPropertiesDataMap());
+	FString ownerName = owner->CountryName;
+	FString cultureName = culture->DataName;
+	FString religionName = religion->DataName;
+
 	NameCustomInput->SetValues(FText::FromString(data.ProvinceName), FText::FromString(FString("______")));
-	OwnerCustomInput->SetValues(FText::FromString(data.Owner.ToString()), FText::FromString(FString("______")));
-	ReligionCustomInput->SetValues(FText::FromString(data.Religion.ToString()), FText::FromString(FString("______")));
-	CultureCustomInput->SetValues(FText::FromString(data.Culture.ToString()), FText::FromString(FString("______")));
+	OwnerCustomInput->SetValues(FText::FromString(ownerName), FText::FromString(FString("______")));
+	ReligionCustomInput->SetValues(FText::FromString(religionName), FText::FromString(FString("______")));
+	CultureCustomInput->SetValues(FText::FromString(cultureName), FText::FromString(FString("______")));
 	PopulationCustomInput->SetValues(FText::AsNumber(data.Population), FText::FromString(FString("______")));
 
 	ProvinceSelectedData = data;

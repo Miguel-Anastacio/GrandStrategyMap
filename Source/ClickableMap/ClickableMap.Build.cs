@@ -20,6 +20,7 @@ public class ClickableMap : ModuleRules
 			"RenderCore",
 			"Json",
 			"JsonUtilities",
+			"VictoryBPLibrary"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

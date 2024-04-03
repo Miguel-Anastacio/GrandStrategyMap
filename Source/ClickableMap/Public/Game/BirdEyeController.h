@@ -45,6 +45,11 @@ public:
 	UInputAction* MouseMoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MouseScrollAction;
+
+
+	// UI Action to open country editor
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* OpenCountryEditorAction;
 protected:
 	// To add mapping context
 	virtual void SetupInputComponent() override;
@@ -56,12 +61,18 @@ protected:
 	void MouseClick();
 	UFUNCTION(BlueprintCallable)
 	void CameraMovement(const FInputActionInstance& instance);
-	void MouseMovement();
+
 	UFUNCTION(BlueprintCallable)
 	void CameraZoom(const FInputActionInstance& instance);
 
 	UFUNCTION(BlueprintCallable)
 	void StartMovement(const FVector2D& mousePos);
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleCountryEditor();
+
+
+protected:
 	UPROPERTY(EditAnywhere, Category = "Mouse Click")
 	float zOffset = 300.0f;
 

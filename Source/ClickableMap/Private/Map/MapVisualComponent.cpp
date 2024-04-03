@@ -27,10 +27,14 @@ UMapVisualComponent::UMapVisualComponent()
 void UMapVisualComponent::AttachMeshes(USceneComponent* root)
 {
     FAttachmentTransformRules attachmentRules(EAttachmentRule::KeepRelative, true);
-    MapSelectMesh->AttachToComponent(root, attachmentRules);
+  /*  MapSelectMesh->AttachToComponent(root, attachmentRules);
     MapBorderMesh->AttachToComponent(root, attachmentRules);
     GameplayMapMesh->AttachToComponent(root, attachmentRules);
-    TerrainMapMesh->AttachToComponent(root, attachmentRules);
+    TerrainMapMesh->AttachToComponent(root, attachmentRules);*/
+    MapSelectMesh->SetupAttachment(root);
+    MapBorderMesh->SetupAttachment(root);
+    GameplayMapMesh->SetupAttachment(root);
+    TerrainMapMesh->SetupAttachment(root);
 }
 void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
 {
