@@ -60,30 +60,28 @@ void AInteractiveMap::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Map Look up Texture not assigned"));
 		return;
 	}
+	// Data
+	CreateLookUpTable();
+	UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap);
+	UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryData);
+	UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
+	SetCountryProvinces();
+
+	// Visual Data
+	SaveMapTextureData();
+
+	// Visual
 	int32 width = MapLookUpTexture->GetSizeX();
 	int32 height = MapLookUpTexture->GetSizeY();
 	PoliticalMapTextureComponent->InitializeTexture(width, height);
 	ReligiousMapTextureComponent->InitializeTexture(width, height);
 	CultureMapTextureComponent->InitializeTexture(width, height);
 
-	CreateLookUpTable();
-
-	UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap);
-	UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryData);
-	UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
-	SetCountryProvinces();
-
-
-	SaveMapTextureData();
-
 	CreateMapTexture(PoliticalMapTextureComponent, PixelColorPoliticalTexture, PoliticalMapTexture);
 	CreateMapTexture(ReligiousMapTextureComponent, PixelColorReligiousTexture, ReligiousMapTexture);
 	CreateMapTexture(CultureMapTextureComponent, PixelColorCultureMapTexture, CultureMapTexture);
 
-
 	MapVisualComponent->GetMapGameplayMeshComponent()->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
-
-	//GameplayMapMesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 
 	// set referene in player class
 	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
@@ -92,12 +90,6 @@ void AInteractiveMap::BeginPlay()
 		player->SetInteractiveMap(this);
 	}
 
-	//UMaterialInstanceDynamic* borderMaterialInstance = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	//UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), BorderMaterialRenderTarget, borderMaterialInstance);
-
-	//UMaterialInstanceDynamic* filteredBorderMaterialInstance = UMaterialInstanceDynamic::Create(HQXFilterMaterial, this);
-	//filteredBorderMaterialInstance->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
-	//MapBorderMesh->SetMaterial(0, filteredBorderMaterialInstance);
 
 }
 

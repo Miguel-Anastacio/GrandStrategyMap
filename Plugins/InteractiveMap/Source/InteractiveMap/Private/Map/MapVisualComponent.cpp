@@ -157,6 +157,13 @@ UStaticMeshComponent* UMapVisualComponent::GetMapTerrainMeshComponent()
     return TerrainMapMesh;
 }
 
+FVector UMapVisualComponent::CalculateSizeOfMap() const
+{
+    FBox boundingBox = TerrainMapMesh->Bounds.GetBox();
+    return boundingBox.Max - boundingBox.Min;
+    
+}
+
 // Called when the game starts
 void UMapVisualComponent::BeginPlay()
 {

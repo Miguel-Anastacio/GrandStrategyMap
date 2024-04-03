@@ -46,7 +46,9 @@ public:
 	UStaticMeshComponent* GetMapBorderMeshComponent();
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UStaticMeshComponent* GetMapTerrainMeshComponent();
-public:	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector CalculateSizeOfMap() const;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

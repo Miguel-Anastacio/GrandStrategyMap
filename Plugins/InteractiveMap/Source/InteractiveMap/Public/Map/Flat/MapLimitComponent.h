@@ -35,12 +35,12 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
 	TObjectPtr<class UBoxComponent> Box;
-	// UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UStaticMeshComponent> Root;
+
+
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
-	//TObjectPtr<class USceneComponent> Root;
+
+
 
 	float TimeSinceOverlap = 10.0f;
 

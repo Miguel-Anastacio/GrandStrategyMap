@@ -30,6 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetInteractiveMap(AInteractiveMap* map);
+
+	FORCEINLINE void SetVerticalMovementLimits(FVector2D limits) { VerticalLimitMovement = limits; };
+	FORCEINLINE FVector2D GetVerticalMovementLimits() { return VerticalLimitMovement; };
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,6 +66,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Camera| Zoom");
 	float CameraCollisionScaleOnZoom = 2.0f;
+
+	// x is top of map and y is the bottom
+	UPROPERTY(BlueprintReadWrite, Category = "Camera| Movement");
+	FVector2D VerticalLimitMovement = FVector2D(-3000, 3000);
 
 	UPROPERTY()
 	TWeakObjectPtr<AInteractiveMap> GameMap;
