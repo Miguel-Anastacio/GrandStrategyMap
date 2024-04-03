@@ -14,13 +14,13 @@ public class ClickableMap : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore", 
-			"EnhancedInput", 
-			"UMG", 
-			"RHI", 
+			"EnhancedInput",
+			//"UMG",
+			"RHI",
 			"RenderCore",
-			"Json",
-			"JsonUtilities",
-			"VictoryBPLibrary"
+			//"Json",
+			//"JsonUtilities",
+			"InteractiveMap"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
