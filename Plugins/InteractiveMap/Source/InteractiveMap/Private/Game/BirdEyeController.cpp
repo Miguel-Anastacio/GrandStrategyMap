@@ -59,10 +59,12 @@ void ABirdEyeController::Tick(float DeltaTime)
 			FVector2D uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			FColor color = Map->GetColorFromLookUpTexture(uvs);
-			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B));
+
+			bool result;
+			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B), result);
 
 
-			if (id != FName() && !bProvinceSelected)
+			if (result && !bProvinceSelected)
 			{
 				Map->UpdateProvinceHovered(color);
 			}
@@ -141,8 +143,11 @@ void ABirdEyeController::MouseClick()
 			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
 			FColor color = Map->GetColorFromLookUpTexture(uvs);
 				
-			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B));
-			
+			bool result;
+			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B), result);
+			//if(!result)
+
+
 			FProvinceData* data = Map->GetProvinceData(id);
 			if (data)
 			{

@@ -33,22 +33,27 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UTextureRenderTarget2D* GetMapRenderTarget() const;
+	//UFUNCTION(BlueprintCallable, BlueprintPure)
+	//UTextureRenderTarget2D* GetMapRenderTarget() const;
 
+	/// <summary>
+	///  DATA
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	TMap<FVector, FName> GetLookUpTable() const;
 
-	//UFUNCTION(BlueprintCallable, BlueprintPure)
 	TMap<FName, FProvinceData>* GetProvinceDataMap();
 	TMap<FName, FCountryData>* GetCountryDataMap();
 	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FName GetProvinceID(const FVector& color) const;
+	FName GetProvinceID(const FVector& color, bool& out_result) const;
+	//FName GetProvinceID(const FVector& color) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	void GetProvinceData(FName name, FProvinceData& out_data) const;
 	FProvinceData* GetProvinceData(FName name);
+	////////////////////////////////////////////////////////////////////
 
 	UFUNCTION(BlueprintCallable)
 	FColor GetColorFromLookUpTexture(FVector2D uv) const;
@@ -61,11 +66,13 @@ public:
 	
 	void SetMapMode_Implementation(MapMode mode);
 
-	// Get Actual name of thing from tag/id
+	// Get data from tag/id
 	template<class T>
 	const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
 	{
 		const T* data = mapToSearch.Find(tag);
+
+		//return MapDataComponent->GetDataFromID(tag, mapToSearch);
 
 		return data;
 	}
@@ -75,8 +82,9 @@ public:
 	bool UpdateProvinceData(const FProvinceData& data, FName id);
 	UFUNCTION(BlueprintCallable)
 	bool UpdateCountryData(const FCountryData& data, FName id);
+	// Update Visual Data
+	UFUNCTION(BlueprintCallable)
 	bool UpdateCountryColor(const FLinearColor& color, FName id);
-
 
 	// Update Visual
 	UFUNCTION(BlueprintCallable)
@@ -92,27 +100,14 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
-	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
-	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
-
-	bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
-	FColor GetCountryColor(const FProvinceData* data) const;
-
-	FColor GetReligionColor(const FProvinceData* data) const;
-	FColor GetCultureColor(const FProvinceData* data) const;
-
 	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
 
-	void SaveMapTextureData();
-
-	// DATA
-	void CreateLookUpTable();
-	void SetCountryProvinces();
-
+	
 
 
 	// Visual Data
-	void CreateMapTexture(UDynamicTextureComponent* textureCompoment, UTexture2D* texture);
+	void SaveMapTextureData();
+	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
@@ -120,6 +115,8 @@ protected:
 	//void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	//void UpdatePixelArrayB(TArray<float>& pixelArray,const UTexture2D* texture, const TArray<FName>& provinceIDs, const FColor& oldColor);
+	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
+	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
 
 
 protected:
@@ -145,16 +142,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* GameplayMapMaterial;
 
-
 	// Hold pixel data of the lookup texture
 	FLookUpTextureData MapColorCodeTextureData;
 
-	//// Hold pixel data of the political map texture
-	//TArray<float> PixelColorPoliticalTexture;
-	//// Hold pixel data of the religious map texture
-	//TArray<float> PixelColorReligiousTexture;
-	//// Hold pixel data of the culture map texture
-	//TArray<float> PixelColorCultureMapTexture;
 
 	// Border Material 
 	UPROPERTY(EditAnywhere)
@@ -163,54 +153,13 @@ protected:
 	UMaterialInterface* HQXFilterMaterial;
 	UPROPERTY(EditAnywhere)
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
-	// -----------------------------------------------------------------------------
 
 	//------------------------------- Data -----------------------------------------
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* MapDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* ProvinceDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* CountryDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* VisualPropertiesDataTable;
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FVector, FName> LookUpTable;
-	// Data Populated by the data tables
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FName, FProvinceData> ProvinceDataMap;
-
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FName, FCountryData> CountryData;
-
-	// Populated when reading the ProvinceDataTable
-	// Not in USE
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FString, FColor> Religions;
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FString, FColor> Cultures;
-
-	// Province properties that have a map color associated
-	UPROPERTY(BlueprintReadOnly)
-	TMap<FName, FColoredData> VisualPropertiesDataMap;
-
-	//------------------------------------------------------------------------------
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	TObjectPtr<class UMapDataComponent> MapDataComponent;
 
 	UPROPERTY(BlueprintReadWrite)
 	MapMode CurrentMapMode = MapMode::POLITICAL;
-
-	// ----------------------------------------- Useless ---------------------------
-	UPROPERTY()
-	UTexture2D* PoliticalMapTexture;
-	UPROPERTY()
-	UTexture2D* ReligiousMapTexture;
-	UPROPERTY()
-	UTexture2D* CultureMapTexture;
-
-	// IN USE but Obsolete
-	// removed at final cleanup
-	UPROPERTY(BlueprintReadWrite)
-	TObjectPtr<UTextureRenderTarget2D> MapRenderTarget;
 
 
 
