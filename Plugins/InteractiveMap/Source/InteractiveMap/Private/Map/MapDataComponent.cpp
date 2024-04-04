@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/MapDataComponent.h"
 #include "Map/MapEnums.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
-// Sets default values for this component's properties
 UMapDataComponent::UMapDataComponent()
 {
 
@@ -69,7 +67,6 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 
 		out_newColor = newOwnerCountry->Color;
 		out_mapToUpdate = MapMode::POLITICAL;
-		//(*province) = data;
 
 		return true;
 	}
@@ -83,7 +80,6 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 		}
 
 		out_mapToUpdate = MapMode::RELIGIOUS;
-		//(*province) = data;
 
 		return true;
 	}
@@ -97,7 +93,6 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 		}
 
 		out_mapToUpdate = MapMode::CULTURAL;
-		//(*province) = data;
 		return true;
 	}
 	else
@@ -148,7 +143,8 @@ void UMapDataComponent::CreateLookUpTable()
 		if (Item)
 		{
 			FString temp = Item->Color;
-			temp += FString("FF");
+			temp = temp.EndsWith(FString("FF")) ? temp : temp.Append(TEXT("FF"));
+
 			FColor sRGBColor = Item->ConvertHexStringToRGB(temp, HexMap);
 
 			LookUpTable.Add(FVector(sRGBColor.R, sRGBColor.G, sRGBColor.B), name);
@@ -208,7 +204,6 @@ bool UMapDataComponent::GetCountryColor(const FVector& color, FColor& out_countr
 	}
 	else
 	{
-		//SetPixelColor(index, PixelColorPoliticalTexture, 0, 0, 0, 0);
 		return false;
 	}
 	return true;

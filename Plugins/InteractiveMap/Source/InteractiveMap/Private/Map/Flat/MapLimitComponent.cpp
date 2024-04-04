@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/Flat/MapLimitComponent.h"
 #include "Components/BoxComponent.h"
@@ -9,8 +8,6 @@
 // Sets default values for this component's properties
 UMapLimitComponent::UMapLimitComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	
 
@@ -22,7 +19,6 @@ UMapLimitComponent::UMapLimitComponent()
 	MapVisualComponent->AttachMeshes(Box);
 }
 
-// Called when the game starts
 void UMapLimitComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -53,7 +49,6 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 
 	const float xPos = owner->GetActorLocation().X + distanceToMapCenter;
 
-	//player->Stop();
 	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y , currentPlayerPos.Z));
 	
 }

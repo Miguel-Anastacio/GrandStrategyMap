@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Game/GlobeMapController.h"
 #include "EnhancedInputComponent.h"
@@ -56,7 +55,6 @@ void AGlobeMapController::RotateMap(const FInputActionInstance& instance)
 
 	input *= MapRotSpeed;
 	Map->AddActorWorldRotation(FRotator(-input.X, 0, input.Y));
-	//Map->AddActorWorldRotation(FRotator(0, 0, input.Y));
-	//Map->AddActorWorldRotation(FRotator(0, 0, input.Y));
+
 }
 UE_ENABLE_OPTIMIZATION

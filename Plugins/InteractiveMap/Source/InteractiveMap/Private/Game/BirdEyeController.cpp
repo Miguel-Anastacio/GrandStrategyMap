@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Game/BirdEyeController.h"
 #include "GameFramework/Pawn.h"
@@ -46,7 +46,6 @@ void ABirdEyeController::Tick(float DeltaTime)
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
 		params.bReturnFaceIndex = true;
-		//params.
 		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
 			return;
 		if (!IsValid(hit.GetActor()))
@@ -99,10 +98,8 @@ void ABirdEyeController::SetupInputComponent()
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
-		//// Setup touch input events
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
-		//EnhancedInputComponent->BindAction(MouseMoveAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
 		
@@ -114,7 +111,6 @@ void ABirdEyeController::SetupInputComponent()
 	}
 }
 
-UE_DISABLE_OPTIMIZATION
 void ABirdEyeController::MouseClick()
 {
 	FHitResult hit;
@@ -129,7 +125,6 @@ void ABirdEyeController::MouseClick()
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
 		params.bReturnFaceIndex = true;
-		//params.
 		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
 			return;
 		if (!IsValid(hit.GetActor()))
@@ -187,7 +182,6 @@ void ABirdEyeController::MouseClick()
 void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
 {
 	FVector2D input = instance.GetValue().Get<FVector2D>();
-	//FVector2D input = FVector2D(rawInput.Y, rawInput.X);
 	input.Y *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->MoveCamera(input);
@@ -236,4 +230,3 @@ void ABirdEyeController::ToggleCountryEditor()
 	}
 }
 
-UE_ENABLE_OPTIMIZATION

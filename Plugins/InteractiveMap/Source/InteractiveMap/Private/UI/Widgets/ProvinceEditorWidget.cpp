@@ -1,10 +1,9 @@
+// Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/ProvinceEditorWidget.h"
 #include "UI/Widgets/CustomEditableText.h"
 #include "Components/EditableText.h"
 #include "Components/RichTextBlock.h"
 #include "Map/InteractiveMap.h"
-//#include "ProvinceEditorWidget.h"
-UE_DISABLE_OPTIMIZATION
 void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName provinceID)
 {
 
@@ -141,4 +140,3 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 }
 
 
-UE_ENABLE_OPTIMIZATION

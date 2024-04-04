@@ -1,36 +1,24 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/MapVisualComponent.h"
-UE_DISABLE_OPTIMIZATION
 
 // Sets default values for this component's properties
 UMapVisualComponent::UMapVisualComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
     MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Select"));
-    //MapSelectMesh->SetupAttachment(this);
 
     MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Border"));
-    //MapBorderMesh->SetupAttachment(this);
 
     TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Terrain"));
-    //TerrainMapMesh->SetupAttachment(this);
 
     GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Gameplay"));
-    //GameplayMapMesh->SetupAttachment(this);
-	// ...
 }
 
 void UMapVisualComponent::AttachMeshes(USceneComponent* root)
 {
     FAttachmentTransformRules attachmentRules(EAttachmentRule::KeepRelative, true);
-  /*  MapSelectMesh->AttachToComponent(root, attachmentRules);
-    MapBorderMesh->AttachToComponent(root, attachmentRules);
-    GameplayMapMesh->AttachToComponent(root, attachmentRules);
-    TerrainMapMesh->AttachToComponent(root, attachmentRules);*/
+
     MapSelectMesh->SetupAttachment(root);
     MapBorderMesh->SetupAttachment(root);
     GameplayMapMesh->SetupAttachment(root);
@@ -38,10 +26,6 @@ void UMapVisualComponent::AttachMeshes(USceneComponent* root)
 }
 void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
 {
-    //MapSelectMesh = InitMeshComponent(mapVisual->GetMapSelectMeshComponent());
-    //MapBorderMesh = InitMeshComponent(mapVisual->GetMapBorderMeshComponent());
-    //GameplayMapMesh = InitMeshComponent(mapVisual->GetMapGameplayMeshComponent());
-    //TerrainMapMesh = InitMeshComponent(mapVisual->GetMapTerrainMeshComponent());
 
     InitMeshProperty(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
     InitMeshProperty(mapVisual->GetMapBorderMeshComponent(), MapBorderMesh);
@@ -182,4 +166,3 @@ void UMapVisualComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-UE_ENABLE_OPTIMIZATION

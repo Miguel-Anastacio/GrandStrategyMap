@@ -68,32 +68,6 @@ void UDynamicTextureComponent::SetPixelValue(int32 X, int32 Y, FColor Color)
 	TextureData[start + 3] = Color.A;
 }
 
-//void UDynamicTextureComponent::DrawRectangle(int32 StartX, int32 StartY, int32 Width, int32 Height, FLinearColor Color)
-//{
-//	for (int32 y = 0; y < Height; y++)
-//	{
-//		for (int32 x = 0; x < Width; x++) {
-//			SetPixelColor(StartX + x, StartY + y, Color);
-//		}
-//	}
-//}
-//
-//void UDynamicTextureComponent::DrawCircle(int32 StartX, int32 StartY, int32 Size, FLinearColor Color, bool Center /*= true*/)
-//{
-//	float radius = Size / 2;
-//	int32 offset = FMath::Floor(radius * Center);
-//
-//	for (int32 y = 0; y < Size; y++)
-//	{
-//		for (int32 x = 0; x < Size; x++) {
-//			FVector pos = FVector(x - radius, y - radius, 0);
-//			if (pos.Size2D() <= radius) {
-//				SetPixelColor((StartX - offset) + x, (StartY - offset) + y, Color);
-//			}
-//
-//		}
-//	}
-//}
 
 void UDynamicTextureComponent::DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter /*= FLinearColor::White*/)
 {

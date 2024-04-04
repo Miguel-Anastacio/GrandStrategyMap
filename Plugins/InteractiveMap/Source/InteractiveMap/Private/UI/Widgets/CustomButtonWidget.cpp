@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "UI/Widgets/CustomButtonWidget.h"
 #include "Components/RichTextBlock.h"

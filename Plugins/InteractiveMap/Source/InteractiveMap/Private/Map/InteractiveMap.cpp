@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/InteractiveMap.h"
 #include "Map/MapUtils.h"
@@ -43,7 +42,6 @@ void AInteractiveMap::PostInitializeComponents()
 void AInteractiveMap::BeginPlay()
 {
 	Super::BeginPlay();
-	//MapVisualComponent->GetMapGameplayMeshComponent()->SetVisibility(true);
 
 	if (!MapLookUpTexture)
 	{
@@ -145,11 +143,6 @@ void AInteractiveMap::SaveMapTextureData()
 				ReligiousMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetReligionColor(province));
 				CultureMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCultureColor(province));
 
-
-				// this pixel belongs to a province so safe its indexes on the map
-				//FName* indexPixel = MapColorCodeTextureData.PixedIndexID.Find((*id));
-				
-				//MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));	
 			}
 			else
 			{

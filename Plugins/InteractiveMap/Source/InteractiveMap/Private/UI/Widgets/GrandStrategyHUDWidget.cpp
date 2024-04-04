@@ -1,10 +1,10 @@
+// Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
 #include "UI/Widgets/CustomButtonWidget.h"
 #include "Components/Button.h"
 #include "Map/InteractiveMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
-// Fill out your copyright notice in the Description page of Project Settings.
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
 {

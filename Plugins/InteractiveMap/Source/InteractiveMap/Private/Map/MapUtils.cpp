@@ -1,7 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2024 An@stacioDev All rights reserved.
 #include "Map/MapUtils.h"
 
-UE_DISABLE_OPTIMIZATION
 int32 FProvinceIDData::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
 {
     FString temp = hex.Reverse();
@@ -41,10 +40,10 @@ FColor FProvinceIDData::ConvertHexStringToRGB(const FString& color, const TMap<T
         return ColorValue;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Color is not hexadecimal format"));
+    UE_LOG(LogTemp, Error, TEXT("Color is not hexadecimal format"));
     return FColor();
 }
-UE_ENABLE_OPTIMIZATION
+
 
 void FProvinceData::PrintProvinceData()
 {

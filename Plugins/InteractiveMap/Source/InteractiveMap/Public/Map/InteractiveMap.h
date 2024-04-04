@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -9,14 +8,6 @@
 
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
-
-//USTRUCT()
-//struct FLookUpTextureData
-//{
-//	GENERATED_BODY()
-//
-//	TArray<float> PixelData;
-//};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapDataChangedSignature, MapMode, mode, FName, provinceID);
 UCLASS()

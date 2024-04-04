@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "UI/Widgets/CustomEditableText.h"
 #include "Components/EditableTextBox.h"
 #include "Components/RichTextBlock.h"
-UE_DISABLE_OPTIMIZATION
 void UCustomEditableText::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -27,4 +25,3 @@ void UCustomEditableText::SetValues(const FText& current, const FText& input)
 	CurrentValue->SetText(current);
 	InputValue->SetText(input);
 }
-UE_ENABLE_OPTIMIZATION

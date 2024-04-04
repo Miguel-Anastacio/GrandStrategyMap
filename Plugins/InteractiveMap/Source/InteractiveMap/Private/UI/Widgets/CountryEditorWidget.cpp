@@ -1,9 +1,9 @@
+// Copyright 2024 An@stacioDev All rights reserved.
+
 #include "UI/Widgets/CountryEditorWidget.h"
 #include "UI/Widgets/CustomEditableText.h"
 #include "Map/InteractiveMap.h"
 #include "UI/Utilities/RamaColorPicker.h"
-UE_DISABLE_OPTIMIZATION
-
 
 void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
 {

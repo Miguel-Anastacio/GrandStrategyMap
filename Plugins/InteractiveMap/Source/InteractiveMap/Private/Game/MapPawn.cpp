@@ -1,12 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Game/MapPawn.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
-//#include "GameFramework/PawnMovementComponent.h"
-//#include "GameFramework/FloatingPawnMovement.h"
 #include "Map/InteractiveMap.h"
 // Sets default values
 AMapPawn::AMapPawn()
@@ -25,10 +22,6 @@ AMapPawn::AMapPawn()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));
 	CameraBoom->SetupAttachment(CollisionComponent);
 
-
-	//MovementComponent = CreateDefaultSubobject<UPawnMovementComponent, UFloatingPawnMovement>(TEXT("Movement Component"));
-	//MovementComponent->UpdatedComponent = CollisionComponent;
-
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom);
 
@@ -42,8 +35,7 @@ void AMapPawn::BeginPlay()
 	FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
 	CollisionComponent->SetWorldScale3D(scale);
 }
-UE_DISABLE_OPTIMIZATION
-// Called every frame
+
 void AMapPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -52,24 +44,19 @@ void AMapPawn::Tick(float DeltaTime)
 	FVector currentVelocity = GetVelocity();
 	if (abs(futurePos.Y) > abs(VerticalLimitMovement.Y))
 	{
-		//SetActorLocation(currentPos.X, )
 		CollisionComponent->SetPhysicsLinearVelocity(FVector(currentVelocity.X, 0, currentVelocity.Z));
 	}
 }
 
 void AMapPawn::MoveCamera(FVector2D input)
 {
-	//AddMovementInput(FVector(input.X, input.Y, 0), CameraMoveSpeed);
-	
+
 	FVector vel = FVector(input.X, input.Y, 0) * CameraMoveSpeed;
 	float yPos = GetActorLocation().Y + vel.Y;
-	//if (abs(yPos) > abs(VerticalLimitMovement.Y))
-	//	vel.Y = 0;
-	
+
 	CollisionComponent->SetPhysicsLinearVelocity(vel);
 
 }
-UE_ENABLE_OPTIMIZATION
 
 void AMapPawn::Stop()
 {
@@ -86,9 +73,6 @@ void AMapPawn::ZoomCamera(float input)
 		FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
 		CollisionComponent->SetWorldScale3D(scale);
 	}
-
-
-
 
 
 	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
