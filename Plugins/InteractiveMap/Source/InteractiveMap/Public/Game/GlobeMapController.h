@@ -21,9 +21,9 @@ protected:
 	void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
-	UFUNCTION()
+	UFUNCTION(Category = "Globe Controller")
 	void StartRotate();
-	UFUNCTION()
+	UFUNCTION(Category = "Globe Controller")
 	void RotateMap(const FInputActionInstance& instance);
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

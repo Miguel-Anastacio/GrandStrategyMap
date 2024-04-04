@@ -26,6 +26,8 @@ public class InteractiveMap : ModuleRules
 			new string[]
 			{
 				"Core",
+				"RHI",
+				"RenderCore",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -40,8 +42,6 @@ public class InteractiveMap : ModuleRules
                 "Slate",
 				"SlateCore",
                 "UMG",
-				"RHI",
-				"RenderCore",
 				"Json",
 				"JsonUtilities",
                 "AppFramework", // color picker

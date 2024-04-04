@@ -11,6 +11,7 @@
 #include "UI/ManagerHUD.h"
 #include "Components/SlateWrapperTypes.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Engine/Engine.h"
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 ABirdEyeController::ABirdEyeController()
 {

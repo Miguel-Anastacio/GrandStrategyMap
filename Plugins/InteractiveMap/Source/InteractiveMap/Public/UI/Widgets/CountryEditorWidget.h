@@ -4,50 +4,55 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-//#include "Types/SlateEnums.h"
-////#include "../../Map/MapEnums.h"
 #include "Map/MapUtils.h"
 #include "CountryEditorWidget.generated.h"
 //
 class UCustomEditableText;
 class URamaColorPicker;
+/**
+ * Widget for editing country data.
+ */
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UCountryEditorWidget : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void SetCountryData(const FCountryData& data, FName id);
-	UFUNCTION(BlueprintCallable)
-	void SetInteractiveMapReference(class AInteractiveMap* map);
-//
+    /** Sets the country data for this widget. */
+    UFUNCTION(BlueprintCallable, Category = "Country Editor")
+    void SetCountryData(const FCountryData& data, FName id);
+
+    /** Sets the reference to the interactive map. */
+    UFUNCTION(BlueprintCallable, Category = "Country Editor")
+    void SetInteractiveMapReference(class AInteractiveMap* map);
+
 protected:
-	void NativeOnInitialized() override;
-	UFUNCTION()
-	void UpdateData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
-	UFUNCTION()
-	void UpdateColor(const FLinearColor& color);
-//
-//protected:
-	UPROPERTY(meta = (BindWidget))
-	UCustomEditableText* NameCustomInput;
-	UPROPERTY(meta = (BindWidget))
-	URamaColorPicker* ColorPicker;
-	
-	FName CountryTag;
-	FCountryData CountryData;
-	class AInteractiveMap* GameMapReference;
-//	UPROPERTY(meta = (BindWidget))
-//	UCustomEditableText* ReligionCustomInput;
-//	UPROPERTY(meta = (BindWidget))
-//	UCustomEditableText* CultureCustomInput;
-//	UPROPERTY(meta = (BindWidget))
-//	UCustomEditableText* PopulationCustomInput;
-//
-//
-//	FName ProvinceSelectedID;
-//	FProvinceData ProvinceSelectedData;
-//	class AInteractiveMap* GameMapReference;
+    virtual void NativeOnInitialized() override;
+
+    /** Updates the data when text is edited. */
+    UFUNCTION(Category = "Country Editor")
+    void UpdateData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
+
+    /** Updates the color of the country. */
+    UFUNCTION(Category = "Country Editor")
+    void UpdateColor(const FLinearColor& color);
+
+protected:
+    /** The custom editable text for editing the country name. */
+    UPROPERTY(meta = (BindWidget))
+    UCustomEditableText* NameCustomInput;
+
+    /** The color picker for choosing the country color. */
+    UPROPERTY(meta = (BindWidget))
+    URamaColorPicker* ColorPicker;
+
+    /** The tag of the country being edited. */
+    FName CountryTag;
+
+    /** The data of the country being edited. */
+    FCountryData CountryData;
+
+    /** Reference to the interactive map. */
+    class AInteractiveMap* GameMapReference;
 
 };

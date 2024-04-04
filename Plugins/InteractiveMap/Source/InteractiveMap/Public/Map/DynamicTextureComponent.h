@@ -6,9 +6,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RHIResources.h"
+#include "Rendering/Texture2DResource.h"
 #include "DynamicTextureComponent.generated.h"
 
-
+struct FUpdateTextureRegion2D;
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class INTERACTIVEMAP_API UDynamicTextureComponent : public UActorComponent
 {
@@ -18,16 +20,16 @@ public:
 	// Sets default values for this component's properties
 	UDynamicTextureComponent();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureWidth = 512;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureHeight = 512;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Texture")
 	UMaterialInstanceDynamic* DynamicMaterial;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	FName DynamicMaterialParamName = "DynamicTexture";
 
 	/// Fill Entire Texture with a specified color.
@@ -74,8 +76,6 @@ public:
 private:
 	// Array that contains the Texture Data
 	TArray<uint8> TextureData;
-	//uint8* TextureData;
-
 
 	// Total Bytes of Texture Data
 	uint32 TextureDataSize;
@@ -95,6 +95,19 @@ private:
 
 	// Initialize the Dynamic Texture
 	void InitializeTexture();
+
+
+	struct FUpdateTextureRegionsData
+	{
+		FTexture2DResource* Texture2DResource;
+		FRHITexture2D* TextureRHI;
+		int32 MipIndex;
+		uint32 NumRegions;
+		FUpdateTextureRegion2D* Regions;
+		uint32 SrcPitch;
+		uint32 SrcBpp;
+		uint8* SrcData;
+	};
 private:
 
 

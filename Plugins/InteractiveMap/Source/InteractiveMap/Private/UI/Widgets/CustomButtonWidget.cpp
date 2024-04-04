@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "UI/Widgets/ButtonWidget.h"
+#include "UI/Widgets/CustomButtonWidget.h"
 #include "Components/RichTextBlock.h"
 #include "Components/Button.h"
-void UButtonWidget::NativePreConstruct()
+void UCustomButtonWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	if (IsValid(ButtonText))
@@ -12,16 +12,16 @@ void UButtonWidget::NativePreConstruct()
 	}
 }
 
-void UButtonWidget::NativeOnInitialized()
+void UCustomButtonWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	if (Button)
 	{
-		Button->OnClicked.AddDynamic(this, &UButtonWidget::OnButtonClicked);
+		Button->OnClicked.AddDynamic(this, &UCustomButtonWidget::OnButtonClicked);
 	}
 }
 
-void UButtonWidget::OnButtonClicked()
+void UCustomButtonWidget::OnButtonClicked()
 {
 	OnClickedDelegate.Broadcast(this);
 }

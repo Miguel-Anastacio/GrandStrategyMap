@@ -5,6 +5,7 @@
 #include "HAL/PlatformFileManager.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
+#include "Misc/FileHelper.h"
 
 void UDataManagerFunctioLibrary::WriteStringToFile(FString filePath, FString string, bool& outSuccess, FString& outInfoMessage)
 {

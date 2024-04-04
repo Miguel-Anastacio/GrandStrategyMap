@@ -7,50 +7,50 @@
 #include "../../Map/MapEnums.h"
 #include "GrandStrategyHUDWidget.generated.h"
 
-class UButtonWidget;
+/**
+ * This is the base HUD widget for the Grand Strategy map plugin.
+ * It provides functionality to interact with the game map and save data.
+ */
+class UCustomButtonWidget;
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UGrandStrategyHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetGameMapReference();
 
 protected:
 	void NativeOnInitialized() override;
 	UFUNCTION()
-	void SetMapMode(UButtonWidget* button);
+	void SetMapMode(UCustomButtonWidget* button);
 
 	UFUNCTION()
-	void SaveDataToJson(UButtonWidget* button);
+	void SaveDataToJson(UCustomButtonWidget* button);
 protected:	
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> PoliticalMapButton;
+	TObjectPtr<UCustomButtonWidget> PoliticalMapButton;
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> ReligiousMapButton;
+	TObjectPtr<UCustomButtonWidget> ReligiousMapButton;
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> CultureMapButton;
+	TObjectPtr<UCustomButtonWidget> CultureMapButton;
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> TerrainMapButton;
+	TObjectPtr<UCustomButtonWidget> TerrainMapButton;
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> SaveDataButton;
+	TObjectPtr<UCustomButtonWidget> SaveDataButton;
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UButtonWidget> SaveCountryButton;
+	TObjectPtr<UCustomButtonWidget> SaveCountryButton;
 	
 	// Save Province Data File
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
 	FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileName = FString("ProvinceCustom");
-	//// Save Country Editing File
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	//FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
+	FString FileName = FString("ProvinceCustom.json");
+	// Save Country Editing File
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileNameCountry = FString("CountryCustom");
-
-	//int FilesCreated;
+	FString FileNameCountry = FString("CountryCustom.json");
 
 	class AInteractiveMap* GameMap;
 };

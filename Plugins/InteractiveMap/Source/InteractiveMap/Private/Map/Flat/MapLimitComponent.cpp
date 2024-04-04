@@ -22,12 +22,6 @@ UMapLimitComponent::UMapLimitComponent()
 	MapVisualComponent->AttachMeshes(Box);
 }
 
-void UMapLimitComponent::UpdateGameplayMapMesh(UMaterialInstanceDynamic* mat)
-{
-	//GameplayMapMesh->set
-}
-
-
 // Called when the game starts
 void UMapLimitComponent::BeginPlay()
 {
@@ -37,14 +31,11 @@ void UMapLimitComponent::BeginPlay()
 		Box->OnComponentBeginOverlap.AddDynamic(this, &UMapLimitComponent::OnOverlapBegin);
 	}
 }
-UE_DISABLE_OPTIMIZATION
+
 void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor)
 		return;
-
-	/*if (TimeSinceOverlap < 2.0f)
-		return;*/
 
 	AMapPawn* player = Cast<AMapPawn>(OtherActor);
 	if (!player)
@@ -60,24 +51,14 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	const FVector currentPlayerPos = player->GetActorLocation();
 	const float distanceToMapCenter = currentPlayerPos.X - OverlappedComp->GetComponentLocation().X;
 
-	const float xPos = owner->GetActorLocation().X + distanceToMapCenter  /* + player->GetVelocity().X * TimeSinceOverlap * 1*/;
+	const float xPos = owner->GetActorLocation().X + distanceToMapCenter;
 
 	//player->Stop();
 	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y , currentPlayerPos.Z));
 	
 	UE_LOG(LogTemp, Error, TEXT("Overlap Begin %s"), *GetName());
-	//TimeSinceOverlap = 0.0f;
-	//TimeSinceOverlap = 0.0f;
 
 }
-
-void UMapLimitComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	TimeSinceOverlap = DeltaTime;
-}
-
 void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
 	MapVisualComponent->InitVisualComponents(mapSelectMesh, mapBorder, gameplayMap, terrainMap);
@@ -87,4 +68,3 @@ UMapVisualComponent* UMapLimitComponent::GetVisualComponent()
 {
 	return MapVisualComponent;
 }
-UE_ENABLE_OPTIMIZATION

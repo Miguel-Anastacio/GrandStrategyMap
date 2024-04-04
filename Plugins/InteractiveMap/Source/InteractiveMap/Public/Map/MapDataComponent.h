@@ -18,16 +18,16 @@ class INTERACTIVEMAP_API UMapDataComponent : public UActorComponent
 
 protected:
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	TMap<FVector, FName> GetLookUpTable() const;
 
 	FORCEINLINE TMap<FName, FProvinceData>* GetProvinceDataMap() { return &ProvinceDataMap; };
 	FORCEINLINE TMap<FName, FCountryData>* GetCountryDataMap() { return &CountryDataMap; };
 	FORCEINLINE TMap<FName, FColoredData>* GetVisualPropertiesDataMap() { return &VisualPropertiesDataMap; };
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	FName GetProvinceID(const FVector& color, bool out_result) const;
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	void GetProvinceData(FName name, FProvinceData& out_data) const;
 	FProvinceData* GetProvinceData(FName name);
 
@@ -42,9 +42,9 @@ protected:
 
 	// Update Data
 	// returns true if the the map texture needs to be updated
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	bool UpdateProvinceData(const FProvinceData& data, FName id, MapMode& out_mapToUpdate, FColor& out_newColor);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	bool UpdateCountryData(const FCountryData& data, FName id);
 
 	void CreateLookUpTable();
@@ -68,15 +68,15 @@ protected:
 	UDataTable* VisualPropertiesDataTable;
 
 	// Data Populated by the data tables
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
 	TMap<FVector, FName> LookUpTable;
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
 	TMap<FName, FProvinceData> ProvinceDataMap;
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
 	TMap<FName, FCountryData> CountryDataMap;
 
 	// Province properties that have a map color associated
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
 	TMap<FName, FColoredData> VisualPropertiesDataMap;
 
 

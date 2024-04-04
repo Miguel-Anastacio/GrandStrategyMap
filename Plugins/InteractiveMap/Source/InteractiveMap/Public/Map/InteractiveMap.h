@@ -32,39 +32,25 @@ public:
 	AInteractiveMap();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	//UFUNCTION(BlueprintCallable, BlueprintPure)
-	//UTextureRenderTarget2D* GetMapRenderTarget() const;
-
-	/// <summary>
-	///  DATA
-	/// </summary>
-	/// <returns></returns>
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	//------------------------------- Data -----------------------------------------
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	TMap<FVector, FName> GetLookUpTable() const;
 
 	TMap<FName, FProvinceData>* GetProvinceDataMap();
 	TMap<FName, FCountryData>* GetCountryDataMap();
 	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	FName GetProvinceID(const FVector& color, bool& out_result) const;
-	//FName GetProvinceID(const FVector& color) const;
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	void GetProvinceData(FName name, FProvinceData& out_data) const;
 	FProvinceData* GetProvinceData(FName name);
-	////////////////////////////////////////////////////////////////////
 
-	UFUNCTION(BlueprintCallable)
-	FColor GetColorFromLookUpTexture(FVector2D uv) const;
-
-	//UFUNCTION(BlueprintCallable, BlueprintPure)
-	//F GetProvinceID(const FVector& color) const;
-
-	UFUNCTION(BlueprintNativeEvent)
-	void SetMapMode(MapMode mode);
-	
-	void SetMapMode_Implementation(MapMode mode);
+	// Update Data
+	UFUNCTION(BlueprintCallable, Category = "Map Data")
+	bool UpdateProvinceData(const FProvinceData& data, FName id);
+	UFUNCTION(BlueprintCallable, Category = "Map Data")
+	bool UpdateCountryData(const FCountryData& data, FName id);
 
 	// Get data from tag/id
 	template<class T>
@@ -76,45 +62,42 @@ public:
 
 		return data;
 	}
+	//------------------------------- Visual Data -----------------------------------
 
-	// Update Data
-	UFUNCTION(BlueprintCallable)
-	bool UpdateProvinceData(const FProvinceData& data, FName id);
-	UFUNCTION(BlueprintCallable)
-	bool UpdateCountryData(const FCountryData& data, FName id);
+	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
+	FColor GetColorFromLookUpTexture(FVector2D uv) const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
+	void SetMapMode(MapMode mode);
+	void SetMapMode_Implementation(MapMode mode);
+
 	// Update Visual Data
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
 	bool UpdateCountryColor(const FLinearColor& color, FName id);
 
-	// Update Visual
-	UFUNCTION(BlueprintCallable)
+	//------------------------------- Visual ----------------------------------------
+	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void UpdateProvinceHovered(const FColor& color);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
 
 public:
-	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapDataChangedSignature MapDataChangedDelegate;
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
 	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
 
-	
-
-
-	// Visual Data
 	void SaveMapTextureData();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
 
-	//void UpdatePixelArray(TArray<float>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
-	//void UpdatePixelArrayB(TArray<float>& pixelArray,const UTexture2D* texture, const TArray<FName>& provinceIDs, const FColor& oldColor);
 	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
 
@@ -139,7 +122,7 @@ protected:
 	TObjectPtr<UDynamicTextureComponent> CultureMapTextureComponent;
 	// Material that show the current gameplay map
 	// Political religious or terrain
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Materials")
 	UMaterialInterface* GameplayMapMaterial;
 
 	// Hold pixel data of the lookup texture
@@ -147,18 +130,18 @@ protected:
 
 
 	// Border Material 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Materials|Border")
 	UMaterialInterface* BorderMaterial;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Materials|Border")
 	UMaterialInterface* HQXFilterMaterial;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Border")
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 
 	//------------------------------- Data -----------------------------------------
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<class UMapDataComponent> MapDataComponent;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
 

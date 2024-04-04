@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
+#include "Dom/JsonObject.h"
 #include "MapUtils.generated.h"
 
 

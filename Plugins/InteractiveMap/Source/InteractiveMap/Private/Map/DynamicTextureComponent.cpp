@@ -3,8 +3,10 @@
 
 #include "Map/DynamicTextureComponent.h"
 #include "RHICommandList.h"
-#include "Rendering/Texture2DResource.h"
-
+#include "Components/ActorComponent.h"
+#include "RenderingThread.h"
+//#include "Rendering/Texture2DResource.h"
+#include "Engine/Texture2D.h"
 // Sets default values for this component's properties
 UDynamicTextureComponent::UDynamicTextureComponent()
 {
@@ -212,18 +214,6 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 		return;
 	}
 
-	struct FUpdateTextureRegionsData
-	{
-		FTexture2DResource* Texture2DResource;
-		FRHITexture2D* TextureRHI;
-		int32 MipIndex;
-		uint32 NumRegions;
-		FUpdateTextureRegion2D* Regions;
-		uint32 SrcPitch;
-		uint32 SrcBpp;
-		uint8* SrcData;
-	};
-
 	FUpdateTextureRegionsData* RegionData = new FUpdateTextureRegionsData;
 
 	UTexture2D* Texture = DynamicTexture;
@@ -237,7 +227,10 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	RegionData->SrcBpp = 4;
 	RegionData->SrcData = TextureData.GetData();
 
-	ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)(
+	// Declare RenderCommand
+
+	ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)
+	(
 		[RegionData, bFreeData, Texture](FRHICommandListImmediate& RHICmdList)
 		{
 			for (uint32 RegionIndex = 0; RegionIndex < RegionData->NumRegions; ++RegionIndex)
@@ -261,7 +254,8 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 				FMemory::Free(RegionData->SrcData);
 			}
 			delete RegionData;
-		});
+		}
+	);
 }
 
 //

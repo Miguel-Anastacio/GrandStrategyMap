@@ -20,8 +20,10 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
+				"Engine",
 				"UMG"
-			]
+			],
+			"PlatformAllowList": [ "Win64" ]
 		}
 	],
 	"Plugins": [

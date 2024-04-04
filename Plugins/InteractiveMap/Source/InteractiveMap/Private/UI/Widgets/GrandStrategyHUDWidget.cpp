@@ -1,5 +1,5 @@
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
-#include "UI/Widgets/ButtonWidget.h"
+#include "UI/Widgets/CustomButtonWidget.h"
 #include "Components/Button.h"
 #include "Map/InteractiveMap.h"
 #include "Kismet/GameplayStatics.h"
@@ -46,7 +46,7 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 	}
 }
 
-void UGrandStrategyHUDWidget::SetMapMode(UButtonWidget* button)
+void UGrandStrategyHUDWidget::SetMapMode(UCustomButtonWidget* button)
 {
 	if (!GameMap)
 	{
@@ -75,7 +75,7 @@ void UGrandStrategyHUDWidget::SetMapMode(UButtonWidget* button)
 	}
 }
 
-void UGrandStrategyHUDWidget::SaveDataToJson(UButtonWidget* button)
+void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 {
 	if (button == SaveDataButton)
 	{
@@ -85,6 +85,8 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UButtonWidget* button)
 
 		bool result;
 		FString outMessageInfo;
+		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
+
 		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
@@ -102,6 +104,8 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UButtonWidget* button)
 
 		bool result;
 		FString outMessageInfo;
+		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
+
 		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
 		if (!result)
 		{

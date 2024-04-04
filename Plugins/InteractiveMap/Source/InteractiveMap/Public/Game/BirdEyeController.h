@@ -23,13 +23,6 @@ class INTERACTIVEMAP_API ABirdEyeController : public APlayerController
 public:
 	ABirdEyeController();
 
-	///** Time Threshold to know if it was a short press */
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	//float ShortPressThreshold;
-
-	///** FX Class that we will spawn when clicking */
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	//UNiagaraSystem* FXCursor;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
@@ -57,18 +50,18 @@ protected:
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Input Actions")
 	void MouseClick();
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Input Actions")
 	void CameraMovement(const FInputActionInstance& instance);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Input Actions")
 	void CameraZoom(const FInputActionInstance& instance);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Input Actions")
 	void StartMovement(const FVector2D& mousePos);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Input Actions")
 	void ToggleCountryEditor();
 
 

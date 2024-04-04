@@ -4,38 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-//#include "Types/SlateEnums.h"
-////#include "../../Map/MapEnums.h"
 #include "Map/MapUtils.h"
 #include "EditCountriesContainerWidget.generated.h"
-//
 class UCustomEditableText;
 class URamaColorPicker;
 class UScrollBox;
+/**
+ * This widget container is responsible for managing country editor widgets.
+ * It allows adding countries to the scroll box and sets the reference to the interactive map.
+ */
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UEditCountriesContainerWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	/** Adds countries to the scroll box. */
+	UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")
 	void AddCountriesToBox(const TMap<FName, FCountryData>& countryData);
-	UFUNCTION(BlueprintCallable)
+
+	/** Sets the reference to the interactive map. */
+	UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")
 	void SetInteractiveMapReference(class AInteractiveMap* map);
-////
-//protected:
-//	void NativeOnInitialized() override;
-//	UFUNCTION()
-//	void UpdateData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
-//	UFUNCTION()
-//	void UpdateColor(const FLinearColor& color);
-////
+
 protected:
+	/** Holds the scroll box containing country editor widgets. */
 	UPROPERTY(meta = (BindWidget))
 	UScrollBox* CountriesHolder;
 
+	/** The class of the country editor widget. */
 	UPROPERTY(EditAnywhere, Category = "Country Editor")
 	TSubclassOf<class UCountryEditorWidget> CountryEditorClass;
+
+	/** Reference to the interactive map. */
 	class AInteractiveMap* GameMapReference;
 
 };

@@ -20,15 +20,15 @@ public:
 	AMapPawn();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Pawm")
 	void MoveCamera(FVector2D input);
 
 	void Stop();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Pawm")
 	void ZoomCamera(float input);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Map Pawm")
 	void SetInteractiveMap(AInteractiveMap* map);
 
 	FORCEINLINE void SetVerticalMovementLimits(FVector2D limits) { VerticalLimitMovement = limits; };

@@ -9,7 +9,7 @@
 #include "Map/MapUtils.h"
 #include "ProvinceEditorWidget.generated.h"
 
-class UButtonWidget;
+class UCustomButtonWidget;
 class UEditableText;
 class URichTextBlock; 
 class UCustomEditableText;
@@ -18,32 +18,61 @@ class INTERACTIVEMAP_API UProvinceEditorWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable)
-	void SetProvinceData(const FProvinceData& data, FName provinceID);
-	UFUNCTION(BlueprintCallable)
-	void SetInteractiveMapReference(class AInteractiveMap* map);
+```cpp
+/**
+ * Sets the data for a specific province identified by its ID.
+ *
+ * @param data The data to set for the province.
+ * @param provinceID The unique identifier of the province.
+ */
+	UFUNCTION(BlueprintCallable, Category = "Province Editor")
+void SetProvinceData(const FProvinceData& data, FName provinceID);
 
+/**
+ * Sets the reference to the interactive map actor.
+ *
+ * @param map Pointer to the interactive map actor.
+ */
+UFUNCTION(BlueprintCallable, Category = "Province Editor")
+void SetInteractiveMapReference(class AInteractiveMap* map);
+
+/**
+ * Overrides the initialization method to perform custom initialization tasks.
+ */
 protected:
 	void NativeOnInitialized() override;
-	UFUNCTION()
+
+	/**
+	 * Handles updates to province data when an editable text is modified.
+	 *
+	 * @param editedText The editable text widget being modified.
+	 * @param Text The updated text.
+	 * @param CommitMethod The type of text commit event.
+	 */
+	UFUNCTION(Category = "Province Editor")
 	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
 
+	/**
+	 * Custom editable text widgets for editing province properties.
+	 */
 protected:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	UCustomEditableText* NameCustomInput;
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	UCustomEditableText* OwnerCustomInput;
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	UCustomEditableText* ReligionCustomInput;
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	UCustomEditableText* CultureCustomInput;
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	UCustomEditableText* PopulationCustomInput;
 
-
-	FName ProvinceSelectedID;
-	FProvinceData ProvinceSelectedData;
-	class AInteractiveMap* GameMapReference;
+	/**
+	 * Member variables storing information about the currently selected province and the interactive map.
+	 */
+protected:
+	FName ProvinceSelectedID; // The unique identifier of the currently selected province.
+	FProvinceData ProvinceSelectedData; // Data structure containing information about the currently selected province.
+	class AInteractiveMap* GameMapReference; // Pointer to the interactive map actor used as a reference for this component.
 
 };

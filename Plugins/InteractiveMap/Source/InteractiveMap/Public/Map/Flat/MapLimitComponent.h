@@ -16,33 +16,27 @@ class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
 public:	
 	// Sets default values for this component's properties
 	UMapLimitComponent();
-	UFUNCTION(BlueprintCallable)
-	void UpdateGameplayMapMesh(class UMaterialInstanceDynamic* mat);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Limit")
 	void InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder,
 		UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Visual")
 	class UMapVisualComponent* GetVisualComponent();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	UFUNCTION()
+	UFUNCTION(Category = "Overlap")
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, 
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
 	TObjectPtr<class UBoxComponent> Box;
 
-
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Visual", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 
-
-
-	float TimeSinceOverlap = 10.0f;
 
 
 		

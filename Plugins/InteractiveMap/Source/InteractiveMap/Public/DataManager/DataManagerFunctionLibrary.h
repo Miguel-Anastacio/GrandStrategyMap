@@ -5,25 +5,10 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
+#include "Engine/DataTable.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
 
-//template<class Data>
-//USTRUCT(BlueprintType)
-//struct FJsonFileStruct
-//{
-//	GENERATED_BODY()
-//
-//	//UPROPERTY()
-//	//TArray<FName> name;
-//	UPROPERTY()
-//	TMap<FName,Data> StructData;
-//
-//	FJsonFileStruct(TMap<FName, Data>& data) : StructData(data) {};
-//};
-/**
- * 
- */
 class FJsonObject;
 UCLASS()
 class INTERACTIVEMAP_API UDataManagerFunctioLibrary : public UBlueprintFunctionLibrary
