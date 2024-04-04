@@ -9,76 +9,121 @@
 #include "MapDataComponent.generated.h"
 
 
+
+/**
+ * Component for managing map data.
+ */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class INTERACTIVEMAP_API UMapDataComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	UMapDataComponent();
-
-protected:
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	TMap<FVector, FName> GetLookUpTable() const;
-
-	FORCEINLINE TMap<FName, FProvinceData>* GetProvinceDataMap() { return &ProvinceDataMap; };
-	FORCEINLINE TMap<FName, FCountryData>* GetCountryDataMap() { return &CountryDataMap; };
-	FORCEINLINE TMap<FName, FColoredData>* GetVisualPropertiesDataMap() { return &VisualPropertiesDataMap; };
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	FName GetProvinceID(const FVector& color, bool out_result) const;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	void GetProvinceData(FName name, FProvinceData& out_data) const;
-	FProvinceData* GetProvinceData(FName name);
-
-	// Get data from tag/id
-	template<class T>
-	const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
-	{
-		const T* data = mapToSearch.Find(tag);
-
-		return data;
-	}
-
-	// Update Data
-	// returns true if the the map texture needs to be updated
-	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateProvinceData(const FProvinceData& data, FName id, MapMode& out_mapToUpdate, FColor& out_newColor);
-	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateCountryData(const FCountryData& data, FName id);
-
-	void CreateLookUpTable();
-	void ReadDataTables();
-	void SetCountryProvinces();
-
-	bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
-	FColor GetCountryColor(const FProvinceData* data) const;
-
-	FColor GetReligionColor(const FProvinceData* data) const;
-	FColor GetCultureColor(const FProvinceData* data) const;
+public:
+    /** Default constructor. */
+    UMapDataComponent();
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* MapDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* ProvinceDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* CountryDataTable;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	UDataTable* VisualPropertiesDataTable;
+    /** Gets the lookup table. */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
+    TMap<FVector, FName> GetLookUpTable() const;
 
-	// Data Populated by the data tables
-	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-	TMap<FVector, FName> LookUpTable;
-	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-	TMap<FName, FProvinceData> ProvinceDataMap;
-	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-	TMap<FName, FCountryData> CountryDataMap;
+    /** Gets the province data map. */
+    FORCEINLINE TMap<FName, FProvinceData>* GetProvinceDataMap() { return &ProvinceDataMap; };
 
-	// Province properties that have a map color associated
-	UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-	TMap<FName, FColoredData> VisualPropertiesDataMap;
+    /** Gets the country data map. */
+    FORCEINLINE TMap<FName, FCountryData>* GetCountryDataMap() { return &CountryDataMap; };
 
+    /** Gets the visual properties data map. */
+    FORCEINLINE TMap<FName, FColoredData>* GetVisualPropertiesDataMap() { return &VisualPropertiesDataMap; };
 
-	friend class AInteractiveMap;
+    /** Gets the province ID. */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
+    FName GetProvinceID(const FVector& color, bool out_result) const;
+
+    /** Gets province data by name. */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
+    void GetProvinceData(FName name, FProvinceData& out_data) const;
+
+    /** Gets province data by name. */
+    FProvinceData* GetProvinceData(FName name);
+
+    /** Gets data from ID/tag. */
+    template<class T>
+    const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
+    {
+        const T* data = mapToSearch.Find(tag);
+        return data;
+    }
+
+     /**
+     * Updates province data.
+     *
+     * @param data The new data to update.
+     * @param id The ID of the province.
+     * @param out_mapToUpdate Reference to the map mode to update.
+     * @param out_newColor Reference to the new color.
+     * @return True if the update is successful, false otherwise.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Map Data")
+    bool UpdateProvinceData(const FProvinceData& data, FName id, MapMode& out_mapToUpdate, FColor& out_newColor);
+
+    /** Updates country data. */
+    UFUNCTION(BlueprintCallable, Category = "Map Data")
+    bool UpdateCountryData(const FCountryData& data, FName id);
+
+    /** Creates the lookup table. */
+    void CreateLookUpTable();
+
+    /** Reads data tables. */
+    void ReadDataTables();
+
+    /** Sets country provinces. */
+    void SetCountryProvinces();
+
+    /** Gets country color. */
+    bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
+
+    /** Gets country color. */
+    FColor GetCountryColor(const FProvinceData* data) const;
+
+    /** Gets religion color. */
+    FColor GetReligionColor(const FProvinceData* data) const;
+
+    /** Gets culture color. */
+    FColor GetCultureColor(const FProvinceData* data) const;
+
+protected:
+    /** Data table for the map. */
+    UPROPERTY(EditAnywhere, Category = "Data")
+    UDataTable* MapDataTable;
+
+    /** Data table for provinces. */
+    UPROPERTY(EditAnywhere, Category = "Data")
+    UDataTable* ProvinceDataTable;
+
+    /** Data table for countries. */
+    UPROPERTY(EditAnywhere, Category = "Data")
+    UDataTable* CountryDataTable;
+
+    /** Data table for visual properties. */
+    UPROPERTY(EditAnywhere, Category = "Data")
+    UDataTable* VisualPropertiesDataTable;
+
+    /** Lookup table. */
+    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    TMap<FVector, FName> LookUpTable;
+
+    /** Province data map. */
+    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    TMap<FName, FProvinceData> ProvinceDataMap;
+
+    /** Country data map. */
+    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    TMap<FName, FCountryData> CountryDataMap;
+
+    /** Visual properties data map. */
+    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    TMap<FName, FColoredData> VisualPropertiesDataMap;
+
+    friend class AInteractiveMap;
 };

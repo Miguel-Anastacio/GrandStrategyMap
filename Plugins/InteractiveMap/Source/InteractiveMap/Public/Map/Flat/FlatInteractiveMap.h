@@ -7,7 +7,7 @@
 #include "FlatInteractiveMap.generated.h"
 
 /**
- * 
+ *  FlatMap base class - 
  */
 class UMapLimitComponent;
 UCLASS()
@@ -16,13 +16,8 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AInteractiveMap
 	GENERATED_BODY()
 
 	AFlatInteractiveMap();
-	void BeginPlay() override;
-	//void SetMapMode(MapMode mode) override;
-
 protected:
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
-	//TObjectPtr<UMapLimitComponent> LeftLimitComponent;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limits")
-	//TObjectPtr<UMapLimitComponent> RightLimitComponent;
-	
+	void BeginPlay() override;
+
+
 };

@@ -9,13 +9,8 @@
 AFlatInteractiveMap::AFlatInteractiveMap()
 	: AInteractiveMap()
 {
-	//LeftLimitComponent = CreateDefaultSubobject<UMapLimitComponent>(TEXT("Left Limit"));
-	//LeftLimitComponent->SetupAttachment(MapRoot);
 
-	//RightLimitComponent = CreateDefaultSubobject<UMapLimitComponent>(TEXT("Right Limit"));
-	//RightLimitComponent->SetupAttachment(MapRoot);
 }
-UE_DISABLE_OPTIMIZATION
 void AFlatInteractiveMap::BeginPlay()
 {
 	Super::BeginPlay();
@@ -30,19 +25,6 @@ void AFlatInteractiveMap::BeginPlay()
 		pawn->SetVerticalMovementLimits(FVector2D(size.Y * 0.5, -size.Y * 0.5));
 	}
 
-	//LeftLimitComponent->InitLimitComponent(MapSelectMesh, MapBorderMesh, GameplayMapMesh, TerrainMapMesh);
-	//RightLimitComponent->InitLimitComponent(MapSelectMesh, MapBorderMesh, GameplayMapMesh, TerrainMapMesh);
-
 	
 }
-UE_ENABLE_OPTIMIZATION
 
-//void AFlatInteractiveMap::SetMapMode(MapMode mode)
-//{
-//	Super::SetMapMode(mode);
-//	//UMapVisualComponent* limitVisual = LeftLimitComponent->GetVisualComponent();
-//	//limitVisual->UpdateMeshMaterial(limitVisual->GetMeshComponent(mode), GameplayMapMesh->GetMaterial(0));
-//
-//	////limitVisual = RightLimitComponent->GetVisualComponent();
-//	//limitVisual->UpdateMeshMaterial(limitVisual->GetMeshComponent(mode), GameplayMapMesh->GetMaterial(0));
-//}

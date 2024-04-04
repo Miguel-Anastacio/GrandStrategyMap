@@ -56,8 +56,6 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	//player->Stop();
 	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y , currentPlayerPos.Z));
 	
-	UE_LOG(LogTemp, Error, TEXT("Overlap Begin %s"), *GetName());
-
 }
 void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {

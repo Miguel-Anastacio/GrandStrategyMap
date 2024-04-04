@@ -12,7 +12,7 @@
 #include "Components/SlateWrapperTypes.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/Engine.h"
-DEFINE_LOG_CATEGORY(LogTemplateCharacter);
+
 ABirdEyeController::ABirdEyeController()
 {
 	bShowMouseCursor = true;
@@ -110,7 +110,7 @@ void ABirdEyeController::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
 

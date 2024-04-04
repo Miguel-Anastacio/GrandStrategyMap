@@ -9,7 +9,9 @@
 #include "RHIResources.h"
 #include "Rendering/Texture2DResource.h"
 #include "DynamicTextureComponent.generated.h"
-
+/**
+ * Component for dynamically updating a texture.
+ */
 struct FUpdateTextureRegion2D;
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class INTERACTIVEMAP_API UDynamicTextureComponent : public UActorComponent
@@ -19,6 +21,56 @@ class INTERACTIVEMAP_API UDynamicTextureComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UDynamicTextureComponent();
+public:
+
+	/**
+	 * Fill the entire texture with a specified color.
+	 * @param Color The color to fill the texture with.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
+	void FillTexture(FLinearColor Color);
+
+	/**
+	 * Set the color of a pixel in the texture.
+	 *
+	 * @param X The x-coordinate of the pixel.
+	 * @param Y The y-coordinate of the pixel.
+	 * @param Color The color to set the pixel to.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
+	void SetPixelColor(int32 X, int32 Y, FLinearColor Color);
+	void SetPixelValue(int32 X, int32 Y, FColor Color);
+
+	/**
+	 * Draw a texture onto the dynamic texture.
+	 *
+	 * @param StartX The x-coordinate to start drawing from.
+	 * @param StartY The y-coordinate to start drawing from.
+	 * @param Texture The texture to draw onto the dynamic texture.
+	 * @param Filter The filter to apply when drawing the texture.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
+	void DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter = FLinearColor::White);
+
+	/**
+	 * Update the texture object from texture data.
+	 * @param bFreeData Whether to free the data after updating.
+	 */
+	void UpdateTexture(bool bFreeData = false);
+
+	/**
+	* Get the dynamic texture.
+	* @return The dynamic texture.
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dynamic Texture")
+	UTexture2D* GetTexture() const;
+
+	void InitializeTexture(uint32 width, uint32 height);
+	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter = FLinearColor::White);
+	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
+
+	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureWidth = 512;
@@ -32,46 +84,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	FName DynamicMaterialParamName = "DynamicTexture";
 
-	/// Fill Entire Texture with a specified color.
-	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	void FillTexture(FLinearColor Color);
-
-	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	void SetPixelColor(int32 X, int32 Y, FLinearColor Color);
-	void SetPixelValue(int32 X, int32 Y, FColor Color);
-
-	//UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	//void DrawRectangle(int32 StartX, int32 StartY, int32 Width, int32 Height, FLinearColor Color);
-
-	//UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	//void DrawCircle(int32 StartX, int32 StartY, int32 Size, FLinearColor Color, bool Center = true);
-
-	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	void DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter = FLinearColor::White);
-
-	//Update Texture Object from Texture Data
-	void UpdateTexture(bool bFreeData = false);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dynamic Texture")
-	UTexture2D* GetTexture() const;
-
-	//UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	//void InitializeTexture(uint32 width, uint32 height, UTexture* texture);
-	void InitializeTexture(uint32 width, uint32 height);
-	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter = FLinearColor::White);
-	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
-	//void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
-
-	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
-
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+	// Initialize the Dynamic Texture
+	void InitializeTexture();
 
 private:
 	// Array that contains the Texture Data
@@ -92,25 +110,6 @@ private:
 
 	// Update Region Struct
 	FUpdateTextureRegion2D* TextureRegion;
-
-	// Initialize the Dynamic Texture
-	void InitializeTexture();
-
-
-	struct FUpdateTextureRegionsData
-	{
-		FTexture2DResource* Texture2DResource;
-		FRHITexture2D* TextureRHI;
-		int32 MipIndex;
-		uint32 NumRegions;
-		FUpdateTextureRegion2D* Regions;
-		uint32 SrcPitch;
-		uint32 SrcBpp;
-		uint8* SrcData;
-	};
-private:
-
-
 
 
 };

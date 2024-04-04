@@ -20,10 +20,6 @@ void UDataManagerFunctioLibrary::WriteStringToFile(FString filePath, FString str
 	outInfoMessage = outInfoMessage = FString::Printf(TEXT("Write string to file succeeded"));
 }
 
-TSharedPtr<FJsonObject> UDataManagerFunctioLibrary::ReadJson(FString jsonFilePath, bool& outSuccess, FString& outInfoMessage)
-{
-	return TSharedPtr<FJsonObject>();
-}
 
 void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {

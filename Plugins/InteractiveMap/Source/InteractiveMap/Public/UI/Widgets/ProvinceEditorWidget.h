@@ -1,5 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,28 +17,28 @@ class INTERACTIVEMAP_API UProvinceEditorWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-```cpp
-/**
- * Sets the data for a specific province identified by its ID.
- *
- * @param data The data to set for the province.
- * @param provinceID The unique identifier of the province.
- */
+public:
+	/**
+	 * Sets the data for a specific province identified by its ID.
+	 *
+	 * @param data The data to set for the province.
+	 * @param provinceID The unique identifier of the province.
+	 */
+		UFUNCTION(BlueprintCallable, Category = "Province Editor")
+	void SetProvinceData(const FProvinceData& data, FName provinceID);
+
+	/**
+	 * Sets the reference to the interactive map actor.
+	 *
+	 * @param map Pointer to the interactive map actor.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-void SetProvinceData(const FProvinceData& data, FName provinceID);
+	void SetInteractiveMapReference(class AInteractiveMap* map);
 
-/**
- * Sets the reference to the interactive map actor.
- *
- * @param map Pointer to the interactive map actor.
- */
-UFUNCTION(BlueprintCallable, Category = "Province Editor")
-void SetInteractiveMapReference(class AInteractiveMap* map);
-
-/**
- * Overrides the initialization method to perform custom initialization tasks.
- */
 protected:
+	/**
+	 * Overrides the initialization method to perform custom initialization tasks.
+	 */
 	void NativeOnInitialized() override;
 
 	/**
@@ -71,8 +70,11 @@ protected:
 	 * Member variables storing information about the currently selected province and the interactive map.
 	 */
 protected:
-	FName ProvinceSelectedID; // The unique identifier of the currently selected province.
-	FProvinceData ProvinceSelectedData; // Data structure containing information about the currently selected province.
-	class AInteractiveMap* GameMapReference; // Pointer to the interactive map actor used as a reference for this component.
+	// The unique identifier of the currently selected province.
+	FName ProvinceSelectedID; 
+	// Data structure containing information about the currently selected province.
+	FProvinceData ProvinceSelectedData; 
+	// Pointer to the interactive map actor used as a reference for this component.
+	class AInteractiveMap* GameMapReference; 
 
 };

@@ -60,30 +60,6 @@ struct FColoredData : public FTableRowBase
     }
 };
 
-//USTRUCT(BlueprintType)
-//struct FReligion : public FColoredData
-//{
-//    GENERATED_BODY()
-//
-//    FReligion() : FColoredData() {};
-//
-//    FReligion(const FString& name, FColor color) :
-//        FColoredData(name, color) {};
-//
-//    // Add more religion data here
-//};
-//USTRUCT(BlueprintType)
-//struct FPopCulture : public FColoredData
-//{
-//    GENERATED_BODY()
-//
-//    FPopCulture() : FColoredData() {};
-//
-//    FPopCulture(const FString& name, FColor color) :
-//        FColoredData(name, color) {};
-//
-//    // Add more culture data here
-//};
 
 USTRUCT(BlueprintType)
 struct FProvinceIDData : public FTableRowBase
@@ -91,11 +67,8 @@ struct FProvinceIDData : public FTableRowBase
     GENERATED_BODY()
     FProvinceIDData() {};
 
-    //UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    //FString Name;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString Color;
-    //TMap<TCHAR, int32> HexMap;
     // assuming format AABBCCTT (AA = R, BB = G, CC = B, TT = Alpha)
     int32 HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap);
     FColor ConvertHexStringToRGB(const FString& color, const TMap<TCHAR, int32>& HexMap);
@@ -107,8 +80,6 @@ struct FProvinceIDDataRGB: public FTableRowBase
     GENERATED_BODY()
     FProvinceIDDataRGB() {};
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FString Name;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FColor Color;
 
@@ -132,6 +103,7 @@ struct FProvinceData : public FTableRowBase
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FName Culture;
     // Add more province data here
+
     FProvinceData() : ProvinceName(FString("")), Owner(FName()), Population(0), Religion(FName()) {};
 
     FProvinceData(const FString& name, FName owner, int64 population, FName religion, FName culture) :
@@ -190,7 +162,6 @@ struct FCountryData : public FTableRowBase
 
         OutJsonObject->SetArrayField(TEXT("Provinces"), provinceIDs);
 
-        //OutJsonObject->
         // Add more fields as needed
     }
 };

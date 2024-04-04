@@ -12,41 +12,15 @@ UDynamicTextureComponent::UDynamicTextureComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
-}
-
-// Called when the game starts
-void UDynamicTextureComponent::BeginPlay()
-{
-	//Must be called before Super otherwise Blueprint can't modify texture at BeginPlay.
-	//InitializeTexture();
-
-	Super::BeginPlay();
-
-	// ...
-
 }
 
 void UDynamicTextureComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	//FMemory::Free(TextureData);
 	FMemory::Free(TextureRegion);
-}
-
-// Called every frame
-void UDynamicTextureComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	/*UpdateTexture();
-
-	if (DynamicMaterial)
-	{
-		DynamicMaterial->SetTextureParameterValue("DynamicTexture", DynamicTexture);
-	}*/
 }
 
 void UDynamicTextureComponent::FillTexture(FLinearColor Color)
@@ -178,34 +152,6 @@ void UDynamicTextureComponent::InitializeTexture()
 	UpdateTexture();
 }
 
-//void UDynamicTextureComponent::InitializeTexture(UTexture2D* texture)
-//{
-//	// Get Total Pixels in Texture
-//	TextureTotalPixels = TextureWidth * TextureHeight;
-//
-//	// Get Total Bytes of Texture - Each pixel has 4 bytes for RGBA
-//	TextureDataSize = TextureTotalPixels * 4;
-//	TextureDataSqrtSize = TextureWidth * 4;
-//
-//	// Initialize Texture Data Array
-//	TextureData = new uint8[TextureDataSize];
-//
-//	// Create Dynamic Texture Object
-//	texture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
-//	texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-//	texture->SRGB = 0;
-//	texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
-//	texture->Filter = TextureFilter::TF_Nearest;
-//	texture->AddToRoot();
-//	texture->UpdateResource();
-//
-//	//Create Update Region Struct Instance
-//	TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, TextureWidth, TextureHeight);
-//
-//	FillTexture(FLinearColor::Green);
-//	UpdateTexture();
-////}
-
 void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 {
 	if (DynamicTexture == nullptr)
@@ -213,6 +159,19 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 		UE_LOG(LogTemp, Warning, TEXT("Dynamic Texture tried to Update Texture but it hasn't been initialized!"));
 		return;
 	}
+
+	struct FUpdateTextureRegionsData
+	{
+		FTexture2DResource* Texture2DResource;
+		FRHITexture2D* TextureRHI;
+		int32 MipIndex;
+		uint32 NumRegions;
+		FUpdateTextureRegion2D* Regions;
+		uint32 SrcPitch;
+		uint32 SrcBpp;
+		uint8* SrcData;
+	};
+
 
 	FUpdateTextureRegionsData* RegionData = new FUpdateTextureRegionsData;
 
@@ -258,11 +217,6 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	);
 }
 
-//
-//void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height, UTexture* texture)
-//{
-//
-//}
 
 void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height)
 {

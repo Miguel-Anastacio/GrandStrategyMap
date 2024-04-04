@@ -13,76 +13,101 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionInstance;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+/**
+ * Base Controller class for interactive maps, handles input for mouse clicks, camera movement, menus and camera zoom
+ */
 UCLASS()
 class INTERACTIVEMAP_API ABirdEyeController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	ABirdEyeController();
+    /** Default constructor. */
+    ABirdEyeController();
 
+    /** Mapping context for the controller. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputMappingContext* DefaultMappingContext;
 
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	UInputAction* CameraMoveAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* CameraRotAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* SelectAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MouseMoveAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* MouseScrollAction;
+    /** Action for moving the camera. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* CameraMoveAction;
 
+    /** Action for rotating the camera. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* CameraRotAction;
 
-	// UI Action to open country editor
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* OpenCountryEditorAction;
-protected:
-	// To add mapping context
-	virtual void SetupInputComponent() override;
-	
-	virtual void BeginPlay();
-	virtual void Tick(float DeltaTime) override;
+    /** Action for selecting objects. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* SelectAction;
 
-	UFUNCTION(BlueprintCallable, Category = "Input Actions")
-	void MouseClick();
-	UFUNCTION(BlueprintCallable, Category = "Input Actions")
-	void CameraMovement(const FInputActionInstance& instance);
+    /** Action for mouse movement. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* MouseMoveAction;
 
-	UFUNCTION(BlueprintCallable, Category = "Input Actions")
-	void CameraZoom(const FInputActionInstance& instance);
+    /** Action for mouse scrolling (zoom). */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* MouseScrollAction;
 
-	UFUNCTION(BlueprintCallable, Category = "Input Actions")
-	void StartMovement(const FVector2D& mousePos);
-
-	UFUNCTION(BlueprintCallable, Category = "Input Actions")
-	void ToggleCountryEditor();
-
+    /** Action for opening the country editor UI. */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* OpenCountryEditorAction;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Mouse Click")
-	float zOffset = 300.0f;
+    /** Sets up the input component. */
+    virtual void SetupInputComponent() override;
 
-	bool bProvinceSelected = false;
+    virtual void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	bool bMoveCamera;
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FVector2D MoveInput;
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FVector2D ViewportCenter;
+    virtual void Tick(float DeltaTime) override;
 
+    /** Handles mouse click events. */
+    UFUNCTION(BlueprintCallable, Category = "Input Actions")
+    void MouseClick();
 
-	UPROPERTY(Transient)
-	class AInteractiveMap* Map;
-	UPROPERTY(Transient)
-	class AMapPawn* MapPawn;
+    /** Handles camera movement events. */
+    UFUNCTION(BlueprintCallable, Category = "Input Actions")
+    void CameraMovement(const FInputActionInstance& instance);
+
+    /** Handles camera zoom events. */
+    UFUNCTION(BlueprintCallable, Category = "Input Actions")
+    void CameraZoom(const FInputActionInstance& instance);
+
+    /** Starts movement based on mouse position. */
+    UFUNCTION(BlueprintCallable, Category = "Input Actions")
+    void StartMovement(const FVector2D& mousePos);
+
+    /** Toggles the country editor UI. */
+    UFUNCTION(BlueprintCallable, Category = "Input Actions")
+    void ToggleCountryEditor();
+
+protected:
+    /** Offset for mouse click on Z-axis. */
+    UPROPERTY(EditAnywhere, Category = "Mouse Click")
+    float zOffset = 300.0f;
+
+    /** Flag indicating if a province is selected. */
+    bool bProvinceSelected = false;
+
+    /** Flag indicating camera movement. */
+    UPROPERTY(BlueprintReadWrite, Category = "Movement")
+    bool bMoveCamera;
+
+    /** Input for camera movement. */
+    UPROPERTY(BlueprintReadWrite, Category = "Movement")
+    FVector2D MoveInput;
+
+    /** Center of the viewport. */
+    UPROPERTY(BlueprintReadWrite, Category = "Movement")
+    FVector2D ViewportCenter;
+
+    /** Reference to the interactive map. */
+    UPROPERTY(Transient)
+    class AInteractiveMap* Map;
+
+    /** Reference to the map pawn. */
+    UPROPERTY(Transient)
+    class AMapPawn* MapPawn;
 };
-
 

@@ -10,16 +10,13 @@
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
-USTRUCT()
-struct FLookUpTextureData
-{
-	GENERATED_BODY()
-
-	TArray<float> PixelData;
-	// useles for now and a waste of memory
-	// keep around for now, might be useful eventually
-	TMap<int32, FName> PixedIndexID;
-};
+//USTRUCT()
+//struct FLookUpTextureData
+//{
+//	GENERATED_BODY()
+//
+//	TArray<float> PixelData;
+//};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapDataChangedSignature, MapMode, mode, FName, provinceID);
 UCLASS()
@@ -46,7 +43,7 @@ public:
 	void GetProvinceData(FName name, FProvinceData& out_data) const;
 	FProvinceData* GetProvinceData(FName name);
 
-	// Update Data
+
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	bool UpdateProvinceData(const FProvinceData& data, FName id);
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
@@ -57,11 +54,9 @@ public:
 	const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
 	{
 		const T* data = mapToSearch.Find(tag);
-
-		//return MapDataComponent->GetDataFromID(tag, mapToSearch);
-
 		return data;
 	}
+
 	//------------------------------- Visual Data -----------------------------------
 
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
@@ -90,44 +85,68 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
-
+	
+	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
 	void SaveMapTextureData();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
 
+	/**
+	* Update map texture per province.
+	*
+	* @param mode The map mode.
+	* @param provinceID The ID of the province.
+	* @param newColor The new color.
+	*/
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
-
+	/**
+	* Update the array that holds the pixel data of a texture.
+	*
+	* @param pixelArray The array of pixels to update.
+	* @param oldColor The old color to replace.
+	* @param newColor The new color to set.
+	* @param texture The texture that the array corresponds to, only passed to get its dimensions
+	* @param provinceIDs The array of province IDs that should change color
+	*/
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
 	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
+	void SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color);
 
 
 protected:
+	// The root of the map.
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapRoot;
 
-	// VISUAL
+	// The visual representation of the map 
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 
 	// -------------------------VISUAL DATA--------------------------------------
+	// The lookup texture.
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
 
+	// The political map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;	
+	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;
+
+	// The religious map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> ReligiousMapTextureComponent;
+
+	// The culture map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> CultureMapTextureComponent;
-	// Material that show the current gameplay map
-	// Political religious or terrain
+
+	// Material that shows the current gameplay map.
+	// Political, religious, or terrain.
 	UPROPERTY(EditAnywhere, Category = "Materials")
 	UMaterialInterface* GameplayMapMaterial;
 
-	// Hold pixel data of the lookup texture
-	FLookUpTextureData MapColorCodeTextureData;
-
+	// Hold pixel data of the lookup texture.
+	TArray<uint8> MapColorCodeTextureData;
 
 	// Border Material 
 	UPROPERTY(EditAnywhere, Category = "Materials|Border")
@@ -138,9 +157,11 @@ protected:
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 
 	//------------------------------- Data -----------------------------------------
+	// The map data component.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	TObjectPtr<class UMapDataComponent> MapDataComponent;
 
+	// The current map mode.
 	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 

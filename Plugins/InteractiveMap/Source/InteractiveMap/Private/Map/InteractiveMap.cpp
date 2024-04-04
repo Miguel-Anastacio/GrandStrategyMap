@@ -93,6 +93,14 @@ void AInteractiveMap::SetPixelColor(int index, TArray<float>& pixelArray, const 
 	pixelArray[index + 3] = color.A;
 }
 
+void AInteractiveMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color)
+{
+	pixelArray[index ] = color.B;
+	pixelArray[index + 1] = color.G;
+	pixelArray[index + 2] = color.R;
+	pixelArray[index + 3] = color.A;
+}
+
 void AInteractiveMap::SaveMapTextureData()
 {
 	if (!IsValid(MapLookUpTexture))
@@ -107,7 +115,7 @@ void AInteractiveMap::SaveMapTextureData()
 	int32 Height = MapLookUpTexture->GetSizeY();
 	const uint8* Data = static_cast<const uint8*>(TextureData);
 
-	MapColorCodeTextureData.PixelData.AddDefaulted(Width * Height * 4);
+	MapColorCodeTextureData.AddDefaulted(Width * Height * 4);
 
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
@@ -120,7 +128,7 @@ void AInteractiveMap::SaveMapTextureData()
 			uint8 R = Data[Index + 2];
 			uint8 A = Data[Index + 3];
 
-			SetPixelColor(Index, MapColorCodeTextureData.PixelData, FColor(R, G, B, A));
+			SetPixelColorInt(Index, MapColorCodeTextureData, FColor(R, G, B, A));
 
 			FColor pixelColor = FColor(0, 0, 0, 0);
 			FName* id = MapDataComponent->LookUpTable.Find(FVector(R, G, B));
@@ -133,11 +141,6 @@ void AInteractiveMap::SaveMapTextureData()
 					continue;
 				}
 
-				if((*id) == FName("2"))
-				{
-					int a = 2;
-				}
-
 				PoliticalMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCountryColor(province));
 				ReligiousMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetReligionColor(province));
 				CultureMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCultureColor(province));
@@ -146,7 +149,7 @@ void AInteractiveMap::SaveMapTextureData()
 				// this pixel belongs to a province so safe its indexes on the map
 				//FName* indexPixel = MapColorCodeTextureData.PixedIndexID.Find((*id));
 				
-				MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));	
+				//MapColorCodeTextureData.PixedIndexID.Add(Index, (*id));	
 			}
 			else
 			{
@@ -265,9 +268,9 @@ void AInteractiveMap::UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& 
 				continue;
 
 			// get province id from the array that holds the original look up texture pixel data
-			FName* id = MapDataComponent->LookUpTable.Find(FVector(MapColorCodeTextureData.PixelData[Index],
-											MapColorCodeTextureData.PixelData[Index + 1],
-											MapColorCodeTextureData.PixelData[Index + 2]));
+			FName* id = MapDataComponent->LookUpTable.Find(FVector(MapColorCodeTextureData[Index+2],
+											MapColorCodeTextureData[Index + 1],
+											MapColorCodeTextureData[Index]));
 			if (!id)
 				continue;
 
@@ -454,10 +457,10 @@ FColor AInteractiveMap::GetColorFromUV(UTexture2D* texture, FVector2D uv) const
 		return FColor();
 	}
 
-	FColor color = FColor(MapColorCodeTextureData.PixelData[index],
-		MapColorCodeTextureData.PixelData[index + 1],
-		MapColorCodeTextureData.PixelData[index + 2],
-		MapColorCodeTextureData.PixelData[index + 3]);
+	FColor color = FColor(MapColorCodeTextureData[index+2],
+		MapColorCodeTextureData[index + 1],
+		MapColorCodeTextureData[index],
+		MapColorCodeTextureData[index + 3]);
 
 	return color;
 }
