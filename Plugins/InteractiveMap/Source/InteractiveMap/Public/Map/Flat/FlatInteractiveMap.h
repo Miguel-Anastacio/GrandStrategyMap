@@ -5,11 +5,11 @@
 #include "CoreMinimal.h"
 #include "Map/InteractiveMap.h"
 #include "FlatInteractiveMap.generated.h"
-
 /**
- *  FlatMap base class - 
+ *  FlatMap base class -
  */
 class UMapLimitComponent;
+class UMapVisualComponent;
 UCLASS()
 class INTERACTIVEMAP_API AFlatInteractiveMap : public AInteractiveMap
 {
@@ -19,5 +19,16 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AInteractiveMap
 protected:
 	void BeginPlay() override;
 
+	void SetMapMode_Implementation(MapMode mode) override;
+	void UpdateLimitComponent(UMapVisualComponent* mapLimit, MapMode mode, UStaticMeshComponent* originalMesh);
+
+	/** Map limit component. */
+	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
+	TObjectPtr<class UMapLimitComponent> LeftMapLimit;
+	/** Map limit component. */
+	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
+	TObjectPtr<class UMapLimitComponent> RightMapLimit;
+
 
 };
+

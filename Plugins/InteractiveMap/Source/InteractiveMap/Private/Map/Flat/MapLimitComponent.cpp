@@ -1,4 +1,3 @@
-// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/Flat/MapLimitComponent.h"
 #include "Components/BoxComponent.h"
@@ -7,16 +6,17 @@
 #include "Game/MapPawn.h"
 // Sets default values for this component's properties
 UMapLimitComponent::UMapLimitComponent()
+	: USceneComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
 
 	Box = CreateDefaultSubobject<UBoxComponent>("Box Limit");
-	Box->SetupAttachment(this);
+	//Box->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
-	MapVisualComponent->SetupAttachment(Box);
-	MapVisualComponent->AttachMeshes(Box);
+	//MapVisualComponent->SetupAttachment(Box);
+	//MapVisualComponent->AttachMeshes(Box);
 }
 
 void UMapLimitComponent::BeginPlay()
@@ -49,8 +49,8 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 
 	const float xPos = owner->GetActorLocation().X + distanceToMapCenter;
 
-	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y , currentPlayerPos.Z));
-	
+	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y, currentPlayerPos.Z));
+
 }
 void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
@@ -60,4 +60,11 @@ void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh,
 UMapVisualComponent* UMapLimitComponent::GetVisualComponent()
 {
 	return MapVisualComponent;
+}
+
+void UMapLimitComponent::Attach(USceneComponent* root)
+{
+	Box->SetupAttachment(root);
+	MapVisualComponent->SetupAttachment(Box);
+	MapVisualComponent->AttachMeshes(Box);
 }

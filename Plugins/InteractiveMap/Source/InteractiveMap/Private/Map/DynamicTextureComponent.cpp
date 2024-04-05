@@ -1,5 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Thank you J.Anthracite for the tutorial
+// https://dev.epicgames.com/community/learning/tutorials/ow9v/unreal-engine-creating-a-runtime-editable-texture-in-c
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/DynamicTextureComponent.h"
 #include "RHICommandList.h"

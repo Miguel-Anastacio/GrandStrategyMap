@@ -4,13 +4,12 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "MapLimitComponent.generated.h"
-
-
 /**
  * Component for managing map limits.
  */
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
-class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
+class UBoxComponent
+    UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
+    class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
 {
     GENERATED_BODY()
 
@@ -27,6 +26,10 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Visual")
     class UMapVisualComponent* GetVisualComponent();
 
+
+    void Attach(USceneComponent* root);
+    FORCEINLINE UBoxComponent* GetBoxComponent() { return Box; };
+
 protected:
     /** Called when the game starts. */
     virtual void BeginPlay() override;
@@ -37,9 +40,10 @@ protected:
         int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 protected:
+
     /** Box component for the limit. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
-    TObjectPtr<class UBoxComponent> Box;
+    TObjectPtr<UBoxComponent> Box;
 
     /** Map visual component. */
     UPROPERTY(EditAnywhere, Category = "Visual", BlueprintReadOnly)
