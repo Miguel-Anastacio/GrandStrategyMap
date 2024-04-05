@@ -86,6 +86,11 @@ protected:
     /** Offset for mouse click on Z-axis. */
     UPROPERTY(EditAnywhere, Category = "Mouse Click")
     float zOffset = 300.0f;
+    /** Define channel where the mouse traces are performed 
+    *   For the ClickableMap to work make sure that at least one of the map meshes blocks this channel
+    */
+    UPROPERTY(EditAnywhere, Category = "Mouse Click")
+    TEnumAsByte<ECollisionChannel> MouseTraceChannel = ECC_Visibility;
 
     /** Flag indicating if a province is selected. */
     bool bProvinceSelected = false;
@@ -104,7 +109,7 @@ protected:
 
     /** Reference to the interactive map. */
     UPROPERTY(Transient)
-    class AInteractiveMap* Map;
+    class AClickableMap* Map;
 
     /** Reference to the map pawn. */
     UPROPERTY(Transient)

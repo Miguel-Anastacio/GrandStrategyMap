@@ -25,7 +25,7 @@ public:
 
 	/** Sets the reference to the interactive map. */
 	UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")
-	void SetInteractiveMapReference(class AInteractiveMap* map);
+	void SetInteractiveMapReference(class AClickableMap* map);
 
 protected:
 	/** Holds the scroll box containing country editor widgets. */
@@ -37,6 +37,6 @@ protected:
 	TSubclassOf<class UCountryEditorWidget> CountryEditorClass;
 
 	/** Reference to the interactive map. */
-	class AInteractiveMap* GameMapReference;
+	class AClickableMap* GameMapReference;
 
 };

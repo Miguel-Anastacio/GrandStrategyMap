@@ -7,9 +7,9 @@
 /**
  * Component for managing map limits.
  */
-class UBoxComponent
-    UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
-    class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
+class UBoxComponent;
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
+class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
 {
     GENERATED_BODY()
 

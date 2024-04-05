@@ -5,13 +5,14 @@
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
 #include "UI/Widgets/ProvinceEditorWidget.h"
 #include "UI/Widgets/EditCountriesContainerWidget.h"
+#include "InteractiveMap.h"
 void AManagerHUD::DisplayProvinceEditorWidget(const FProvinceData& provinceData, FName id)
 {
 	if (!ProvinceEditorWidget)
 	{
 		if (!ProvincedEditorWidgetClass)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Province Editor Widget class not set"));
+			UE_LOG(LogInteractiveMap, Error, TEXT("Province Editor Widget class not set"));
 			return;
 		}
 		ProvinceEditorWidget = CreateWidget<UProvinceEditorWidget>(GetOwningPlayerController(), ProvincedEditorWidgetClass);
@@ -29,7 +30,7 @@ void AManagerHUD::DisplayCountryContainerEditorWidget()
 	{
 		if (!CountryContainerEditorWidgetClass)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Country Editor Widget class not set"));
+			UE_LOG(LogInteractiveMap, Error, TEXT("Country Editor Widget class not set"));
 			return;
 		}
 
@@ -73,7 +74,7 @@ UE_ENABLE_OPTIMIZATION
 //		return true;
 //	return false;
 //}
-void AManagerHUD::SetInteractiveMapReference(AInteractiveMap* map)
+void AManagerHUD::SetInteractiveMapReference(AClickableMap* map)
 {
 	GameMapReference = map;
 	if (ProvinceEditorWidget)

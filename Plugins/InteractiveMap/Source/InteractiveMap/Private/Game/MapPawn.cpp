@@ -4,7 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 // Sets default values
 AMapPawn::AMapPawn()
 {
@@ -50,12 +50,8 @@ void AMapPawn::Tick(float DeltaTime)
 
 void AMapPawn::MoveCamera(FVector2D input)
 {
-
 	FVector vel = FVector(input.X, input.Y, 0) * CameraMoveSpeed;
-	float yPos = GetActorLocation().Y + vel.Y;
-
 	CollisionComponent->SetPhysicsLinearVelocity(vel);
-
 }
 
 void AMapPawn::Stop()
@@ -96,7 +92,7 @@ void AMapPawn::ZoomCamera(float input)
 	}
 }
 
-void AMapPawn::SetInteractiveMap(AInteractiveMap* map)
+void AMapPawn::SetInteractiveMap(AClickableMap* map)
 {
 	GameMap = map;
 }

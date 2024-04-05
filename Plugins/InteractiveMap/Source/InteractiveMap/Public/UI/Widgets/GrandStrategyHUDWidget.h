@@ -70,6 +70,6 @@ protected:
 	FString FileNameCountry = FString("CountryCustom.json");
 
 	/** Reference to the interactive map. */
-	class AInteractiveMap* GameMap;
+	class AClickableMap* GameMap;
 
 };

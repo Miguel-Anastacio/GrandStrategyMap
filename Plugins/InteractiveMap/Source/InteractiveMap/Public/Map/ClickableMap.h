@@ -4,20 +4,20 @@
 #include "GameFramework/Actor.h"
 #include "MapUtils.h"
 #include "MapEnums.h"
-#include "InteractiveMap.generated.h"
+#include "ClickableMap.generated.h"
 
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapDataChangedSignature, MapMode, mode, FName, provinceID);
 UCLASS()
-class INTERACTIVEMAP_API AInteractiveMap : public AActor
+class INTERACTIVEMAP_API AClickableMap : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AInteractiveMap();
+	AClickableMap();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	//------------------------------- Data -----------------------------------------
@@ -55,7 +55,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
 	void SetMapMode(MapMode mode);
-	void SetMapMode_Implementation(MapMode mode);
+	virtual void SetMapMode_Implementation(MapMode mode);
 
 	// Update Visual Data
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")

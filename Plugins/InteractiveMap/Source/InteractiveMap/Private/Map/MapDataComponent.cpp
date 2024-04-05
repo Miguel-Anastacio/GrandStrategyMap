@@ -3,6 +3,8 @@
 #include "Map/MapDataComponent.h"
 #include "Map/MapEnums.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
+#include "InteractiveMap.h"
+
 UMapDataComponent::UMapDataComponent()
 {
 
@@ -52,7 +54,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 	FProvinceData* province = ProvinceDataMap.Find(id);
 	if (!province)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid province id - update not possible"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
 		return false;
 	}
 
@@ -61,7 +63,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 		FCountryData* newOwnerCountry = CountryDataMap.Find(data.Owner);
 		if (!newOwnerCountry)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid owner - update not possible"));
+			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid owner - update not possible"));
 			return false;
 		}
 
@@ -75,7 +77,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 		out_newColor = GetReligionColor(&data);
 		if (out_newColor == FColor(0, 0, 0, 0))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid religion - update not possible"));
+			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid religion - update not possible"));
 			return false;
 		}
 
@@ -88,7 +90,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 		out_newColor = GetCultureColor(&data);
 		if (out_newColor == FColor(0, 0, 0, 0))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid culture - update not possible"));
+			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid culture - update not possible"));
 			return false;
 		}
 
@@ -119,7 +121,7 @@ bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid province id - update not possible"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
 		return false;
 	}
 }
@@ -129,7 +131,7 @@ void UMapDataComponent::CreateLookUpTable()
 {
 	if (!MapDataTable)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Map table not loaded"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Map table not loaded"));
 		return;
 	}
 
@@ -179,7 +181,7 @@ void UMapDataComponent::SetCountryProvinces()
 		FCountryData* country = CountryDataMap.Find(province.Value.Owner);
 		if (!country)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Province has an invalid Owner"));
+			UE_LOG(LogInteractiveMap, Error, TEXT("Province has an invalid Owner"));
 			continue;
 		}
 

@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
+#include "InteractiveMap.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
 
@@ -31,7 +32,7 @@ public:
     {
         if (!dataTable)
         {
-            UE_LOG(LogTemp, Error, TEXT("Data not loaded"));
+            UE_LOG(LogInteractiveMap, Error, TEXT("Data not loaded"));
             return false;
         }
         TArray<FName> RowNames = dataTable->GetRowNames();

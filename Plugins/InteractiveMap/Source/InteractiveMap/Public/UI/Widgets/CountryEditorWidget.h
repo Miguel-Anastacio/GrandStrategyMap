@@ -24,8 +24,7 @@ public:
 
     /** Sets the reference to the interactive map. */
     UFUNCTION(BlueprintCallable, Category = "Country Editor")
-    void SetInteractiveMapReference(class AInteractiveMap* map);
-
+    void SetInteractiveMapReference(class AClickableMap* map);
 protected:
     virtual void NativeOnInitialized() override;
 
@@ -53,6 +52,6 @@ protected:
     FCountryData CountryData;
 
     /** Reference to the interactive map. */
-    class AInteractiveMap* GameMapReference;
+    class AClickableMap* GameMapReference;
 
 };

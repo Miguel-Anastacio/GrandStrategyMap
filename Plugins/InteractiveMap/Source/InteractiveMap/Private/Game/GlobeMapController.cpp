@@ -4,7 +4,9 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
+#include "InteractiveMap.h"
+
 void AGlobeMapController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -35,7 +37,7 @@ void AGlobeMapController::StartRotate()
 	if (!hit.GetActor())
 		return;
 
-	Map = Cast<AInteractiveMap>(hit.GetActor());
+	Map = Cast<AClickableMap>(hit.GetActor());
 
 }
 UE_DISABLE_OPTIMIZATION
@@ -43,7 +45,7 @@ void AGlobeMapController::RotateMap(const FInputActionInstance& instance)
 {
 	if (!Map)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Rotate not possible - make sure you click on the globe to start rotation"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Rotate not possible - make sure you click on the globe to start rotation"));
 		return;
 	}
 	FVector2D input = instance.GetValue().Get<FVector2D>();

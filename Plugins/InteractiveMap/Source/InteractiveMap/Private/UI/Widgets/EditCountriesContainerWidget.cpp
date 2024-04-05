@@ -1,11 +1,11 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/EditCountriesContainerWidget.h"
 #include "UI/Widgets/CountryEditorWidget.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 #include "Components/ScrollBox.h"
 
 
-void UEditCountriesContainerWidget::SetInteractiveMapReference(AInteractiveMap* map)
+void UEditCountriesContainerWidget::SetInteractiveMapReference(AClickableMap* map)
 {
 	GameMapReference = map;
 	AddCountriesToBox(*map->GetCountryDataMap());

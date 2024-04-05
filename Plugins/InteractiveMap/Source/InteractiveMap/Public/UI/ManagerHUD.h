@@ -57,7 +57,7 @@ public:
 	 * @param map Reference to the interactive map.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetInteractiveMapReference(class AInteractiveMap* map);
+	void SetInteractiveMapReference(class AClickableMap* map);
 
 protected:
 	void BeginPlay() override;
@@ -88,5 +88,5 @@ protected:
 
 	/** Reference to the interactive map. */
 	UPROPERTY(Transient)
-	class AInteractiveMap* GameMapReference;
+	class AClickableMap* GameMapReference;
 };

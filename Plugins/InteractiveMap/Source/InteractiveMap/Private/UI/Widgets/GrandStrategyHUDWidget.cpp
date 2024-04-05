@@ -2,16 +2,17 @@
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
 #include "UI/Widgets/CustomButtonWidget.h"
 #include "Components/Button.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
+#include "InteractiveMap.h"
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
 {
-	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), AInteractiveMap::StaticClass());
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(), AClickableMap::StaticClass());
 	if (actor)
 	{
-		GameMap = Cast<AInteractiveMap>(actor);
+		GameMap = Cast<AClickableMap>(actor);
 	}
 }
 
@@ -50,7 +51,7 @@ void UGrandStrategyHUDWidget::SetMapMode(UCustomButtonWidget* button)
 {
 	if (!GameMap)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Map Variable not set in hud widget"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Map Variable not set in hud widget"));
 		return;
 	}
 	if (button == PoliticalMapButton)

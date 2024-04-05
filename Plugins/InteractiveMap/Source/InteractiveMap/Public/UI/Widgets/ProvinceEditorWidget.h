@@ -33,7 +33,7 @@ public:
 	 * @param map Pointer to the interactive map actor.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-	void SetInteractiveMapReference(class AInteractiveMap* map);
+	void SetInteractiveMapReference(class AClickableMap* map);
 
 protected:
 	/**
@@ -75,6 +75,6 @@ protected:
 	// Data structure containing information about the currently selected province.
 	FProvinceData ProvinceSelectedData; 
 	// Pointer to the interactive map actor used as a reference for this component.
-	class AInteractiveMap* GameMapReference; 
+	class AClickableMap* GameMapReference; 
 
 };

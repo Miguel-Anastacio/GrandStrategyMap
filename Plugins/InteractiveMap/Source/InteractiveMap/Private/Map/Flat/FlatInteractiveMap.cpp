@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 AFlatInteractiveMap::AFlatInteractiveMap()
-	: AInteractiveMap()
+	: AClickableMap()
 {
 
 	LeftMapLimit = CreateDefaultSubobject<UMapLimitComponent>(TEXT("Limit L"));

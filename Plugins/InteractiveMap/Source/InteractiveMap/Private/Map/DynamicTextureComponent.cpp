@@ -8,6 +8,8 @@
 #include "RenderingThread.h"
 //#include "Rendering/Texture2DResource.h"
 #include "Engine/Texture2D.h"
+#include "InteractiveMap.h"
+
 // Sets default values for this component's properties
 UDynamicTextureComponent::UDynamicTextureComponent()
 {
@@ -131,7 +133,7 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 {
 	if (DynamicTexture == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Dynamic Texture tried to Update Texture but it hasn't been initialized!"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Dynamic Texture tried to Update Texture but it hasn't been initialized!"));
 		return;
 	}
 

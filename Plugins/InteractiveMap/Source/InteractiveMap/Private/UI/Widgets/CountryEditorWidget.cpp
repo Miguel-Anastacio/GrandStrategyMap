@@ -2,7 +2,7 @@
 
 #include "UI/Widgets/CountryEditorWidget.h"
 #include "UI/Widgets/CustomEditableText.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 #include "UI/Utilities/RamaColorPicker.h"
 
 void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
@@ -13,7 +13,7 @@ void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
 	ColorPicker->JoyColor = data.Color;
 }
 
-void UCountryEditorWidget::SetInteractiveMapReference(AInteractiveMap* map)
+void UCountryEditorWidget::SetInteractiveMapReference(AClickableMap* map)
 {
 	GameMapReference = map;
 }

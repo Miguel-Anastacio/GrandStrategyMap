@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 #include "FlatInteractiveMap.generated.h"
 /**
  *  FlatMap base class -
@@ -11,7 +11,7 @@
 class UMapLimitComponent;
 class UMapVisualComponent;
 UCLASS()
-class INTERACTIVEMAP_API AFlatInteractiveMap : public AInteractiveMap
+class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 {
 	GENERATED_BODY()
 

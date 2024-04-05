@@ -125,5 +125,5 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FName, FColoredData> VisualPropertiesDataMap;
 
-    friend class AInteractiveMap;
+    friend class AClickableMap;
 };

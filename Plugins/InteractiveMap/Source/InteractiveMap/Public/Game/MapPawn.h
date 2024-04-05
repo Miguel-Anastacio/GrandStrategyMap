@@ -9,7 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class USphereComponent;
-class AInteractiveMap;
+class AClickableMap;
 /**
  * Pawn class for controlling the map camera.
  */
@@ -38,7 +38,7 @@ public:
 
     /** Sets the interactive map reference. */
     UFUNCTION(BlueprintCallable, Category = "Map Pawn")
-    void SetInteractiveMap(AInteractiveMap* map);
+    void SetInteractiveMap(AClickableMap* map);
 
     /** Sets vertical movement limits. */
     FORCEINLINE void SetVerticalMovementLimits(FVector2D limits) { VerticalLimitMovement = limits; };
@@ -88,6 +88,6 @@ protected:
 
     /** Weak reference to the interactive map. */
     UPROPERTY()
-    TWeakObjectPtr<AInteractiveMap> GameMap;
+    TWeakObjectPtr<AClickableMap> GameMap;
 };
 

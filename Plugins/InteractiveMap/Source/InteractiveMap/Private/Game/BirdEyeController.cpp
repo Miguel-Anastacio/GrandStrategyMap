@@ -6,12 +6,13 @@
 #include "InputActionValue.h"
 #include "EnhancedInputSubsystems.h"
 #include "Game/MapPawn.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/ManagerHUD.h"
 #include "Components/SlateWrapperTypes.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/Engine.h"
+#include "InteractiveMap.h"
 
 ABirdEyeController::ABirdEyeController()
 {
@@ -36,7 +37,7 @@ void ABirdEyeController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FHitResult hit;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hit))
+	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, hit))
 	{
 		FVector start = hit.ImpactPoint;
 		FVector end = hit.ImpactPoint;
@@ -46,13 +47,13 @@ void ABirdEyeController::Tick(float DeltaTime)
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
 		params.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
+		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, MouseTraceChannel, params))
 			return;
 		if (!IsValid(hit.GetActor()))
 			return;
 
 		if(!Map)
-			Map = Cast<AInteractiveMap>(hit.GetActor());
+			Map = Cast<AClickableMap>(hit.GetActor());
 
 		if (Map)
 		{
@@ -107,7 +108,7 @@ void ABirdEyeController::SetupInputComponent()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogInteractiveMap, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
 
@@ -115,7 +116,7 @@ void ABirdEyeController::MouseClick()
 {
 	FHitResult hit;
 	bProvinceSelected = false;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hit))
+	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, hit))
 	{
 		FVector start = hit.ImpactPoint;
 		FVector end = hit.ImpactPoint;
@@ -125,13 +126,13 @@ void ABirdEyeController::MouseClick()
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
 		params.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
+		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, MouseTraceChannel, params))
 			return;
 		if (!IsValid(hit.GetActor()))
 			return;
 
 		if (!Map)
-			Map = Cast<AInteractiveMap>(hit.GetActor());
+			Map = Cast<AClickableMap>(hit.GetActor());
 
 		if (Map)
 		{
@@ -141,9 +142,6 @@ void ABirdEyeController::MouseClick()
 				
 			bool result;
 			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B), result);
-			//if(!result)
-
-
 			FProvinceData* data = Map->GetProvinceData(id);
 			if (data)
 			{
@@ -176,7 +174,7 @@ void ABirdEyeController::MouseClick()
 			hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
 		}
 	}
-
+	
 }
 
 void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
@@ -205,7 +203,6 @@ void ABirdEyeController::StartMovement(const FVector2D& mousePos)
 	MoveInput = mousePos - ViewportCenter; 
 	MoveInput.Normalize();
 
-	
 }
 
 void ABirdEyeController::ToggleCountryEditor()
@@ -217,10 +214,10 @@ void ABirdEyeController::ToggleCountryEditor()
 		if (!Map)
 		{
 			TArray<AActor*> FoundActors;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInteractiveMap::StaticClass(), FoundActors);
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AClickableMap::StaticClass(), FoundActors);
 			if (FoundActors.Num() > 0)
 			{
-				Map = Cast<AInteractiveMap>(FoundActors[0]);
+				Map = Cast<AClickableMap>(FoundActors[0]);
 				hud->SetInteractiveMapReference(Map);
 			}
 		}

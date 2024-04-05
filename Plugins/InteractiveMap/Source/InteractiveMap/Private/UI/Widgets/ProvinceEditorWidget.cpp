@@ -3,7 +3,9 @@
 #include "UI/Widgets/CustomEditableText.h"
 #include "Components/EditableText.h"
 #include "Components/RichTextBlock.h"
-#include "Map/InteractiveMap.h"
+#include "Map/ClickableMap.h"
+#include "InteractiveMap.h"
+
 void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName provinceID)
 {
 
@@ -24,7 +26,7 @@ void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName pro
 	ProvinceSelectedID = provinceID;
 }
 
-void UProvinceEditorWidget::SetInteractiveMapReference(AInteractiveMap* map)
+void UProvinceEditorWidget::SetInteractiveMapReference(AClickableMap* map)
 {
 	GameMapReference = map;
 }
@@ -120,7 +122,7 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 		{
 			if (!Text.IsNumeric())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Invalid value in population, please insert a number"));
+				UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid value in population, please insert a number"));
 				editedText->SetValues(Text, FText::FromString(FString("______")));
 			}
 			if (GameMapReference)

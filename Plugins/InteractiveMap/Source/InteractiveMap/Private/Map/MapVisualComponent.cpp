@@ -1,18 +1,24 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/MapVisualComponent.h"
+#include "InteractiveMap.h"
 
 // Sets default values for this component's properties
 UMapVisualComponent::UMapVisualComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
     MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Select"));
+    MapSelectMesh->SetCollisionProfileName(TEXT("BlockAll"));
+    MapSelectMesh->bHiddenInGame = true;
 
     MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Border"));
+    MapBorderMesh->SetCollisionProfileName(TEXT("NoCollision"));
 
     TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Terrain"));
+    TerrainMapMesh->SetCollisionProfileName(TEXT("NoCollision"));
 
     GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Gameplay"));
+    GameplayMapMesh->SetCollisionProfileName(TEXT("NoCollision"));
 }
 
 void UMapVisualComponent::AttachMeshes(USceneComponent* root)
@@ -26,7 +32,6 @@ void UMapVisualComponent::AttachMeshes(USceneComponent* root)
 }
 void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
 {
-
     InitMeshProperty(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
     InitMeshProperty(mapVisual->GetMapBorderMeshComponent(), MapBorderMesh);
     InitMeshProperty(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
@@ -67,7 +72,7 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
         return instance;
     }
 
-    UE_LOG(LogTemp, Error, TEXT("Original Mesh is not valid"));
+    UE_LOG(LogInteractiveMap, Error, TEXT("Original Mesh is not valid"));
     return nullptr;
 }
 
@@ -75,12 +80,12 @@ void UMapVisualComponent::InitMeshProperty(UStaticMeshComponent* original, UStat
 {
     if (!original)
     {
-        UE_LOG(LogTemp, Error, TEXT("Original Mesh is not valid"));
+        UE_LOG(LogInteractiveMap, Error, TEXT("Original Mesh is not valid"));
         return;
     }
     if (!meshToUpdate)
     {
-        UE_LOG(LogTemp, Error, TEXT("Mesh to update is not valid"));
+        UE_LOG(LogInteractiveMap, Error, TEXT("Mesh to update is not valid"));
         return;
     }
 

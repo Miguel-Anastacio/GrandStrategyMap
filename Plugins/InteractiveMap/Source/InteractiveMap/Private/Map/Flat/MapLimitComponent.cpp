@@ -4,6 +4,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Map/MapVisualComponent.h"
 #include "Game/MapPawn.h"
+#include "InteractiveMap.h"
+
 // Sets default values for this component's properties
 UMapLimitComponent::UMapLimitComponent()
 	: USceneComponent()
@@ -40,7 +42,7 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	AActor* owner = GetOwner();
 	if (!owner)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Owner of Map Limit not set"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Owner of Map Limit not set"));
 		return;
 	}
 

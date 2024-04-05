@@ -1,5 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "Map/MapUtils.h"
+#include "InteractiveMap.h"
 
 int32 FProvinceIDData::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
 {
@@ -16,7 +17,7 @@ int32 FProvinceIDData::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("Invalid Hex value"));
+            UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid Hex value"));
         }
     }
     return total;
@@ -40,7 +41,7 @@ FColor FProvinceIDData::ConvertHexStringToRGB(const FString& color, const TMap<T
         return ColorValue;
     }
 
-    UE_LOG(LogTemp, Error, TEXT("Color is not hexadecimal format"));
+    UE_LOG(LogInteractiveMap, Error, TEXT("Color is not hexadecimal format"));
     return FColor();
 }
 
