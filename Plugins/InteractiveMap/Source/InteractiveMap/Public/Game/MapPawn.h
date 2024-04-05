@@ -78,10 +78,15 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Camera|Zoom")
     float ZoomCameraRot = 2000.0f;
 
-    /** Camera collision scale on zoom. */
+    /** Adjust size of sphere component based on camera zoom */
     UPROPERTY(EditAnywhere, Category = "Camera|Zoom")
-    float CameraCollisionScaleOnZoom = 2.0f;
+    float CameraCollisionScaleOnZoom = 0.1f;
 
+    /** Max Sphere Component Scale */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+    float MaxSphereScale = 5;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+    float MinSphereScale = 0.1;
     /** Vertical movement limits. (x top, y bottom) */
     UPROPERTY(BlueprintReadWrite, Category = "Camera|Movement")
     FVector2D VerticalLimitMovement = FVector2D(-3000, 3000);

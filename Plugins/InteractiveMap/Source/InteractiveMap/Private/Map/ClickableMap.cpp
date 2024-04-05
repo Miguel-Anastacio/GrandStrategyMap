@@ -34,19 +34,15 @@ AClickableMap::AClickableMap()
 
 }
 
-UE_DISABLE_OPTIMIZATION
 void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 }
-// Called when the game starts or when spawned
-void AClickableMap::BeginPlay()
+void AClickableMap::InitializeMap()
 {
-	Super::BeginPlay();
-
 	if (!MapLookUpTexture)
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Map Look up Texture not assigned"));
+		UE_LOG(LogInteractiveMap, Fatal, TEXT("Map Look up Texture not assigned"));
 		return;
 	}
 	//// Data
@@ -75,6 +71,13 @@ void AClickableMap::BeginPlay()
 	{
 		player->SetInteractiveMap(this);
 	}
+}
+// Called when the game starts or when spawned
+void AClickableMap::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitializeMap();
 }
 
 void AClickableMap::SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A)
@@ -137,6 +140,7 @@ void AClickableMap::SaveMapTextureData()
 				if (!province)
 				{
 					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
+					return;
 					continue;
 				}
 
@@ -364,7 +368,8 @@ FProvinceData* AClickableMap::GetProvinceData(FName name)
 
 void AClickableMap::SetBorderVisibility(bool status)
 {
-	MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
+	if(bUseBorderMesh)
+		MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
 }
 
 bool AClickableMap::UpdateProvinceData(const FProvinceData& data, FName id) 
@@ -461,5 +466,3 @@ FColor AClickableMap::GetColorFromUV(UTexture2D* texture, FVector2D uv) const
 
 	return color;
 }
-
-UE_ENABLE_OPTIMIZATION

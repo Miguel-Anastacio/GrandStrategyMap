@@ -18,6 +18,7 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 	AFlatInteractiveMap();
 protected:
 	void BeginPlay() override;
+	void InitializeMap() override;
 
 	void SetMapMode_Implementation(MapMode mode) override;
 	void UpdateLimitComponent(UMapVisualComponent* mapLimit, MapMode mode, UStaticMeshComponent* originalMesh);

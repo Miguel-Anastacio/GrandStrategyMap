@@ -131,7 +131,7 @@ void UMapDataComponent::CreateLookUpTable()
 {
 	if (!MapDataTable)
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Map table not loaded"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 		return;
 	}
 
@@ -164,9 +164,15 @@ void UMapDataComponent::CreateLookUpTable()
 
 void UMapDataComponent::ReadDataTables()
 {
-	UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap);
-	UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryDataMap);
-	UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap);
+	if (!UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
+		UE_LOG(LogInteractiveMap, Error, TEXT("Province Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+
+	if(!UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
+		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+
+	if(UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
+		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+
 }
 
 void UMapDataComponent::SetCountryProvinces()

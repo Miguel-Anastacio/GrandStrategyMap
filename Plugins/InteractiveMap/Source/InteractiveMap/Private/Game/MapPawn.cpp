@@ -67,9 +67,13 @@ void AMapPawn::ZoomCamera(float input)
 		CameraBoom->TargetArmLength = newZoom;
 		// adjust the size of the collision component depending on the zoom distance
 		FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
+
+		scale.X = FMath::Clamp(scale.X, MinSphereScale, MaxSphereScale);
+		scale.Y = FMath::Clamp(scale.Y, MinSphereScale, MaxSphereScale);
+		scale.Z = FMath::Clamp(scale.Z, MinSphereScale, MaxSphereScale); 
+
 		CollisionComponent->SetWorldScale3D(scale);
 	}
-
 
 	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
 	{
@@ -77,7 +81,7 @@ void AMapPawn::ZoomCamera(float input)
 		// hide borders
 		if (GameMap.Get())
 		{
-			//GameMap->SetBorderVisibility(false);
+			GameMap->SetBorderVisibility(false);
 		}
 	}
 	else
@@ -85,7 +89,7 @@ void AMapPawn::ZoomCamera(float input)
 		// Show borders
 		if (GameMap.Get())
 		{
-			//GameMap->SetBorderVisibility(true);
+			GameMap->SetBorderVisibility(true);
 		}
 
 		//CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));

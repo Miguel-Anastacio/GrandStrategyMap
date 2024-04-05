@@ -32,7 +32,7 @@ public:
     {
         if (!dataTable)
         {
-            UE_LOG(LogInteractiveMap, Error, TEXT("Data not loaded"));
+            //UE_LOG(LogInteractiveMap, Error, TEXT("Data not loaded"));
             return false;
         }
         TArray<FName> RowNames = dataTable->GetRowNames();

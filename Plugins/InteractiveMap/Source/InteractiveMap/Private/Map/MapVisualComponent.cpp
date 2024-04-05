@@ -8,17 +8,18 @@ UMapVisualComponent::UMapVisualComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
     MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Select"));
-    MapSelectMesh->SetCollisionProfileName(TEXT("BlockAll"));
+    MapSelectMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
     MapSelectMesh->bHiddenInGame = true;
 
     MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Border"));
-    MapBorderMesh->SetCollisionProfileName(TEXT("NoCollision"));
+    MapBorderMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
     TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Terrain"));
     TerrainMapMesh->SetCollisionProfileName(TEXT("NoCollision"));
+    TerrainMapMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 
     GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Gameplay"));
-    GameplayMapMesh->SetCollisionProfileName(TEXT("NoCollision"));
+    GameplayMapMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 }
 
 void UMapVisualComponent::AttachMeshes(USceneComponent* root)

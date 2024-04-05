@@ -18,7 +18,10 @@ class INTERACTIVEMAP_API AClickableMap : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AClickableMap();
-	// Called every frame
+
+	UFUNCTION(BlueprintCallable, Category = "Map")
+	virtual void InitializeMap();
+
 	virtual void Tick(float DeltaTime) override;
 	//------------------------------- Data -----------------------------------------
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
@@ -140,13 +143,14 @@ protected:
 	TArray<uint8> MapColorCodeTextureData;
 
 	// Border Material 
-	UPROPERTY(EditAnywhere, Category = "Materials|Border")
+	UPROPERTY(EditAnywhere, Category = "Border|Materials")
 	UMaterialInterface* BorderMaterial;
-	UPROPERTY(EditAnywhere, Category = "Materials|Border")
+	UPROPERTY(EditAnywhere, Category = "Border|Materials")
 	UMaterialInterface* HQXFilterMaterial;
 	UPROPERTY(EditAnywhere, Category = "Border")
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
-
+	UPROPERTY(EditAnywhere, Category = "Border")
+	bool bUseBorderMesh = false;
 	//------------------------------- Data -----------------------------------------
 	// The map data component.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

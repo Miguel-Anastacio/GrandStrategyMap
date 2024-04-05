@@ -29,7 +29,7 @@ void UMapLimitComponent::BeginPlay()
 		Box->OnComponentBeginOverlap.AddDynamic(this, &UMapLimitComponent::OnOverlapBegin);
 	}
 }
-
+UE_DISABLE_OPTIMIZATION
 void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor)
@@ -54,6 +54,7 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 	player->SetActorLocation(FVector(xPos, currentPlayerPos.Y, currentPlayerPos.Z));
 
 }
+UE_ENABLE_OPTIMIZATION
 void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
 	MapVisualComponent->InitVisualComponents(mapSelectMesh, mapBorder, gameplayMap, terrainMap);
