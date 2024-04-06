@@ -8,19 +8,51 @@
 
 void UProvinceEditorWidget::SetProvinceData(const FProvinceData& data, FName provinceID)
 {
+	NameCustomInput->SetValues(FText::FromString(data.ProvinceName), FText::FromString(FString("______")));
+	PopulationCustomInput->SetValues(FText::AsNumber(data.Population), FText::FromString(FString("______")));
 
 	const FCountryData* owner = GameMapReference->GetDataFromID(data.Owner, *GameMapReference->GetCountryDataMap());
 	const FColoredData* culture = GameMapReference->GetDataFromID(data.Culture, *GameMapReference->GetVisualPropertiesDataMap());
 	const FColoredData* religion = GameMapReference->GetDataFromID(data.Religion, *GameMapReference->GetVisualPropertiesDataMap());
-	FString ownerName = owner->CountryName;
-	FString cultureName = culture->DataName;
-	FString religionName = religion->DataName;
 
-	NameCustomInput->SetValues(FText::FromString(data.ProvinceName), FText::FromString(FString("______")));
-	OwnerCustomInput->SetValues(FText::FromString(ownerName), FText::FromString(FString("______")));
-	ReligionCustomInput->SetValues(FText::FromString(religionName), FText::FromString(FString("______")));
-	CultureCustomInput->SetValues(FText::FromString(cultureName), FText::FromString(FString("______")));
-	PopulationCustomInput->SetValues(FText::AsNumber(data.Population), FText::FromString(FString("______")));
+
+
+	if (!owner)
+	{
+		OwnerCustomInput->SetValues(FText::FromString("Invalid"), FText::FromString(FString("______")));
+
+		UE_LOG(LogInteractiveMap, Error, TEXT("In Province Editor Widget"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Province Owner is not valid, either the CountryData table is not set or the country tag is not present in the data set"));
+	}
+	else
+	{
+		FString ownerName = owner->CountryName;
+		OwnerCustomInput->SetValues(FText::FromString(ownerName), FText::FromString(FString("______")));
+	}
+
+	if (!culture)
+	{
+		CultureCustomInput->SetValues(FText::FromString("Invalid"), FText::FromString(FString("______")));
+		UE_LOG(LogInteractiveMap, Error, TEXT("In Province Editor Widget"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Province Culture is not valid, either the VisualProperties data table is not set or the religion tag is not present in the data set"));
+	}
+	else
+	{
+		FString cultureName = culture->DataName;
+		CultureCustomInput->SetValues(FText::FromString(cultureName), FText::FromString(FString("______")));
+	}
+	if (!religion)
+	{
+		ReligionCustomInput->SetValues(FText::FromString("Invalid"), FText::FromString(FString("______")));
+		UE_LOG(LogInteractiveMap, Error, TEXT("In Province Editor Widget"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Province Religion is not valid, either the VisualProperties table is not set or the culture tag is not present in the data set"));
+	}
+	else
+	{
+		FString religionName = religion->DataName;
+		ReligionCustomInput->SetValues(FText::FromString(religionName), FText::FromString(FString("______")));
+	}
+
 
 	ProvinceSelectedData = data;
 	ProvinceSelectedID = provinceID;

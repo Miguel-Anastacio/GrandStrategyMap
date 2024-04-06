@@ -163,8 +163,6 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	RegionData->SrcBpp = 4;
 	RegionData->SrcData = TextureData.GetData();
 
-	// Declare RenderCommand
-
 	ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)
 	(
 		[RegionData, bFreeData, Texture](FRHICommandListImmediate& RHICmdList)
@@ -215,14 +213,14 @@ void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UT
 		{
 			uint32 start = ((y * width) + x) * 4;
 
-			//// SetPixelValue takes FColor, SetPixel
-			//SetPixelValue(startX + x, 
-			//			startY + y, 
-			//			FColor(dataBuffer[start] * filter.R, 
-			//				dataBuffer[start + 1] * filter.G, 
-			//				dataBuffer[start + 2] * filter.B, 
-			//				dataBuffer[start + 3] * filter.A)
-			//			);
+			// SetPixelValue takes FColor, SetPixel
+			SetPixelValue(startX + x, 
+						startY + y, 
+						FColor(dataBuffer[start] * filter.R, 
+							dataBuffer[start + 1] * filter.G, 
+							dataBuffer[start + 2] * filter.B, 
+							dataBuffer[start + 3] * filter.A)
+						);
 		}
 	}
 
@@ -254,8 +252,6 @@ void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UT
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION
-
 UTexture2D* UDynamicTextureComponent::GetTexture() const
 {
 	return DynamicTexture;

@@ -103,10 +103,7 @@ protected:
 	* @param provinceIDs The array of province IDs that should change color
 	*/
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
-	void SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A);
-	void SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color);
 	void SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color);
-
 
 protected:
 	// The root of the map.

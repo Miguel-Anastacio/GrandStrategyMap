@@ -170,7 +170,7 @@ void UMapDataComponent::ReadDataTables()
 	if(!UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 
-	if(UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
+	if(!UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 
 }
@@ -187,7 +187,7 @@ void UMapDataComponent::SetCountryProvinces()
 		FCountryData* country = CountryDataMap.Find(province.Value.Owner);
 		if (!country)
 		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Province has an invalid Owner"));
+			UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Component: Province has an invalid Owner"));
 			continue;
 		}
 

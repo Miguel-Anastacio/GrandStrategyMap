@@ -42,7 +42,7 @@ void AClickableMap::InitializeMap()
 {
 	if (!MapLookUpTexture)
 	{
-		UE_LOG(LogInteractiveMap, Fatal, TEXT("Map Look up Texture not assigned"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Map Look up Texture not assigned"));
 		return;
 	}
 	//// Data
@@ -80,21 +80,6 @@ void AClickableMap::BeginPlay()
 	InitializeMap();
 }
 
-void AClickableMap::SetPixelColor(int index, TArray<float>& pixelArray, uint8 R, uint8 G, uint8 B, uint8 A)
-{
-	pixelArray[index] = R;
-	pixelArray[index + 1] = G;
-	pixelArray[index + 2] = B;
-	pixelArray[index + 3] = A;
-}
-void AClickableMap::SetPixelColor(int index, TArray<float>& pixelArray, const FColor& color)
-{
-	pixelArray[index] = color.R;
-	pixelArray[index + 1] = color.G;
-	pixelArray[index + 2] = color.B;
-	pixelArray[index + 3] = color.A;
-}
-
 void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color)
 {
 	pixelArray[index ] = color.B;
@@ -108,16 +93,16 @@ void AClickableMap::SaveMapTextureData()
 	if (!IsValid(MapLookUpTexture))
 		return;
 
-	// Lock the texture for reading
-	FTexture2DMipMap& Mip = MapLookUpTexture->GetPlatformData()->Mips[0];
-	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
-
 	// Get the dimensions of the texture
 	int32 Width = MapLookUpTexture->GetSizeX();
 	int32 Height = MapLookUpTexture->GetSizeY();
-	const uint8* Data = static_cast<const uint8*>(TextureData);
-
 	MapColorCodeTextureData.AddDefaulted(Width * Height * 4);
+
+	// Lock the texture for reading
+	FTexture2DMipMap& Mip = MapLookUpTexture->GetPlatformData()->Mips[0];
+	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
+	
+	const uint8* Data = static_cast<const uint8*>(TextureData);
 
 	// Read color of each pixel
 	for (int32 Y = 0; Y < Height; ++Y)
@@ -140,8 +125,11 @@ void AClickableMap::SaveMapTextureData()
 				if (!province)
 				{
 					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
+
+					// Unlock the texture
+					Mip.BulkData.Unlock();
+					MapLookUpTexture->UpdateResource();
 					return;
-					continue;
 				}
 
 				PoliticalMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCountryColor(province));
@@ -176,7 +164,11 @@ void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 {
 	textureCompoment->UpdateTexture();
 
-	// Set material
+
+	if (!GameplayMapMaterial)
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("Gameplay Map Material not assigned"));
+	}
 	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
 	textureCompoment->DynamicMaterial = DynMaterial;
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
