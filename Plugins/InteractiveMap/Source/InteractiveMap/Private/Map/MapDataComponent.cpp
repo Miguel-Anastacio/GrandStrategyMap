@@ -69,7 +69,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 
 		out_newColor = newOwnerCountry->Color;
 		out_mapToUpdate = MapMode::POLITICAL;
-
+		(*province) = data;
 		return true;
 	}
 	else if (province->Religion != data.Religion)
@@ -81,6 +81,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 			return false;
 		}
 
+		(*province) = data;
 		out_mapToUpdate = MapMode::RELIGIOUS;
 
 		return true;
@@ -94,6 +95,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 			return false;
 		}
 
+		(*province) = data;
 		out_mapToUpdate = MapMode::CULTURAL;
 		return true;
 	}
@@ -177,9 +179,20 @@ void UMapDataComponent::ReadDataTables()
 
 void UMapDataComponent::SetCountryProvinces()
 {
+	TArray<FName> countriesToIgnore;
+
+	// see which countries already had province data from file
 	for (auto& country : CountryDataMap)
 	{
 		country.Value.Provinces.Empty();
+		if (country.Value.Provinces.Num() > 0)
+			countriesToIgnore.Emplace(country.Key);
+	}
+
+	// if all countries then exit function
+	if (countriesToIgnore.Num() == CountryDataMap.Num())
+	{
+		return;
 	}
 
 	for (auto& province : ProvinceDataMap)
@@ -190,6 +203,9 @@ void UMapDataComponent::SetCountryProvinces()
 			UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Component: Province has an invalid Owner"));
 			continue;
 		}
+
+		if (countriesToIgnore.Contains(province.Value.Owner))
+			continue;
 
 		country->Provinces.Add(province.Key);
 	}

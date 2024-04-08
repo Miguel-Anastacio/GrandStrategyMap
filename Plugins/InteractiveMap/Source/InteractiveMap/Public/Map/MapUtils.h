@@ -1,4 +1,4 @@
-// Copyright 2024 An@stacioDev All rights reserved.
+// Copyright 2024 An@stacioDev All rights reserved. 
 
 #pragma once
 

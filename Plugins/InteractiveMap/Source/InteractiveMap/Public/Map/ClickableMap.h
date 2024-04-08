@@ -9,7 +9,7 @@
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapDataChangedSignature, MapMode, mode, FName, provinceID);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
 UCLASS()
 class INTERACTIVEMAP_API AClickableMap : public AActor
 {
@@ -71,6 +71,7 @@ public:
 	void SetBorderVisibility(bool status);
 
 public:
+	// Delegate triggered when map data changes impacts the visual representation of the map
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapDataChangedSignature MapDataChangedDelegate;
 
@@ -78,12 +79,16 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Map")
 	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
 	
 	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
 	void SaveMapTextureData();
 	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
 
+
+	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
+	void RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode);
 	/**
 	* Update map texture per province.
 	*
@@ -93,6 +98,15 @@ protected:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
+
+	/**
+	* Update map texture completely
+	* reads the look up texture data buffer
+	* and updates the data buffer of one of the texture dynamic components
+	* @param mode The map mode.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Map Visual")
+	void UpdateMapTexture(MapMode mode);
 	/**
 	* Update the array that holds the pixel data of a texture.
 	*
