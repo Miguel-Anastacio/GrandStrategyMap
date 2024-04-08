@@ -59,7 +59,7 @@ protected:
 
 	/** The directory path for saving province data. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString DirectoryPath = FString("D:\\Dev\\Unreal\\GrandStrategyData\\Spain\\");
+	FString DirectoryPath = FString("\\MapDataFiles\\");
 
 	/** The filename for saving province data. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")

@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
+#include "Misc/Paths.h"
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
 {
@@ -88,7 +89,9 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 		FString outMessageInfo;
 		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileName, *provinceMapData, result, outMessageInfo);
+		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
+
+		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
@@ -107,7 +110,9 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 		FString outMessageInfo;
 		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(DirectoryPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
+		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
+
+		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);

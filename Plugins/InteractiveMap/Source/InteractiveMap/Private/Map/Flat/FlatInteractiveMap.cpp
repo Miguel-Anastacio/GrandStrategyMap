@@ -61,7 +61,7 @@ void AFlatInteractiveMap::SetMapMode_Implementation(MapMode mode)
 	UStaticMeshComponent* terrainMesh = MapVisualComponent->GetMapTerrainMeshComponent();
 
 
-	switch (mode)
+	/*switch (mode)
 	{
 	case MapMode::POLITICAL:
 		UpdateLimitComponent(leftVisual, mode, gameplayMesh);
@@ -85,7 +85,13 @@ void AFlatInteractiveMap::SetMapMode_Implementation(MapMode mode)
 		break;
 	default:
 		break;
-	}
+	}*/
+
+	leftVisual->InitMeshProperty(gameplayMesh, leftVisual->GetMapGameplayMeshComponent());
+	leftVisual->InitMeshProperty(terrainMesh, leftVisual->GetMapTerrainMeshComponent());
+
+	rightVisual->InitMeshProperty(gameplayMesh, rightVisual->GetMapGameplayMeshComponent());
+	rightVisual->InitMeshProperty(terrainMesh, rightVisual->GetMapTerrainMeshComponent());
 }
 
 void AFlatInteractiveMap::UpdateLimitComponent(UMapVisualComponent* mapLimitVisual, MapMode mode, UStaticMeshComponent* originalMesh)

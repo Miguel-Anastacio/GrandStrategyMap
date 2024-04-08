@@ -403,6 +403,7 @@ void AClickableMap::SetMapMode_Implementation(MapMode mode)
 
 		mesh->SetVisibility(true);
 		mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
 
 		break;
 	case MapMode::RELIGIOUS:
@@ -410,6 +411,7 @@ void AClickableMap::SetMapMode_Implementation(MapMode mode)
 
 		mesh->SetVisibility(true);
 		mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
 
 		break;
 	case MapMode::CULTURAL:
@@ -417,6 +419,7 @@ void AClickableMap::SetMapMode_Implementation(MapMode mode)
 
 		mesh->SetVisibility(true);
 		mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
 
 		break;
 	case MapMode::TERRAIN:
