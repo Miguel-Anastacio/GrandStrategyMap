@@ -8,13 +8,14 @@
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
-#include "Map/MapVisualComponent.h"
+#include "Map/Visual/LayeredMapVisualComponent.h"
 #include "Map/MapDataComponent.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 //#include "InteractiveMap.h"
 // Sets default values
-AClickableMap::AClickableMap()
+AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
+	: AActor(ObjectInitializer)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -22,7 +23,7 @@ AClickableMap::AClickableMap()
 	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
 
-	MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
+	MapVisualComponent = CreateDefaultSubobject<ULayeredMapVisualComponent>(TEXT("Map Visual"));
 	MapVisualComponent->SetupAttachment(RootComponent);
 	MapVisualComponent->AttachMeshes(RootComponent);
 

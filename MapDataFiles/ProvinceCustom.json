@@ -1,0 +1,90 @@
+[
+	{
+		"Name": "0",
+		"ProvinceName": "Galicia",
+		"Owner": "SPN",
+		"Population": 1000,
+		"Religion": "CAT",
+		"Culture": "SPA"
+	},
+	{
+		"Name": "1",
+		"ProvinceName": "Andalucia",
+		"Owner": "SPN",
+		"Population": 3000,
+		"Religion": "MUS",
+		"Culture": "SPA"
+	},
+	{
+		"Name": "2",
+		"ProvinceName": "Pais Vasco",
+		"Owner": "EUH",
+		"Population": 2000,
+		"Religion": "CAT",
+		"Culture": "BAS"
+	},
+	{
+		"Name": "3",
+		"ProvinceName": "Extremadura",
+		"Owner": "SPN",
+		"Population": 4000,
+		"Religion": "CAT",
+		"Culture": "SPA"
+	},
+	{
+		"Name": "4",
+		"ProvinceName": "Castilla-La Mancha",
+		"Owner": "SPN",
+		"Population": 1500,
+		"Religion": "MUS",
+		"Culture": "CTL"
+	},
+	{
+		"Name": "5",
+		"ProvinceName": "Isla Baleares",
+		"Owner": "CLA",
+		"Population": 500,
+		"Religion": "MUS",
+		"Culture": "CTL"
+	},
+	{
+		"Name": "6",
+		"ProvinceName": "Cataluna",
+		"Owner": "CLA",
+		"Population": 5000,
+		"Religion": "CAT",
+		"Culture": "CTL"
+	},
+	{
+		"Name": "7",
+		"ProvinceName": "Castilla y Leao",
+		"Owner": "SPN",
+		"Population": 1500,
+		"Religion": "CAT",
+		"Culture": "SPA"
+	},
+	{
+		"Name": "8",
+		"ProvinceName": "Comunidad Valenciana",
+		"Owner": "CLA",
+		"Population": 1500,
+		"Religion": "CAT",
+		"Culture": "CTL"
+	},
+	{
+		"Name": "9",
+		"ProvinceName": "Aragao",
+		"Owner": "SPN",
+		"Population": 1500,
+		"Religion": "CAT",
+		"Culture": "BAS"
+	},
+	{
+		"Name": "10",
+		"ProvinceName": "Asturias",
+		"Owner": "SPN",
+		"Population": 1500,
+		"Religion": "CAT",
+		"Culture": "SPA"
+	}
+]

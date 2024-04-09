@@ -8,12 +8,18 @@
  * Component for managing map limits.
  */
 class UBoxComponent;
+class UMapVisualComponent;
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
 class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
 {
     GENERATED_BODY()
 
 public:
+
+ /*   template<typename ReturnType, typename ClassToCreateByDefault>
+    ReturnType* CreateDefaultSubobjectHelper(FName SubobjectFName, UClass* classToCreateByDefault, bool bIsRequired, bool bIsTransient) {
+        return CreateDefaultSubobject<ReturnType>(SubobjectFName, ReturnType::StaticClass(), classToCreateByDefault, bIsRequired, bIsTransient);
+    }*/
     /** Default constructor. */
     UMapLimitComponent();
 
@@ -26,9 +32,10 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Visual")
     class UMapVisualComponent* GetVisualComponent();
 
-
     void Attach(USceneComponent* root);
     FORCEINLINE UBoxComponent* GetBoxComponent() { return Box; };
+
+    void CreateVisualComponent(TSubclassOf<UMapVisualComponent> mapVisualClass);
 
 protected:
     /** Called when the game starts. */
@@ -45,7 +52,10 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
     TObjectPtr<UBoxComponent> Box;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Limit")
+    TSubclassOf<UMapVisualComponent> VisualComponentClass;
+
     /** Map visual component. */
     UPROPERTY(EditAnywhere, Category = "Visual", BlueprintReadOnly)
-    TObjectPtr<class UMapVisualComponent> MapVisualComponent;
+    TObjectPtr<UMapVisualComponent> MapVisualComponent;
 };

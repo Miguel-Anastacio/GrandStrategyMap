@@ -17,7 +17,7 @@ class INTERACTIVEMAP_API AClickableMap : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
-	AClickableMap();
+	AClickableMap(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable, Category = "Map")
 	virtual void InitializeMap();

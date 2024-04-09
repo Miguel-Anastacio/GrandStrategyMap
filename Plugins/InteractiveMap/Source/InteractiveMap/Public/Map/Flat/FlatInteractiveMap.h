@@ -15,8 +15,8 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 {
 	GENERATED_BODY()
 
-	AFlatInteractiveMap();
 protected:
+	AFlatInteractiveMap(const FObjectInitializer& ObjectInitializer);
 	void BeginPlay() override;
 	void InitializeMap() override;
 
@@ -30,6 +30,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
 	TObjectPtr<class UMapLimitComponent> RightMapLimit;
 
-
+	/** The size of the box overlap on X as a percentage of the map size values between 0 a 0.5*/
+	UPROPERTY(EditAnywhere, Category = "Limit")
+	float BoxPercentageOfMap = 0.1;
 };
 
