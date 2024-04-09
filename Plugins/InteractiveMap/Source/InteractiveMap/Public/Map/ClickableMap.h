@@ -60,13 +60,15 @@ public:
 	void SetMapMode(MapMode mode);
 	virtual void SetMapMode_Implementation(MapMode mode);
 
+	void SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh);
+
 	// Update Visual Data
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
 	bool UpdateCountryColor(const FLinearColor& color, FName id);
 
 	//------------------------------- Visual ----------------------------------------
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
-	void UpdateProvinceHovered(const FColor& color);
+	virtual void UpdateProvinceHovered(const FColor& color);
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
 
@@ -128,6 +130,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 
+	// Terrain
+	UPROPERTY(EditAnywhere, Category = "Terrain", BlueprintReadOnly)
+	TObjectPtr<class UTexture2D> TerrainTexture;
+
+	UPROPERTY(EditAnywhere, Category = "Terrain| Material")
+	UMaterialInterface* TerrainMapMaterial;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Terrain|Material")
+	UMaterialInstanceDynamic* TerrainDynamicMaterial;
+
 	// -------------------------VISUAL DATA--------------------------------------
 	// The lookup texture.
 	UPROPERTY(EditAnywhere, Category = "Map")
@@ -147,7 +159,7 @@ protected:
 
 	// Material that shows the current gameplay map.
 	// Political, religious, or terrain.
-	UPROPERTY(EditAnywhere, Category = "Materials")
+	UPROPERTY(EditAnywhere, Category = "GameplayMap|Materials")
 	UMaterialInterface* GameplayMapMaterial;
 
 	// Hold pixel data of the lookup texture.
@@ -162,6 +174,7 @@ protected:
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
 	UPROPERTY(EditAnywhere, Category = "Border")
 	bool bUseBorderMesh = false;
+
 	//------------------------------- Data -----------------------------------------
 	// The map data component.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")

@@ -15,23 +15,19 @@ class INTERACTIVEMAP_API AFlatInteractiveCombinedMap : public AFlatInteractiveMa
 {
 	GENERATED_BODY()
 
+public:
 	AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
-//protected:
-//	void BeginPlay() override;
-//	void InitializeMap() override;
-//
-//	void SetMapMode_Implementation(MapMode mode) override;
-//	void UpdateLimitComponent(UMapVisualComponent* mapLimit, MapMode mode, UStaticMeshComponent* originalMesh);
-//
-//	/** Map limit component. */
-//	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
-//	TObjectPtr<class UMapLimitComponent> LeftMapLimit;
-//	/** Map limit component. */
-//	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
-//	TObjectPtr<class UMapLimitComponent> RightMapLimit;
-//
-//	/** The size of the box overlap on X as a percentage of the map size values between 0 a 0.5*/
-//	UPROPERTY(EditAnywhere, Category = "Limit")
-//	float BoxPercentageOfMap = 0.1;
+	virtual void SetMapMode_Implementation(MapMode mode) override;
+	//virtual void UpdateProvinceHovered(const FColor& color) override;
+
+protected:
+	//void InitializeMap() override;
+
+	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	//TObjectPtr<class UTexture2D> TerrainTexture;
+
+	//UPROPERTY(BlueprintReadWrite, Category = "Texture")
+	//UMaterialInstanceDynamic* TerrainDynamicMaterial;
+
 };
 

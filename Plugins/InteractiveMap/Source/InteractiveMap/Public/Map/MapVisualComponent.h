@@ -33,6 +33,9 @@ public:
     /** Initializes the visual component from an original one. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
     virtual void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual);
+    /** Initializes the visual component from an original one. */
+    UFUNCTION(BlueprintCallable, Category = "MapVisual")
+    virtual void UpdateVisualComponent(UMapVisualComponent* mapVisual) {};
 
     /** Initializes the mesh components. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
@@ -45,7 +48,7 @@ public:
 
     /** Initializes the mesh property. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    void InitMeshProperty(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate);
+    void SetMeshProperties(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate);
 
     /** Updates the mesh material. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")

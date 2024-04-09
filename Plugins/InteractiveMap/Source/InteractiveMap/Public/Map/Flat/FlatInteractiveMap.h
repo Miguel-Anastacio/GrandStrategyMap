@@ -18,10 +18,12 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 protected:
 	AFlatInteractiveMap(const FObjectInitializer& ObjectInitializer);
 	void BeginPlay() override;
-	void InitializeMap() override;
+	virtual void InitializeMap() override;
 
-	void SetMapMode_Implementation(MapMode mode) override;
-	void UpdateLimitComponent(UMapVisualComponent* mapLimit, MapMode mode, UStaticMeshComponent* originalMesh);
+	virtual void SetMapMode_Implementation(MapMode mode) override;
+	UFUNCTION(BlueprintCallable, Category = "Limit")
+	void UpdateLimits();
+
 
 	/** Map limit component. */
 	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)

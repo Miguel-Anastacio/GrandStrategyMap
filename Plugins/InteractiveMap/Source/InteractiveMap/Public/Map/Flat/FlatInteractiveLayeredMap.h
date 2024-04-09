@@ -15,6 +15,9 @@ class INTERACTIVEMAP_API AFlatInteractiveLayeredMap : public AFlatInteractiveMap
 {
 	GENERATED_BODY()
 	//
-	protected:
-		AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
+public:
+	AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
+	
+	virtual void SetMapMode_Implementation(MapMode mode) override;
+
 };

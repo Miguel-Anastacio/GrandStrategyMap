@@ -1,14 +1,14 @@
 //  Copyright 2024 An@stacioDev All rights reserved.
-#include "Map/Flat/FlatInteractiveLayeredMap.h"
+#include "Map/Globe/GlobeInteractiveLayeredMap.h"
 #include "Map/Visual/LayeredMapVisualComponent.h"
 
-AFlatInteractiveLayeredMap::AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
+AGlobeInteractiveLayeredMap::AGlobeInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULayeredMapVisualComponent>(TEXT("Map Visual")))
 {
 
 }
 
-void AFlatInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
+void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
 {
 	Super::SetMapMode_Implementation(mode);
 	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
@@ -33,10 +33,10 @@ void AFlatInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
 		mesh->SetVisibility(false);
 		terrainMesh->SetVisibility(true);
 		terrainMesh->SetMaterial(0, TerrainDynamicMaterial);
-		
+
+
 		break;
 	default:
 		break;
 	}
-	UpdateLimits();
 }

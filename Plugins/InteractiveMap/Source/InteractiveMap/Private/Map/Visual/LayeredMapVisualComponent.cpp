@@ -65,6 +65,21 @@ void ULayeredMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualCompo
     TerrainMapMesh = InitMeshComponent(layerVisual->GetMapTerrainMeshComponent());
 }
 
+void ULayeredMapVisualComponent::UpdateVisualComponent(UMapVisualComponent* mapVisual)
+{
+    ULayeredMapVisualComponent* layerVisual = Cast<ULayeredMapVisualComponent>(mapVisual);
+    if (!layerVisual)
+    {
+        UE_LOG(LogInteractiveMap, Error, TEXT("Mismatch between type of Visual Components"));
+        return;
+    }
+
+    SetMeshProperties(layerVisual->GetMapSelectMeshComponent(), MapSelectMesh);
+    SetMeshProperties(layerVisual->GetMapBorderMeshComponent(), MapBorderMesh);
+    SetMeshProperties(layerVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
+    SetMeshProperties(layerVisual->GetMapTerrainMeshComponent(), TerrainMapMesh);
+}
+
 
 UStaticMeshComponent* ULayeredMapVisualComponent::GetMeshComponent(MapMode mode)
 {

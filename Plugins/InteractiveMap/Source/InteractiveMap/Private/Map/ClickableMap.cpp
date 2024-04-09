@@ -23,9 +23,9 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
 
-	MapVisualComponent = CreateDefaultSubobject<ULayeredMapVisualComponent>(TEXT("Map Visual"));
-	MapVisualComponent->SetupAttachment(RootComponent);
-	MapVisualComponent->AttachMeshes(RootComponent);
+	//MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
+	//MapVisualComponent->SetupAttachment(RootComponent);
+	//MapVisualComponent->AttachMeshes(RootComponent);
 
 	MapDataComponent = CreateDefaultSubobject<UMapDataComponent>(TEXT("Map Data"));
 
@@ -72,6 +72,16 @@ void AClickableMap::InitializeMap()
 	{
 		player->SetInteractiveMap(this);
 	}
+
+	// Terrain Material
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(TerrainMapMaterial, this);
+	TerrainDynamicMaterial = DynMaterial;
+	if (!TerrainTexture)
+		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Texture is not valid"));
+
+	TerrainDynamicMaterial->SetTextureParameterValue("DynamicTexture", TerrainTexture);
+	TerrainDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+
 
 	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
 }
@@ -398,40 +408,42 @@ FName AClickableMap::GetProvinceID(const FVector& color, bool& out_result) const
 void AClickableMap::SetMapMode_Implementation(MapMode mode)
 {
 	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
+	SetMeshMaterial(mode, mesh);
+	CurrentMapMode = mode;
+}
+
+void AClickableMap::SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh)
+{
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
 
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
-
+		if (mesh)
+		{
+			mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		}
 		break;
 	case MapMode::RELIGIOUS:
 
-
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
+		if (mesh)
+		{
+			mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		}
 
 		break;
 	case MapMode::CULTURAL:
 
-
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
-
+		if (mesh)
+		{
+			mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+		}
 		break;
 	case MapMode::TERRAIN:
 
-		mesh->SetVisibility(false);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(true);
 		break;
 	default:
 		break;
 	}
-	CurrentMapMode = mode;
 }
 
 // to be able to use in BP
@@ -509,6 +521,8 @@ void AClickableMap::UpdateProvinceHovered(const FColor& color)
 			CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::TERRAIN:
+		if(TerrainDynamicMaterial)
+			TerrainDynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	default:
 		break;

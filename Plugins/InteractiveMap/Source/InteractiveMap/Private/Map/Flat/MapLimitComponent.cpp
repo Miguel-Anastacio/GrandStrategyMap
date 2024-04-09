@@ -78,10 +78,10 @@ void UMapLimitComponent::Attach(USceneComponent* root)
 
 void UMapLimitComponent::CreateVisualComponent(TSubclassOf<UMapVisualComponent> mapVisualClass)
 {
-	if (VisualComponentClass)
+	if (mapVisualClass)
 	{
-		//MapVisualComponent = NewObject<UMapVisualComponent>(this, ULayeredMapVisualComponent::StaticClass(), TEXT("Limit Visual"));
-		MapVisualComponent = NewObject<ULayeredMapVisualComponent>(this);
+		MapVisualComponent = NewObject<UMapVisualComponent>(this, mapVisualClass, TEXT("Limit Visual"));
+		//MapVisualComponent = NewObject<ULayeredMapVisualComponent>(this);
 		MapVisualComponent->SetupAttachment(Box);
 		MapVisualComponent->RegisterComponent();
 		MapVisualComponent->AttachMeshesOutsideConstructor(Box);

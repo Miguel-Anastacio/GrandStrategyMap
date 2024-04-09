@@ -33,6 +33,7 @@ public:
     /** Initializes the visual component from an original one. */
     void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual) override;
 
+    virtual void UpdateVisualComponent(UMapVisualComponent* mapVisual) override;
     /** Gets the mesh component for a specific map mode. */
     UStaticMeshComponent* GetMeshComponent(MapMode mode) override;
 

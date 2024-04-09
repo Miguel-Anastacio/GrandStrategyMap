@@ -30,6 +30,7 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
         if (instance)
         {
             // Set properties of the new static mesh component to match the original
+            instance->SetVisibility(original->IsVisible());
             instance->SetStaticMesh(original->GetStaticMesh());
             instance->SetRelativeLocation(original->GetRelativeLocation());
             instance->SetRelativeRotation(original->GetRelativeRotation());
@@ -50,7 +51,7 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
     return nullptr;
 }
 
-void UMapVisualComponent::InitMeshProperty(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate)
+void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate)
 {
     if (!original)
     {

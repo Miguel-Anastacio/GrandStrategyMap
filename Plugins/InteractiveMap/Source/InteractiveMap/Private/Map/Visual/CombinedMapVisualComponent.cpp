@@ -36,8 +36,22 @@ void UCombinedMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComp
         return;
     }
 
-    InitMeshProperty(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
-    InitMeshProperty(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
+    MapSelectMesh = InitMeshComponent(combinedVisual->GetMapSelectMeshComponent());
+    GameplayMapMesh = InitMeshComponent(combinedVisual->GetMapGameplayMeshComponent());
+}
+
+void UCombinedMapVisualComponent::UpdateVisualComponent(UMapVisualComponent* mapVisual)
+{
+
+    UCombinedMapVisualComponent* combinedVisual = Cast<UCombinedMapVisualComponent>(mapVisual);
+    if (!combinedVisual)
+    {
+        UE_LOG(LogInteractiveMap, Error, TEXT("Mismatch between type of Visual Components"));
+        return;
+    }
+
+    SetMeshProperties(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
+    SetMeshProperties(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
 }
 
 
