@@ -79,7 +79,9 @@ void AClickableMap::InitializeMap()
 	if (!TerrainTexture)
 		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Texture is not valid"));
 
-	TerrainDynamicMaterial->SetTextureParameterValue("DynamicTexture", TerrainTexture);
+	//TerrainDynamicMaterial->SetTextureParameterValue("DynamicTexture", TerrainTexture);
+	TerrainDynamicMaterial->SetTextureParameterValue("TerrainTexture", TerrainTexture);
+	TerrainDynamicMaterial->SetScalarParameterValue("TextureType", 0.0f);
 	TerrainDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
 
 
@@ -177,7 +179,6 @@ void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 {
 	textureCompoment->UpdateTexture();
 
-
 	if (!GameplayMapMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Gameplay Map Material not assigned"));
@@ -186,6 +187,8 @@ void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 	textureCompoment->DynamicMaterial = DynMaterial;
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	// Use a regular texture not a virtual texture
+	textureCompoment->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
 }
 
 void AClickableMap::RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode)

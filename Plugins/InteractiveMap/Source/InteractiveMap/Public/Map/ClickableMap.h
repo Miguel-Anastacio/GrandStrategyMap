@@ -10,7 +10,7 @@ class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
-UCLASS()
+UCLASS(Abstract)
 class INTERACTIVEMAP_API AClickableMap : public AActor
 {
 	GENERATED_BODY()
