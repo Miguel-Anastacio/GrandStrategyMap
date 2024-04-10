@@ -10,7 +10,7 @@
  */
 class UMapLimitComponent;
 class UMapVisualComponent;
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class INTERACTIVEMAP_API AFlatInteractiveCombinedMap : public AFlatInteractiveMap
 {
 	GENERATED_BODY()
@@ -18,6 +18,7 @@ class INTERACTIVEMAP_API AFlatInteractiveCombinedMap : public AFlatInteractiveMa
 public:
 	AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
 	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void InitializeMap() override;
 	//virtual void UpdateProvinceHovered(const FColor& color) override;
 
 protected:

@@ -6,7 +6,7 @@
 #include "Map/ClickableMap.h"
 #include "GlobeInteractiveMap.generated.h"
 
-UCLASS()
+UCLASS(Abstract, NotBlueprintable)
 class INTERACTIVEMAP_API AGlobeInteractiveMap : public AClickableMap
 {
 	GENERATED_BODY()

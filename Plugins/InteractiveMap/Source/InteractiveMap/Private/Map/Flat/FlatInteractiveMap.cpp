@@ -31,10 +31,10 @@ void AFlatInteractiveMap::InitializeMap()
 {
 	Super::InitializeMap();
 	LeftMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
-	RightMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
-
 	if (!MapLookUpTexture)
 		return;
+	RightMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
+
 	LeftMapLimit->GetVisualComponent()->InitVisualComponentFromOriginal(MapVisualComponent);
 	RightMapLimit->GetVisualComponent()->InitVisualComponentFromOriginal(MapVisualComponent);
 

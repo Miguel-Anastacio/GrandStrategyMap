@@ -75,25 +75,25 @@ void AMapPawn::ZoomCamera(float input)
 		CollisionComponent->SetWorldScale3D(scale);
 	}
 
-	if(CameraBoom->TargetArmLength <= ZoomCameraRot)
-	{
-		//CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
-		// hide borders
-		if (GameMap.Get())
-		{
-			GameMap->SetBorderVisibility(false);
-		}
-	}
-	else
-	{
-		// Show borders
-		if (GameMap.Get())
-		{
-			GameMap->SetBorderVisibility(true);
-		}
+	//if(CameraBoom->TargetArmLength <= ZoomCameraRot)
+	//{
+	//	//CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
+	//	// hide borders
+	//	if (GameMap.Get())
+	//	{
+	//		GameMap->SetBorderVisibility(false);
+	//	}
+	//}
+	//else
+	//{
+	//	// Show borders
+	//	if (GameMap.Get())
+	//	{
+	//		GameMap->SetBorderVisibility(true);
+	//	}
 
-		//CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
-	}
+	//	//CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
+	//}
 }
 
 void AMapPawn::SetInteractiveMap(AClickableMap* map)

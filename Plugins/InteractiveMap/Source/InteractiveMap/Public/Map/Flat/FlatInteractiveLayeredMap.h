@@ -10,7 +10,7 @@
  */
 class UMapLimitComponent;
 class UMapVisualComponent;
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class INTERACTIVEMAP_API AFlatInteractiveLayeredMap : public AFlatInteractiveMap
 {
 	GENERATED_BODY()
@@ -19,5 +19,5 @@ public:
 	AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void SetMapMode_Implementation(MapMode mode) override;
-
+	virtual void InitializeMap() override;
 };

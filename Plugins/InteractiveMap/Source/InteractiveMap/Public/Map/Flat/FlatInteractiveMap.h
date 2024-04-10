@@ -10,7 +10,7 @@
  */
 class UMapLimitComponent;
 class UMapVisualComponent;
-UCLASS()
+UCLASS(Abstract, NotBlueprintable)
 class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 {
 	GENERATED_BODY()

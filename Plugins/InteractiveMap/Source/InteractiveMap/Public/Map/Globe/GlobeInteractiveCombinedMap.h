@@ -6,7 +6,7 @@
 #include "Map/Globe/GlobeInteractiveMap.h"
 #include "GlobeInteractiveCombinedMap.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class INTERACTIVEMAP_API AGlobeInteractiveCombinedMap : public AGlobeInteractiveMap
 {
 	GENERATED_BODY()
@@ -14,6 +14,7 @@ class INTERACTIVEMAP_API AGlobeInteractiveCombinedMap : public AGlobeInteractive
 public:
 	AGlobeInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
 	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void InitializeMap() override;
 
 protected:
 	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)

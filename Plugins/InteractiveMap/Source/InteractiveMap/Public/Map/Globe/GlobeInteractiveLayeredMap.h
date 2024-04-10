@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Map/Globe/GlobeInteractiveMap.h"
 #include "GlobeInteractiveLayeredMap.generated.h"
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class INTERACTIVEMAP_API AGlobeInteractiveLayeredMap : public AGlobeInteractiveMap
 {
 	GENERATED_BODY()
@@ -15,4 +15,5 @@ protected:
 
 public:
 	void SetMapMode_Implementation(MapMode mode) override;
+	virtual void InitializeMap() override;
 };

@@ -17,7 +17,7 @@ class UStaticMeshComponent;
  *  - hide the terrain and border mesh 
  *  - override the set map mode function either in c++ or blueprint
  */
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), NotBlueprintable)
 class INTERACTIVEMAP_API UMapVisualComponent : public USceneComponent
 {
     GENERATED_BODY()
