@@ -34,6 +34,7 @@ void AMapPawn::BeginPlay()
 	// adjust the size of the collision component depending on the zoom distance
 	FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
 	CollisionComponent->SetWorldScale3D(scale);
+	OldZoom = CameraBoom->TargetArmLength;
 }
 
 void AMapPawn::Tick(float DeltaTime)
@@ -62,38 +63,45 @@ void AMapPawn::Stop()
 void AMapPawn::ZoomCamera(float input)
 {
 	float newZoom = CameraBoom->TargetArmLength + input * ZoomSpeed;
-	if (newZoom > ZoomLimit.X && newZoom < ZoomLimit.Y)
+
+	FHitResult hit;
+	FVector start = Camera->GetComponentLocation();
+	FVector end = Camera->GetComponentLocation() + Camera->GetForwardVector() * ZoomLimit.Y * 2;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+	if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, params))
+		return;
+
+	FVector cameraToMap = hit.Location - (start + Camera->GetForwardVector() * input * ZoomSpeed);
+	float distance = cameraToMap.Size();
+
+	if (distance < ZoomLimit.X && input < 0)
+		return;
+	if (distance > ZoomLimit.Y && input > 0)
+		return;
+
+	CameraBoom->TargetArmLength = newZoom;
+	// adjust the size of the collision component depending on the zoom distance
+	FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
+
+	scale.X = FMath::Clamp(scale.X, MinSphereScale, MaxSphereScale);
+	scale.Y = FMath::Clamp(scale.Y, MinSphereScale, MaxSphereScale);
+	scale.Z = FMath::Clamp(scale.Z, MinSphereScale, MaxSphereScale); 
+
+	CollisionComponent->SetWorldScale3D(scale);
+
+	if(distance <= ZoomCameraRot)
 	{
-		CameraBoom->TargetArmLength = newZoom;
-		// adjust the size of the collision component depending on the zoom distance
-		FVector scale = FVector(CameraBoom->TargetArmLength, CameraBoom->TargetArmLength, CameraBoom->TargetArmLength) * CameraCollisionScaleOnZoom;
-
-		scale.X = FMath::Clamp(scale.X, MinSphereScale, MaxSphereScale);
-		scale.Y = FMath::Clamp(scale.Y, MinSphereScale, MaxSphereScale);
-		scale.Z = FMath::Clamp(scale.Z, MinSphereScale, MaxSphereScale); 
-
-		CollisionComponent->SetWorldScale3D(scale);
+		if(OldZoom > ZoomCameraRot)
+			MapZoomInThresholdDelegate.Broadcast(GameMap.Get());
+	}
+	else
+	{
+		if(OldZoom < ZoomCameraRot)
+			MapZoomOutThresholdDelegate.Broadcast(GameMap.Get());
 	}
 
-	//if(CameraBoom->TargetArmLength <= ZoomCameraRot)
-	//{
-	//	//CameraBoom->SetRelativeRotation(FRotator(-70, 0, 0));
-	//	// hide borders
-	//	if (GameMap.Get())
-	//	{
-	//		GameMap->SetBorderVisibility(false);
-	//	}
-	//}
-	//else
-	//{
-	//	// Show borders
-	//	if (GameMap.Get())
-	//	{
-	//		GameMap->SetBorderVisibility(true);
-	//	}
-
-	//	//CameraBoom->SetRelativeRotation(FRotator(-90, 0, 0));
-	//}
+	OldZoom = distance;
 }
 
 void AMapPawn::SetInteractiveMap(AClickableMap* map)

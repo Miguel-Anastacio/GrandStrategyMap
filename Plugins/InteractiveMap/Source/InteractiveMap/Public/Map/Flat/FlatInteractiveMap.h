@@ -18,7 +18,7 @@ class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 protected:
 	AFlatInteractiveMap(const FObjectInitializer& ObjectInitializer);
 	void BeginPlay() override;
-	virtual void InitializeMap() override;
+	virtual void InitializeMap_Implementation() override;
 
 	virtual void SetMapMode_Implementation(MapMode mode) override;
 	UFUNCTION(BlueprintCallable, Category = "Limit")

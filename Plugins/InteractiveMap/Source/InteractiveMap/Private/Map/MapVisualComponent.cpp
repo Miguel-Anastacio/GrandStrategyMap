@@ -31,6 +31,8 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
         {
             // Set properties of the new static mesh component to match the original
             instance->SetVisibility(original->IsVisible());
+            instance->bHiddenInGame = original->bHiddenInGame;
+            instance->SetCollisionProfileName(original->GetCollisionProfileName());
             instance->SetStaticMesh(original->GetStaticMesh());
             instance->SetRelativeLocation(original->GetRelativeLocation());
             instance->SetRelativeRotation(original->GetRelativeRotation());
@@ -65,6 +67,8 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     }
 
     meshToUpdate->SetVisibility(original->IsVisible());
+    meshToUpdate->bHiddenInGame = original->bHiddenInGame;
+    meshToUpdate->SetCollisionProfileName(original->GetCollisionProfileName());
     meshToUpdate->SetStaticMesh(original->GetStaticMesh());
     meshToUpdate->SetRelativeLocation(original->GetRelativeLocation());
     meshToUpdate->SetRelativeRotation(original->GetRelativeRotation());

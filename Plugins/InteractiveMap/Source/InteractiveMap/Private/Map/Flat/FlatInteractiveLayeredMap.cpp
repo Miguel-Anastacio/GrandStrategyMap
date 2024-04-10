@@ -2,11 +2,15 @@
 #include "Map/Flat/FlatInteractiveLayeredMap.h"
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "InteractiveMap.h"
+#include "UObject/ConstructorHelpers.h"
+
 AFlatInteractiveLayeredMap::AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULayeredMapVisualComponent>(TEXT("Map Visual")))
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Script/Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_GameplayMap.MI_GameplayMap'"));
-	GameplayMapMaterial = MaterialFinder.Object;
+	if(MaterialFinder.Succeeded())
+		GameplayMapMaterial = MaterialFinder.Object;
+
 }
 
 void AFlatInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
@@ -42,23 +46,26 @@ void AFlatInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
 	UpdateLimits();
 }
 
-void AFlatInteractiveLayeredMap::InitializeMap()
+void AFlatInteractiveLayeredMap::InitializeMap_Implementation()
 {
-	Super::InitializeMap();
+	Super::InitializeMap_Implementation();
+
 	if (!bUseBorderMesh)
 	{
 		MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(false);
-		return;
 	}
-
-	if (!BorderMaterial)
+	else if (!BorderMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border material is null"));
-		return;
+	}
+	else
+	{
+		UStaticMeshComponent* borderMesh = MapVisualComponent->GetMapBorderMeshComponent();
+		UMaterialInstanceDynamic* material = UMaterialInstanceDynamic::Create(BorderMaterial, this);
+		material->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		borderMesh->SetMaterial(0, material);
 	}
 
-	UStaticMeshComponent* borderMesh = MapVisualComponent->GetMapBorderMeshComponent();
-	UMaterialInstanceDynamic* material = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	material->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	borderMesh->SetMaterial(0, material);
+	UpdateLimits();
+	MapInitializationDelegate.Broadcast(this);
 }

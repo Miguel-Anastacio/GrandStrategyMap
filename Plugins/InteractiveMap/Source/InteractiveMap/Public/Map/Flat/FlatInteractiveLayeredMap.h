@@ -19,5 +19,5 @@ public:
 	AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void SetMapMode_Implementation(MapMode mode) override;
-	virtual void InitializeMap() override;
+	virtual void InitializeMap_Implementation() override;
 };

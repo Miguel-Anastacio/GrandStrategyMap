@@ -52,9 +52,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
     TObjectPtr<UBoxComponent> Box;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Limit")
-    TSubclassOf<UMapVisualComponent> VisualComponentClass;
-
     /** Map visual component. */
     UPROPERTY(EditAnywhere, Category = "Visual", BlueprintReadOnly)
     TObjectPtr<UMapVisualComponent> MapVisualComponent;

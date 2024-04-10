@@ -4,12 +4,14 @@
 #include "Map/DynamicTextureComponent.h"
 #include "Map/Flat/MapLimitComponent.h"
 #include "Kismet/KismetRenderingLibrary.h"
+#include "UObject/ConstructorHelpers.h"
 #include "InteractiveMap.h"
 AFlatInteractiveCombinedMap::AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCombinedMapVisualComponent>(TEXT("Map Visual")))
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Script/Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_PoliticalMapWithTerrain.MI_PoliticalMapWithTerrain'"));
-	GameplayMapMaterial = MaterialFinder.Object;
+	if (MaterialFinder.Succeeded())
+		GameplayMapMaterial = MaterialFinder.Object;
 }
 
 void AFlatInteractiveCombinedMap::SetMapMode_Implementation(MapMode mode)
@@ -43,37 +45,30 @@ void AFlatInteractiveCombinedMap::SetMapMode_Implementation(MapMode mode)
 	
 }
 
-void AFlatInteractiveCombinedMap::InitializeMap()
+void AFlatInteractiveCombinedMap::InitializeMap_Implementation()
 {
-	Super::InitializeMap();
+	Super::InitializeMap_Implementation();
+
 	if (!bUseBorderMesh)
 	{
-		return;
 	}
 
 	if (!BorderMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border material is null"));
-		return;
 	}
-	if (!BorderMaterialRenderTarget)
+	else
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border render target is null"));
-		return;
+		BorderDynamicMaterial = UMaterialInstanceDynamic::Create(BorderMaterial, this);
+		//BorderDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		SetBorderLookUpTexture(BorderDynamicMaterial, PoliticalMapTextureComponent);
+
+		BorderMaterialRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 2048, 1024, ETextureRenderTargetFormat::RTF_RGBA8, FLinearColor::White);
+		UpdateBorder(BorderDynamicMaterial, BorderMaterialRenderTarget);
+
 	}
 
-	UMaterialInstanceDynamic* material = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	material->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	
-	UTextureRenderTarget2D* renderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 1024, 1024);
-	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), BorderMaterialRenderTarget, material);
-
-	//UTextureRenderTarget2D
-
-	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
-	ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
-	CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
-	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", BorderMaterialRenderTarget);
+	MapInitializationDelegate.Broadcast(this);
 }
 
 //void AFlatInteractiveCombinedMap::UpdateProvinceHovered(const FColor& color)

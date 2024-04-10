@@ -69,7 +69,14 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 
 		out_newColor = newOwnerCountry->Color;
 		out_mapToUpdate = MapMode::POLITICAL;
+
+		newOwnerCountry->Provinces.Add(id);
+		FCountryData* currentOwner = CountryDataMap.Find(province->Owner);
+		if(currentOwner)
+			currentOwner->Provinces.RemoveSingle(id);
+
 		(*province) = data;
+
 		return true;
 	}
 	else if (province->Religion != data.Religion)

@@ -2,13 +2,16 @@
 #include "Map/Globe/GlobeInteractiveLayeredMap.h"
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "InteractiveMap.h"
+#include "UObject/ConstructorHelpers.h"
+
 
 AGlobeInteractiveLayeredMap::AGlobeInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULayeredMapVisualComponent>(TEXT("Map Visual")))
 {
 	//GameplayMapMaterial = ConstructorHelpers::FObjectFinder<UMaterialInterface>(TEXT(/ Script / Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_GameplayMap.MI_GameplayMap');
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Script/Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_GameplayMap.MI_GameplayMap'"));
-	GameplayMapMaterial = MaterialFinder.Object;
+	if (MaterialFinder.Succeeded())
+		GameplayMapMaterial = MaterialFinder.Object;
 }
 
 void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
@@ -44,22 +47,25 @@ void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
 	}
 }
 
-void AGlobeInteractiveLayeredMap::InitializeMap()
+void AGlobeInteractiveLayeredMap::InitializeMap_Implementation()
 {
-	Super::InitializeMap();
+	Super::InitializeMap_Implementation();
+
 	if (!bUseBorderMesh)
 	{
 		MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(false);
-		return;
 	}
-	if (!BorderMaterial)
+	else if (!BorderMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border material is null"));
-		return;
+	}
+	else 
+	{
+		UStaticMeshComponent* borderMesh = MapVisualComponent->GetMapBorderMeshComponent();
+		UMaterialInstanceDynamic* material = UMaterialInstanceDynamic::Create(BorderMaterial, this);
+		material->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		borderMesh->SetMaterial(0, material);
 	}
 
-	UStaticMeshComponent* borderMesh = MapVisualComponent->GetMapBorderMeshComponent();
-	UMaterialInstanceDynamic* material = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	material->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	borderMesh->SetMaterial(0, material);
+	MapInitializationDelegate.Broadcast(this);
 }

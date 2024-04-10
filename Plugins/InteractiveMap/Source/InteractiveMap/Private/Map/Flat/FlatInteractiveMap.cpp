@@ -27,9 +27,9 @@ void AFlatInteractiveMap::BeginPlay()
 	Super::BeginPlay();
 }
 UE_DISABLE_OPTIMIZATION
-void AFlatInteractiveMap::InitializeMap()
+void AFlatInteractiveMap::InitializeMap_Implementation()
 {
-	Super::InitializeMap();
+	Super::InitializeMap_Implementation();
 	LeftMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
 	if (!MapLookUpTexture)
 		return;
