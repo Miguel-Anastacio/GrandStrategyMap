@@ -8,13 +8,15 @@
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
-#include "Map/MapVisualComponent.h"
+#include "Map/Visual/LayeredMapVisualComponent.h"
 #include "Map/MapDataComponent.h"
 #include "DataManager/DataManagerFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Components/StaticMeshComponent.h"
 //#include "InteractiveMap.h"
 // Sets default values
-AClickableMap::AClickableMap()
+AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
+	: AActor(ObjectInitializer)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -22,9 +24,9 @@ AClickableMap::AClickableMap()
 	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
 
-	MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
-	MapVisualComponent->SetupAttachment(RootComponent);
-	MapVisualComponent->AttachMeshes(RootComponent);
+	//MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
+	//MapVisualComponent->SetupAttachment(RootComponent);
+	//MapVisualComponent->AttachMeshes(RootComponent);
 
 	MapDataComponent = CreateDefaultSubobject<UMapDataComponent>(TEXT("Map Data"));
 
@@ -38,7 +40,7 @@ void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 }
-void AClickableMap::InitializeMap()
+void AClickableMap::InitializeMap_Implementation()
 {
 	if (!MapLookUpTexture)
 	{
@@ -64,6 +66,7 @@ void AClickableMap::InitializeMap()
 	CreateMapTexture(CultureMapTextureComponent);
 
 	MapVisualComponent->GetMapGameplayMeshComponent()->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
 
 	// set referene in player class
 	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
@@ -72,14 +75,30 @@ void AClickableMap::InitializeMap()
 		player->SetInteractiveMap(this);
 	}
 
-	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
+	if (!TerrainMapMaterial)
+		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Map Material is not valid"));
+
+	// Terrain Material
+	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(TerrainMapMaterial, this);
+	TerrainDynamicMaterial = DynMaterial;
+
+	if (!TerrainTexture)
+		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Texture is not valid"));
+
+	if (TerrainDynamicMaterial)
+	{
+		TerrainDynamicMaterial->SetTextureParameterValue("TerrainTexture", TerrainTexture); 
+		TerrainDynamicMaterial->SetScalarParameterValue("TextureType", 0.0f);
+		TerrainDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	}
+
 }
 // Called when the game starts or when spawned
 void AClickableMap::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitializeMap();
+	InitializeMap_Implementation();
 }
 
 void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color)
@@ -166,7 +185,6 @@ void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 {
 	textureCompoment->UpdateTexture();
 
-
 	if (!GameplayMapMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Gameplay Map Material not assigned"));
@@ -175,6 +193,8 @@ void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 	textureCompoment->DynamicMaterial = DynMaterial;
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
 	textureCompoment->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	// Use a regular texture not a virtual texture
+	textureCompoment->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
 }
 
 void AClickableMap::RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode)
@@ -397,40 +417,43 @@ FName AClickableMap::GetProvinceID(const FVector& color, bool& out_result) const
 void AClickableMap::SetMapMode_Implementation(MapMode mode)
 {
 	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
+	SetMeshMaterial(mode, mesh);
+	MapModeChangedDelegate.Broadcast(CurrentMapMode, mode);
+	CurrentMapMode = mode;
+}
+
+void AClickableMap::SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh)
+{
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
 
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
-
+		if (mesh)
+		{
+			mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+		}
 		break;
 	case MapMode::RELIGIOUS:
 
-
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
+		if (mesh)
+		{
+			mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+		}
 
 		break;
 	case MapMode::CULTURAL:
 
-
-		mesh->SetVisibility(true);
-		mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(false);
-
+		if (mesh)
+		{
+			mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+		}
 		break;
 	case MapMode::TERRAIN:
 
-		mesh->SetVisibility(false);
-		MapVisualComponent->GetMapTerrainMeshComponent()->SetVisibility(true);
 		break;
 	default:
 		break;
 	}
-	CurrentMapMode = mode;
 }
 
 // to be able to use in BP
@@ -486,9 +509,29 @@ bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
 
 }
 
+void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
+{
+	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), renderTarget, material);
+	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+}
+
 FColor AClickableMap::GetColorFromLookUpTexture(FVector2D uv) const
 {
 	return GetColorFromUV(MapLookUpTexture, uv);
+}
+
+void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, UDynamicTextureComponent* textureComponent)
+{
+	if (!textureComponent)
+	{
+		borderMat->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		return;
+	}
+
+	borderMat->SetTextureParameterValue("LookUpTexture", textureComponent->GetTexture());
 }
 
 void AClickableMap::UpdateProvinceHovered(const FColor& color)
@@ -508,6 +551,8 @@ void AClickableMap::UpdateProvinceHovered(const FColor& color)
 			CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::TERRAIN:
+		if(TerrainDynamicMaterial)
+			TerrainDynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	default:
 		break;

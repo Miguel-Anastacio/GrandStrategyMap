@@ -6,47 +6,20 @@
 // Sets default values for this component's properties
 UMapVisualComponent::UMapVisualComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
-    MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Select"));
-    MapSelectMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
-    MapSelectMesh->bHiddenInGame = true;
 
-    MapBorderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Border"));
-    MapBorderMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-
-    TerrainMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Terrain"));
-    TerrainMapMesh->SetCollisionProfileName(TEXT("NoCollision"));
-    TerrainMapMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-
-    GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Gameplay"));
-    GameplayMapMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 }
-
-void UMapVisualComponent::AttachMeshes(USceneComponent* root)
-{
-    FAttachmentTransformRules attachmentRules(EAttachmentRule::KeepRelative, true);
-
-    MapSelectMesh->SetupAttachment(root);
-    MapBorderMesh->SetupAttachment(root);
-    GameplayMapMesh->SetupAttachment(root);
-    TerrainMapMesh->SetupAttachment(root);
-}
+UE_DISABLE_OPTIMIZATION
 void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
 {
-    InitMeshProperty(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
-    InitMeshProperty(mapVisual->GetMapBorderMeshComponent(), MapBorderMesh);
-    InitMeshProperty(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
-    InitMeshProperty(mapVisual->GetMapTerrainMeshComponent(), TerrainMapMesh);
+    int a = 0;
 }
 
 void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
-    MapSelectMesh = InitMeshComponent(mapSelectMesh);
-    MapBorderMesh = InitMeshComponent(mapBorder);
-    GameplayMapMesh = InitMeshComponent(gameplayMap);
-    TerrainMapMesh =InitMeshComponent(terrainMap);
+
 }
 
+UE_ENABLE_OPTIMIZATION
 UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponent* original)
 {
     if (original)
@@ -57,6 +30,9 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
         if (instance)
         {
             // Set properties of the new static mesh component to match the original
+            instance->SetVisibility(original->IsVisible());
+            instance->bHiddenInGame = original->bHiddenInGame;
+            instance->SetCollisionProfileName(original->GetCollisionProfileName());
             instance->SetStaticMesh(original->GetStaticMesh());
             instance->SetRelativeLocation(original->GetRelativeLocation());
             instance->SetRelativeRotation(original->GetRelativeRotation());
@@ -77,7 +53,7 @@ UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponen
     return nullptr;
 }
 
-void UMapVisualComponent::InitMeshProperty(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate)
+void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate)
 {
     if (!original)
     {
@@ -91,6 +67,8 @@ void UMapVisualComponent::InitMeshProperty(UStaticMeshComponent* original, UStat
     }
 
     meshToUpdate->SetVisibility(original->IsVisible());
+    meshToUpdate->bHiddenInGame = original->bHiddenInGame;
+    meshToUpdate->SetCollisionProfileName(original->GetCollisionProfileName());
     meshToUpdate->SetStaticMesh(original->GetStaticMesh());
     meshToUpdate->SetRelativeLocation(original->GetRelativeLocation());
     meshToUpdate->SetRelativeRotation(original->GetRelativeRotation());
@@ -107,68 +85,32 @@ void UMapVisualComponent::UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate,
 
 UStaticMeshComponent* UMapVisualComponent::GetMeshComponent(MapMode mode)
 {
-    switch (mode)
-    {
-    case MapMode::POLITICAL:
-        return GameplayMapMesh;
-        break;
-    case MapMode::RELIGIOUS:
-        return GameplayMapMesh;
-        break;
-    case MapMode::CULTURAL:
-        return GameplayMapMesh;
-        break;
-    case MapMode::TERRAIN:
-        return TerrainMapMesh;
-        break;
-    default:
-        break;
-    }
     return nullptr;
 }
 
 UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
 {
-    return MapSelectMesh;
+    return nullptr;
 }
 
 UStaticMeshComponent* UMapVisualComponent::GetMapGameplayMeshComponent()
 {
-    return GameplayMapMesh;
+    return nullptr;
 }
 
 UStaticMeshComponent* UMapVisualComponent::GetMapBorderMeshComponent()
 {
-    return MapBorderMesh;
+    return nullptr;
 }
 
 UStaticMeshComponent* UMapVisualComponent::GetMapTerrainMeshComponent()
 {
-    return TerrainMapMesh;
+    return nullptr;
 }
 
-FVector UMapVisualComponent::CalculateSizeOfMap() const
+FVector UMapVisualComponent::CalculateSizeOfMesh(UStaticMeshComponent* mesh) const
 {
-    FBox boundingBox = TerrainMapMesh->Bounds.GetBox();
+    FBox boundingBox = mesh->Bounds.GetBox();
     return boundingBox.Max - boundingBox.Min;
     
 }
-
-// Called when the game starts
-void UMapVisualComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-
-// Called every frame
-void UMapVisualComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-

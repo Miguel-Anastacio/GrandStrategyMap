@@ -10,18 +10,20 @@
  */
 class UMapLimitComponent;
 class UMapVisualComponent;
-UCLASS()
+UCLASS(Abstract, NotBlueprintable)
 class INTERACTIVEMAP_API AFlatInteractiveMap : public AClickableMap
 {
 	GENERATED_BODY()
 
-	AFlatInteractiveMap();
 protected:
+	AFlatInteractiveMap(const FObjectInitializer& ObjectInitializer);
 	void BeginPlay() override;
-	void InitializeMap() override;
+	virtual void InitializeMap_Implementation() override;
 
-	void SetMapMode_Implementation(MapMode mode) override;
-	void UpdateLimitComponent(UMapVisualComponent* mapLimit, MapMode mode, UStaticMeshComponent* originalMesh);
+	virtual void SetMapMode_Implementation(MapMode mode) override;
+	UFUNCTION(BlueprintCallable, Category = "Limit")
+	void UpdateLimits();
+
 
 	/** Map limit component. */
 	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
@@ -30,6 +32,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
 	TObjectPtr<class UMapLimitComponent> RightMapLimit;
 
-
+	/** The size of the box overlap on X as a percentage of the map size values between 0 a 0.5*/
+	UPROPERTY(EditAnywhere, Category = "Limit")
+	float BoxPercentageOfMap = 0.1;
 };
 

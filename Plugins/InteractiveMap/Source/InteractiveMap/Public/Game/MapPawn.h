@@ -10,6 +10,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class USphereComponent;
 class AClickableMap;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapUpCloseSignature, AClickableMap*, map);
 /**
  * Pawn class for controlling the map camera.
  */
@@ -45,6 +47,13 @@ public:
 
     /** Gets vertical movement limits. */
     FORCEINLINE FVector2D GetVerticalMovementLimits() { return VerticalLimitMovement; };
+
+public:
+    UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+    FMapUpCloseSignature MapZoomInThresholdDelegate;
+    UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+    FMapUpCloseSignature MapZoomOutThresholdDelegate;
+
 
 protected:
     virtual void BeginPlay() override;
@@ -94,5 +103,7 @@ protected:
     /** Weak reference to the interactive map. */
     UPROPERTY()
     TWeakObjectPtr<AClickableMap> GameMap;
+
+    float OldZoom = 0.0f;
 };
 

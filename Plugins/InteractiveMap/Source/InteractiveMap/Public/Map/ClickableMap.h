@@ -10,17 +10,21 @@ class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
-UCLASS()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapInitializedSignature, AClickableMap*, map);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapModeChangedSignature, MapMode, oldMode, MapMode, newMode);
+UCLASS(Abstract, NotBlueprintable)
 class INTERACTIVEMAP_API AClickableMap : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AClickableMap();
+	AClickableMap(const FObjectInitializer& ObjectInitializer);
 
-	UFUNCTION(BlueprintCallable, Category = "Map")
-	virtual void InitializeMap();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Map")
+	void InitializeMap();
+	virtual void InitializeMap_Implementation();
 
 	virtual void Tick(float DeltaTime) override;
 	//------------------------------- Data -----------------------------------------
@@ -60,20 +64,43 @@ public:
 	void SetMapMode(MapMode mode);
 	virtual void SetMapMode_Implementation(MapMode mode);
 
+	void SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh);
+
 	// Update Visual Data
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
 	bool UpdateCountryColor(const FLinearColor& color, FName id);
 
+	UFUNCTION(BlueprintCallable, Category = "Map Border")
+	void UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget);
+	/**
+	* Set the a dynamic texture as the lookuptexture of the border material
+	*
+	* @param borderMat dynamic instance of the Border Material
+	* @param textureComponent the dynamic texture component that owns the texture to use as lookup
+	*		 by default pass null and use the MapLookUpTexture
+	*/
+	UFUNCTION(BlueprintCallable, Category = "Map Border")
+	void SetBorderLookUpTexture(UMaterialInstanceDynamic* bordeMat, UDynamicTextureComponent* textureComponent = nullptr);
+
 	//------------------------------- Visual ----------------------------------------
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
-	void UpdateProvinceHovered(const FColor& color);
+	virtual void UpdateProvinceHovered(const FColor& color);
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
+
+
 
 public:
 	// Delegate triggered when map data changes impacts the visual representation of the map
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapDataChangedSignature MapDataChangedDelegate;
+
+	// Delegate triggered when map initialization is finished
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+	FMapInitializedSignature MapInitializationDelegate;
+	// Delegate triggered when map initialization is finished
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+	FMapModeChangedSignature MapModeChangedDelegate;
 
 protected:
 	virtual void BeginPlay() override;
@@ -128,9 +155,19 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 
+	// Terrain
+	UPROPERTY(EditAnywhere, Category = "Map|Terrain", BlueprintReadOnly)
+	TObjectPtr<class UTexture2D> TerrainTexture;
+
+	UPROPERTY(EditAnywhere, Category = "Map|Terrain")
+	UMaterialInterface* TerrainMapMaterial;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Map|Terrain|Material")
+	UMaterialInstanceDynamic* TerrainDynamicMaterial;
+
 	// -------------------------VISUAL DATA--------------------------------------
 	// The lookup texture.
-	UPROPERTY(EditAnywhere, Category = "Map")
+	UPROPERTY(EditAnywhere, Category = "Map|LookupTexture")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
 
 	// The political map texture component.
@@ -147,21 +184,25 @@ protected:
 
 	// Material that shows the current gameplay map.
 	// Political, religious, or terrain.
-	UPROPERTY(EditAnywhere, Category = "Materials")
+	UPROPERTY(EditAnywhere, Category = "Map|GameplayMap")
 	UMaterialInterface* GameplayMapMaterial;
 
 	// Hold pixel data of the lookup texture.
 	TArray<uint8> MapColorCodeTextureData;
 
 	// Border Material 
-	UPROPERTY(EditAnywhere, Category = "Border|Materials")
+	UPROPERTY(EditAnywhere, Category = "Map|Border")
 	UMaterialInterface* BorderMaterial;
-	UPROPERTY(EditAnywhere, Category = "Border|Materials")
-	UMaterialInterface* HQXFilterMaterial;
-	UPROPERTY(EditAnywhere, Category = "Border")
+	//UPROPERTY(EditAnywhere, Category = "Border|Materials")
+	//UMaterialInterface* HQXFilterMaterial;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Map|Border|Material")
+	UMaterialInstanceDynamic* BorderDynamicMaterial;
+	UPROPERTY(BlueprintReadWrite, Category = "Border")
 	UTextureRenderTarget2D* BorderMaterialRenderTarget;
-	UPROPERTY(EditAnywhere, Category = "Border")
+	UPROPERTY(EditAnywhere, Category = "Map|Border")
 	bool bUseBorderMesh = false;
+
 	//------------------------------- Data -----------------------------------------
 	// The map data component.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
