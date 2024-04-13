@@ -109,7 +109,7 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, 
 	else
 	{
 		(*province) = data;
-		return false;
+		return true;
 	}
 
 

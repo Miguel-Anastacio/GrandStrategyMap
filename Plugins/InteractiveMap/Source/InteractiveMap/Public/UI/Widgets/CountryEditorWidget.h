@@ -43,7 +43,7 @@ protected:
 
     /** The color picker for choosing the country color. */
     UPROPERTY(meta = (BindWidget))
-    URamaColorPicker* ColorPicker;
+    class URamaColorPicker* ColorPicker;
 
     /** The tag of the country being edited. */
     FName CountryTag;

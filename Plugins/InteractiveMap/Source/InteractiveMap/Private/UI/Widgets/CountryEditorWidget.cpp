@@ -3,7 +3,7 @@
 #include "UI/Widgets/CountryEditorWidget.h"
 #include "UI/Widgets/CustomEditableText.h"
 #include "Map/ClickableMap.h"
-#include "UI/Utilities/RamaColorPicker.h"
+#include "RamaColorPicker.h"
 
 void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
 {

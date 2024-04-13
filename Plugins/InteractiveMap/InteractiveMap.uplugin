@@ -8,7 +8,7 @@
 	"CreatedBy": "AnastacioDev",
 	"CreatedByURL": "https://miguel-anastacio.github.io/",
 	"DocsURL": "",
-	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/a3f618dab9a34d4ca047f2eb18ae6c47",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/859a9e498a11446e8c84b87df2dcd285",
 	"SupportURL": "",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
@@ -17,6 +17,16 @@
 	"Modules": [
 		{
 			"Name": "InteractiveMap",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			],
+			"PlatformAllowList": [ "Win64" ]
+		},
+		{
+			"Name": "VictoryBPLibrary",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [

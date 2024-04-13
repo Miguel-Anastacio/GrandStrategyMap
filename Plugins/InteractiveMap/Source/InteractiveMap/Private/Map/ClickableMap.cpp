@@ -479,14 +479,14 @@ bool AClickableMap::UpdateProvinceData(const FProvinceData& data, FName id)
 	MapMode mapToUpdate = MapMode::TERRAIN;
 	FColor color = FColor();
 
-
-	if (MapDataComponent->UpdateProvinceData(data, id, mapToUpdate, color))
+	bool dataChanged = MapDataComponent->UpdateProvinceData(data, id, mapToUpdate, color);
+	if (mapToUpdate != MapMode::TERRAIN)
 	{
 		MapDataChangedDelegate.Broadcast(mapToUpdate);
 		return true;
 	}
 	
-	return false;
+	return dataChanged;
 }
 
 bool AClickableMap::UpdateCountryData(const FCountryData& data, FName id)

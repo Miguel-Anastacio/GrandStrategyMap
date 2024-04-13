@@ -11,14 +11,15 @@ public class InteractiveMap : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
-			}
+            }
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
-			}
+			
+            }
 			);
 			
 		
@@ -28,6 +29,8 @@ public class InteractiveMap : ModuleRules
 				"Core",
 				"RHI",
 				"RenderCore",
+				"VictoryBPLibrary"
+             
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -43,8 +46,8 @@ public class InteractiveMap : ModuleRules
 				"SlateCore",
                 "UMG",
 				"Json",
-				"JsonUtilities",
-                "AppFramework", // color picker
+				"JsonUtilities"
+				
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

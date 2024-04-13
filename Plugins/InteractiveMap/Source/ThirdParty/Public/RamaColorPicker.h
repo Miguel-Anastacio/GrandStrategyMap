@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJoyColorChangedEvent, const FLine
  * Rama Color Picker For You! ♥ Rama
  */
 UCLASS()
-class INTERACTIVEMAP_API URamaColorPicker : public UWidget
+class VICTORYBPLIBRARY_API URamaColorPicker : public UWidget
 {
 	GENERATED_UCLASS_BODY()
 	

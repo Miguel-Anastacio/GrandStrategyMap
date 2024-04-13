@@ -77,6 +77,7 @@ void UProvinceEditorWidget::NativeOnInitialized()
 
 void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod)
 {
+
 	if (editedText == OwnerCustomInput)
 	{
 		if (CommitMethod == ETextCommit::OnEnter)
@@ -87,7 +88,8 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 				ProvinceSelectedData.Owner = FName(*dummy);
 				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
 				{
-					editedText->SetValues(Text, FText::FromString(FString("______")));
+					const FCountryData* owner = GameMapReference->GetDataFromID(ProvinceSelectedData.Owner, *GameMapReference->GetCountryDataMap());
+					editedText->SetValues(FText::FromString(owner->CountryName), FText::FromString(FString("______")));
 				}
 
 			}
@@ -123,8 +125,10 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 				ProvinceSelectedData.Religion = FName(*value);
 				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
 				{
-					editedText->SetValues(Text, FText::FromString(FString("______")));
+					const FColoredData* religion = GameMapReference->GetDataFromID(ProvinceSelectedData.Religion, *GameMapReference->GetVisualPropertiesDataMap());
+					editedText->SetValues(FText::FromString(religion->DataName), FText::FromString(FString("______")));
 				}
+			
 
 			}
 		}
@@ -141,7 +145,9 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 				ProvinceSelectedData.Culture = FName(*value);
 				if(GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
 				{
-					editedText->SetValues(Text, FText::FromString(FString("______")));
+
+					const FColoredData* culture = GameMapReference->GetDataFromID(ProvinceSelectedData.Culture, *GameMapReference->GetVisualPropertiesDataMap());
+					editedText->SetValues(FText::FromString(culture->DataName), FText::FromString(FString("______")));
 				}
 			}
 		}
@@ -164,7 +170,6 @@ void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, 
 				if (GameMapReference->UpdateProvinceData(ProvinceSelectedData, ProvinceSelectedID))
 				{
 					editedText->SetValues(Text, FText::FromString(FString("______")));
-
 				}
 			}
 		}
