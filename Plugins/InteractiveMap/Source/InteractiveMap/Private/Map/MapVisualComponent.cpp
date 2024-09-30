@@ -2,7 +2,7 @@
 
 #include "Map/MapVisualComponent.h"
 #include "InteractiveMap.h"
-
+#include "Components/StaticMeshComponent.h"
 // Sets default values for this component's properties
 UMapVisualComponent::UMapVisualComponent()
 {

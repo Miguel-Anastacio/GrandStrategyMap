@@ -237,7 +237,6 @@ bool UMapDataComponent::GetCountryColor(const FVector& color, FColor& out_countr
 	{
 		return false;
 	}
-	return true;
 }
 
 FColor UMapDataComponent::GetCountryColor(const FProvinceData* data) const

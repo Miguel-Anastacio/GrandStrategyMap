@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "InteractiveMap.h"
+#include "Engine/World.h"
 AFlatInteractiveMap::AFlatInteractiveMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

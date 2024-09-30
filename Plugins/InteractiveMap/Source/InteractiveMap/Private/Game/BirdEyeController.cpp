@@ -13,6 +13,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/Engine.h"
 #include "InteractiveMap.h"
+#include "Engine/LocalPlayer.h"
 
 ABirdEyeController::ABirdEyeController()
 {

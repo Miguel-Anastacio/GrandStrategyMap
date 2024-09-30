@@ -38,9 +38,9 @@ struct FColoredData : public FTableRowBase
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString DataName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FColor Color;
+    FColor Color = FColor::Black;
 
-    FColoredData() : DataName(FString("")), Color(FColor()) {};
+    FColoredData() : DataName(FString("")), Color(FColor::Black) {};
 
     FColoredData(const FString& name, FColor color) :
         DataName(name), Color(color) {};
@@ -68,7 +68,7 @@ struct FProvinceIDData : public FTableRowBase
     FProvinceIDData() {};
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FString Color;
+    FString Color = "";
     // assuming format AABBCCTT (AA = R, BB = G, CC = B, TT = Alpha)
     int32 HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap);
     FColor ConvertHexStringToRGB(const FString& color, const TMap<TCHAR, int32>& HexMap);
@@ -133,7 +133,7 @@ struct FCountryData : public FTableRowBase
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     FString CountryName;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FColor Color;
+    FColor Color = FColor::Black;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
     TArray<FName> Provinces;
     // Add more country data here

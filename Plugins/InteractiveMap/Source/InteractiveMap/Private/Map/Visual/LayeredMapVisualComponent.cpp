@@ -2,6 +2,9 @@
 
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "InteractiveMap.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"  
+#include "Engine/CollisionProfile.h"
 
 //// Sets default values for this component's properties
 ULayeredMapVisualComponent::ULayeredMapVisualComponent()

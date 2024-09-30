@@ -3,6 +3,10 @@
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "InteractiveMap.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 
 AFlatInteractiveLayeredMap::AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULayeredMapVisualComponent>(TEXT("Map Visual")))

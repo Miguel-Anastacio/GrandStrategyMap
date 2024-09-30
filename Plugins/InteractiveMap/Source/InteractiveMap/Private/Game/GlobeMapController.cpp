@@ -6,6 +6,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/HitResult.h"
 
 void AGlobeMapController::BeginPlay()
 {

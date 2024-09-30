@@ -3,7 +3,11 @@
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "InteractiveMap.h"
 #include "UObject/ConstructorHelpers.h"
-
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Components/StaticMeshComponent.h"	
+#include "Engine/World.h"
+#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 
 AGlobeInteractiveLayeredMap::AGlobeInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<ULayeredMapVisualComponent>(TEXT("Map Visual")))
@@ -39,7 +43,6 @@ void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
 		mesh->SetVisibility(false);
 		terrainMesh->SetVisibility(true);
 		terrainMesh->SetMaterial(0, TerrainDynamicMaterial);
-
 
 		break;
 	default:

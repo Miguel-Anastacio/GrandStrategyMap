@@ -5,6 +5,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SphereComponent.h"
 #include "Map/ClickableMap.h"
+#include "Engine/CollisionProfile.h"
+#include "Engine/World.h"
 // Sets default values
 AMapPawn::AMapPawn()
 {

@@ -13,6 +13,7 @@
 #include "DataManager/DataManagerFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 //#include "InteractiveMap.h"
 // Sets default values
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
@@ -412,7 +413,6 @@ FName AClickableMap::GetProvinceID(const FVector& color, bool& out_result) const
 {
 	return MapDataComponent->GetProvinceID(color, out_result);
 }
-
 
 void AClickableMap::SetMapMode_Implementation(MapMode mode)
 {

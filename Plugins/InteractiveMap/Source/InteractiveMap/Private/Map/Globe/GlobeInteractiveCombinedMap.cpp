@@ -5,7 +5,11 @@
 #include "Kismet/KismetRenderingLibrary.h"
 #include "InteractiveMap.h"
 #include "UObject/ConstructorHelpers.h"
-
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
+#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
 
 AGlobeInteractiveCombinedMap::AGlobeInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCombinedMapVisualComponent>(TEXT("Map Visual")))

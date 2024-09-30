@@ -7,6 +7,7 @@
 #include "DataManager/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
 #include "Misc/Paths.h"
+#include "Engine/Engine.h"
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
 {

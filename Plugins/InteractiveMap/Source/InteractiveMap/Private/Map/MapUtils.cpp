@@ -1,6 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "Map/MapUtils.h"
 #include "InteractiveMap.h"
+#include "Engine/Engine.h"
 
 int32 FProvinceIDData::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
 {

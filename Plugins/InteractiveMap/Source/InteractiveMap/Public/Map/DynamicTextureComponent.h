@@ -10,6 +10,7 @@
 #include "Components/ActorComponent.h"
 #include "RHIResources.h"
 #include "Rendering/Texture2DResource.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "DynamicTextureComponent.generated.h"
 /**
  * Component for dynamically updating a texture.

@@ -1,7 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/Visual/CombinedMapVisualComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "InteractiveMap.h"
+#include "Engine/CollisionProfile.h"
 
 // Sets default values for this component's properties
 UCombinedMapVisualComponent::UCombinedMapVisualComponent()
