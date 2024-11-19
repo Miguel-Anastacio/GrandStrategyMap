@@ -16,7 +16,7 @@ UDynamicTextureComponent::UDynamicTextureComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
+	mapGenerator = new MapGenerator::Map(1024, 1024);
 	// ...
 }
 
@@ -24,6 +24,8 @@ void UDynamicTextureComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	FMemory::Free(TextureRegion);
+	if(mapGenerator)
+		delete mapGenerator;
 }
 
 void UDynamicTextureComponent::FillTexture(FLinearColor Color)

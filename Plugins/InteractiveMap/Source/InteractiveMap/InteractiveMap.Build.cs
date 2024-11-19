@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
+using System.IO;
 using UnrealBuildTool;
 
 public class InteractiveMap : ModuleRules
@@ -51,7 +51,7 @@ public class InteractiveMap : ModuleRules
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		
+		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
