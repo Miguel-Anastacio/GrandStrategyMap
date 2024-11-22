@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
+#include "Map/MapUtils.h"
 #include "BirdEyeController.generated.h"
 
 /** Forward declaration to improve compiling times */
@@ -13,6 +14,11 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionInstance;
 
+
+// Delegate signature
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnProvinceClickedSignature, FName, ProvinceID, FProvinceData, data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapClickedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProvinceHoveredSignature, FColor, Color);
 
 /**
  * Base Controller class for interactive maps, handles input for mouse clicks, camera movement, menus and camera zoom
@@ -46,6 +52,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction* OpenCountryEditorAction;
 
+    UPROPERTY(BlueprintAssignable)
+    FOnProvinceClickedSignature ProvinceClickedDelegate;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnProvinceHoveredSignature ProvinceHoveredDelegate;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnMapClickedSignature MapClickedDelegate;
+
 protected:
     /** Sets up the input component. */
     virtual void SetupInputComponent() override;
@@ -73,6 +88,15 @@ protected:
     /** Toggles the country editor UI. */
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
     void ToggleCountryEditor();
+
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions")
+    void HideHUD();
+
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions")
+    void ShowProvinceInfo(FName id, FProvinceData data);
+
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions")
+    void HighlightProvince(FColor color);
 
 protected:
     /** Offset for mouse click on Z-axis. */
