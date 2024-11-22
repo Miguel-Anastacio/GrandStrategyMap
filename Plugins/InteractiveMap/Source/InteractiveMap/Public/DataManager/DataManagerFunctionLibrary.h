@@ -7,6 +7,7 @@
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
 #include "InteractiveMap.h"
+#include "Map/MapUtils.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
 
@@ -127,5 +128,12 @@ public:
      * @param outInfoMessage Information message about the operation.
      */
     static void WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
+
+    void PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces);
+
+    UFUNCTION(BlueprintCallable, Category = "Data Loader")
+    bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
+
+    bool ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces);
 };
 

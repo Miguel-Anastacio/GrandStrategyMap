@@ -61,3 +61,75 @@ void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, TArray<TSharedP
 	outSuccess = true;
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
+
+void UDataManagerFunctioLibrary::PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces)
+{
+	if (!DataTable) return;
+
+	for (int32 Index = 0; Index < Provinces.Num(); ++Index)
+	{
+		FString RowName = FString::Printf(TEXT("Province_%d"), Index);
+		DataTable->AddRow(FName(*RowName), Provinces[Index]);
+	}
+}
+
+bool UDataManagerFunctioLibrary::LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable)
+{
+	FString JsonContent;
+	if (FFileHelper::LoadFileToString(JsonContent, *FilePath))
+	{
+		TArray<FVariantProvinceData> Provinces;
+		if (ImportProvinceData(JsonContent, Provinces))
+		{
+			PopulateDataTable(TargetDataTable, Provinces);
+		}
+	}
+	return false;
+}
+
+bool UDataManagerFunctioLibrary::ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces)
+{
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonContent);
+
+	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+	{
+		// Iterate through the provinces
+		for (auto& ProvinceEntry : JsonObject->Values)
+		{
+			TSharedPtr<FJsonObject> ProvinceObject = ProvinceEntry.Value->AsObject();
+			if (ProvinceObject.IsValid())
+			{
+				FVariantProvinceData ProvinceData;
+				for (auto& Field : ProvinceObject->Values)
+				{
+					// Store each key-value pair in the TMap
+					FString Key = Field.Key;
+					TSharedPtr<FJsonValue> Value = Field.Value;
+					// Handle different JSON value types and store as FVariant
+					if (Value->Type == EJson::String)
+					{
+						ProvinceData.Properties.Add(Key, FVariant(Value->AsString()));
+					}
+					else if (Value->Type == EJson::Number)
+					{
+						ProvinceData.Properties.Add(Key, FVariant(Value->AsNumber()));
+					}
+					else if (Value->Type == EJson::Boolean)
+					{
+						ProvinceData.Properties.Add(Key, FVariant(Value->AsBool()));
+					}
+					else
+					{
+						// Default to string for unsupported types
+						ProvinceData.Properties.Add(Key, FVariant(Value->AsString()));
+					}
+					ProvinceData.Properties.Add(Key, Value);
+				}
+				OutProvinces.Add(ProvinceData);
+			}
+		}
+		return true;
+	}
+	return false;
+}
