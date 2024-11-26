@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Dom/JsonObject.h"
+#include "Misc/TVariant.h"
 #include "MapUtils.generated.h"
 
 
@@ -129,10 +130,11 @@ struct FVariantProvinceData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    TMap<FString, FVariant> Properties;
-
-}
+    // UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    TMap<FString, TVariant<int, float, FString, bool>> Properties;
+    // TVariant<FString, int64> StringOrInt64Holder;
+    
+};
 
 USTRUCT(BlueprintType)
 struct FCountryData : public FTableRowBase

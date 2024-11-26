@@ -6,7 +6,7 @@
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
 
-void UDataManagerFunctioLibrary::WriteStringToFile(FString filePath, FString string, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteStringToFile(FString filePath, FString string, bool& outSuccess, FString& outInfoMessage)
 {
 	if (!FFileHelper::SaveStringToFile(string, *filePath))
 	{
@@ -20,7 +20,7 @@ void UDataManagerFunctioLibrary::WriteStringToFile(FString filePath, FString str
 }
 
 
-void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 
@@ -41,7 +41,7 @@ void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, const TSharedPt
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 
@@ -62,7 +62,7 @@ void UDataManagerFunctioLibrary::WriteJson(FString jsonFilePath, TArray<TSharedP
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctioLibrary::PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces)
+void UDataManagerFunctionLibrary::PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces)
 {
 	if (!DataTable) return;
 
@@ -73,7 +73,7 @@ void UDataManagerFunctioLibrary::PopulateDataTable(UDataTable* DataTable, const 
 	}
 }
 
-bool UDataManagerFunctioLibrary::LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable)
+bool UDataManagerFunctionLibrary::LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable)
 {
 	FString JsonContent;
 	if (FFileHelper::LoadFileToString(JsonContent, *FilePath))
@@ -87,7 +87,7 @@ bool UDataManagerFunctioLibrary::LoadProvinceData(const FString& FilePath, UData
 	return false;
 }
 
-bool UDataManagerFunctioLibrary::ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces)
+bool UDataManagerFunctionLibrary::ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces)
 {
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonContent);
@@ -101,30 +101,31 @@ bool UDataManagerFunctioLibrary::ImportProvinceData(const FString& JsonContent, 
 			if (ProvinceObject.IsValid())
 			{
 				FVariantProvinceData ProvinceData;
-				for (auto& Field : ProvinceObject->Values)
+				for (const auto& Field : ProvinceObject->Values)
 				{
+					TVariant<int, float, FString, bool> variant;
 					// Store each key-value pair in the TMap
 					FString Key = Field.Key;
 					TSharedPtr<FJsonValue> Value = Field.Value;
 					// Handle different JSON value types and store as FVariant
 					if (Value->Type == EJson::String)
 					{
-						ProvinceData.Properties.Add(Key, FVariant(Value->AsString()));
+						variant.Set<FString>(Value->AsString());
 					}
 					else if (Value->Type == EJson::Number)
 					{
-						ProvinceData.Properties.Add(Key, FVariant(Value->AsNumber()));
+						variant.Set<int>(Value->AsNumber());
 					}
 					else if (Value->Type == EJson::Boolean)
 					{
-						ProvinceData.Properties.Add(Key, FVariant(Value->AsBool()));
+						variant.Set<bool>(Value->AsBool());
 					}
 					else
 					{
 						// Default to string for unsupported types
-						ProvinceData.Properties.Add(Key, FVariant(Value->AsString()));
+						variant.Set<FString>(Value->AsString());
 					}
-					ProvinceData.Properties.Add(Key, Value);
+					ProvinceData.Properties.Add(Key, variant);
 				}
 				OutProvinces.Add(ProvinceData);
 			}

@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnProvinceClickedSignature, FName,
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapClickedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProvinceHoveredSignature, FColor, Color);
 
-/**
+/**     
  * Base Controller class for interactive maps, handles input for mouse clicks, camera movement, menus and camera zoom
  */
 UCLASS()

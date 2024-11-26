@@ -16,7 +16,7 @@ class FJsonObject;
  * Library for managing data functions, such as reading from data tables and writing to JSON files.
  */
 UCLASS()
-class INTERACTIVEMAP_API UDataManagerFunctioLibrary : public UBlueprintFunctionLibrary
+class INTERACTIVEMAP_API UDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -129,11 +129,11 @@ public:
      */
     static void WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
 
-    void PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces);
+    static void PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces);
 
     UFUNCTION(BlueprintCallable, Category = "Data Loader")
-    bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
+    static bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
 
-    bool ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces);
+    static bool ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces);
 };
 

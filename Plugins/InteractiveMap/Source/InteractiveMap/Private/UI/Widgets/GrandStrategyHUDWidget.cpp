@@ -92,7 +92,7 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
+		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
@@ -113,7 +113,7 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
+		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
