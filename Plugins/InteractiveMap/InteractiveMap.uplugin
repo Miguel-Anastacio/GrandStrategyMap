@@ -26,6 +26,15 @@
 			"PlatformAllowList": [ "Win64" ]
 		},
 		{
+			"Name": "MapEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			],
+			"PlatformAllowList": [ "Win64" ]
+		},
+		{
 			"Name": "VictoryBPLibrary",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",

@@ -75,7 +75,7 @@ public:
 
 	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
 
-	MapGenerator::Map* mapGenerator;
+	// MapGenerator::Map* mapGenerator;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureWidth = 512;

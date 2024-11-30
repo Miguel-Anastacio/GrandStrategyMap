@@ -2,9 +2,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class InteractiveMap : ModuleRules
+public class MapEditor : ModuleRules
 {
-	public InteractiveMap(ReadOnlyTargetRules Target) : base(Target)
+	public MapEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -41,16 +41,20 @@ public class InteractiveMap : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
-                "EnhancedInput",
                 "Slate",	
 				"SlateCore",
                 "UMG",
 				"Json",
 				"JsonUtilities",
+				"AssetTools",
+				"AssetDefinition",
+				"AdvancedPreviewScene",
+				"ToolMenus",
+				"UnrealEd"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		// PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
+		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
