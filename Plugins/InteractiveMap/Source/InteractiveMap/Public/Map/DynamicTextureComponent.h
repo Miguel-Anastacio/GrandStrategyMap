@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "../MapGenerator/source/map/map.h"
+// #include "../MapGenerator/source/map/map.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RHIResources.h"
