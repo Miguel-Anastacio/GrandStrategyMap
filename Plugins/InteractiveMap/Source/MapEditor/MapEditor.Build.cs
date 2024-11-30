@@ -41,6 +41,7 @@ public class MapEditor : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+				"InputCore",
                 "Slate",	
 				"SlateCore",
                 "UMG",

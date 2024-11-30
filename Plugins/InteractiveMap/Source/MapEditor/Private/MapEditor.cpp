@@ -3,14 +3,18 @@
 #include "MapEditor.h"
 #include "ToolMenus.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Editor/SMapEditorMenu.h"
 DEFINE_LOG_CATEGORY(LogInteractiveMapEditor);
 
 #define LOCTEXT_NAMESPACE "FInteractiveMapModule"
 void FInteractiveMapEditorModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-	RegisterMenus();
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Map Generator Editor module has been loaded"));
+	RegisterMenus();
+
+	// FGlobalTabmanager::Get()->RegisterNomadTabSpawner("MyCustomTab", FOnSpawnTab::CreateRaw(this, &FInteractiveMapEditorModule::OnSpawnPluginTab))
+	//    .SetDisplayName(FText::FromString("My Custom Tool"))
+	//    .SetMenuType(ETabSpawnerMenuType::Hidden);
 
 }
 void FInteractiveMapEditorModule::ShutdownModule()
@@ -83,13 +87,29 @@ void FInteractiveMapEditorModule::AddMenuExtensions(FMenuBuilder& Builder) const
 
 void FInteractiveMapEditorModule::LaunchMapEditor() const
 {
-	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Launching Map Editor"));
+	TSharedRef<SWindow> Window = SNew(SWindow)
+		.Title(FText::FromString("My Custom Tool"))
+		.ClientSize(FVector2D(400, 300))
+		[
+			SNew(SMapEditorMenu) // Embed your custom Slate widget here
+		];
+
+	FSlateApplication::Get().AddWindow(Window);
 }
 
 void FInteractiveMapEditorModule::LaunchTerrainCreator() const
 {
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Launching Terrain Creator Editor"));
 }
+
+// void FInteractiveMapEditorModule::OnSpawnMapEditorTab() const
+// {
+// 	return SNew(SDockTab)
+// 	  .TabRole(ETabRole::NomadTab)
+// 	  [
+// 		  SNew(SMapEditorMenu) // Your custom Slate widget
+// 	  ];
+// }
 
 #undef LOCTEXT_NAMESPACE
 	

@@ -20,4 +20,6 @@ public:
 	void AddMenuExtensions(FMenuBuilder& MenuBuilder) const;
 	void LaunchMapEditor() const;
 	void LaunchTerrainCreator() const;
+
+	void OnSpawnMapEditorTab() const;
 };
