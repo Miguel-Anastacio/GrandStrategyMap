@@ -51,7 +51,10 @@ public class MapEditor : ModuleRules
 				"AssetDefinition",
 				"AdvancedPreviewScene",
 				"ToolMenus",
-				"UnrealEd"
+				"UnrealEd",
+				"EditorStyle",
+				"WorkspaceMenuStructure",
+				"PropertyEditor"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

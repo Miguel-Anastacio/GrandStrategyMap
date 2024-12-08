@@ -18,7 +18,7 @@ void SMapCreatorViewport::Construct(const FArguments& InArgs)
 
 	//ABuildingBase* PreviewBuilding = GetWorld()->SpawnActor<ABuildingBase>();
 	//PreviewBuilding->BuildingStyle = StylePreset.Get();
-	//PreviewBuilding->RerunConstructionScripts();
+	//PreviewBu	ilding->RerunConstructionScripts();
 }
 
 
