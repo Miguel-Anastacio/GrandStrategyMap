@@ -93,8 +93,10 @@ namespace MapGenerator
 	void RegenerateLookupBorders(const LookupMapData &data);
 
 	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height);
+	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const LookupMapData& data);
 
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight);
+	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data);
 
 	// void SaveMap(const char* filePath);
 	void SaveMap(const std::string &filePath) const;

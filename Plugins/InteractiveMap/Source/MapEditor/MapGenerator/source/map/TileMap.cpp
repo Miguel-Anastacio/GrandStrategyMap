@@ -90,7 +90,7 @@ namespace MapGenerator
 				const int tileIndex = (i * Width() + j);
 				const int index = tileIndex * 4;
 				buffer[index] = m_tiles[tileIndex].color.B;
-				buffer[index + 0] = m_tiles[tileIndex].color.R;
+				buffer[index + 1] = m_tiles[tileIndex].color.R;
 				buffer[index + 2] = m_tiles[tileIndex].color.G;
 				buffer[index + 3] = m_tiles[tileIndex].color.A;
 				

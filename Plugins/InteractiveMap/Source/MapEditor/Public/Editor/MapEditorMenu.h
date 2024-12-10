@@ -24,7 +24,7 @@ public:
 	~MapEditorMenu();
 
 	void RegisterTabs();
-	TSharedRef<SDockTab> SpawnDetailsTab(const FSpawnTabArgs& Args) const;
+	TSharedRef<SDockTab> SpawnDetailsTab(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnViewport(const FSpawnTabArgs& Args);
 
 	// UFUNCTION()

@@ -5,7 +5,7 @@
 void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	OnObjectChanged.Broadcast();
+	// OnObjectChanged.Broadcast();
 }
 #endif}
 

@@ -79,6 +79,13 @@ namespace MapGenerator
 		GenerateMapFromHeigthMap(textureBuffer, m_cutOffHeight);
 	}
 
+	void Map::GenerateMap(const std::vector<uint8_t>& textureBuffer, unsigned width, unsigned height,
+		const LookupMapData& data)
+	{
+		setDimensions(width, height);
+		GenerateMapFromHeigthMap(textureBuffer, data.cutOffHeight, data);
+	}
+
 	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight)
 	{
 		cutOffHeight = 0.001f;
@@ -88,6 +95,22 @@ namespace MapGenerator
 
 		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
 		RegenerateLookUp(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, 0.001f));
+
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation());
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes);
+	}
+
+	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight,
+		const LookupMapData& data)
+	{
+		// cutOffHeight = 0.001f;
+		
+		m_maskmap = std::make_unique<MapMask>("LandmassMaskTest.png", textureBuffer, Width(), Height(), cutOffHeight);
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, false);
+
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
+		RegenerateLookUp(data);
 
 		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation());
 		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes);

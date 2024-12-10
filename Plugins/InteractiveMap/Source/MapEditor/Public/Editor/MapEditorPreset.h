@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MapEditor/MapGenerator/source/map/components/HeightMap.h"
 #include "MapEditorPreset.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
@@ -27,7 +28,7 @@ struct FModuleDefinition
 	UTexture2D* HeightMapTexture;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings")
-	float CutoffHeight = 0.01f;
+	float CutoffHeight = 0.001f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Land Settings")
 	FMapDetails LandDetails;
@@ -69,5 +70,30 @@ public:
 	FModuleDefinition MapEditorDetails;
 	
 	FOnAssetChanged OnObjectChanged;
+
+	MapGenerator::NoiseData GetNoiseData() const
+	{
+		return MapGenerator::NoiseData(MapEditorDetails.Seed, MapEditorDetails.Octaves, MapEditorDetails.Frequency, MapEditorDetails.Scale,
+										MapEditorDetails.Lacunarity, 0.2);
+	};
+	MapGenerator::LookupFeatures LandSettings() const
+	{
+		return MapGenerator::LookupFeatures(MapEditorDetails.LandDetails.Seed, MapEditorDetails.LandDetails.NumberOfTiles,
+							MapEditorDetails.LandDetails.LloydIteration);
+	};
+	MapGenerator::LookupFeatures OceanSettings() const
+	{
+		return MapGenerator::LookupFeatures(MapEditorDetails.OceanDetails.Seed, MapEditorDetails.OceanDetails.NumberOfTiles,
+							MapEditorDetails.OceanDetails.LloydIteration);
+	};
+
+	MapGenerator::LookupMapData GetLookupMapData() const
+	{
+		const uint32 width = MapEditorDetails.HeightMapTexture->GetSizeX();
+		const uint32 height = MapEditorDetails.HeightMapTexture->GetSizeY();
+		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
+											width, height, MapEditorDetails.LineThickness, MapEditorDetails.CutoffHeight);
+	}
+	
 
 };
