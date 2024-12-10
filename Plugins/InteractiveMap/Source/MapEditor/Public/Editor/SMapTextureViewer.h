@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
-// #include "Editor/EditorWidgets/Public/SEditorViewport.h"
 #include "IDetailsView.h"
 #include "PropertyEditorModule.h"
 #include "Misc/Optional.h"
@@ -12,11 +11,19 @@
 class FAdvancedPreviewScene;
 class UTexture2D;  // Forward declaration for UTexture2D class
 
-
-class MapEditorMenu 
+/**
+ * Custom Editor Widget to manage texture selection, details, and display.
+ */
+class STextureViewer : public SCompoundWidget
 {
 public:
-   
+    SLATE_BEGIN_ARGS(STextureViewer)
+    {}
+    SLATE_END_ARGS()
+
+    /** Constructor and widget setup */
+    void Construct(const FArguments& InArgs);
+
     /** Updates the main window to display the selected texture */
     FReply ChangeImageSelected();
 

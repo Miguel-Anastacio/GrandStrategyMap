@@ -1,7 +1,7 @@
-#include "Editor/SMapEditorMenu.h"
+#include "Editor/SMapTextureViewer.h"
 #include "Engine/Texture2D.h"
 
-void SMapEditorMenu::Construct(const FArguments& InArgs)
+void STextureViewer::Construct(const FArguments& InArgs)
 {
     MainBrush = CreateBrush(nullptr, FVector2D(1028, 1028));
     TSharedRef<SVerticalBox> ButtonsBox = SNew(SVerticalBox)
@@ -13,7 +13,7 @@ void SMapEditorMenu::Construct(const FArguments& InArgs)
         .AutoHeight()
         [
             SNew(SButton)
-            .OnClicked(this, &SMapEditorMenu::ChangeImageSelected)
+            .OnClicked(this, &STextureViewer::ChangeImageSelected)
         ];
     }
     
@@ -28,7 +28,7 @@ void SMapEditorMenu::Construct(const FArguments& InArgs)
             .AutoHeight()
             [
                SNew(SButton)
-               .OnClicked(this, &SMapEditorMenu::ChangeImageSelected)
+               .OnClicked(this, &STextureViewer::ChangeImageSelected)
                [
                    SNew(SImage)
                    .Image(Brushes[0].Get())
@@ -38,7 +38,7 @@ void SMapEditorMenu::Construct(const FArguments& InArgs)
             .AutoHeight()
             [
                SNew(SButton)
-               .OnClicked(this, &SMapEditorMenu::ChangeImageSelected)
+               .OnClicked(this, &STextureViewer::ChangeImageSelected)
                [
                    SNew(SImage)
                    .Image(Brushes[1].Get())
@@ -47,18 +47,18 @@ void SMapEditorMenu::Construct(const FArguments& InArgs)
         ]
         + SHorizontalBox::Slot()
         [
-            SNew(SImage).Image(this, &SMapEditorMenu::GetMainBrush)
+            SNew(SImage).Image(this, &STextureViewer::GetMainBrush)
         ]
     ];
 }
 
-FReply SMapEditorMenu::ChangeImageSelected()
+FReply STextureViewer::ChangeImageSelected()
 {
     // MainImage = Images[0];
     return FReply::Handled();
 }
 
-void SMapEditorMenu::OnTextureChanged(UTexture2D* texture)
+void STextureViewer::OnTextureChanged(UTexture2D* texture)
 {
     if(!texture)
         return;
@@ -75,12 +75,12 @@ void SMapEditorMenu::OnTextureChanged(UTexture2D* texture)
     }
 }
 
-const FSlateBrush* SMapEditorMenu::GetMainBrush() const
+const FSlateBrush* STextureViewer::GetMainBrush() const
 {
     return  MainBrush.Get();
 }
 
-TSharedPtr<FSlateBrush> SMapEditorMenu::CreateBrush(UTexture2D* Texture, const FVector2D& Size)
+TSharedPtr<FSlateBrush> STextureViewer::CreateBrush(UTexture2D* Texture, const FVector2D& Size)
 {
     TSharedPtr<FSlateBrush> Brush = MakeShared<FSlateBrush>();
     if (Texture)
