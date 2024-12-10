@@ -67,6 +67,7 @@ namespace MapGenerator
 		}
 
 		std::vector<uint8_t> ConvertTileMapToBuffer() const;
+		uint8_t* ConvertTileMapToRawBuffer() const;
 		inline std::vector<Tile> &GetTilesRef()
 		{
 			return m_tiles;

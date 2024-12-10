@@ -79,6 +79,27 @@ namespace MapGenerator
 		return buffer;
 	}
 
+	uint8_t* TileMap::ConvertTileMapToRawBuffer() const
+	{
+		uint8* buffer = new uint8[m_tiles.size() * 4];
+		
+		for (unsigned i = 0; i < Height(); i++)
+		{
+			for (unsigned j = 0; j < Width(); j++)
+			{
+				const int tileIndex = (i * Width() + j);
+				const int index = tileIndex * 4;
+				buffer[index] = m_tiles[tileIndex].color.B;
+				buffer[index + 0] = m_tiles[tileIndex].color.R;
+				buffer[index + 2] = m_tiles[tileIndex].color.G;
+				buffer[index + 3] = m_tiles[tileIndex].color.A;
+				
+			}
+		}
+
+		return buffer;
+	}
+
 	void TileMap::ComputeCells()
 	{
 		auto height = Height();
