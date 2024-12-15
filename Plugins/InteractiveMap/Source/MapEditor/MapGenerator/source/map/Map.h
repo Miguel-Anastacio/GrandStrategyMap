@@ -102,6 +102,7 @@ namespace MapGenerator
 	void SaveMap(const std::string &filePath) const;
 	void Reset();
 
+
 private:
 	// void SaveMapComponent(MapComponent* component, const char* filePath, const char* message = "map component");
 	void SaveMapComponent(MapComponent *component, const std::string &filePath, const char *message = "map component") const;
@@ -118,5 +119,6 @@ private:
 
 	float m_cutOffHeight = 0.001f;
 	// std::unique_ptr<Texture> m_lookUpTexture;
+	uint8* GetTileMapOfType(TileType type) const;
 };
 }

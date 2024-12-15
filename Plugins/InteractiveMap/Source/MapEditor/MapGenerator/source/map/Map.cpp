@@ -62,6 +62,7 @@ namespace MapGenerator
 		}
 
 		m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get());
+		m_cutOffHeight = data.cutOffHeight;
 	}
 
 	void Map::RegenerateLookupBorders(const LookupMapData &data)

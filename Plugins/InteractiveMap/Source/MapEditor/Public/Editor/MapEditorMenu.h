@@ -37,10 +37,15 @@ private:
 
 	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
+	TObjectPtr<UTexture2D> CreateTexture(uint8* buffer, unsigned width, unsigned height);
+	
 	static const uint8* ReadTextureToBuffer(UTexture2D* texture);
 	
 	UPROPERTY()
 	TObjectPtr<UTexture2D> LookupTexture;
+	TObjectPtr<UTexture2D> LookupLandTexture;
+	TObjectPtr<UTexture2D> LookupOceanTexture;
+	TObjectPtr<UTexture2D> HeightMapTexture;
 
 	
 

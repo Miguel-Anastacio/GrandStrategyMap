@@ -4,17 +4,9 @@
 void STextureViewer::Construct(const FArguments& InArgs)
 {
     MainBrush = CreateBrush(nullptr, FVector2D(1028, 1028));
-    TSharedRef<SVerticalBox> ButtonsBox = SNew(SVerticalBox)
-    + SVerticalBox::Slot();
     for(int i = 0; i < 4; i++)
     {
         Brushes.Add(CreateBrush(nullptr, FVector2D(128, 128)));
-        ButtonsBox->AddSlot()
-        .AutoHeight()
-        [
-            SNew(SButton)
-            .OnClicked(this, &STextureViewer::ChangeImageSelected)
-        ];
     }
     
     ChildSlot
@@ -28,22 +20,70 @@ void STextureViewer::Construct(const FArguments& InArgs)
             .AutoHeight()
             [
                SNew(SButton)
-               .OnClicked(this, &STextureViewer::ChangeImageSelected)
+               .OnClicked_Lambda([this]() -> FReply
+               {
+                   MainBrush = Brushes[0];
+                   return FReply::Handled();
+               })
                [
                    SNew(SImage)
-                   .Image(Brushes[0].Get())
+                  .Image_Lambda([this]() -> const FSlateBrush*
+                  {
+                      return GetBrush(0);
+                  })
                ]
             ]
             + SVerticalBox::Slot()
             .AutoHeight()
             [
-               SNew(SButton)
-               .OnClicked(this, &STextureViewer::ChangeImageSelected)
+                SNew(SButton)
+                .OnClicked_Lambda([this]() -> FReply
+                {
+                  MainBrush = Brushes[1];
+                  return FReply::Handled();
+                })
                [
                    SNew(SImage)
-                   .Image(Brushes[1].Get())
+                   .Image_Lambda([this]() -> const FSlateBrush*
+                   {
+                       return GetBrush(1);
+                   })
                ]
             ]
+            + SVerticalBox::Slot()
+           .AutoHeight()
+           [
+               SNew(SButton)
+               .OnClicked_Lambda([this]() -> FReply
+               {
+                 MainBrush = Brushes[2];
+                 return FReply::Handled();
+               })
+              [
+                  SNew(SImage)
+                  .Image_Lambda([this]() -> const FSlateBrush*
+                  {
+                      return GetBrush(2);
+                  })
+              ]
+           ]
+            + SVerticalBox::Slot()
+           .AutoHeight()
+           [
+               SNew(SButton)
+               .OnClicked_Lambda([this]() -> FReply
+               {
+                 MainBrush = Brushes[3];
+                 return FReply::Handled();
+               })
+              [
+                  SNew(SImage)
+                  .Image_Lambda([this]() -> const FSlateBrush*
+                  {
+                      return GetBrush(3);
+                  })
+              ]
+           ]
         ]
         + SHorizontalBox::Slot()
         [
@@ -55,6 +95,7 @@ void STextureViewer::Construct(const FArguments& InArgs)
 FReply STextureViewer::ChangeImageSelected()
 {
     // MainImage = Images[0];
+    // if()
     return FReply::Handled();
 }
 
@@ -78,6 +119,21 @@ void STextureViewer::OnTextureChanged(UTexture2D* texture)
 const FSlateBrush* STextureViewer::GetMainBrush() const
 {
     return  MainBrush.Get();
+}
+
+void STextureViewer::SetTextures(TArray<UTexture2D*> textures)
+{
+    for(int i = 0; i < textures.Num(); i++)
+    {
+        if(i >= Brushes.Num())
+            break;
+        Brushes[i]->SetResourceObject(textures[i]);
+    }
+}
+
+const FSlateBrush* STextureViewer::GetBrush(int index) const
+{
+    return Brushes[index].Get();
 }
 
 TSharedPtr<FSlateBrush> STextureViewer::CreateBrush(UTexture2D* Texture, const FVector2D& Size)

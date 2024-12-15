@@ -32,9 +32,12 @@ public:
 
     const FSlateBrush* GetMainBrush() const;
 
+    void SetTextures(TArray<UTexture2D*> textures);
+
 protected:
     static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);
 private:
+    const FSlateBrush* GetBrush(int index) const;
     /** The currently selected texture */
     TArray<TSharedPtr<SImage>> Images;
 

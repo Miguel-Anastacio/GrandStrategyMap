@@ -96,17 +96,28 @@ void MapEditorMenu::GenerateMap()
 	int32 Height = texture->GetSizeY();
 	int32 Width = texture->GetSizeX();
 	std::vector<uint8_t> vector = std::vector<uint8_t>(&Data[0], &Data[Width * Height * 4]);
-	// MapGenerator::LookupMapData()
-	using namespace MapGenerator;
 	Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData());
 	LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
+	LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
+	LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
 
 	// UpdateDisplayTexture
 	if(TextureViewer && MapEditorPreset)
+	{
 		TextureViewer->OnTextureChanged(LookupTexture.Get());
+		TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), texture});
+	}
 }
 
 TObjectPtr<UTexture2D> MapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
+{
+	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
+	const int Width = TileMap.Width();
+	const int Height = TileMap.Height();
+	return CreateTexture(buffer, Width, Height);
+}
+
+TObjectPtr<UTexture2D> MapEditorMenu::CreateTexture(uint8* buffer, unsigned width, unsigned height)
 {
 	//Create a string containing the texture's path
 	FString PackageName = TEXT("/Game/ProceduralTextures/");
@@ -123,16 +134,13 @@ TObjectPtr<UTexture2D> MapEditorMenu::CreateLookupTexture(const MapGenerator::Ti
 	Package->FullyLoad();
  
 	TObjectPtr<UTexture2D> NewTexture = NewObject<UTexture2D>(Package, TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
-	const int Width = TileMap.Width();
-	const int Height = TileMap.Height();
 
 	// Set texture properties
-	NewTexture->Source.Init(Width, Height, 1, 1, TSF_BGRA8);
+	NewTexture->Source.Init(width, height, 1, 1, TSF_BGRA8);
 
 	// Lock the mipmap and write the buffer data
 	uint8* MipData = NewTexture->Source.LockMip(0);
-	int32 BufferSize = Width * Height * 4; // BGRA8 format
+	int32 BufferSize = width * height * 4; // BGRA8 format
 	FMemory::Memcpy(MipData, buffer, BufferSize);
 	NewTexture->Source.UnlockMip(0);
 	

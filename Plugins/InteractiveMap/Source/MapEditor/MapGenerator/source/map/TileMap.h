@@ -106,8 +106,12 @@ namespace MapGenerator
 		bool FindColorOfClosestTileOfSameType(int x, int y, int radius, data::Color &out_color) const;
 
 		void ColorInBorders(const Mask &mask);
+		
+		uint8* GetOceanTileMap() const;
+		uint8* GetLandTileMap() const;
 
 	private:
+		uint8* GetTileMapOfType(TileType type) const;
 		std::vector<Tile> m_tiles;
 		std::unordered_map<mygal::Vector2<int>, data::Color> m_cells;
 
@@ -126,5 +130,7 @@ namespace MapGenerator
 	};
 
 	std::ostream &operator<<(std::ostream &os, const TileMap &map);
+
+
 
 } // namespace MapGeneratorTool
