@@ -14,9 +14,7 @@
 
 class STextureViewer;
 class FAdvancedPreviewScene;
-class UTexture2D;  // Forward declaration for UTexture2D class
-
-
+class UTexture2D;  
 class MAPEDITOR_API MapEditorMenu  
 {
 public:
@@ -29,17 +27,19 @@ public:
 
 	// UFUNCTION()
 	void GenerateMap();
-
+	void SaveMap();
 private:
 	UMapEditorPreset* MapEditorPreset;
 	TSharedPtr<STextureViewer> TextureViewer;
 	MapGenerator::Map Map;
 
-	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
+	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
-	TObjectPtr<UTexture2D> CreateTexture(uint8* buffer, unsigned width, unsigned height);
+	static TObjectPtr<UTexture2D> CreateTexture(uint8* buffer, unsigned width, unsigned height);
 	
 	static const uint8* ReadTextureToBuffer(UTexture2D* texture);
+
+	static bool ValidateTexture(UTexture2D* texture);
 	
 	UPROPERTY()
 	TObjectPtr<UTexture2D> LookupTexture;

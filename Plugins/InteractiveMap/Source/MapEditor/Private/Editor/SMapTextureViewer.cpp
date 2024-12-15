@@ -1,14 +1,16 @@
 #include "Editor/SMapTextureViewer.h"
+
+#include "Editor/STextureDisplay.h"
 #include "Engine/Texture2D.h"
 
 void STextureViewer::Construct(const FArguments& InArgs)
 {
-    MainBrush = CreateBrush(nullptr, FVector2D(1028, 1028));
     for(int i = 0; i < 4; i++)
     {
         Brushes.Add(CreateBrush(nullptr, FVector2D(128, 128)));
     }
     
+    // MainBrush = Brushes[0];
     ChildSlot
     [
        SNew(SHorizontalBox)
@@ -22,7 +24,7 @@ void STextureViewer::Construct(const FArguments& InArgs)
                SNew(SButton)
                .OnClicked_Lambda([this]() -> FReply
                {
-                   MainBrush = Brushes[0];
+                   TextureDisplay->SetMainBrush(Brushes[0]);
                    return FReply::Handled();
                })
                [
@@ -39,7 +41,7 @@ void STextureViewer::Construct(const FArguments& InArgs)
                 SNew(SButton)
                 .OnClicked_Lambda([this]() -> FReply
                 {
-                  MainBrush = Brushes[1];
+                    TextureDisplay->SetMainBrush(Brushes[1]);
                   return FReply::Handled();
                 })
                [
@@ -56,7 +58,7 @@ void STextureViewer::Construct(const FArguments& InArgs)
                SNew(SButton)
                .OnClicked_Lambda([this]() -> FReply
                {
-                 MainBrush = Brushes[2];
+                   TextureDisplay->SetMainBrush(Brushes[2]);
                  return FReply::Handled();
                })
               [
@@ -73,8 +75,8 @@ void STextureViewer::Construct(const FArguments& InArgs)
                SNew(SButton)
                .OnClicked_Lambda([this]() -> FReply
                {
-                 MainBrush = Brushes[3];
-                 return FReply::Handled();
+                   TextureDisplay->SetMainBrush(Brushes[3]);
+                   return FReply::Handled();
                })
               [
                   SNew(SImage)
@@ -87,7 +89,7 @@ void STextureViewer::Construct(const FArguments& InArgs)
         ]
         + SHorizontalBox::Slot()
         [
-            SNew(SImage).Image(this, &STextureViewer::GetMainBrush)
+            SAssignNew(TextureDisplay, STextureDisplay)
         ]
     ];
 }
@@ -101,24 +103,7 @@ FReply STextureViewer::ChangeImageSelected()
 
 void STextureViewer::OnTextureChanged(UTexture2D* texture)
 {
-    if(!texture)
-        return;
-    
-    if(!MainBrush.IsValid() )
-    {
-        MainBrush = CreateBrush(texture, FVector2D(1028, 1028));
-        MainBrush->SetResourceObject(texture);
-        // MainImage->SetImage(MainBrush.Get());
-    }
-    else if (MainBrush.IsValid() && texture)
-    {
-        MainBrush->SetResourceObject(texture);
-    }
-}
-
-const FSlateBrush* STextureViewer::GetMainBrush() const
-{
-    return  MainBrush.Get();
+    TextureDisplay->SetMainBrush(texture);
 }
 
 void STextureViewer::SetTextures(TArray<UTexture2D*> textures)
@@ -142,8 +127,6 @@ TSharedPtr<FSlateBrush> STextureViewer::CreateBrush(UTexture2D* Texture, const F
     if (Texture)
     {
         Brush->SetResourceObject(Texture);
-        // Brush->ImageSize.X = InArgs._ItemImage->GetSurfaceWidth();
-        // Brush->ImageSize.Y = InArgs._ItemImage->GetSurfaceHeight();
     }
     Brush->DrawAs = ESlateBrushDrawType::Image;
     Brush->ImageSize = Size;

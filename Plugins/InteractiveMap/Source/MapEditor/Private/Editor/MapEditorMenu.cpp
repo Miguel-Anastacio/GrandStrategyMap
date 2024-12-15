@@ -63,6 +63,20 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
 					return FReply::Handled();
 				})
 			]
+			+ SVerticalBox::Slot()
+			.Padding(10.0f) // Add padding around the button
+			.HAlign(HAlign_Center) // Center the button horizontally
+			.VAlign(VAlign_Top)    // Align the button to the top of its slot
+			.AutoHeight()          // Let the button determine its own height
+			[
+				SNew(SButton)
+				.Text(FText::FromString("Save"))
+				.OnClicked_Lambda([this]() -> FReply
+				{
+					SaveMap();
+					return FReply::Handled();
+				})
+			]
 		];	
 }
 
@@ -84,11 +98,10 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 void MapEditorMenu::GenerateMap()
 {
 	auto texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
-	if (!IsValid(texture))
+	if(!ValidateTexture(texture))
 		return;
 	
 	FTextureCompilingManager::Get().FinishCompilation({texture});
-	
 	const uint8* Data = ReadTextureToBuffer(texture);
 	
 	// temp just to test
@@ -106,6 +119,23 @@ void MapEditorMenu::GenerateMap()
 	{
 		TextureViewer->OnTextureChanged(LookupTexture.Get());
 		TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), texture});
+	}
+}
+
+void MapEditorMenu::SaveMap()
+{
+	// FInteractiveMapEditorModule::SaveObject(LookupTexture);
+	bool result = false;
+	FString message;
+	uint8_t* buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
+	const int Width =  Map.GetLookupTileMap().Width();
+	const int Height =  Map.GetLookupTileMap().Height();
+	FInteractiveMapEditorModule::CreateTexture(FString("/Game/TestTextures/NewLookup"), result, message, buffer, Width, Height);
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
+	if(buffer)
+	{
+		delete[] buffer;
+		buffer = nullptr;
 	}
 }
 
@@ -164,4 +194,18 @@ const uint8* MapEditorMenu::ReadTextureToBuffer(UTexture2D* texture)
 	Mip.BulkData.Unlock();
 
 	return  Data;
+}
+
+bool MapEditorMenu::ValidateTexture(UTexture2D* texture)
+{
+	UE_LOG(LogInteractiveMapEditor, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *texture->GetName());
+	if(texture == nullptr)
+		return false;
+	if(texture->CompressionSettings != TC_EditorIcon)
+	{
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *texture->GetName());
+		return false;
+	}
+
+	return true;
 }

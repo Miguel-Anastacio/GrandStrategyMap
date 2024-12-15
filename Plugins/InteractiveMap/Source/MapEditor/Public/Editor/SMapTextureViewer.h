@@ -8,6 +8,7 @@
 #include "Misc/Optional.h"
 #include "Framework/Docking/TabManager.h"
 
+class STextureDisplay;
 class FAdvancedPreviewScene;
 class UTexture2D;  // Forward declaration for UTexture2D class
 
@@ -38,10 +39,7 @@ protected:
     static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);
 private:
     const FSlateBrush* GetBrush(int index) const;
-    /** The currently selected texture */
-    TArray<TSharedPtr<SImage>> Images;
-
-    TSharedPtr<FSlateBrush> MainBrush;
     TArray<TSharedPtr<FSlateBrush>> Brushes;
-
+    TSharedPtr<STextureDisplay> TextureDisplay;
+    
 };

@@ -30,6 +30,10 @@ public:
 	TSharedRef<SDockTab> SpawnMainTab(const FSpawnTabArgs& Args) const;
 
 	static bool SaveObject(UObject* Object);
+
+	static UObject* CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
+	// static UObject* CreateAssetFrom(const FString& assetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage, const TArray<UObject*>& Objects);
+	static UTexture2D* CreateTexture(const FString& assetPath, bool& bOutSuccess, FString& OutInfoMessage, uint8* Buffer, unsigned Width, unsigned Height);
 private:
 	FName MapEditorMainTab = FName(TEXT("MapEditorMainTab"));
 	MapEditorMenu* _MapEditorMenu;
