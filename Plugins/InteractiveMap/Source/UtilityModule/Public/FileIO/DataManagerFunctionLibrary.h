@@ -1,21 +1,29 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
-#include "Map/MapUtils.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
+/**
+ *  Struct that can hold any data of that type 
+ */
+USTRUCT(BlueprintType)
+struct FVariantData : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    TMap<FString, TVariant<int, float, FString, bool>> Properties;
+};
 
 class FJsonObject;
 /**
  * Library for managing data functions, such as reading from data tables and writing to JSON files.
  */
 UCLASS()
-class INTERACTIVEMAP_API UDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -32,7 +40,6 @@ public:
     {
         if (!dataTable)
         {
-            //UE_LOG(LogInteractiveMap, Error, TEXT("Data not loaded"));
             return false;
         }
         TArray<FName> RowNames = dataTable->GetRowNames();
@@ -56,7 +63,7 @@ public:
      * @param outInfoMessage Information message about the operation.
      */
     template<class T>
-    static void WriteStructToJsonFile(FString jsonFilePath, T structure, bool& outSuccess, FString& outInfoMessage)
+    static void WriteStructToJsonFile(const FString& jsonFilePath,const T& structure, bool& outSuccess, FString& outInfoMessage)
     {
         TSharedPtr<FJsonObject> jsonObject = FJsonObjectConverter::UStructToJsonObject(structure);
         if (!jsonObject)
@@ -77,7 +84,7 @@ public:
      * @param outInfoMessage Information message about the operation.
      */
     template<class T>
-    static void WriteMapToJsonFile(FString jsonFilePath, TMap<FName, T> mapStructure, bool& outSuccess, FString& outInfoMessage)
+    static void WriteMapToJsonFile(const FString& jsonFilePath, const TMap<FName, T>& mapStructure, bool& outSuccess, FString& outInfoMessage)
     {
         TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
         if (!jsonObject)
@@ -106,7 +113,7 @@ public:
          * @param outSuccess Whether the operation was successful.
          * @param outInfoMessage Information message about the operation.
          */
-    static void WriteStringToFile(FString filePath, FString string, bool& outSuccess, FString& outInfoMessage);
+    static void WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage);
 
     /**
      * Writes JSON data to a file.
@@ -116,7 +123,7 @@ public:
      * @param outSuccess Whether the operation was successful.
      * @param outInfoMessage Information message about the operation.
      */
-    static void WriteJson(FString jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage);
+    static void WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage);
 
     /**
      * Writes JSON data to a file.
@@ -126,13 +133,13 @@ public:
      * @param outSuccess Whether the operation was successful.
      * @param outInfoMessage Information message about the operation.
      */
-    static void WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
+    static void WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
 
-    static void PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces);
 
     UFUNCTION(BlueprintCallable, Category = "Data Loader")
     static bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
-
-    static bool ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces);
+private:
+    static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
+    static bool ImportVariantData(const FString& JsonContent, TArray<FVariantData>& OutProvinces);
 };
 

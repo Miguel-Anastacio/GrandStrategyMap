@@ -29,7 +29,8 @@ public class InteractiveMap : ModuleRules
 				"Core",
 				"RHI",
 				"RenderCore",
-				"VictoryBPLibrary"
+				"VictoryBPLibrary",
+				"UtilityModule"
              
 				// ... add other public dependencies that you statically link with here ...
 			}

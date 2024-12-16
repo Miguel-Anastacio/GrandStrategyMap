@@ -10,10 +10,10 @@
 #include "Components/PrimitiveComponent.h"
 #include "Map/Visual/LayeredMapVisualComponent.h"
 #include "Map/MapDataComponent.h"
-#include "DataManager/DataManagerFunctionLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "InteractiveMap.h"
 //#include "InteractiveMap.h"
 // Sets default values
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)

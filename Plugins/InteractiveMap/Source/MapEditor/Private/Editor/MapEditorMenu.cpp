@@ -128,8 +128,8 @@ void MapEditorMenu::SaveMap()
 	FString message;
 	uint8_t* buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
 	bool result = false;
-	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage("/Game/MapEditor/", "LookupTexture" ,UTexture2D::StaticClass());
-	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(assetPath, buffer, Map.Width(), Map.Height(), result, message);
+	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage("/Game/MapEditor/Maps", "LookupTexture" ,UTexture2D::StaticClass());
+	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer("/Game/MapEditor/Maps" + assetPath, buffer, Map.Width(), Map.Height(), result, message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
 
 	

@@ -1,12 +1,12 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "DataManager/DataManagerFunctionLibrary.h"
+#include "FileIO/DataManagerFunctionLibrary.h"
 #include "HAL/PlatformFileManager.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
 
-void UDataManagerFunctionLibrary::WriteStringToFile(FString filePath, FString string, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
 	if (!FFileHelper::SaveStringToFile(string, *filePath))
 	{
@@ -20,7 +20,7 @@ void UDataManagerFunctionLibrary::WriteStringToFile(FString filePath, FString st
 }
 
 
-void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 
@@ -41,7 +41,7 @@ void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, const TSharedP
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 
@@ -62,7 +62,7 @@ void UDataManagerFunctionLibrary::WriteJson(FString jsonFilePath, TArray<TShared
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::PopulateDataTable(UDataTable* DataTable, const TArray<FVariantProvinceData>& Provinces)
+void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Provinces)
 {
 	if (!DataTable) return;
 
@@ -78,16 +78,16 @@ bool UDataManagerFunctionLibrary::LoadProvinceData(const FString& FilePath, UDat
 	FString JsonContent;
 	if (FFileHelper::LoadFileToString(JsonContent, *FilePath))
 	{
-		TArray<FVariantProvinceData> Provinces;
-		if (ImportProvinceData(JsonContent, Provinces))
+		TArray<FVariantData> Provinces;
+		if (ImportVariantData(JsonContent, Provinces))
 		{
-			PopulateDataTable(TargetDataTable, Provinces);
+			PopulateDataTableWithArray(TargetDataTable, Provinces);
 		}
 	}
 	return false;
 }
 
-bool UDataManagerFunctionLibrary::ImportProvinceData(const FString& JsonContent, TArray<FVariantProvinceData>& OutProvinces)
+bool UDataManagerFunctionLibrary::ImportVariantData(const FString& JsonContent, TArray<FVariantData>& OutProvinces)
 {
 	TSharedPtr<FJsonObject> JsonObject;
 	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonContent);
@@ -100,7 +100,7 @@ bool UDataManagerFunctionLibrary::ImportProvinceData(const FString& JsonContent,
 			TSharedPtr<FJsonObject> ProvinceObject = ProvinceEntry.Value->AsObject();
 			if (ProvinceObject.IsValid())
 			{
-				FVariantProvinceData ProvinceData;
+				FVariantData ProvinceData;
 				for (const auto& Field : ProvinceObject->Values)
 				{
 					TVariant<int, float, FString, bool> variant;
