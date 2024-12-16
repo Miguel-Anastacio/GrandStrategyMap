@@ -104,6 +104,27 @@ public:
 
         WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
     }
+    template<class T>
+    static void WriteArrayToJsonFile(const FString& jsonFilePath, const TArray<T>& Array, bool& outSuccess, FString& outInfoMessage)
+    {
+        TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
+        if (!jsonObject)
+        {
+            outSuccess = false;
+            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
+            return;
+        }
+
+        TArray<TSharedPtr<FJsonValue>> jsonValueArray;
+        for (const auto& value : Array)
+        {
+            TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
+            value.SerializeToJson(structObject);
+            jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
+        }
+
+        WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
+    }
 
     /**
          * Writes a string to a file.
@@ -115,6 +136,9 @@ public:
          */
     static void WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage);
 
+    UFUNCTION(BlueprintCallable, Category = "Data Loader")
+    static bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
+private:
     /**
      * Writes JSON data to a file.
      *
@@ -136,9 +160,6 @@ public:
     static void WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
 
 
-    UFUNCTION(BlueprintCallable, Category = "Data Loader")
-    static bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
-private:
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
     static bool ImportVariantData(const FString& JsonContent, TArray<FVariantData>& OutProvinces);
 };

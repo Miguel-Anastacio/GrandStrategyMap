@@ -4,6 +4,7 @@
 #include "TextureCompiler.h"
 #include "Assets/AssetCreatorFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
+#include "FileIO/DataManagerFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
 
 MapEditorMenu::MapEditorMenu() : Map(1028, 1028)
@@ -123,22 +124,33 @@ void MapEditorMenu::GenerateMap()
 	}
 }
 
-void MapEditorMenu::SaveMap()
+void MapEditorMenu::SaveMap() const
 {
 	FString message;
 	uint8_t* buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
 	bool result = false;
-	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage("/Game/MapEditor/Maps", "LookupTexture" ,UTexture2D::StaticClass());
-	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer("/Game/MapEditor/Maps" + assetPath, buffer, Map.Width(), Map.Height(), result, message);
+	FString dir("/Game/MapEditor/Maps/");
+	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(dir, "LookupTexture" ,UTexture2D::StaticClass());
+	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(dir + assetPath, buffer, Map.Width(), Map.Height(), result, message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
-
-	
-
 	if(buffer)
 	{
 		delete[] buffer;
 		buffer = nullptr;
 	}
+
+	// Output Json File with lookup data
+	int32 Id = 0;
+	TArray<FTileIdData> OutputData;
+	dir = ("MapEditor/Maps/");
+	for (const auto& cell : Map.GetLookupTileMap().GetCellMap())
+	{
+		OutputData.Emplace(FTileIdData(cell.second.ConvertToHex().c_str(), Id));
+		Id++;
+	}
+	UDataManagerFunctionLibrary::WriteArrayToJsonFile(FPaths::ProjectContentDir() + dir + "lookup.json", OutputData, result, message);
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
+
 }
 
 TObjectPtr<UTexture2D> MapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)

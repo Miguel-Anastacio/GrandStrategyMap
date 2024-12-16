@@ -3,14 +3,33 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
-// #include "Editor/EditorWidgets/Public/SEditorViewport.h"
 #include "IDetailsView.h"
 #include "MapEditorPreset.h"
 #include "PropertyEditorModule.h"
 #include "Misc/Optional.h"
 #include "Framework/Docking/TabManager.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
-#include "MapEditor/MapGenerator/source/map/components/HeightMap.h"
+#include "MapEditorMenu.generated.h"
+
+USTRUCT(NotBlueprintType)
+struct FTileIdData 
+{
+	GENERATED_BODY()
+	FTileIdData()  : ColorString(TEXT("")), Name(-1) {};
+	FTileIdData(const char* color, int32 id) :  ColorString(color), Name(id) {};
+
+	UPROPERTY()
+	FString ColorString = "";
+	UPROPERTY()
+	int32 Name = -1;
+
+	// Serialize to JSON
+	void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
+	{
+		OutJsonObject->SetStringField(TEXT("Name"), FString::FromInt(Name));
+		OutJsonObject->SetStringField(TEXT("Color"), ColorString);
+	}
+};
 
 class STextureViewer;
 class FAdvancedPreviewScene;
@@ -27,7 +46,7 @@ public:
 
 	// UFUNCTION()
 	void GenerateMap();
-	void SaveMap();
+	void SaveMap() const;
 private:
 	UMapEditorPreset* MapEditorPreset;
 	TSharedPtr<STextureViewer> TextureViewer;
@@ -41,12 +60,8 @@ private:
 
 	static bool ValidateTexture(UTexture2D* texture);
 	
-	UPROPERTY()
 	TObjectPtr<UTexture2D> LookupTexture;
 	TObjectPtr<UTexture2D> LookupLandTexture;
 	TObjectPtr<UTexture2D> LookupOceanTexture;
 	TObjectPtr<UTexture2D> HeightMapTexture;
-
-	
-
 };
