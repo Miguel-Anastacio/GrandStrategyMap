@@ -2,6 +2,7 @@
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
 #include "TextureCompiler.h"
+#include "Assets/AssetCreatorFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
 
@@ -124,14 +125,15 @@ void MapEditorMenu::GenerateMap()
 
 void MapEditorMenu::SaveMap()
 {
-	// FInteractiveMapEditorModule::SaveObject(LookupTexture);
-	bool result = false;
 	FString message;
 	uint8_t* buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
-	const int Width =  Map.GetLookupTileMap().Width();
-	const int Height =  Map.GetLookupTileMap().Height();
-	FInteractiveMapEditorModule::CreateTexture(FString("/Game/TestTextures/NewLookup"), result, message, buffer, Width, Height);
+	bool result = false;
+	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage("/Game/MapEditor/", "LookupTexture" ,UTexture2D::StaticClass());
+	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(assetPath, buffer, Map.Width(), Map.Height(), result, message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
+
+	
+
 	if(buffer)
 	{
 		delete[] buffer;

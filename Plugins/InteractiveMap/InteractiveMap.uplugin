@@ -43,6 +43,16 @@
 				"UMG"
 			],
 			"PlatformAllowList": [ "Win64" ]
+		},
+		{
+			"Name": "UtilityModule",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			],
+			"PlatformAllowList": [ "Win64" ]
 		}
 	],
 	"Plugins": [

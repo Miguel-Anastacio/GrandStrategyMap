@@ -1,4 +1,4 @@
-#include "Editor/TextureFromBufferFactory.h"
+#include "Assets/TextureFromBufferFactory.h"
 UTexture2DFromBufferFactory::UTexture2DFromBufferFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

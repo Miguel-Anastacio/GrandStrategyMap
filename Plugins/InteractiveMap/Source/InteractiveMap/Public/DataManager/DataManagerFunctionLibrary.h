@@ -6,7 +6,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
-#include "InteractiveMap.h"
 #include "Map/MapUtils.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
