@@ -2,7 +2,7 @@
 
 #include "Map/MapDataComponent.h"
 #include "Map/MapEnums.h"
-#include "DataManager/DataManagerFunctionLibrary.h"
+#include "FileIO/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
 
 UMapDataComponent::UMapDataComponent()
@@ -173,13 +173,13 @@ void UMapDataComponent::CreateLookUpTable()
 
 void UMapDataComponent::ReadDataTables()
 {
-	if (!UDataManagerFunctioLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
+	if (!UDataManagerFunctionLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Province Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 
-	if(!UDataManagerFunctioLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
+	if(!UDataManagerFunctionLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 
-	if(!UDataManagerFunctioLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
+	if(!UDataManagerFunctionLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
 
 }

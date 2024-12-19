@@ -6,6 +6,7 @@
 
 #pragma once
 
+// #include "../MapGenerator/source/map/map.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RHIResources.h"
@@ -74,6 +75,7 @@ public:
 
 	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
 
+	// MapGenerator::Map* mapGenerator;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureWidth = 512;

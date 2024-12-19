@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "Dom/JsonObject.h"
+#include "Misc/TVariant.h"
 #include "MapUtils.generated.h"
 
 
@@ -122,6 +123,17 @@ struct FProvinceData : public FTableRowBase
         OutJsonObject->SetStringField(TEXT("Culture"), Culture.ToString());
         // Add more fields as needed
     }
+};
+
+USTRUCT(BlueprintType)
+struct FVariantProvinceData : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    // UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
+    TMap<FString, TVariant<int, float, FString, bool>> Properties;
+    // TVariant<FString, int64> StringOrInt64Holder;
+    
 };
 
 USTRUCT(BlueprintType)

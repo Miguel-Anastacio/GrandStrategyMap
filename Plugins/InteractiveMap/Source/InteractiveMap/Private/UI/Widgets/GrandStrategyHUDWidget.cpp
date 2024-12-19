@@ -1,10 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
 #include "UI/Widgets/CustomButtonWidget.h"
-#include "Components/Button.h"
 #include "Map/ClickableMap.h"
 #include "Kismet/GameplayStatics.h"
-#include "DataManager/DataManagerFunctionLibrary.h"
+#include "FileIO/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
 #include "Misc/Paths.h"
 #include "Engine/Engine.h"
@@ -92,7 +91,7 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
+		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
@@ -113,7 +112,7 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctioLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
+		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);

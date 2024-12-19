@@ -65,14 +65,13 @@ void ABirdEyeController::Tick(float DeltaTime)
 			bool result;
 			FName id = Map->GetProvinceID(FVector(color.R, color.G, color.B), result);
 
-
 			if (result && !bProvinceSelected)
 			{
-				Map->UpdateProvinceHovered(color);
+				ProvinceHoveredDelegate.Broadcast(color);
 			}
 			else if (!bProvinceSelected)
 			{
-				Map->UpdateProvinceHovered(color);
+				ProvinceHoveredDelegate.Broadcast(color);
 			}
 		}
 	}
@@ -146,36 +145,26 @@ void ABirdEyeController::MouseClick()
 			FProvinceData* data = Map->GetProvinceData(id);
 			if (data)
 			{
-				Map->UpdateProvinceHovered(color);
+				ProvinceHoveredDelegate.Broadcast(color);
 
+				ProvinceClickedDelegate.Broadcast(id, *data);
 				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 				if (hud)
 				{
 					hud->SetInteractiveMapReference(Map);
-					hud->DisplayProvinceEditorWidget(*data, id);
-					bProvinceSelected = true;
 				}
 			}
 			else
 			{
-				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-				if (hud)
-				{
-					hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
-				}
+				MapClickedDelegate.Broadcast();
 				GEngine->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, FString("Error"));
 			}
 		}
 	}
 	if (!bProvinceSelected)
 	{
-		AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-		if (hud)
-		{
-			hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
-		}
+		MapClickedDelegate.Broadcast();
 	}
-	
 }
 
 void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
@@ -226,5 +215,30 @@ void ABirdEyeController::ToggleCountryEditor()
 		hud->SetInteractiveMapReference(Map);
 		hud->ToggleCountryEditorVisibility();
 	}
+}
+
+void ABirdEyeController::HideHUD()
+{
+	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+	if (hud)
+	{
+		hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void ABirdEyeController::ShowProvinceInfo(FName id, FProvinceData data)
+{
+	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
+	if (hud)
+	{
+		hud->SetInteractiveMapReference(Map);
+		hud->DisplayProvinceEditorWidget(data, id);
+		bProvinceSelected = true;
+	}
+}
+
+void ABirdEyeController::HighlightProvince(FColor color)
+{
+	Map->UpdateProvinceHovered(color);
 }
 
