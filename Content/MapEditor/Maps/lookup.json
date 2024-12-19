@@ -1,230 +1,230 @@
 [
 	{
 		"Name": "0",
-		"Color": "#d386abff"
+		"Color": "#398c16ff"
 	},
 	{
 		"Name": "1",
-		"Color": "#5c48e8ff"
+		"Color": "#a534a0ff"
 	},
 	{
 		"Name": "2",
-		"Color": "#1caca5ff"
+		"Color": "#450ea2ff"
 	},
 	{
 		"Name": "3",
-		"Color": "#f8e91bff"
+		"Color": "#41ac9fff"
 	},
 	{
 		"Name": "4",
-		"Color": "#4bb0b1ff"
+		"Color": "#5e1330ff"
 	},
 	{
 		"Name": "5",
-		"Color": "#68d6c8ff"
+		"Color": "#c7ad90ff"
 	},
 	{
 		"Name": "6",
-		"Color": "#dd00edff"
+		"Color": "#acf913ff"
 	},
 	{
 		"Name": "7",
-		"Color": "#ed40a6ff"
+		"Color": "#2b970dff"
 	},
 	{
 		"Name": "8",
-		"Color": "#f3cae9ff"
+		"Color": "#b38634ff"
 	},
 	{
 		"Name": "9",
-		"Color": "#8d1ec2ff"
+		"Color": "#e185faff"
 	},
 	{
 		"Name": "10",
-		"Color": "#1a528bff"
+		"Color": "#51560dff"
 	},
 	{
 		"Name": "11",
-		"Color": "#3de717ff"
+		"Color": "#9a483dff"
 	},
 	{
 		"Name": "12",
-		"Color": "#50b08cff"
+		"Color": "#89dedcff"
 	},
 	{
 		"Name": "13",
-		"Color": "#5c48e8ff"
+		"Color": "#a534a0ff"
 	},
 	{
 		"Name": "14",
-		"Color": "#338deeff"
+		"Color": "#dbc27bff"
 	},
 	{
 		"Name": "15",
-		"Color": "#9936bcff"
+		"Color": "#cb36acff"
 	},
 	{
 		"Name": "16",
-		"Color": "#b42b19ff"
+		"Color": "#86b098ff"
 	},
 	{
 		"Name": "17",
-		"Color": "#467752ff"
+		"Color": "#05aee2ff"
 	},
 	{
 		"Name": "18",
-		"Color": "#cb028fff"
+		"Color": "#4a7b16ff"
 	},
 	{
 		"Name": "19",
-		"Color": "#56b64eff"
+		"Color": "#b0e50eff"
 	},
 	{
 		"Name": "20",
-		"Color": "#4dab1fff"
+		"Color": "#338a50ff"
 	},
 	{
 		"Name": "21",
-		"Color": "#aedd9fff"
+		"Color": "#0d28e9ff"
 	},
 	{
 		"Name": "22",
-		"Color": "#5c6f96ff"
+		"Color": "#3889bfff"
 	},
 	{
 		"Name": "23",
-		"Color": "#5e9cddff"
+		"Color": "#637712ff"
 	},
 	{
 		"Name": "24",
-		"Color": "#607e8cff"
+		"Color": "#ea7d63ff"
 	},
 	{
 		"Name": "25",
-		"Color": "#0b8ef3ff"
+		"Color": "#094549ff"
 	},
 	{
 		"Name": "26",
-		"Color": "#3399fdff"
+		"Color": "#f00153ff"
 	},
 	{
 		"Name": "27",
-		"Color": "#fe5afbff"
+		"Color": "#74d2c6ff"
 	},
 	{
 		"Name": "28",
-		"Color": "#ee24d3ff"
+		"Color": "#89a8edff"
 	},
 	{
 		"Name": "29",
-		"Color": "#894727ff"
+		"Color": "#4f0b35ff"
 	},
 	{
 		"Name": "30",
-		"Color": "#1a3cd7ff"
+		"Color": "#eb3e87ff"
 	},
 	{
 		"Name": "31",
-		"Color": "#8ee2eeff"
+		"Color": "#a663e6ff"
 	},
 	{
 		"Name": "32",
-		"Color": "#3d8aceff"
+		"Color": "#9dc79aff"
 	},
 	{
 		"Name": "33",
-		"Color": "#3ef3a5ff"
+		"Color": "#74a658ff"
 	},
 	{
 		"Name": "34",
-		"Color": "#9d4b8cff"
+		"Color": "#c5ab04ff"
 	},
 	{
 		"Name": "35",
-		"Color": "#f834abff"
+		"Color": "#66930eff"
 	},
 	{
 		"Name": "36",
-		"Color": "#7c33e0ff"
+		"Color": "#36993eff"
 	},
 	{
 		"Name": "37",
-		"Color": "#91c732ff"
+		"Color": "#5c2825ff"
 	},
 	{
 		"Name": "38",
-		"Color": "#2da036ff"
+		"Color": "#112d7eff"
 	},
 	{
 		"Name": "39",
-		"Color": "#1c020bff"
+		"Color": "#371e85ff"
 	},
 	{
 		"Name": "40",
-		"Color": "#453f63ff"
+		"Color": "#73698dff"
 	},
 	{
 		"Name": "41",
-		"Color": "#ce591bff"
+		"Color": "#dd59d8ff"
 	},
 	{
 		"Name": "42",
-		"Color": "#2e6104ff"
+		"Color": "#f70148ff"
 	},
 	{
 		"Name": "43",
-		"Color": "#eab211ff"
+		"Color": "#cf81cbff"
 	},
 	{
 		"Name": "44",
-		"Color": "#2b2d54ff"
+		"Color": "#0e804aff"
 	},
 	{
 		"Name": "45",
-		"Color": "#3d548cff"
+		"Color": "#551d6cff"
 	},
 	{
 		"Name": "46",
-		"Color": "#c8bde8ff"
+		"Color": "#9c7befff"
 	},
 	{
 		"Name": "47",
-		"Color": "#898523ff"
+		"Color": "#30f449ff"
 	},
 	{
 		"Name": "48",
-		"Color": "#3d6182ff"
+		"Color": "#498192ff"
 	},
 	{
 		"Name": "49",
-		"Color": "#4b1155ff"
+		"Color": "#e86eadff"
 	},
 	{
 		"Name": "50",
-		"Color": "#2f3f41ff"
+		"Color": "#b27bf5ff"
 	},
 	{
 		"Name": "51",
-		"Color": "#be318bff"
+		"Color": "#43be96ff"
 	},
 	{
 		"Name": "52",
-		"Color": "#53e3e7ff"
+		"Color": "#7f3efdff"
 	},
 	{
 		"Name": "53",
-		"Color": "#4ba5fdff"
+		"Color": "#dfb31eff"
 	},
 	{
 		"Name": "54",
-		"Color": "#ed655aff"
+		"Color": "#a5193bff"
 	},
 	{
 		"Name": "55",
-		"Color": "#9e7b60ff"
+		"Color": "#44701cff"
 	},
 	{
 		"Name": "56",
-		"Color": "#90c309ff"
+		"Color": "#40f552ff"
 	}
 ]

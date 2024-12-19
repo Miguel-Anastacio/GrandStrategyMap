@@ -14,7 +14,7 @@ class UTILITYMODULE_API UAssetCreatorFunctionLibrary : public UBlueprintFunction
 	GENERATED_BODY()
 
 public:
-
+#if WITH_EDITOR
 	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
@@ -28,5 +28,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
 	static FString CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Asset Save")
+	static bool SaveAsset(const FString& AssetPath, FString& OutInfoMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "Asset Save")
+	static TArray<UObject*> GetModifiedAssets(bool& OutResult, FString& OutInfoMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "Asset Save")
+	static bool SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage);
+#endif
 	
 };

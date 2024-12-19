@@ -108,8 +108,8 @@ void MapEditorMenu::GenerateMap()
 	
 	// temp just to test
 	// TODO - improve this, adjust MapGeneratorLib
-	int32 Height = texture->GetSizeY();
-	int32 Width = texture->GetSizeX();
+	const uint32 Height = texture->GetSizeY();
+	const uint32 Width = texture->GetSizeX();
 	std::vector<uint8_t> vector = std::vector<uint8_t>(&Data[0], &Data[Width * Height * 4]);
 	Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData());
 	LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
@@ -150,6 +150,9 @@ void MapEditorMenu::SaveMap() const
 	}
 	UDataManagerFunctionLibrary::WriteArrayToJsonFile(FPaths::ProjectContentDir() + dir + "lookup.json", OutputData, result, message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
+
+
+	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, message);
 
 }
 

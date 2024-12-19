@@ -1,0 +1,207 @@
+[
+	{
+		"Strange": "0",
+		"Test": "Northern Africa",
+		"Random": 46788589
+	},
+	{
+		"ID": "1",
+		"Name": "East Africa",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "2",
+		"Name": "West Africa",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "3",
+		"Name": "Central Africa",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "4",
+		"Name": "South Africa",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "5",
+		"Name": "Central America",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "6",
+		"Name": "Northern America",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "7",
+		"Name": "Southern America",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "8",
+		"Name": "Caribbean",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "9",
+		"Name": "Western Europe",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "10",
+		"Name": "Eastern Europe",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "11",
+		"Name": "Southern Europe",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "12",
+		"Name": "Central Asia",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "13",
+		"Name": "Eastern Asia",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "14",
+		"Name": "Midlle East",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "15",
+		"Name": "Southern Asia",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "16",
+		"Name": "Northern Europe",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "17",
+		"Name": "South East Asia",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "18",
+		"Name": "Oceania",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "19",
+		"Name": "Oceania West",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	},
+	{
+		"ID": "20",
+		"Name": "Oceania East",
+		"Color": {
+			"B": 0,
+			"G": 255,
+			"R": 255,
+			"A": 255
+		}
+	}
+]

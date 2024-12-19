@@ -1,6 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "Assets/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
+#include "FileHelpers.h"
 #include "Assets//TextureFromBufferFactory.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
@@ -70,5 +71,70 @@ FString UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(const FStri
 	// Create a package to hold the new asset
 	UPackage* Package = CreatePackage(*PackagePath);
 	return MakeUniqueObjectName(Package, AssetClass, FName(*BaseAssetName)).ToString();
+}
+
+bool UAssetCreatorFunctionLibrary::SaveAsset(const FString& AssetPath, FString& OutInfoMessage)
+{
+	UObject* asset = StaticLoadObject(UObject::StaticClass(), nullptr, *AssetPath);
+	if(!asset)
+	{
+		OutInfoMessage = FString::Printf(TEXT("Save Asset Failed - Asset is not valid '%s'"),*AssetPath);
+		return false;
+	}
+
+	UPackage* package = asset->GetPackage();
+	if(!package)
+	{
+		OutInfoMessage = FString::Printf(TEXT("Save Asset Failed - Package is not valid '%s'"),*AssetPath);
+		return false;
+	}
+
+	bool result = UEditorLoadingAndSavingUtils::SavePackages({package}, false);
+	OutInfoMessage = FString::Printf(TEXT("Save Asset %s - '%s'"), *FString(result ? "Success" : "Failed"), *AssetPath);
+	return result;
+}
+
+TArray<UObject*> UAssetCreatorFunctionLibrary::GetModifiedAssets(bool& OutResult, FString& OutInfoMessage)
+{
+	TArray<UPackage*> modifiedPackages = TArray<UPackage*>();
+	FEditorFileUtils::GetDirtyPackages(modifiedPackages);
+
+	TArray<UObject*> assets = TArray<UObject*>();
+	OutResult = true;
+	OutInfoMessage = ("Get Modified Assets Succeeded");
+	for(const UPackage* package : modifiedPackages)
+	{
+		UObject* asset = package->FindAssetInPackage();
+		if(asset)
+		{
+			assets.Add(asset);
+		}
+		else
+		{
+			if(OutResult)
+			{
+				OutResult = false;
+				OutInfoMessage = FString::Printf(TEXT("Get Modified Assets Failed - Packages with invalid assets "));
+			}
+			OutInfoMessage += FString::Printf(TEXT("'%s', "), *package->GetName());
+		}
+	}
+
+	return assets;
+}
+
+bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage)
+{
+	bool result = false;
+	if(bPrompt)
+	{
+		result = UEditorLoadingAndSavingUtils::SaveDirtyPackagesWithDialog(true, true);
+	}
+	else
+	{
+		result = UEditorLoadingAndSavingUtils::SaveDirtyPackages(true, true);
+	}
+
+	return result;
 }
 

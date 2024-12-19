@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
+#include "UtilityModule.h"
 #include "Engine/DataTable.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
@@ -15,7 +16,31 @@ struct FVariantData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    TMap<FString, TVariant<int, float, FString, bool>> Properties;
+    TMap<FString, TVariant<int, float, FString, bool, FLinearColor>> Properties;
+};
+
+USTRUCT(BlueprintType)
+struct FTestBasic
+{
+    GENERATED_BODY()
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 ID = -1;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FString Name;
+};
+
+USTRUCT(BlueprintType)
+struct FTestAdvanced
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 ID = -1;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FString Name;
+    // bool Type = false;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FLinearColor Color;
 };
 
 class FJsonObject;
@@ -111,7 +136,7 @@ public:
         if (!jsonObject)
         {
             outSuccess = false;
-            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
+            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct)"));
             return;
         }
 
@@ -136,8 +161,44 @@ public:
          */
     static void WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage);
 
+    static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
+    static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
+
     UFUNCTION(BlueprintCallable, Category = "Data Loader")
-    static bool LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable);
+    static  TArray<FTestBasic> LoadTestBasic(const FString& FilePath);
+    UFUNCTION(BlueprintCallable, Category = "Data Loader")
+    static  TArray<FTestAdvanced> LoadTestAdvanced(const FString& FilePath);
+    
+    template<class T>
+    static TArray<T> LoadCustomDataFromJson(const FString& FilePath)
+    {
+        TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
+        TArray<T> outArray;
+        int32 index = 0;
+        for(const auto& jsonValue : JsonArray)
+        {
+            if (jsonValue->Type == EJson::Object)
+            {
+                T StructInstance;
+                TSharedPtr<FJsonObject> jsonObject = jsonValue->AsObject();
+                if (FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), T::StaticStruct(), &StructInstance, 0, 0, true))
+                {
+                    ObjectHasMissingFiels<T>(jsonObject, index, FilePath);
+                    outArray.Emplace(StructInstance);
+                }
+                else
+                {
+                    // if you do not get this error but the array is not filled correctly
+                    // make sure that the struct members are marked as UPROPERTY
+                    UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
+                    outArray.Empty();
+                }
+                index++;
+            }
+        }
+        return outArray;
+    }
+    
 private:
     /**
      * Writes JSON data to a file.
@@ -161,6 +222,26 @@ private:
 
 
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
-    static bool ImportVariantData(const FString& JsonContent, TArray<FVariantData>& OutProvinces);
+
+    template<typename T>
+    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath)
+    {
+        for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
+        {
+            FProperty* Property = *It;
+
+            // Get property name
+            FString PropertyName = Property->GetName();
+
+            // Check if the JSON object contains the field
+            if (!Object->HasField(PropertyName))
+            {
+                UE_LOG(LogUtilityModule, Warning, 
+                    TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
+                    *PropertyName, Index, *FilePath);
+                return;
+            }
+        }
+    }
 };
 

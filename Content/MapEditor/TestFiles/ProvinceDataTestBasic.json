@@ -1,0 +1,86 @@
+[
+	{
+		"ID": "0",
+		"Name": "Northern Africa"
+	},
+	{
+		"ID": "1",
+		"Name": "East Africa"
+	},
+	{
+		"ID": "2",
+		"Name": "West Africa"
+	},
+	{
+		"ID": "3",
+		"Name": "Central Africa"
+	},
+	{
+		"ID": "4",
+		"Name": "South Africa"
+	},
+	{
+		"ID": "5",
+		"Name": "Central America"
+	},
+	{
+		"ID": "6",
+		"Name": "Northern America"
+	},
+	{
+		"ID": "7",
+		"Name": "Southern America"
+	},
+	{
+		"ID": "8",
+		"Name": "Caribbean"
+	},
+	{
+		"ID": "9",
+		"Name": "Western Europe"
+	},
+	{
+		"ID": "10",
+		"Name": "Eastern Europe"
+	},
+	{
+		"ID": "11",
+		"Name": "Southern Europe"
+	},
+	{
+		"ID": "12",
+		"Name": "Central Asia"
+	},
+	{
+		"ID": "13",
+		"Name": "Eastern Asia"
+	},
+	{
+		"ID": "14",
+		"Name": "Midlle East"
+	},
+	{
+		"ID": "15",
+		"Name": "Southern Asia"
+	},
+	{
+		"ID": "16",
+		"Name": "Northern Europe"
+	},
+	{
+		"ID": "17",
+		"Name": "South East Asia"
+	},
+	{
+		"ID": "18",
+		"Name": "Oceania"
+	},
+	{
+		"ID": "19",
+		"Name": "Oceania West"
+	},
+	{
+		"ID": "20",
+		"Name": "Oceania East"
+	}
+]

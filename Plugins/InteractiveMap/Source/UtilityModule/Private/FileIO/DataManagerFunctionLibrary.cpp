@@ -5,6 +5,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
+#include "UtilityModule.h"
 
 void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
@@ -17,6 +18,38 @@ void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, con
 
 	outSuccess = true;
 	outInfoMessage = outInfoMessage = FString::Printf(TEXT("Write string to file succeeded"));
+}
+
+TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::ReadJsonFile(const FString& filePath)
+{
+	FString jsonString;
+	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *filePath);
+		return nullptr;
+	}
+	TSharedPtr<FJsonObject> jsonObject;
+	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(jsonString), jsonObject))
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *filePath);
+	}
+	return jsonObject;
+}
+
+TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(const FString& filePath)
+{
+	FString jsonString;
+	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *filePath);
+		return TArray<TSharedPtr<FJsonValue>>();
+	}
+	TArray<TSharedPtr<FJsonValue>> jsonValueArray;
+	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(jsonString), jsonValueArray))
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *filePath);
+	}
+	return jsonValueArray;
 }
 
 
@@ -73,64 +106,13 @@ void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTab
 	}
 }
 
-bool UDataManagerFunctionLibrary::LoadProvinceData(const FString& FilePath, UDataTable* TargetDataTable)
+
+TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
 {
-	FString JsonContent;
-	if (FFileHelper::LoadFileToString(JsonContent, *FilePath))
-	{
-		TArray<FVariantData> Provinces;
-		if (ImportVariantData(JsonContent, Provinces))
-		{
-			PopulateDataTableWithArray(TargetDataTable, Provinces);
-		}
-	}
-	return false;
+	return LoadCustomDataFromJson<FTestBasic>(FilePath);
 }
 
-bool UDataManagerFunctionLibrary::ImportVariantData(const FString& JsonContent, TArray<FVariantData>& OutProvinces)
+TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FString& FilePath)
 {
-	TSharedPtr<FJsonObject> JsonObject;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonContent);
-
-	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-	{
-		// Iterate through the provinces
-		for (auto& ProvinceEntry : JsonObject->Values)
-		{
-			TSharedPtr<FJsonObject> ProvinceObject = ProvinceEntry.Value->AsObject();
-			if (ProvinceObject.IsValid())
-			{
-				FVariantData ProvinceData;
-				for (const auto& Field : ProvinceObject->Values)
-				{
-					TVariant<int, float, FString, bool> variant;
-					// Store each key-value pair in the TMap
-					FString Key = Field.Key;
-					TSharedPtr<FJsonValue> Value = Field.Value;
-					// Handle different JSON value types and store as FVariant
-					if (Value->Type == EJson::String)
-					{
-						variant.Set<FString>(Value->AsString());
-					}
-					else if (Value->Type == EJson::Number)
-					{
-						variant.Set<int>(Value->AsNumber());
-					}
-					else if (Value->Type == EJson::Boolean)
-					{
-						variant.Set<bool>(Value->AsBool());
-					}
-					else
-					{
-						// Default to string for unsupported types
-						variant.Set<FString>(Value->AsString());
-					}
-					ProvinceData.Properties.Add(Key, variant);
-				}
-				OutProvinces.Add(ProvinceData);
-			}
-		}
-		return true;
-	}
-	return false;
+	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
 }
