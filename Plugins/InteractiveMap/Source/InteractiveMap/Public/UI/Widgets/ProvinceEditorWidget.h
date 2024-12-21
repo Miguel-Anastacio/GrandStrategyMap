@@ -24,7 +24,7 @@ public:
 	 * @param data The data to set for the province.
 	 * @param provinceID The unique identifier of the province.
 	 */
-		UFUNCTION(BlueprintCallable, Category = "Province Editor")
+	UFUNCTION(BlueprintCallable, Category = "Province Editor")
 	void SetProvinceData(const FProvinceData& data, FName provinceID);
 
 	/**
@@ -39,7 +39,7 @@ protected:
 	/**
 	 * Overrides the initialization method to perform custom initialization tasks.
 	 */
-	void NativeOnInitialized() override;
+	virtual void NativeOnInitialized() override;
 
 	/**
 	 * Handles updates to province data when an editable text is modified.

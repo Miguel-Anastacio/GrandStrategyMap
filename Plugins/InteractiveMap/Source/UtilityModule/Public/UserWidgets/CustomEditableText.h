@@ -22,13 +22,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
 class UEditableTextBox;
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class INTERACTIVEMAP_API UCustomEditableText : public UUserWidget
+class UTILITYMODULE_API UCustomEditableText : public UUserWidget
 {
     GENERATED_BODY()
 
 public:
     /** Sets the initial values for the editable text widget. */
     void SetValues(const FText& text, const FText& input);
+    void SetIDText(const FText& text);
 
 public:
     /** Delegate for editable text commit events. */
@@ -36,8 +37,8 @@ public:
     FEditableTextCommitSignature TextCommitDelegate;
 
 protected:
-    void NativeOnInitialized() override;
-    void NativePreConstruct() override;
+    virtual void NativeOnInitialized() override;
+    virtual void NativePreConstruct() override;
 
 protected:
     /** The text displayed as the identifier. */

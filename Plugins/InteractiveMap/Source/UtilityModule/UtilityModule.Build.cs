@@ -45,6 +45,9 @@ public class UtilityModule : ModuleRules
 				"AssetTools",
 				"ToolMenus",
 				"UnrealEd",
+				"Slate",	
+				"SlateCore",
+				"UMG"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

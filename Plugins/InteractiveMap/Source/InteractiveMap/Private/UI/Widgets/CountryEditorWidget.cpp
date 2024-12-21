@@ -1,7 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "UI/Widgets/CountryEditorWidget.h"
-#include "UI/Widgets/CustomEditableText.h"
+#include "UserWidgets/CustomEditableText.h"
 #include "Map/ClickableMap.h"
 #include "RamaColorPicker.h"
 
@@ -18,8 +18,6 @@ void UCountryEditorWidget::SetInteractiveMapReference(AClickableMap* map)
 	GameMapReference = map;
 }
 
-
-
 void UCountryEditorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -35,7 +33,6 @@ void UCountryEditorWidget::UpdateColor(const FLinearColor& color)
 	}
 }
 
-UE_ENABLE_OPTIMIZATION
 void UCountryEditorWidget::UpdateData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod)
 {
 	if (editedText == NameCustomInput)
@@ -52,6 +49,5 @@ void UCountryEditorWidget::UpdateData(UCustomEditableText* editedText, const FTe
 				}
 			}
 		}
-		return;
 	}
 }

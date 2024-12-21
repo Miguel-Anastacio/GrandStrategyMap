@@ -1,8 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/ProvinceEditorWidget.h"
-#include "UI/Widgets/CustomEditableText.h"
-#include "Components/EditableText.h"
-#include "Components/RichTextBlock.h"
+#include "UserWidgets/CustomEditableText.h"
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
 
