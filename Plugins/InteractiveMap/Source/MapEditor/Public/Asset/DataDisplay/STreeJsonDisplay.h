@@ -16,9 +16,18 @@ public:
     {
 
     }
+	const TArray<TSharedPtr<FDocumentInfo>> GetSubDocuments() const
+	{
+		return SubDocuments;
+	};
 
+	void AddSubDocument(const TSharedPtr<FDocumentInfo> DocumentInfo)
+	{
+		SubDocuments.Add(DocumentInfo);
+	}
     FText DisplayName;
     FText SomeData;
+	TArray< TSharedPtr<FDocumentInfo>> SubDocuments;
 };
 
 DECLARE_DELEGATE_ThreeParams(FSlateEditableTextCommitSignature, class SEditablePropertyWidget*, const FText&, ETextCommit::Type);
@@ -39,7 +48,7 @@ class SEditablePropertyWidget : public SCompoundWidget
 };
 
 
-using SDocumentTreeView = STreeView<FDocumentInfo>;
+using SDocumentTreeView = STreeView<TSharedPtr<FDocumentInfo>>;
 class STreeJsonDisplay : public SCompoundWidget
 {
 public:
@@ -49,24 +58,31 @@ public:
 		SLATE_ARGUMENT(TArray<void*>, StructInstances)            // Pointer to the struct instance
     SLATE_END_ARGS()
 
-
-	static bool PopulateDocuments (const UStruct* StructType, TArray<TSharedRef<FDocumentInfo>>& Documents,
-									const TArray<void*>& StructInstances);
-
     /** Constructor and widget setup */
     void Construct(const FArguments& InArgs, FTabManager* InTabManager);
 
-	TSharedRef<ITableRow> GenerateListRow(TSharedRef< FDocumentInfo > InItem, const TSharedRef<STableViewBase>& OwnerTable);
+	~STreeJsonDisplay()
+	{
+		
+	};	
+	static bool PopulateDocuments (const UStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
+									const TArray<void*>& StructInstances);
+
+
+	TSharedRef<ITableRow> GenerateListRow(TSharedPtr<FDocumentInfo> InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	FReply SummonDocumentButtonClicked( TSharedRef<FDocumentInfo> DocumentName);
 
 
-	void OnGetChildren(TSharedPtr<FDocumentInfo>Item, TArray<TSharedPtr<FDocumentInfo>> OutChildren);
+	void OnGetChildren(TSharedPtr<FDocumentInfo>Item, TArray<TSharedPtr<FDocumentInfo>>& OutChildren);
+	void OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo);
+
+	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo);
 	
 	UClass* DataClass;
 
 	FTabManager* TabManager;
 
-	TArray<TSharedRef<FDocumentInfo>> Documents;
+	TArray<TSharedPtr<FDocumentInfo>> Documents;
 	TSharedPtr<SDocumentTreeView> TreeView;
 
 	bool bButtonOneVisible;

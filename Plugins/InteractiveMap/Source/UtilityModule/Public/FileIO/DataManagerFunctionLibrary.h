@@ -37,6 +37,8 @@ struct FTestAdvanced
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 ID = -1;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 Population = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FString Name;
     // bool Type = false;
     UPROPERTY(EditAnywhere, BlueprintReadWrite)

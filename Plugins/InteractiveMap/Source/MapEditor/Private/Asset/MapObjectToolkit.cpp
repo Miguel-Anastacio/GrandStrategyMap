@@ -131,6 +131,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	AdvancedStruct.ID =1;
 	AdvancedStruct.Name = "Test Name";
 	AdvancedStruct.Color = FLinearColor::Black;
+	AdvancedStruct.Population = 3839864;
 
 	InTabManager->RegisterTabSpawner(DataListTab, FOnSpawnTab::CreateLambda([this, InTabManager](const FSpawnTabArgs&)
 	{
@@ -139,7 +140,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		[
 			SNew(STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
 			.StructType(FTestAdvanced::StaticStruct())
-			.StructInstance(&AdvancedStruct)
+			.StructInstances({&AdvancedStruct, &AdvancedStruct, &AdvancedStruct, &AdvancedStruct})
 		];
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
