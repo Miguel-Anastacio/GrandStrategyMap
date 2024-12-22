@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AssetTypeCategories.h"
 #include "Modules/ModuleManager.h"
 
 class MapEditorMenu;
@@ -23,6 +24,11 @@ public:
 	void RegisterMenus() const;
 	void LaunchMapEditor() const;
 	void LaunchTerrainCreator() const;
+	void RegisterSlateStyles() const;
+
+	// Custom Assets
+	static EAssetTypeCategories::Type CustomAssetCategory;
+	static TSharedPtr<FSlateStyleSet> CustomAssetsEditorSlateStyle;
 	
 	// Probably move to another class
 	const TSharedRef<FTabManager::FLayout> CreateCustomLayout() const;

@@ -7,6 +7,7 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Editor/MapEditorMenu.h"
 #include "Editor/WorkspaceMenuStructure/Public/WorkspaceMenuStructureModule.h"
+#include "Styling/SlateStyleRegistry.h"
 
 DEFINE_LOG_CATEGORY(LogInteractiveMapEditor);
 
@@ -17,6 +18,7 @@ void FInteractiveMapEditorModule::StartupModule()
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Map Generator Editor module has been loaded"));
 	RegisterMenus();
 	RegisterTabs();
+	RegisterSlateStyles();
 }
 void FInteractiveMapEditorModule::ShutdownModule()
 {
@@ -80,6 +82,20 @@ void FInteractiveMapEditorModule::LaunchMapEditor() const
 void FInteractiveMapEditorModule::LaunchTerrainCreator() const
 {
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Launching Terrain Creator Editor"));
+}
+
+TSharedPtr<FSlateStyleSet> FInteractiveMapEditorModule::CustomAssetsEditorSlateStyle;
+void FInteractiveMapEditorModule::RegisterSlateStyles() const
+{
+	// Register the slate styles	
+	const FString ProjectResourceDir = FPaths::ProjectPluginsDir()/TEXT("CustomEditableAssets/Resources");
+	
+	CustomAssetsEditorSlateStyle = MakeShareable(new FSlateStyleSet("CustomEditableAssetsEditor"));
+	CustomAssetsEditorSlateStyle->Set("CustomAsset.Thumbnail", new FSlateImageBrush(FString(ProjectResourceDir/"Icon128.png"), FVector2D(128.0f, 128.0f)));
+	CustomAssetsEditorSlateStyle->Set("ClassIcon.CustomActor", new FSlateImageBrush(FString(ProjectResourceDir/"Icon128.png"), FVector2D(32.0f, 32.0f)));
+	CustomAssetsEditorSlateStyle->Set("ClassIcon.UAssetDefinition_CustomObject", new FSlateImageBrush(FString(ProjectResourceDir/"Icon128.png"), FVector2D(32.0f, 32.0f)));
+	
+	FSlateStyleRegistry::RegisterSlateStyle(*CustomAssetsEditorSlateStyle.Get());
 }
 
 const TSharedRef<FTabManager::FLayout> FInteractiveMapEditorModule::CreateCustomLayout() const

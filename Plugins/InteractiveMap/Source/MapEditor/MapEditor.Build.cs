@@ -53,7 +53,7 @@ public class MapEditor : ModuleRules
 				"UnrealEd",
 				"EditorStyle",
 				"WorkspaceMenuStructure",
-				"PropertyEditor"
+				"PropertyEditor",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
