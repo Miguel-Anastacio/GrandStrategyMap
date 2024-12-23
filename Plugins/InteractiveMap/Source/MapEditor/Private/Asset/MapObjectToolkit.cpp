@@ -1,6 +1,7 @@
 #include "Asset/MapObjectToolkit.h"
 #include "Asset/MapObject.h"
 #include "Asset/SMapObjectViewport.h"
+#include "Asset/DataDisplay/MapDataSettingsPreset.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "Widgets/Text/STextBlock.h"
@@ -10,12 +11,14 @@
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
-FName MapDetailsTab = FName(TEXT("MapDetailsTab"));
+FName DataSourceTab = FName(TEXT("DataSourceTab"));
 FName DataListTab = FName(TEXT("DataListTab"));
 
 void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitHost, UMapObject* Object)
 {
 	CustomObject = Object;
+	DataSettingsPreset = NewObject<UMapDataSettings>();
+	DataSettingsPreset->OnObjectChanged.AddSP(this, &FMapObjectToolkit::OpenFiles);
 	
 	const TSharedRef<FTabManager::FLayout> Layout = FTabManager::NewLayout(FName(TEXT("Layout")))
 	->AddArea
@@ -51,7 +54,7 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 			(
 				FTabManager::NewStack()
 				->SetSizeCoefficient(.6f)
-				->AddTab(MapDetailsTab, ETabState::OpenedTab)
+				->AddTab(DataSourceTab, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 			)
 			->Split
@@ -114,9 +117,9 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
 	const TSharedRef<IDetailsView> DetailsView = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor").CreateDetailView(DetailsViewArgs);
-	DetailsView->SetObjects(TArray<UObject*>{CustomObject.Get()});
+	DetailsView->SetObjects(TArray<UObject*>{DataSettingsPreset.Get()});
 	
-	InTabManager->RegisterTabSpawner(MapDetailsTab, FOnSpawnTab::CreateLambda([=](const FSpawnTabArgs&)
+	InTabManager->RegisterTabSpawner(DataSourceTab, FOnSpawnTab::CreateLambda([=](const FSpawnTabArgs&)
 	{
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
@@ -124,7 +127,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 			DetailsView
 		];
 	}))
-	.SetDisplayName(INVTEXT("Details"))
+	.SetDisplayName(INVTEXT("Data Source"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
 
 	// FTestAdvanced AdvancedStruct(1, "Test Name", FLinearColor::Black);
@@ -145,8 +148,6 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
-
-	
 }
 
 void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& TabManagerRef)

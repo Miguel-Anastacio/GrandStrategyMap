@@ -12,8 +12,8 @@ struct FMapDataSettingsDefinition
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSubclassOf<UClass> TileStructClass;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowAbstract = "true" ))
+	UScriptStruct* TileStructClass;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString FilePath;

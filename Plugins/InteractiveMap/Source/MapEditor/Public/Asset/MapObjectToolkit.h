@@ -1,6 +1,10 @@
 #pragma once
+#include "MapEditor.h"
+#include "DataDisplay/MapDataSettingsPreset.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
+#include "FileIO/FilePickerFunctionLibrary.h"
 
+class UMapDataSettings;
 class UMapObject;
 class FTabManager;
 
@@ -18,7 +22,20 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::White; }
 	
 private:
+	void OpenFiles()
+	{
+		TArray<FString> FilesNames;
+		UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
+
+		UStruct* Struct = DataSettingsPreset->MapDataSettings.TileStructClass;
+
+		UDataManagerFunctionLibrary::ReadJsonFileArray()
+		// TArray<Struct->get> SelectedFiles;
+	}
+
+	
 	TWeakObjectPtr<UMapObject> CustomObject = nullptr;
+	TObjectPtr<UMapDataSettings> DataSettingsPreset = nullptr;
 	FTestAdvanced AdvancedStruct;
 	// TObjectPtr<UMapObject> MapObject = nullptr;
 };
