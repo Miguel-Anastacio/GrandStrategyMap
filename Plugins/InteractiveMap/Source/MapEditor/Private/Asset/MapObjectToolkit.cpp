@@ -1,13 +1,15 @@
 #include "Asset/MapObjectToolkit.h"
 #include "Asset/MapObject.h"
 #include "Asset/SMapObjectViewport.h"
+#include "Asset/DataDisplay/AdvancedStructWrapper.h"
 #include "Asset/DataDisplay/MapDataSettingsPreset.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
+#include "FileIO/FilePickerFunctionLibrary.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
+#include "Asset/DataDisplay/BasicStructWrapper.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
@@ -141,7 +143,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
 		[
-			SNew(STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
+			SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
 			.StructType(FTestAdvanced::StaticStruct())
 			.StructInstances({&AdvancedStruct, &AdvancedStruct, &AdvancedStruct, &AdvancedStruct})
 		];
@@ -158,4 +160,52 @@ void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& Tab
 	
 	FAssetEditorToolkit::UnregisterTabSpawners(TabManagerRef);
 }
+
+void FMapObjectToolkit::OpenFiles()
+{
+	TArray<FString> FilesNames;
+	UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
+	// UObject* Object = DataSettingsPreset->MapDataSettings.StructWrapperObject;
+	// UObject* Object = DataSettingsPreset->MapDataSettings.StructWrapperObject;
+	UBasicStructWrapper* Object = NewObject<UBasicStructWrapper>();	
+		// UE_LOG(LogTemp, Display, TEXT("Object pointer: %p"), DataSettingsPreset->MapDataSettings.StructWGetParentNativeClass(rapGetParentNativeClass(GetParentNativeClass(perObject);
+	if(Object)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Object class: %s"), *(Object->GetClass())->GetName());
+		// if (Object->IsA<UStructWrapper>())
+		// {
+		// 	IStructWrapperInterface* Interface = Cast<IStructWrapperInterface>(Object);
+		// 	if (Interface)
+		// 	{
+		// 		UE_LOG(LogTemp, Display, TEXT("Object implements IStructWrapperInterface"));
+		// 		Interface->OpenFileOfType(FilesNames, TreeDisplay);
+		// 	}
+		// }
+		
+		if(Object->Implements<UStructWrapperInterface>())
+		{
+			IStructWrapperInterface* Interface = Cast<IStructWrapperInterface>(Object);
+			if(Interface)
+			{
+				UE_LOG(LogTemp, Display, TEXT("%s"), *Object->GetClass()->GetName());
+				Interface->OpenFileOfType(FilesNames, TreeDisplay);
+			}
+		}
+	}
+	else
+	{
+		// TODO log something
+	}
+	if(DataSettingsPreset->MapDataSettings.TestWrapper.Get())
+	{
+		if(DataSettingsPreset->MapDataSettings.TestWrapper.Get()->ImplementsInterface(UStructWrapperInterface::StaticClass()))
+		{
+			UE_LOG(LogTemp, Display, TEXT("HEY"));
+		}
+		UE_LOG(LogTemp, Display, TEXT("%s"), *DataSettingsPreset->MapDataSettings.TestWrapper.Get()->GetName());
+	}
+	
+	// TArray<Struct->get> SelectedFiles;
+}
+
 

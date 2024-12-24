@@ -6,6 +6,7 @@
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
 #include "UtilityModule.h"
+#include "UObject/UnrealTypePrivate.h"
 
 void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
@@ -52,6 +53,61 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 	return jsonValueArray;
 }
 
+
+TArray<void*> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, UStruct* structType)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
+	TArray<void*> outArray;
+	int32 index = 0;
+	for(const auto& jsonValue : JsonArray)
+	{
+		UObject* Object = NewObject<UObject>();
+		FProperty* property = Object->GetClass()->FindPropertyByName("Test");
+		FStructProperty* structProperty = Cast<FStructProperty>(property);
+
+		if (jsonValue->Type == EJson::Object)
+		{
+			void* StructInstance = CreateStructInstance(structType);
+			TSharedPtr<FJsonObject> jsonObject = jsonValue->AsObject();
+			if (FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), structType, &StructInstance, 0, 0, true))
+			{
+			    ObjectHasMissingFiels(jsonObject, index, FilePath, structType);
+			    outArray.Emplace(&StructInstance);
+			}
+			else
+			{
+			    // if you do not get this error but the array is not filled correctly
+			    // make sure that the struct members are marked as UPROPERTY
+			    UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
+			    outArray.Empty();
+			}
+			index++;
+		}
+	}
+	return outArray;
+}
+
+void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructType)
+{
+	if (!StructType)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid StructType"));
+		return nullptr;
+	}
+
+	// Allocate memory for the struct instance
+	void* StructMemory = FMemory::Malloc(StructType->GetStructureSize());
+	if (!StructMemory)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to allocate memory for struct"));
+		return nullptr;
+	}
+
+	// Initialize the struct memory
+	StructType->InitializeStruct(StructMemory);
+
+	return StructMemory;
+}
 
 void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
@@ -106,7 +162,6 @@ void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTab
 	}
 }
 
-
 TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
 {
 	return LoadCustomDataFromJson<FTestBasic>(FilePath);
@@ -115,4 +170,29 @@ TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& Fil
 TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FString& FilePath)
 {
 	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
+}
+
+void UDataManagerFunctionLibrary::ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType)
+{
+	for (TFieldIterator<FProperty> It(StructType); It; ++It)
+	{
+		FProperty* Property = *It;
+
+		// Get property name
+		FString PropertyName = Property->GetName();
+
+		// Check if the JSON object contains the field
+		if (!Object->HasField(PropertyName))
+		{
+			UE_LOG(LogUtilityModule, Warning, 
+				TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
+				*PropertyName, Index, *FilePath);
+			return;
+		}
+	}
+}
+
+void UDataManagerFunctionLibrary::LogReadJsonFailed(const FString& FilePath)
+{
+	UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
 }

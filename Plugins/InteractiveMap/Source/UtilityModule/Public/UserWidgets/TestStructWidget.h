@@ -5,7 +5,7 @@
 #include "CustomEditableText.h"
 #include "Types/SlateEnums.h"
 #include "CustomStructWidget.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
+#include "FileIO/DataStructs.h"
 #include "TestStructWidget.generated.h"
 
 class UVerticalBox;

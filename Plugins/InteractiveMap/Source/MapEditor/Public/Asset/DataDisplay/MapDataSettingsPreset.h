@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "StructWrapper.h"
 #include "MapDataSettingsPreset.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
@@ -11,10 +12,13 @@ USTRUCT(BlueprintType)
 struct FMapDataSettingsDefinition
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowAbstract = "true" ))
-	UScriptStruct* TileStructClass;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UStructWrapper* StructWrapperObject;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<UStructWrapper> TestWrapper;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString FilePath;
 };

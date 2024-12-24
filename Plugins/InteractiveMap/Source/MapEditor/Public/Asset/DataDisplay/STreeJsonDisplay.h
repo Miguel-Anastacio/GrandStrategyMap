@@ -55,7 +55,7 @@ public:
     SLATE_BEGIN_ARGS(STreeJsonDisplay)
     {}
     	SLATE_ARGUMENT(const UStruct*, StructType)        // The type of the struct
-		SLATE_ARGUMENT(TArray<void*>, StructInstances)            // Pointer to the struct instance
+		SLATE_ARGUMENT(TArray<const void*>, StructInstances)            // Pointer to the struct instance
     SLATE_END_ARGS()
 
     /** Constructor and widget setup */
@@ -66,11 +66,19 @@ public:
 		
 	};	
 	static bool PopulateDocuments (const UStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
-									const TArray<void*>& StructInstances);
+									const TArray<const void*>& StructInstances);
 
 
 	TSharedRef<ITableRow> GenerateListRow(TSharedPtr<FDocumentInfo> InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	FReply SummonDocumentButtonClicked( TSharedRef<FDocumentInfo> DocumentName);
+
+	void RebuildTree(const UStruct* StructType, const TArray<const void*>& StructInstances);
+	// template<typename T>
+	// void RebuildTree(const UStruct* StructType, const TArray<void*>& StructInstances)
+	// {
+	// 	Documents.Empty();
+	// 	bool bResult = PopulateDocuments(StructType, Documents, StructInstances);
+	// }
 
 
 	void OnGetChildren(TSharedPtr<FDocumentInfo>Item, TArray<TSharedPtr<FDocumentInfo>>& OutChildren);

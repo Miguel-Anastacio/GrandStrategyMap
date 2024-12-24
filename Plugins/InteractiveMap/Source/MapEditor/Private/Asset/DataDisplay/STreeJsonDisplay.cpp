@@ -67,7 +67,7 @@ void STreeJsonDisplay::Construct(const FArguments& InArgs, FTabManager* InTabMan
 }
 
 bool STreeJsonDisplay::PopulateDocuments (const UStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
-												const TArray<void*>& StructInstances)
+												const TArray<const void*>& StructInstances)
 {
 	for(const auto StructIn : StructInstances)
 	{
@@ -133,6 +133,16 @@ FReply STreeJsonDisplay::SummonDocumentButtonClicked( TSharedRef<FDocumentInfo> 
 	return FReply::Handled();
 }
 
+void STreeJsonDisplay::RebuildTree(const UStruct* StructType, const TArray<const void*>& StructInstances)
+{
+	Documents.Empty();
+	bool bResult = PopulateDocuments(StructType, Documents, StructInstances);
+	if( TreeView.IsValid() )
+	{
+		TreeView->RequestTreeRefresh();
+	}
+}
+
 void STreeJsonDisplay::OnGetChildren(TSharedPtr<FDocumentInfo> Item, TArray<TSharedPtr<FDocumentInfo>>& OutChildren)
 {
 	const auto& SubCategories = Item->GetSubDocuments();
@@ -141,7 +151,7 @@ void STreeJsonDisplay::OnGetChildren(TSharedPtr<FDocumentInfo> Item, TArray<TSha
 
 void STreeJsonDisplay::OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo)
 {
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Selected Item: %s"), *Item->DisplayName.ToString());
+	// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Selected Item: %s"), *Item->DisplayName.ToString());
 }
 
 void STreeJsonDisplay::SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo)

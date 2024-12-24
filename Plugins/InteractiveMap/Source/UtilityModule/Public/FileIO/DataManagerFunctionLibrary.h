@@ -4,46 +4,9 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
-#include "UtilityModule.h"
 #include "Engine/DataTable.h"
+#include "DataStructs.h"
 #include "DataManagerFunctionLibrary.generated.h"
-
-/**
- *  Struct that can hold any data of that type 
- */
-USTRUCT(BlueprintType)
-struct FVariantData : public FTableRowBase
-{
-    GENERATED_BODY()
-
-    TMap<FString, TVariant<int, float, FString, bool, FLinearColor>> Properties;
-};
-
-USTRUCT(BlueprintType)
-struct FTestBasic
-{
-    GENERATED_BODY()
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 ID = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString Name;
-};
-
-USTRUCT(BlueprintType)
-struct FTestAdvanced
-{
-    GENERATED_BODY()
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 ID = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 Population = 0;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString Name;
-    // bool Type = false;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FLinearColor Color;
-};
 
 class FJsonObject;
 /**
@@ -55,6 +18,7 @@ class UTILITYMODULE_API UDataManagerFunctionLibrary : public UBlueprintFunctionL
     GENERATED_BODY()
 
 public:
+    
     /**
      * Reads data from a data table into a map.
      *
@@ -185,14 +149,14 @@ public:
                 TSharedPtr<FJsonObject> jsonObject = jsonValue->AsObject();
                 if (FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), T::StaticStruct(), &StructInstance, 0, 0, true))
                 {
-                    ObjectHasMissingFiels<T>(jsonObject, index, FilePath);
+                    ObjectHasMissingFiels(jsonObject, index, FilePath, T::StaticStruct());
                     outArray.Emplace(StructInstance);
                 }
                 else
                 {
                     // if you do not get this error but the array is not filled correctly
                     // make sure that the struct members are marked as UPROPERTY
-                    UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
+                    LogReadJsonFailed(FilePath);
                     outArray.Empty();
                 }
                 index++;
@@ -200,6 +164,10 @@ public:
         }
         return outArray;
     }
+
+    static TArray<void*> LoadCustomDataFromJson(const FString& FilePath, UStruct* structType);
+
+    static void* CreateStructInstance(const UStruct* type);
     
 private:
     /**
@@ -225,25 +193,29 @@ private:
 
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
 
-    template<typename T>
-    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath)
-    {
-        for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
-        {
-            FProperty* Property = *It;
+    // template<typename T>
+    // static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath)
+    // {
+    //     for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
+    //     {
+    //         FProperty* Property = *It;
+    //         
+    //
+    //         // Get property name
+    //         FString PropertyName = Property->GetName();
+    //
+    //         // Check if the JSON object contains the field
+    //         if (!Object->HasField(PropertyName))
+    //         {
+    //             UE_LOG(LogUtilityModule, Warning, 
+    //                 TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
+    //                 *PropertyName, Index, *FilePath);
+    //             return;
+    //         }
+    //     }
+    // }
 
-            // Get property name
-            FString PropertyName = Property->GetName();
-
-            // Check if the JSON object contains the field
-            if (!Object->HasField(PropertyName))
-            {
-                UE_LOG(LogUtilityModule, Warning, 
-                    TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
-                    *PropertyName, Index, *FilePath);
-                return;
-            }
-        }
-    }
+    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType);
+    static void LogReadJsonFailed(const FString& FilePath);
 };
 
