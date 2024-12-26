@@ -38,9 +38,9 @@ void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double In
 	
 	if (PreviewActor)
 	{
-		float X = CustomObject->Radius * FMath::Cos(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
-		float Y = CustomObject->Radius * FMath::Sin(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
-		PreviewActor->SetActorLocation(FVector(X,Y,0));
+		// float X = CustomObject->Radius * FMath::Cos(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
+		// float Y = CustomObject->Radius * FMath::Sin(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
+		// PreviewActor->SetActorLocation(FVector(X,Y,0));
 	}
 }
 

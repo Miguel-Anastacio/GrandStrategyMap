@@ -22,12 +22,8 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::White; }
 	
 private:
-	void OpenFiles();
-
+	void OnLoadFile() const;
 	
 	TWeakObjectPtr<UMapObject> CustomObject = nullptr;
 	TSharedPtr<STreeJsonDisplay> TreeDisplay = nullptr;
-	TObjectPtr<UMapDataSettings> DataSettingsPreset = nullptr;
-	FTestAdvanced AdvancedStruct;
-	// TObjectPtr<UMapObject> MapObject = nullptr;
 };

@@ -1,7 +1,6 @@
 #include "Asset/MapObjectToolkit.h"
 #include "Asset/MapObject.h"
 #include "Asset/SMapObjectViewport.h"
-#include "Asset/DataDisplay/AdvancedStructWrapper.h"
 #include "Asset/DataDisplay/MapDataSettingsPreset.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "FileIO/FilePickerFunctionLibrary.h"
@@ -9,8 +8,8 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
-#include "Asset/DataDisplay/BasicStructWrapper.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
+#include "Log/LogFunctionLibrary.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
@@ -20,8 +19,6 @@ FName DataListTab = FName(TEXT("DataListTab"));
 void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitHost, UMapObject* Object)
 {
 	CustomObject = Object;
-	DataSettingsPreset = NewObject<UMapDataSettings>();
-	DataSettingsPreset->OnObjectChanged.AddSP(this, &FMapObjectToolkit::OpenFiles);
 	
 	const TSharedRef<FTabManager::FLayout> Layout = FTabManager::NewLayout(FName(TEXT("Layout")))
 	->AddArea
@@ -120,24 +117,42 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
 	const TSharedRef<IDetailsView> DetailsView = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor").CreateDetailView(DetailsViewArgs);
-	DetailsView->SetObjects(TArray<UObject*>{DataSettingsPreset.Get()});
+	DetailsView->SetObjects(TArray<UObject*>{CustomObject.Get()});
 	
-	InTabManager->RegisterTabSpawner(DataSourceTab, FOnSpawnTab::CreateLambda([=](const FSpawnTabArgs&)
+	InTabManager->RegisterTabSpawner(DataSourceTab, FOnSpawnTab::CreateLambda([this, DetailsView](const FSpawnTabArgs&)
 	{
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
 		[
-			DetailsView
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			[
+				DetailsView
+			]
+			+ SVerticalBox::Slot()
+			[
+				SNew(SButton)
+				.Text(FText::FromString("Load Data file"))
+				.OnClicked_Lambda([this]() -> FReply
+				{
+					OnLoadFile();
+					return FReply::Handled();
+				})
+			]
+			+ SVerticalBox::Slot()
+			[
+				SNew(SButton)
+				.Text(FText::FromString("Save to file"))
+				.OnClicked_Lambda([this]() -> FReply
+				{
+					this->CustomObject->SaveData();
+					return FReply::Handled();
+				})
+			]
 		];
 	}))
 	.SetDisplayName(INVTEXT("Data Source"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
-
-	// FTestAdvanced AdvancedStruct(1, "Test Name", FLinearColor::Black);
-	AdvancedStruct.ID =1;
-	AdvancedStruct.Name = "Test Name";
-	AdvancedStruct.Color = FLinearColor::Black;
-	AdvancedStruct.Population = 3839864;
 
 	InTabManager->RegisterTabSpawner(DataListTab, FOnSpawnTab::CreateLambda([this, InTabManager](const FSpawnTabArgs&)
 	{
@@ -146,7 +161,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		[
 			SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
 			.StructType(FTestAdvanced::StaticStruct())
-			.StructInstances({})
+			.MapObject(this->CustomObject.Get())
 		];
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
@@ -162,16 +177,17 @@ void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& Tab
 	FAssetEditorToolkit::UnregisterTabSpawners(TabManagerRef);
 }
 
-void FMapObjectToolkit::OpenFiles()
+void FMapObjectToolkit::OnLoadFile() const
 {
-	TArray<FString> FilesNames;
-	UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
-	if(FilesNames.IsEmpty())
+	if(!CustomObject.IsValid())
+	{
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Map Object is NULL"));
 		return;
+	}
+	CustomObject->LoadDataFromFile();
 	if(TreeDisplay)
 	{
-		auto JsonData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilesNames[0], DataSettingsPreset->MapDataSettings.structType);
-		TreeDisplay->RebuildTreeNew(DataSettingsPreset->MapDataSettings.structType, JsonData);
+		TreeDisplay->RebuildTreeFromMap(CustomObject.Get());
 	}
 }
 

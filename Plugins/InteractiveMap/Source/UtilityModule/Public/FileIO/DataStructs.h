@@ -21,9 +21,9 @@ struct FTestBasic
 {
     GENERATED_BODY()
     
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 ID = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     FString Name;
 
     FString ToString() const
@@ -36,14 +36,14 @@ USTRUCT(Blueprintable)
 struct FTestAdvanced
 {
     GENERATED_BODY()
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 ID = -1;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 Population = 0;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     FString Name;
     // bool Type = false;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     FLinearColor Color;
     FString ToString() const
     {

@@ -195,29 +195,6 @@ private:
 
 
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
-
-    // template<typename T>
-    // static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath)
-    // {
-    //     for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
-    //     {
-    //         FProperty* Property = *It;
-    //         
-    //
-    //         // Get property name
-    //         FString PropertyName = Property->GetName();
-    //
-    //         // Check if the JSON object contains the field
-    //         if (!Object->HasField(PropertyName))
-    //         {
-    //             UE_LOG(LogUtilityModule, Warning, 
-    //                 TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
-    //                 *PropertyName, Index, *FilePath);
-    //             return;
-    //         }
-    //     }
-    // }
-
     static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };
