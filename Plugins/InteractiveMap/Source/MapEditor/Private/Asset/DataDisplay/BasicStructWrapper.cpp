@@ -3,11 +3,16 @@
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "Log/LogFunctionLibrary.h"
+
+UBasicStructWrapper::UBasicStructWrapper(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+{
+}
+
 void UBasicStructWrapper::OpenFileOfType(const TArray<FString>& FileNames, TSharedPtr<STreeJsonDisplay>& Tree)
 {
     if(FileNames.IsEmpty())
         return;
-    
     TArray<FTestBasic> JsonData = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FTestBasic>(FileNames[0]);
     ULogFunctionLibrary::LogArray(JsonData, "JsonData");
     
@@ -20,7 +25,7 @@ void UBasicStructWrapper::OpenFileOfType(const TArray<FString>& FileNames, TShar
 	   
     if(Tree)
     {
-        Tree->RebuildTree(FTestBasic::StaticStruct(), Data);
+        // Tree->RebuildTree(FTestBasic::StaticStruct(), Data);
     }
 }
 

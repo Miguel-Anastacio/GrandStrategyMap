@@ -6,8 +6,7 @@
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
 #include "UtilityModule.h"
-#include "UObject/UnrealTypePrivate.h"
-
+#include "StructUtils/Public/InstancedStruct.h"
 void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
 	if (!FFileHelper::SaveStringToFile(string, *filePath))
@@ -54,37 +53,45 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 }
 
 
-TArray<void*> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, UStruct* structType)
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, UScriptStruct* structType)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
-	TArray<void*> outArray;
+	TArray<FInstancedStruct> OutArray;
 	int32 index = 0;
-	for(const auto& jsonValue : JsonArray)
+	FInstancedStruct InstancedStruct;
+	for(const auto& JsonValue : JsonArray)
 	{
-		UObject* Object = NewObject<UObject>();
-		FProperty* property = Object->GetClass()->FindPropertyByName("Test");
-		FStructProperty* structProperty = Cast<FStructProperty>(property);
-
-		if (jsonValue->Type == EJson::Object)
+		TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
+		if (!JsonObject.IsValid())
 		{
-			void* StructInstance = CreateStructInstance(structType);
-			TSharedPtr<FJsonObject> jsonObject = jsonValue->AsObject();
-			if (FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), structType, &StructInstance, 0, 0, true))
-			{
-			    ObjectHasMissingFiels(jsonObject, index, FilePath, structType);
-			    outArray.Emplace(&StructInstance);
-			}
-			else
-			{
-			    // if you do not get this error but the array is not filled correctly
-			    // make sure that the struct members are marked as UPROPERTY
-			    UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
-			    outArray.Empty();
-			}
-			index++;
+			UE_LOG(LogTemp, Error, TEXT("Invalid JSON object in array."));
+			continue;
 		}
+
+		// Deserialize the object into an FInstancedStruct
+		FInstancedStruct NewInstancedStruct;
+		if (DeserializeJsonToFInstancedStruct(JsonObject, structType, NewInstancedStruct))
+		{
+			ObjectHasMissingFiels(JsonObject, index, FilePath, structType);
+			OutArray.Add(MoveTemp(NewInstancedStruct));
+		}
+
+		index++;
 	}
-	return outArray;
+	return OutArray;
+}
+
+bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject, const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct)
+{
+	// Initialize the FInstancedStruct with the resolved type
+	OutInstancedStruct.InitializeAs(StructType);
+
+	// Convert the JSON data into the struct instance
+	if (!FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), StructType, OutInstancedStruct.GetMutableMemory(), 0, 0))
+	{
+		return false;
+	}
+	return true;
 }
 
 void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructType)

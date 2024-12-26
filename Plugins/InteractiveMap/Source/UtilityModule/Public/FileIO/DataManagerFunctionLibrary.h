@@ -6,6 +6,7 @@
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
 #include "DataStructs.h"
+#include "InstancedStruct.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
 class FJsonObject;
@@ -165,7 +166,9 @@ public:
         return outArray;
     }
 
-    static TArray<void*> LoadCustomDataFromJson(const FString& FilePath, UStruct* structType);
+    static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, UScriptStruct* structType);
+
+    static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
 
     static void* CreateStructInstance(const UStruct* type);
     

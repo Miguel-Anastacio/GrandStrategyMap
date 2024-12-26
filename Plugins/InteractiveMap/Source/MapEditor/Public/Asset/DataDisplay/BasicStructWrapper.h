@@ -8,10 +8,12 @@
 
 class SJsonTreeDisplay;
 UCLASS(Blueprintable)
-class MAPEDITOR_API UBasicStructWrapper : public UStructWrapper, public IStructWrapperInterface
+class MAPEDITOR_API UBasicStructWrapper : public UStructWrapper
 {
 	GENERATED_BODY()
-	
+
 public:
+	UBasicStructWrapper(const FObjectInitializer& ObjectInitializer);
+	
 	virtual void OpenFileOfType(const TArray<FString>& FileNames, TSharedPtr<STreeJsonDisplay>& Tree) override;
 };

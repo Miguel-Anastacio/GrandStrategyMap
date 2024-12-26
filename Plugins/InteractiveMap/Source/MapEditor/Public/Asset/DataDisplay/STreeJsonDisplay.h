@@ -4,6 +4,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "IDetailsView.h"
+#include "InstancedStruct.h"
 #include "PropertyEditorModule.h"
 #include "Misc/Optional.h"
 #include "Framework/Docking/TabManager.h"
@@ -54,7 +55,7 @@ class STreeJsonDisplay : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS(STreeJsonDisplay)
     {}
-    	SLATE_ARGUMENT(const UStruct*, StructType)        // The type of the struct
+    	SLATE_ARGUMENT(const UScriptStruct*, StructType)        // The type of the struct
 		SLATE_ARGUMENT(TArray<const void*>, StructInstances)            // Pointer to the struct instance
     SLATE_END_ARGS()
 
@@ -65,14 +66,13 @@ public:
 	{
 		
 	};	
-	static bool PopulateDocuments (const UStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
-									const TArray<const void*>& StructInstances);
-
+	static bool PopulateDocumentsNew(const UScriptStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
+											 const TArray<FInstancedStruct>& StructInstances);
 
 	TSharedRef<ITableRow> GenerateListRow(TSharedPtr<FDocumentInfo> InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	FReply SummonDocumentButtonClicked( TSharedRef<FDocumentInfo> DocumentName);
 
-	void RebuildTree(const UStruct* StructType, const TArray<const void*>& StructInstances);
+	void RebuildTreeNew(const UScriptStruct* StructType, const TArray<FInstancedStruct>& StructInstances);
 	// template<typename T>
 	// void RebuildTree(const UStruct* StructType, const TArray<void*>& StructInstances)
 	// {

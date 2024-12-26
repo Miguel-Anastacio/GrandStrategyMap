@@ -8,7 +8,7 @@
 
 class SJsonTreeDisplay;
 UCLASS(Blueprintable)
-class MAPEDITOR_API UAdvancedStructWrapper : public UObject, public IStructWrapperInterface
+class MAPEDITOR_API UAdvancedStructWrapper : public UStructWrapper
 {
 	GENERATED_BODY()
 	

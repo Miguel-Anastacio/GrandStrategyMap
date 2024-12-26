@@ -16,11 +16,14 @@ struct FMapDataSettingsDefinition
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStructWrapper* StructWrapperObject;
 
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSubclassOf<UStructWrapper> TestWrapper;
+	UScriptStruct* structType;
+	
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString FilePath;
+
 };
 
 UCLASS()

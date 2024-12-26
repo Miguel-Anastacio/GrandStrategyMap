@@ -29,6 +29,7 @@ public class UtilityModule : ModuleRules
 				"Core",
 				"RHI",
 				"RenderCore",
+				"StructUtils"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
