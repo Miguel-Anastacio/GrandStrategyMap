@@ -126,10 +126,18 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				DetailsView
 			]
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("Load Data file"))
@@ -140,6 +148,10 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 				})
 			]
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("Save to file"))
@@ -160,7 +172,6 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		.TabRole(PanelTab)
 		[
 			SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
-			.StructType(FTestAdvanced::StaticStruct())
 			.MapObject(this->CustomObject.Get())
 		];
 	}))

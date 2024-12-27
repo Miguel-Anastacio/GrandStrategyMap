@@ -166,10 +166,11 @@ public:
         return outArray;
     }
 
-    static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, UScriptStruct* structType);
+    static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
+    static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
 
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
-
+    static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
     static void* CreateStructInstance(const UStruct* type);
     
 private:
@@ -195,7 +196,7 @@ private:
 
 
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
-    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType);
+    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };
 

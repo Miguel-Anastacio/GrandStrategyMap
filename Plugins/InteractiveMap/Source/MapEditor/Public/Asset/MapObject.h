@@ -22,24 +22,32 @@ class MAPEDITOR_API UMapObject : public UObject
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* StructType;
-	
 	FOnAssetChanged OnObjectChanged;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	UTexture2D* LookupTexture;
+	UPROPERTY(EditAnywhere, Category = "Lookup")
+	UStaticMesh* Mesh;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	UMaterialInterface* MaterialOverride;
+
 public:
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
 	void SaveData() const;
 	void LoadDataFromFile();
+	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	
-	void SetMapData(const TArray<FInstancedStruct>& NewData); 
 	TArray<FInstancedStruct>& GetMapData()
 	{
 		return MapData;
 	}
+	
 	void SetFilePath(const FString& filePath)
 	{
 		this->FilePath = filePath;
 	}
+	
 	FString GetFilePath() const
 	{
 		return this->FilePath;
@@ -52,8 +60,8 @@ public:
 	}
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TArray<FInstancedStruct> MapData;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category="Data")
 	FString FilePath;
 };

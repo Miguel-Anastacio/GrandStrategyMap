@@ -134,7 +134,6 @@ bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& Out
 	{
 		result = UEditorLoadingAndSavingUtils::SaveDirtyPackages(true, true);
 	}
-
 	return result;
 }
 

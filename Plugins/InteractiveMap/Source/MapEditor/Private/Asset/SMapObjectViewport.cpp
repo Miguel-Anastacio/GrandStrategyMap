@@ -2,6 +2,7 @@
 #include "AdvancedPreviewScene.h"
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
+#include "Asset/MapAssetActor.h"
 #include "Engine/PointLight.h"
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
@@ -19,8 +20,9 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 		return;
 	}
 
-	CustomObject->OnObjectChanged.AddSP(this, &SMapObjectViewport::UpdatePreviewActor);
-	UpdatePreviewActor();
+	AMapAsset* PreviewMapAsset = GetWorld()->SpawnActor<AMapAsset>();
+	PreviewMapAsset->MapObject = CustomObject.Get();
+	PreviewMapAsset->RerunConstructionScripts();
 }
 
 void SMapObjectViewport::UpdatePreviewActor()

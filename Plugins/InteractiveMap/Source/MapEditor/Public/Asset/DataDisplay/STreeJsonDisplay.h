@@ -102,7 +102,6 @@ class STreeJsonDisplay : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS(STreeJsonDisplay)
     {}
-    	SLATE_ARGUMENT(const UScriptStruct*, StructType)        // The type of the struct
 		SLATE_ARGUMENT(UMapObject*, MapObject)      
     SLATE_END_ARGS()
 

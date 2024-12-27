@@ -52,15 +52,7 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 
 void UMapObject::SaveData() const
 {
-	bool bSuccess = false;
-	FString Message;
-	// UDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, MapData, bSuccess, Message);
-	ULogFunctionLibrary::LogArrayInstancedStructs(MapData, "Log Map Data Structs", StructType);
-	if(!bSuccess)
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Error Saving Map Data"));
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("%s"), *Message);
-	}
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, StructType, MapData);
 }
 
 void UMapObject::LoadDataFromFile()

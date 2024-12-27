@@ -53,7 +53,7 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 }
 
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, UScriptStruct* structType)
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
 	TArray<FInstancedStruct> OutArray;
@@ -81,6 +81,25 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 	return OutArray;
 }
 
+void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
+	const TArray<FInstancedStruct>& Array)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
+	for (const auto& Value : Array)
+	{
+		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, StructType);
+		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
+	}
+
+	bool bResult = false;
+	FString OutInfoMessage;
+	WriteJson(FilePath, JsonValueArray, bResult, OutInfoMessage);
+	if(!bResult)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array: %s"), *OutInfoMessage);
+	}
+}
+
 bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject, const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct)
 {
 	// Initialize the FInstancedStruct with the resolved type
@@ -92,6 +111,18 @@ bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TShare
 		return false;
 	}
 	return true;
+}
+
+TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType)
+{
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	if(FJsonObjectConverter::UStructToJsonObject(StructType, Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
+	{
+		return JsonObject;
+	}
+
+	UE_LOG(LogUtilityModule, Error, TEXT("Failed to serialize instanced struct of type %s"), *StructType->GetName());
+	return nullptr;
 }
 
 void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructType)
@@ -169,6 +200,7 @@ void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTab
 	}
 }
 
+// FInstanced Struct method is more versatile
 TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
 {
 	return LoadCustomDataFromJson<FTestBasic>(FilePath);
@@ -179,7 +211,7 @@ TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FStrin
 	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
 }
 
-void UDataManagerFunctionLibrary::ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType)
+void UDataManagerFunctionLibrary::ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{

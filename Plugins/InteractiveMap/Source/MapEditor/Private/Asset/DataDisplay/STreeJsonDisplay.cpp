@@ -194,16 +194,11 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
             Documents.Add(RootDocument);
         }
     }
-
-	// ULogFunctionLibrary::LogArrayInstancedStructs(StructInstances, "Log Map Data Structs", StructType);
-
     return true;
 }
 
 TSharedRef<ITableRow> STreeJsonDisplay::GenerateListRow(TSharedPtr< FDocumentInfo > InItem, const TSharedRef<STableViewBase>& OwnerTable)
 {
-	// TSharedRef<SEditablePropertyWidget> EditablePropertyWidget = MakeShareable(new SEditablePropertyWidget());
-	// EditablePropertyWidget->TextCommitDelegate.BindLambda()
 	return SNew( STableRow< TSharedRef<FDocumentInfo> >, OwnerTable )
 	[
 		SNew(SEditablePropertyWidget).LabelText(InItem->DisplayName).Value(InItem->SomeData).Document(InItem.Get())
@@ -255,7 +250,6 @@ void STreeJsonDisplay::RebuildTreeFromMap(UMapObject* Map)
 	{
 		DocumentInfos.Add(*doc);
 	}
-	ULogFunctionLibrary::LogArray(DocumentInfos, "Map Documents");
 	if( TreeView.IsValid())
 	{
 		TreeView->RequestTreeRefresh();
