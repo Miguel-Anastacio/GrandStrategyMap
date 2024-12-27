@@ -172,6 +172,10 @@ public:
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
     static void* CreateStructInstance(const UStruct* type);
+
+
+    static FColor ConvertHexStringToRGB(const FString& Color);
+    static auto HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap) -> int32;
     
 private:
     /**

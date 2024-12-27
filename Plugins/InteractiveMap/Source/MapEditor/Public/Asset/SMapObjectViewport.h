@@ -4,6 +4,15 @@
 
 class FAdvancedPreviewScene;
 class UMapObject;
+class AMapAsset;
+
+class FMapObjectViewportClient : public FEditorViewportClient
+{
+public:
+	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport);
+	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
+};
+
 
 class SMapObjectViewport: public SEditorViewport, public ICommonEditorViewportToolbarInfoProvider
 {
@@ -14,7 +23,8 @@ public:
 	
 SLATE_END_ARGS()
 	
-void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs);
+	~SMapObjectViewport();
 	void UpdatePreviewActor();
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
@@ -25,7 +35,6 @@ void Construct(const FArguments& InArgs);
 	virtual void OnFloatingButtonClicked() override {}
 	
 	TSoftObjectPtr<UMapObject> CustomObject = nullptr;
-	AActor* PreviewActor = nullptr;
 
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;

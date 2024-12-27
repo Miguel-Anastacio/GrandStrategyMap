@@ -27,23 +27,27 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 		->SetOrientation(Orient_Horizontal)
 		->Split
 		(
-			FTabManager::NewSplitter()
-			->SetOrientation(Orient_Vertical)
-			->SetSizeCoefficient(.65f)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(.5f)
-				->AddTab(MapViewportTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
-			)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(.5f)
-				->AddTab(MapStatsTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
-			)
+			FTabManager::NewStack()
+			->SetSizeCoefficient(.5f)
+			->AddTab(MapViewportTab, ETabState::OpenedTab)
+			->SetHideTabWell(true)
+			// FTabManager::NewSplitter()
+			// ->SetOrientation(Orient_Vertical)
+			// ->SetSizeCoefficient(.65f)
+			// ->Split
+			// (
+			// 	FTabManager::NewStack()
+			// 	->SetSizeCoefficient(.5f)
+			// 	->AddTab(MapViewportTab, ETabState::OpenedTab)
+			// 	->SetHideTabWell(true)
+			// )
+			// ->Split
+			// (
+			// 	FTabManager::NewStack()
+			// 	->SetSizeCoefficient(.5f)
+			// 	->AddTab(MapStatsTab, ETabState::OpenedTab)
+			// 	->SetHideTabWell(true)
+			// )
 		)
 		->Split
 		(
@@ -53,14 +57,14 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 			->Split
 			(
 				FTabManager::NewStack()
-				->SetSizeCoefficient(.6f)
+				->SetSizeCoefficient(0.35f)
 				->AddTab(DataSourceTab, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 			)
 			->Split
 			(
 				FTabManager::NewStack()
-				->SetSizeCoefficient(.4f)
+				->SetSizeCoefficient(.65f)
 				->AddTab(DataListTab, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 			)

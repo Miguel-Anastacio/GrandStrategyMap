@@ -147,6 +147,69 @@ void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructTyp
 	return StructMemory;
 }
 
+int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
+{
+	FString temp = hex.Reverse();
+	auto chars = temp.GetCharArray();
+	temp = temp.ToUpper();
+	int32 total = 0;
+	for (int i = 0; i < temp.Len(); i++)
+	{
+		const int32* value = HexMap.Find(temp[i]);
+		if (value)
+		{
+			total += FMath::Pow(16.f, i) * (*value);
+		}
+		else
+		{
+			UE_LOG(LogUtilityModule, Warning, TEXT("Invalid Hex value"));
+		}
+	}
+	return total;
+}
+
+FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
+{
+	TMap<TCHAR, int32> HexMap;
+	HexMap.Reserve(16);
+	HexMap.Add('0', 0);
+	HexMap.Add('1', 1);
+	HexMap.Add('2', 2);
+	HexMap.Add('3', 3);
+	HexMap.Add('4', 4);
+	HexMap.Add('5', 5);
+	HexMap.Add('6', 6);
+	HexMap.Add('7', 7);
+	HexMap.Add('8', 8);
+	HexMap.Add('9', 9);
+	HexMap.Add('A', 10);
+	HexMap.Add('B', 11);
+	HexMap.Add('C', 12);
+	HexMap.Add('D', 13);
+	HexMap.Add('E', 14);
+	HexMap.Add('F', 15);
+
+	if (Color.StartsWith(FString("#")))
+	{
+		const FString noPrefix = Color.RightChop(1);
+		const FString r = noPrefix.LeftChop(6);
+		const FString g = noPrefix.Mid(2, 2);
+		const FString b = noPrefix.Mid(4, 2);
+		const FString alpha = noPrefix.RightChop(6);
+
+		FColor ColorValue;
+		ColorValue.R = HexToDecimal(r, HexMap);
+		ColorValue.G = HexToDecimal(g, HexMap);
+		ColorValue.B = HexToDecimal(b, HexMap);
+		ColorValue.A = HexToDecimal(alpha, HexMap);
+
+		return ColorValue;
+	}
+
+	UE_LOG(LogUtilityModule, Error, TEXT("Color is not hexadecimal format"));
+	return FColor();
+}
+
 void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;

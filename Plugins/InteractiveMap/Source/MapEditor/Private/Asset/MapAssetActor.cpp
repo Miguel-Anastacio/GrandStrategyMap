@@ -24,7 +24,7 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 	if(MapObject->Mesh)
 	{
 		MapMesh->SetStaticMesh(MapObject->Mesh);
-		MapMesh->SetWorldScale3D(FVector(10, 10, 10));
+		MapMesh->SetWorldScale3D(FVector(20, 15, 1));
 	}
 	if(MapObject->MaterialOverride)
 		MapMesh->SetMaterial(0, MapObject->MaterialOverride);

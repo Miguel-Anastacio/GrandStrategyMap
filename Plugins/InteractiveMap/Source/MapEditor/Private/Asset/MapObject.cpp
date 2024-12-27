@@ -52,7 +52,7 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 
 void UMapObject::SaveData() const
 {
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, StructType, MapData);
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, StructType, MapData);
 }
 
 void UMapObject::LoadDataFromFile()
@@ -71,7 +71,19 @@ void UMapObject::LoadDataFromFile()
 	}
 	
 	MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilesNames[0], StructType);
-	FilePath = FilesNames[0];
+	FilePathMapData = FilesNames[0];
+
+	// Load lookup
+	auto Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(LookupFilePath);
+	for(const auto& Entry : Lookup)
+	{
+		LookupTable.Add(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+	}
+	for(const auto& Entry : LookupTable)
+	{
+		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
+	}
+	
 	// ULogFunctionLibrary::LogArrayInstancedStructs(MapData, "Log Map Data Structs", StructType);
 }
 

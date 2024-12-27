@@ -8,6 +8,23 @@
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "MapObject.generated.h"
 
+USTRUCT(BlueprintType)
+struct FLookupEntry
+{
+	GENERATED_BODY()
+    
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Color;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Name;
+
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("ColorInHex: %s, Name: %s"), *Color, *Name);
+	}
+};
+
+
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
 UCLASS()
@@ -31,6 +48,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
 	UMaterialInterface* MaterialOverride;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	FString LookupFilePath = "D:\\Dev\\Unreal\\GrandStrategyMap\\Content\\MapEditor\\Maps\\lookup.json";
 public:
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
@@ -45,12 +64,12 @@ public:
 	
 	void SetFilePath(const FString& filePath)
 	{
-		this->FilePath = filePath;
+		this->FilePathMapData = filePath;
 	}
 	
 	FString GetFilePath() const
 	{
-		return this->FilePath;
+		return this->FilePathMapData;
 	}
 
 	void ClearMapData()
@@ -62,6 +81,9 @@ public:
 private:
 	UPROPERTY()
 	TArray<FInstancedStruct> MapData;
+
+	TMap<FColor, int> LookupTable;
+	
 	UPROPERTY(VisibleAnywhere, Category="Data")
-	FString FilePath;
+	FString FilePathMapData;
 };
