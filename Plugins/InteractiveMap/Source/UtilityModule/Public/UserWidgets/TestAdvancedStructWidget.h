@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "CustomEditableText.h"
 #include "Types/SlateEnums.h"
-#include "CustomStructWidget.h"
+#include "GenericStructWidget.h"
 #include "FileIO/DataStructs.h"
 #include "TestAdvancedStructWidget.generated.h"
 

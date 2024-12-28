@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UserWidgets/CustomStructWidget.h"
+#include "UserWidgets/GenericStructWidget.h"
 // #include "UtilityModule/Public/UtilityModule.h"
 #include "LogFunctionLibrary.generated.h"
 
@@ -22,6 +22,15 @@ public:
             UE_LOG(LogTemp, Display, TEXT("%s"), *Value.ToString());
         }
     }
+    // template<typename T, typename K>
+    // static void LogMap(const TMap<T, K>& Map, const FString& Message)
+    // {
+    //     UE_LOG(LogTemp, Display, TEXT("Logging Map: %s"), *Message);
+    //     for(const auto& Item : Map)
+    //     {
+    //         UE_LOG(LogTemp, Display, TEXT("Key: %s - Value: %s"), *Item.Key.ToString(), *Item.Value.ToString());
+    //     }
+    // }
     
     static FString InstancedStructToString(const FInstancedStruct& Instance, const UScriptStruct* StructType)
     {

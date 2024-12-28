@@ -78,11 +78,19 @@ public:
 		StructType = nullptr;
 	}
 
+	int GetIndexOfTileSelected(const FColor& Color);
+
+	FColor GetColorFromUv(const FVector2D& uv) const;
+
 private:
 	UPROPERTY()
 	TArray<FInstancedStruct> MapData;
 
+	UPROPERTY()
 	TMap<FColor, int> LookupTable;
+
+	UPROPERTY()
+	TArray<uint8> LookupTextureData;
 	
 	UPROPERTY(VisibleAnywhere, Category="Data")
 	FString FilePathMapData;

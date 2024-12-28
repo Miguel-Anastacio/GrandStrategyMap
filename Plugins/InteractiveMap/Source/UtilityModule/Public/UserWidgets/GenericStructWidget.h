@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-#include "CustomStructWidget.generated.h"
+#include "GenericStructWidget.generated.h"
 
 class UCustomEditableText;
 class UVerticalBox;

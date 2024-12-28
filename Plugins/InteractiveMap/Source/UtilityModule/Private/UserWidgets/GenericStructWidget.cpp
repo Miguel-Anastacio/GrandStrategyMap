@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "UserWidgets/CustomStructWidget.h"
+#include "UserWidgets/GenericStructWidget.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/VerticalBox.h"

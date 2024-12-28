@@ -104,7 +104,8 @@ void MapEditorMenu::GenerateMap()
 		return;
 	
 	FTextureCompilingManager::Get().FinishCompilation({texture});
-	const uint8* Data = ReadTextureToBuffer(texture);
+	const uint8* Data = UAssetCreatorFunctionLibrary::ReadTextureToBuffer(texture);
+	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %llu"), sizeof(*Data))
 	
 	// temp just to test
 	// TODO - improve this, adjust MapGeneratorLib
@@ -201,21 +202,8 @@ TObjectPtr<UTexture2D> MapEditorMenu::CreateTexture(uint8* buffer, unsigned widt
 	return NewTexture;
 }
 
-const uint8* MapEditorMenu::ReadTextureToBuffer(UTexture2D* texture) 
-{
-	// Lock the texture for reading
-	FTexture2DMipMap& Mip = texture->GetPlatformData()->Mips[0];
-	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
-	const uint8* Data = static_cast<const uint8*>(TextureData);
-	// Unlock the texture
-	Mip.BulkData.Unlock();
-
-	return  Data;
-}
-
 bool MapEditorMenu::ValidateTexture(UTexture2D* texture)
 {
-	UE_LOG(LogInteractiveMapEditor, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *texture->GetName());
 	if(texture == nullptr)
 		return false;
 	if(texture->CompressionSettings != TC_EditorIcon)

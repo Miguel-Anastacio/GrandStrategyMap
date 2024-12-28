@@ -11,6 +11,7 @@ class FMapObjectViewportClient : public FEditorViewportClient
 public:
 	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport);
 	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
+	void GetHitLocationInEditor(FEditorViewportClient* ViewportClient, int32 ScreenX, int32 ScreenY);
 };
 
 

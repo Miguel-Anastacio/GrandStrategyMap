@@ -37,6 +37,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static bool SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage);
+	
 #endif
+	static const uint8* ReadTextureToBuffer(UTexture2D* Texture);
+	static TArray<uint8> ReadTextureToArray(UTexture2D* Texture);
+
+	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
+	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const uint8* DataBuffer);
+	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
 	
 };
