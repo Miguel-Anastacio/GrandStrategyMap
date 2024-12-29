@@ -5,6 +5,8 @@
 #include "Engine/DataTable.h"
 #include "DataStructs.generated.h"
 
+//// TEST FILE WITH EXAMPLE STRUCTS
+
 /**
  *  Struct that can hold any data of that type 
  */

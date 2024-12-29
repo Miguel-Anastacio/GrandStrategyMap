@@ -259,7 +259,14 @@ public:
             return T();
         }
     }
-      
+
+    template<typename T, typename V>
+    static T GetPropertyValue(FProperty* Property, const V* object)
+    {
+        void* ValuePtr = Property->ContainerPtrToValuePtr<void>(object);
+        T Result = TPropertyTypeFundamentals<T>::GetPropertyValue(ValuePtr);
+        return Result;
+    }
 
     // --------------------------------------------------------------------
     // COLOR STUFF -> Move somewhere else
