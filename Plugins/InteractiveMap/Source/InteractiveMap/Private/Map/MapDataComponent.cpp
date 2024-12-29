@@ -2,7 +2,7 @@
 
 #include "Map/MapDataComponent.h"
 #include "Map/MapEnums.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
+#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
 
 UMapDataComponent::UMapDataComponent()

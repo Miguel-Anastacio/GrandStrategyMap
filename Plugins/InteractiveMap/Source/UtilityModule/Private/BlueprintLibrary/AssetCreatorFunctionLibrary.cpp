@@ -2,10 +2,10 @@
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
-#include "Assets//TextureFromBufferFactory.h"
+#include "Factories/TextureFromBufferFactory.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
-	bool& bOutSuccess, FString& OutInfoMessage)
+                                                   bool& bOutSuccess, FString& OutInfoMessage)
 {
 	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 

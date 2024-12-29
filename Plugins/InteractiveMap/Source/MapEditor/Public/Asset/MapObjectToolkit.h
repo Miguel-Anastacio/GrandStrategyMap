@@ -1,7 +1,7 @@
 #pragma once
 #include "MapEditor.h"
 #include "DataDisplay/MapDataSettingsPreset.h"
-#include "FileIO/DataStructs.h"
+#include "BlueprintLibrary/DataStructs.h"
 
 class STreeJsonDisplay;
 class UMapDataSettings;

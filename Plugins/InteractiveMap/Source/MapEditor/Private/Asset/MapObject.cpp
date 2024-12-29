@@ -6,8 +6,8 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
-#include "FileIO/FilePickerFunctionLibrary.h"
+#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 
 #if WITH_EDITOR
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
