@@ -43,27 +43,3 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(FProperty* Prope
 		return TEXT("Invalid Property or Instance");
 	}
 }
-
-FProperty* UADStructUtilsFunctionLibrary::GetPropertyByName(const UScriptStruct* StructType, const FString& PropertyName)
-{
-	if(!StructType || PropertyName.IsEmpty())
-	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Get Property by Name Failed"));
-		return nullptr;
-	}
-	for (TFieldIterator<FProperty> It(StructType); It; ++It)
-	{
-		FProperty* Property = *It;
-		if (!Property)
-		{
-			// UE_LOG(LogTemp, Warning, TEXT("Encountered null property in struct '%s'."), *StructType->GetName());
-			continue;
-		}
-
-		if(Property->GetFName() == PropertyName)
-		{
-			return Property;
-		}
-	}
-	return  nullptr;
-}

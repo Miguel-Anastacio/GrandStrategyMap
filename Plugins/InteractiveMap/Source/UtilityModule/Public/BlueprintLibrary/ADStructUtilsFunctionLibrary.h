@@ -6,6 +6,48 @@
 #include "InstancedStruct.h"
 #include "ADStructUtilsFunctionLibrary.generated.h"
 
+template<typename T>
+struct TPropertyTraits
+{
+    using Type = void; // Default to void for unsupported types
+};
+
+template<>
+struct TPropertyTraits<int32>
+{
+    using Type = FIntProperty;
+};
+
+template<>
+struct TPropertyTraits<float>
+{
+    using Type = FFloatProperty;
+};
+
+template<>
+struct TPropertyTraits<FString>
+{
+    using Type = FStrProperty;
+};
+
+template<>
+struct TPropertyTraits<bool>
+{
+    using Type = FBoolProperty;
+};
+
+template<typename T>
+struct TIsDerivedFromStruct
+{
+    static constexpr bool Value = TIsDerivedFrom<T, UStruct>::Value;
+};
+
+template<>
+struct TPropertyTraits<UScriptStruct>
+{
+    using Type = FStructProperty;
+};
+
 UCLASS()
 class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
@@ -13,16 +55,15 @@ class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctio
 
 public:
     static FString GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult);
-
-    static FProperty* GetPropertyByName(const UScriptStruct* StructType, const FString& PropertyName);
-
+    /// TODO - Add Specializations and expose them to Blueprints
+    
     template<typename T>
-    static T GetPropertyValueFromStruct(const UScriptStruct* StructType, const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
+    static T GetPropertyValueFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
     {
         OutResult = false;
-        if(const FProperty* Property = GetPropertyByName(StructType, PropertyName))
+        if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
         {
-            T PropertyValue = GetPropertyValueAsType<T>(Property, InstancedStruct.GetMemory(), OutResult);
+            T PropertyValue = GetPropertyValue<T>(Property, InstancedStruct.GetMemory(), OutResult);
             if(OutResult)
             {
                 return PropertyValue;
@@ -32,78 +73,92 @@ public:
     }
     
     template<typename T>
-    static T GetPropertyValueAsType(const FProperty* Property, const void* StructObject, bool& OutResult)
+    static bool SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
-        OutResult = true;
-        if (!Property || !StructObject)
+        if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
         {
-            OutResult = false;
+            return SetPropertyValue<T>(Property, InstancedStruct.GetMemory(), NewValue);
         }
-        const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(StructObject);
-
-        if (const FIntProperty* IntProperty = CastField<FIntProperty>(Property))
-        {
-            return static_cast<T>(IntProperty->GetPropertyValue(ValuePtr));
-        }
-        else if (const FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
-        {
-            return static_cast<T>(FloatProperty->GetPropertyValue(ValuePtr)); 
-        }
-        else if (const FBoolProperty* BoolProperty = CastField<FBoolProperty>(Property))
-        {
-            return static_cast<T>(BoolProperty->GetPropertyValue(ValuePtr)); 
-        }
-        else if (const FStrProperty* StrProperty = CastField<FStrProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FString>)
-            {
-                return StrProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if (const FNameProperty* NameProperty = CastField<FNameProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FName>)
-            {
-                return NameProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if (const FTextProperty* TextProperty = CastField<FTextProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FText>)
-            {
-                return TextProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if(const FStructProperty* StructProperty = CastField<FStructProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, void*>)
-            {
-                // For structs, we can return the raw pointer or specialize further
-                return static_cast<T>(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else
-        {
-            OutResult = false;
-            return T();
-        }
+        
+        return false;
     }
-
+    
     template<typename T, typename V>
-    static T GetPropertyValue(FProperty* Property, const V* object)
+    static T GetPropertyValue(const FProperty* Property, const V* Object, bool& bOutResult)
     {
-        void* ValuePtr = Property->ContainerPtrToValuePtr<void>(object);
+        if(!Object)
+        {
+            bOutResult = false;
+            return T();
+        }
+        
+        if(!Property)
+        {
+            bOutResult = false;
+            return T();
+        }
+        
+        if(!IsTypeCompatible<T>(Property))
+        {
+            bOutResult = false;
+            return T();
+        }
+        
+        bOutResult = true;
+        const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(Object);
         T Result = TPropertyTypeFundamentals<T>::GetPropertyValue(ValuePtr);
         return Result;
     }
-   
+
+    template<typename T, typename  V>
+    static bool SetPropertyValue(FProperty* Property, V* Object, const T& NewValue)
+    {
+        if(!Object)
+        {
+            return false;
+        }
+        if(!Property)
+        {
+            return false;
+        }
+        if(!IsTypeCompatible<T>(Property))
+        {
+            return false;
+        }
+        
+        void* ValuePtr = Property->ContainerPtrToValuePtr<void>(Object);
+        TPropertyTypeFundamentals<T>::SetPropertyValue(ValuePtr, NewValue);
+        return true;
+    }
+    
+private:
+    // Generalized compatibility check
+    template<typename T>
+    static bool IsTypeCompatible(const FProperty* Property)
+    {
+        if (!Property)
+            return false;
+
+        using ExpectedPropertyType = typename TPropertyTraits<T>::Type;
+        if constexpr (std::is_same_v<ExpectedPropertyType, FStructProperty>)
+        {
+            const FStructProperty* StructProperty = CastField<FStructProperty>(Property);
+            if (StructProperty)
+            {
+                // Ensure the struct type matches
+                return StructProperty->Struct->GetFName() == T::StaticStruct()->GetFName();
+            }
+            return false;
+        }
+        else if constexpr (!std::is_same_v<ExpectedPropertyType, void>)
+        {
+            // For other property types (e.g., FIntProperty, FFloatProperty)
+            return CastField<ExpectedPropertyType>(Property) != nullptr;
+        }
+        else
+        {
+            return false;
+        }
+    }
 };
 

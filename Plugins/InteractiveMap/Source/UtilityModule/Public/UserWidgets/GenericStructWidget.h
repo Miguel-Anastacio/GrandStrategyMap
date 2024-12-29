@@ -29,7 +29,7 @@ public:
 			FProperty* Property = *It;
 			FName PropertyName = Property->GetFName();
 			bool bResult = false;
-			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, &structInstance, bResult);
+			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, &structInstance, bResult);
 			if(bResult)
 			{
 				CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);

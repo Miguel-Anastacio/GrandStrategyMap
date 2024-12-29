@@ -3,8 +3,8 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "TextureCompiler.h"
+#include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
@@ -36,25 +36,14 @@ void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
 void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const FString& NewValue)
 {
 	if(Index < 0 || Index > MapData.Num() - 1)
-		return;
-	void* StructMemory = MapData[Index].GetMutableMemory();
-	
-	if(FProperty* Property = StructType->FindPropertyByName(FName(*PropertyName)))
 	{
-		if (FIntProperty* IntProperty = CastField<FIntProperty>(Property))
-		{
-			int32 Value = FCString::Atoi(*NewValue);
-			IntProperty->SetPropertyValue_InContainer(StructMemory, Value);
-		}
-		else if (FStrProperty* StrProperty = CastField<FStrProperty>(Property))
-		{
-			StrProperty->SetPropertyValue_InContainer(StructMemory, NewValue);
-		}
-		//NO MATCHING PROPERTY
-		else
-		{
-			UE_LOG(LogInteractiveMapEditor, Log, TEXT("No Matching Property with the compatible values: '%s'"), *PropertyName);
-		}
+		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Invalid Index on Update Tile Property '%s'"), *PropertyName);
+		return;
+	}
+	
+	if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct<FString>(MapData[Index], PropertyName, NewValue))
+	{
+		UE_LOG(LogInteractiveMapEditor, Log, TEXT("No Matching Property with the compatible values: '%s'"), *PropertyName);
 	}
 	else
 	{
@@ -65,6 +54,29 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 void UMapObject::SaveData() const
 {
 	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, StructType, MapData);
+	// for(auto& Data : MapData)
+	// {
+	// 	FProperty* Property = Data.GetScriptStruct()->FindPropertyByName("ID");
+	// 	if(Property)
+	// 	{
+	// 		bool bResult = false;
+	// 		int32 value = UADStructUtilsFunctionLibrary::GetPropertyValue<int32>(Property, Data.GetMemory(), bResult);
+	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST ID: %d"), value);
+	// 	}
+	// 	
+	// 	FProperty* PropertyName = Data.GetScriptStruct()->FindPropertyByName("Name");
+	// 	if(PropertyName)
+	// 	{
+	// 		bool bResult = false;
+	// 		FString name = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(PropertyName, Data.GetMemory(), bResult);
+	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST Name: %s"), *name);
+	// 		FTestBasic test = UADStructUtilsFunctionLibrary::GetPropertyValue<FTestBasic>(PropertyName, Data.GetMemory(), bResult);
+	// 		if(!bResult)
+	// 		{
+	// 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Property is not of type requested"));
+	// 		}
+	// 	}
+	// }
 }
 
 void UMapObject::LoadDataFromFile()
@@ -110,7 +122,7 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 		{
 			Index++;
 			bool bOutResult = false;
-			const int32 StructId = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(StructType, Data, "ID", bOutResult);
+			const int32 StructId = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
 			if(!bOutResult)
 			{
 				continue;
