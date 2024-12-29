@@ -1,8 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#include "Assets/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
-#include "UtilityModule.h"
 #include "Assets//TextureFromBufferFactory.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,

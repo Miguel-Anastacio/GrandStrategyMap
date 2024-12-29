@@ -107,48 +107,47 @@ public:
     template<class T>
     static void WriteArrayToJsonFile(const FString& jsonFilePath, const TArray<T>& array, bool& outSuccess, FString& outInfoMessage)
     {
-        TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
-        if (!jsonObject)
+        TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+        if (!JsonObject)
         {
             outSuccess = false;
             outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct)"));
             return;
         }
 
-        TArray<TSharedPtr<FJsonValue>> jsonValueArray;
-        for (const auto& value : array)
+        TArray<TSharedPtr<FJsonValue>> JsonValues;
+        for (const auto& Value : array)
         {
-            TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
-            value.SerializeToJson(structObject);
-            jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
+            TSharedPtr<FJsonObject> StructObject = MakeShared<FJsonObject>();
+            Value.SerializeToJson(StructObject);
+            JsonValues.Add(MakeShared<FJsonValueObject>(StructObject));
         }
 
-        WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
+        WriteJson(jsonFilePath, JsonValues, outSuccess, outInfoMessage);
     }
-
-
-
+    
     ///// ONLY FOR TESTING PURPOSES -> TODO: Remove
     UFUNCTION(BlueprintCallable, Category = "Data Loader")
     static  TArray<FTestBasic> LoadTestBasic(const FString& FilePath);
     UFUNCTION(BlueprintCallable, Category = "Data Loader")
     static  TArray<FTestAdvanced> LoadTestAdvanced(const FString& FilePath);
-    
+    ////////////////////////////////////////////////////////////////
+
     template<class T>
     static TArray<T> LoadCustomDataFromJson(const FString& FilePath)
     {
         TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
         TArray<T> OutArray;
         int32 Index = 0;
-        for(const auto& jsonValue : JsonArray)
+        for(const auto& JsonValue : JsonArray)
         {
-            if (jsonValue->Type == EJson::Object)
+            if (JsonValue->Type == EJson::Object)
             {
                 T StructInstance;
-                TSharedPtr<FJsonObject> jsonObject = jsonValue->AsObject();
-                if (FJsonObjectConverter::JsonObjectToUStruct(jsonObject.ToSharedRef(), T::StaticStruct(), &StructInstance, 0, 0, true))
+                TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
+                if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), T::StaticStruct(), &StructInstance, 0, 0, true))
                 {
-                    ObjectHasMissingFiels(jsonObject, Index, FilePath, T::StaticStruct());
+                    ObjectHasMissingFields(JsonObject, Index, FilePath, T::StaticStruct());
                     OutArray.Emplace(StructInstance);
                 }
                 else
@@ -163,135 +162,19 @@ public:
         }
         return OutArray;
     }
-    // ------------------------------------------------------------------
-    // INSTANCE STRUCT HELPER
+
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
     
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
-    static void* CreateStructInstance(const UStruct* type);
-
-    // static const FInstancedStruct* GetSructWithProperty(const FString& PropertyName)
-
-    static FString GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult);
-
-    static FProperty* GetPropertyByName(const UScriptStruct* StructType, const FString& PropertyName);
-
-    template<typename T>
-    static T GetPropertyValueFromStruct(const UScriptStruct* StructType, const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
-    {
-        OutResult = false;
-        const FProperty* Property = GetPropertyByName(StructType, PropertyName);
-        if(Property)
-        {
-            T PropertyValue = GetPropertyValueAsType<T>(Property, InstancedStruct.GetMemory(), OutResult);
-            if(OutResult)
-            {
-                return PropertyValue;
-            }
-        }
-        return T();
-    }
-    
-    template<typename T>
-    static T GetPropertyValueAsType(const FProperty* Property, const void* StructObject, bool& OutResult)
-    {
-        OutResult = true;
-        if (!Property || !StructObject)
-        {
-            OutResult = false;
-        }
-        const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(StructObject);
-
-        if (const FIntProperty* IntProperty = CastField<FIntProperty>(Property))
-        {
-            return static_cast<T>(IntProperty->GetPropertyValue(ValuePtr));
-        }
-        else if (const FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
-        {
-            return static_cast<T>(FloatProperty->GetPropertyValue(ValuePtr)); 
-        }
-        else if (const FBoolProperty* BoolProperty = CastField<FBoolProperty>(Property))
-        {
-            return static_cast<T>(BoolProperty->GetPropertyValue(ValuePtr)); 
-        }
-        else if (const FStrProperty* StrProperty = CastField<FStrProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FString>)
-            {
-                return StrProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if (const FNameProperty* NameProperty = CastField<FNameProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FName>)
-            {
-                return NameProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if (const FTextProperty* TextProperty = CastField<FTextProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, FText>)
-            {
-                return TextProperty->GetPropertyValue(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else if(const FStructProperty* StructProperty = CastField<FStructProperty>(Property))
-        {
-            if constexpr (std::is_same_v<T, void*>)
-            {
-                // For structs, we can return the raw pointer or specialize further
-                return static_cast<T>(ValuePtr);
-            }
-            OutResult = false;
-            return T();
-        }
-        else
-        {
-            OutResult = false;
-            return T();
-        }
-    }
-
-    template<typename T, typename V>
-    static T GetPropertyValue(FProperty* Property, const V* object)
-    {
-        void* ValuePtr = Property->ContainerPtrToValuePtr<void>(object);
-        T Result = TPropertyTypeFundamentals<T>::GetPropertyValue(ValuePtr);
-        return Result;
-    }
 
     // --------------------------------------------------------------------
     // COLOR STUFF -> Move somewhere else
     static FColor ConvertHexStringToRGB(const FString& Color);
 private:
     static auto HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap) -> int32;
-    /**
-     * Writes JSON data to a file.
-     *
-     * @param jsonFilePath The path to the JSON file.
-     * @param jsonObject The JSON object to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
-     */
-    static void WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage);
 
-    /**
-     * Writes JSON data to a file.
-     *
-     * @param jsonFilePath The path to the JSON file.
-     * @param jsonValueArray The array of JSON values to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
-     */
-    static void WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
     /**
      * Writes a string to a file.
      *
@@ -301,12 +184,31 @@ private:
      * @param outInfoMessage Information message about the operation.
      */
     static void WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage);
+    
+    /**
+     * Writes JSON data to a file.
+     *
+     * @param jsonFilePath The path to the JSON file.
+     * @param jsonObject The JSON object to write.
+     * @param outSuccess Whether the operation was successful.
+     * @param outInfoMessage Information message about the operation.
+     */
+    static void WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage);
+    
+    /**
+     * Writes JSON data to a file.
+     *
+     * @param jsonFilePath The path to the JSON file.
+     * @param jsonValueArray The array of JSON values to write.
+     * @param outSuccess Whether the operation was successful.
+     * @param outInfoMessage Information message about the operation.
+     */
+    static void WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
 
     static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
     static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
-
+    static void ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Array);
-    static void ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };
 

@@ -2,8 +2,8 @@
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
 #include "TextureCompiler.h"
-#include "Assets/AssetCreatorFunctionLibrary.h"
-#include "BlueprintLibrary/TextureUtilsBlueprintLibrary.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
@@ -101,7 +101,7 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 void MapEditorMenu::GenerateMap()
 {
 	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
-	const uint8* Data = UTextureUtilsBlueprintLibrary::ReadTextureToBuffer(Texture);
+	const uint8* Data = UTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
 	
 	// temp just to test
 	// TODO - improve this, adjust MapGeneratorLib

@@ -4,7 +4,7 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
-#include "Assets/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"

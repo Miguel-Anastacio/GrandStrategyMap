@@ -1,6 +1,7 @@
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "MapEditor.h"
 #include "Asset/MapObject.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "UserWidgets/GenericStructWidget.h"
 
 void SEditablePropertyWidget::Construct(const FArguments& args)
@@ -92,7 +93,7 @@ bool STreeJsonDisplay::FillDocuments(const UScriptStruct* StructType,
             }
 
             bool bResult = false;
-            FString PropertyValue = UDataManagerFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
+            FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
 
         	UE_LOG(LogInteractiveMapEditor, Display, TEXT("Property Name: %s"), *Property->GetFName().ToString());
             if (bResult)
@@ -167,7 +168,7 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
             }
 
             bool bResult = false;
-            FString PropertyValue = UDataManagerFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
+            FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
             if (bResult)
             {
                 const FName PropertyName = Property->GetFName();

@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "Types/SlateEnums.h"
 #include "GenericStructWidget.generated.h"
@@ -28,7 +29,7 @@ public:
 			FProperty* Property = *It;
 			FName PropertyName = Property->GetFName();
 			bool bResult = false;
-			FString PropertyValue = UDataManagerFunctionLibrary::GetPropertyValueAsString(Property, &structInstance, bResult);
+			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, &structInstance, bResult);
 			if(bResult)
 			{
 				CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);

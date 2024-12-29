@@ -72,7 +72,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 		FInstancedStruct NewInstancedStruct;
 		if (DeserializeJsonToFInstancedStruct(JsonObject, structType, NewInstancedStruct))
 		{
-			ObjectHasMissingFiels(JsonObject, index, FilePath, structType);
+			ObjectHasMissingFields(JsonObject, index, FilePath, structType);
 			OutArray.Add(MoveTemp(NewInstancedStruct));
 		}
 
@@ -125,28 +125,6 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJ
 	return nullptr;
 }
 
-void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructType)
-{
-	if (!StructType)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid StructType"));
-		return nullptr;
-	}
-
-	// Allocate memory for the struct instance
-	void* StructMemory = FMemory::Malloc(StructType->GetStructureSize());
-	if (!StructMemory)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to allocate memory for struct"));
-		return nullptr;
-	}
-
-	// Initialize the struct memory
-	StructType->InitializeStruct(StructMemory);
-
-	return StructMemory;
-}
-
 int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
 {
 	FString temp = hex.Reverse();
@@ -167,72 +145,6 @@ int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& hex, const TMap<T
 	}
 	return total;
 }
-
-FString UDataManagerFunctionLibrary::GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult)
-{
-	OutResult = true;
-	if (!Property || !StructObject)
-	{
-		OutResult = false;
-		return TEXT("Invalid Property or Instance");
-	}
-	const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(StructObject);
-
-	if (FIntProperty* IntProperty = CastField<FIntProperty>(Property))
-	{
-		return FString::FromInt(IntProperty->GetPropertyValue(ValuePtr));
-	}
-	else if (FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
-	{
-		return FString::SanitizeFloat(FloatProperty->GetPropertyValue(ValuePtr));
-	}
-	else if (FBoolProperty* BoolProperty = CastField<FBoolProperty>(Property))
-	{
-		return BoolProperty->GetPropertyValue(ValuePtr) ? TEXT("True") : TEXT("False");
-	}
-	else if (FStrProperty* StrProperty = CastField<FStrProperty>(Property))
-	{
-		return StrProperty->GetPropertyValue(ValuePtr);
-	}
-	else if (FNameProperty* NameProperty = CastField<FNameProperty>(Property))
-	{
-		return NameProperty->GetPropertyValue(ValuePtr).ToString();
-	}
-	else if (FTextProperty* TextProperty = CastField<FTextProperty>(Property))
-	{
-		return TextProperty->GetPropertyValue(ValuePtr).ToString();
-	}
-	else
-	{
-		OutResult = false;
-		return TEXT("Invalid Property or Instance");
-	}
-}
-
-FProperty* UDataManagerFunctionLibrary::GetPropertyByName(const UScriptStruct* StructType, const FString& PropertyName)
-{
-	if(!StructType || PropertyName.IsEmpty())
-	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Get Property by Name Failed"));
-		return nullptr;
-	}
-	for (TFieldIterator<FProperty> It(StructType); It; ++It)
-	{
-		FProperty* Property = *It;
-		if (!Property)
-		{
-			// UE_LOG(LogTemp, Warning, TEXT("Encountered null property in struct '%s'."), *StructType->GetName());
-			continue;
-		}
-
-		if(Property->GetFName() == PropertyName)
-		{
-			return Property;
-		}
-	}
-	return  nullptr;
-}
-
 
 FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
 {
@@ -340,11 +252,11 @@ TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FStrin
 	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
 }
 
-void UDataManagerFunctionLibrary::ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, const UStruct* StructType)
+void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
-		FProperty* Property = *It;
+		const FProperty* Property = *It;
 
 		// Get property name
 		FString PropertyName = Property->GetName();

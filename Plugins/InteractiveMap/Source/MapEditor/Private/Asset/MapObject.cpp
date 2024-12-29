@@ -3,8 +3,9 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "TextureCompiler.h"
-#include "Assets/AssetCreatorFunctionLibrary.h"
-#include "BlueprintLibrary/TextureUtilsBlueprintLibrary.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "FileIO/FilePickerFunctionLibrary.h"
 
@@ -15,7 +16,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	if(LookupTexture)
 	{
 		FTextureCompilingManager::Get().FinishCompilation({LookupTexture});
-		LookupTextureData = UTextureUtilsBlueprintLibrary::ReadTextureToArray(LookupTexture);
+		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %d"), LookupTextureData.Num());
 	}
 
@@ -109,7 +110,7 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 		{
 			Index++;
 			bool bOutResult = false;
-			const int32 StructId = UDataManagerFunctionLibrary::GetPropertyValueFromStruct<int32>(StructType, Data, "ID", bOutResult);
+			const int32 StructId = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(StructType, Data, "ID", bOutResult);
 			if(!bOutResult)
 			{
 				continue;
@@ -132,7 +133,7 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 
 FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
 {
-	return UTextureUtilsBlueprintLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
+	return UTextureUtilsFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
 }
 
 void UMapObject::LoadLookupMap(const FString& FilePath)

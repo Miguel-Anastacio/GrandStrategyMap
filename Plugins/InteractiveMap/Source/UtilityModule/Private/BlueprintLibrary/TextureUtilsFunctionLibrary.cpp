@@ -1,10 +1,10 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
-#include "BlueprintLibrary/TextureUtilsBlueprintLibrary.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 
 #include "TextureCompiler.h"
 #include "UtilityModule.h"
-TArray<uint8> UTextureUtilsBlueprintLibrary::ReadTextureToArray(UTexture2D* Texture)
+TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Texture)
 {
 	// Initialize an empty TArray to hold the texture data
 	TArray<uint8> DataArray;
@@ -28,7 +28,7 @@ TArray<uint8> UTextureUtilsBlueprintLibrary::ReadTextureToArray(UTexture2D* Text
 	return DataArray;
 }
 
-const uint8* UTextureUtilsBlueprintLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
+const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
 {
 	if(ValidateTexture(Texture))
 	{
@@ -47,7 +47,7 @@ const uint8* UTextureUtilsBlueprintLibrary::ReadTextureToBuffer(UTexture2D* Text
 	return  Data;
 }
 
-FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
+FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
 	const TArray<uint8>& DataBuffer)
 {
 	if(Width * Height * 4 != DataBuffer.Num())
@@ -66,7 +66,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(uint32 Width, uint32 Height
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
+FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
 {
 	if(ValidateTexture(Texture))
 	{
@@ -93,7 +93,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(UTexture2D* Texture, const 
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
+FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
 {
 	if(ValidateTexture(Texture))
 	{
@@ -118,7 +118,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(UTexture2D* Texture, const 
 	
 	return GetColorFromIndex(Index, DataBuffer);
 }
-FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
+FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
 	const uint8* DataBuffer)
 {
 	bool bResult = false;
@@ -130,7 +130,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromUV(uint32 Width, uint32 Height
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-FColor UTextureUtilsBlueprintLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
+FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
 {
 	// Data read from texture is in GBRA format
 	return FColor(DataBuffer[Index+1],
@@ -139,7 +139,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromIndex(uint32 Index, const TArr
 		DataBuffer[Index + 3]);
 }
 
-FColor UTextureUtilsBlueprintLibrary::GetColorFromIndex(uint32 Index, const uint8* DataBuffer)
+FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const uint8* DataBuffer)
 {
 	// Data read from texture is in GBRA format
 	return FColor(DataBuffer[Index+1],
@@ -148,7 +148,7 @@ FColor UTextureUtilsBlueprintLibrary::GetColorFromIndex(uint32 Index, const uint
 		DataBuffer[Index + 3]);
 }
 
-int32 UTextureUtilsBlueprintLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height,
+int32 UTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height,
 	bool& bOutResult)
 {
 	const uint32 y = Uv.Y * Height;
@@ -168,7 +168,7 @@ int32 UTextureUtilsBlueprintLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 
 	return Index;
 }
 
-bool UTextureUtilsBlueprintLibrary::ValidateTexture(const UTexture2D* Texture)
+bool UTextureUtilsFunctionLibrary::ValidateTexture(const UTexture2D* Texture)
 {
 	if(!Texture)
 		return false;

@@ -3,10 +3,10 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "TextureUtilsBlueprintLibrary.generated.h"
+#include "TextureUtilsFunctionLibrary.generated.h"
 
 UCLASS()
-class UTILITYMODULE_API UTextureUtilsBlueprintLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UTextureUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
