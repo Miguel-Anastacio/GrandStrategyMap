@@ -1,7 +1,6 @@
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "MapEditor.h"
 #include "Asset/MapObject.h"
-#include "Log/LogFunctionLibrary.h"
 #include "UserWidgets/GenericStructWidget.h"
 
 void SEditablePropertyWidget::Construct(const FArguments& args)

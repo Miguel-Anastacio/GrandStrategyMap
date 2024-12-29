@@ -56,8 +56,6 @@ private:
 
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* buffer, unsigned width, unsigned height);
 	
-	static bool ValidateTexture(UTexture2D* texture);
-	
 	TObjectPtr<UTexture2D> LookupTexture;
 	TObjectPtr<UTexture2D> LookupLandTexture;
 	TObjectPtr<UTexture2D> LookupOceanTexture;

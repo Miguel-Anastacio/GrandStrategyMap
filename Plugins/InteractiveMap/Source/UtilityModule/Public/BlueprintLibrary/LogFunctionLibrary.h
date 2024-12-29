@@ -3,8 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UserWidgets/GenericStructWidget.h"
-// #include "UtilityModule/Public/UtilityModule.h"
 #include "LogFunctionLibrary.generated.h"
 
 UCLASS()

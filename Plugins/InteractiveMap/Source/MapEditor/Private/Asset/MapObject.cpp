@@ -4,6 +4,7 @@
 #include "MapEditor.h"
 #include "TextureCompiler.h"
 #include "Assets/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/TextureUtilsBlueprintLibrary.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "FileIO/FilePickerFunctionLibrary.h"
 
@@ -14,7 +15,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	if(LookupTexture)
 	{
 		FTextureCompilingManager::Get().FinishCompilation({LookupTexture});
-		LookupTextureData = UAssetCreatorFunctionLibrary::ReadTextureToArray(LookupTexture);
+		LookupTextureData = UTextureUtilsBlueprintLibrary::ReadTextureToArray(LookupTexture);
 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %d"), LookupTextureData.Num());
 	}
 
@@ -131,7 +132,7 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 
 FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
 {
-	return UAssetCreatorFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
+	return UTextureUtilsBlueprintLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
 }
 
 void UMapObject::LoadLookupMap(const FString& FilePath)

@@ -106,13 +106,13 @@ void STextureViewer::OnTextureChanged(UTexture2D* texture)
     TextureDisplay->SetMainBrush(texture);
 }
 
-void STextureViewer::SetTextures(TArray<UTexture2D*> textures)
+void STextureViewer::SetTextures(const TArray<UTexture2D*>& Textures)
 {
-    for(int i = 0; i < textures.Num(); i++)
+    for(int i = 0; i < Textures.Num(); i++)
     {
         if(i >= Brushes.Num())
             break;
-        Brushes[i]->SetResourceObject(textures[i]);
+        Brushes[i]->SetResourceObject(Textures[i]);
     }
 }
 

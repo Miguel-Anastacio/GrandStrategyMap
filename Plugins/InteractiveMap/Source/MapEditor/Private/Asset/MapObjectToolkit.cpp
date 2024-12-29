@@ -1,15 +1,11 @@
 #include "Asset/MapObjectToolkit.h"
 #include "Asset/MapObject.h"
 #include "Asset/SMapObjectViewport.h"
-#include "Asset/DataDisplay/MapDataSettingsPreset.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
-#include "FileIO/FilePickerFunctionLibrary.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
-#include "Log/LogFunctionLibrary.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));

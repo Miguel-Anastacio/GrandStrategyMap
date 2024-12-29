@@ -3,6 +3,7 @@
 #include "MapEditor.h"
 #include "TextureCompiler.h"
 #include "Assets/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/TextureUtilsBlueprintLibrary.h"
 #include "Editor/SMapTextureViewer.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
@@ -99,19 +100,14 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 
 void MapEditorMenu::GenerateMap()
 {
-	auto texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
-	if(!ValidateTexture(texture))
-		return;
-	
-	FTextureCompilingManager::Get().FinishCompilation({texture});
-	const uint8* Data = UAssetCreatorFunctionLibrary::ReadTextureToBuffer(texture);
-	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %llu"), sizeof(*Data))
+	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
+	const uint8* Data = UTextureUtilsBlueprintLibrary::ReadTextureToBuffer(Texture);
 	
 	// temp just to test
 	// TODO - improve this, adjust MapGeneratorLib
-	const uint32 Height = texture->GetSizeY();
-	const uint32 Width = texture->GetSizeX();
-	std::vector<uint8_t> vector = std::vector<uint8_t>(&Data[0], &Data[Width * Height * 4]);
+	const uint32 Height = Texture->GetSizeY();
+	const uint32 Width = Texture->GetSizeX();
+	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
 	Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData());
 	LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
 	LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
@@ -121,7 +117,7 @@ void MapEditorMenu::GenerateMap()
 	if(TextureViewer && MapEditorPreset)
 	{
 		TextureViewer->OnTextureChanged(LookupTexture.Get());
-		TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), texture});
+		TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
 	}
 }
 
@@ -202,15 +198,3 @@ TObjectPtr<UTexture2D> MapEditorMenu::CreateTexture(uint8* buffer, unsigned widt
 	return NewTexture;
 }
 
-bool MapEditorMenu::ValidateTexture(UTexture2D* texture)
-{
-	if(texture == nullptr)
-		return false;
-	if(texture->CompressionSettings != TC_EditorIcon)
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *texture->GetName());
-		return false;
-	}
-
-	return true;
-}

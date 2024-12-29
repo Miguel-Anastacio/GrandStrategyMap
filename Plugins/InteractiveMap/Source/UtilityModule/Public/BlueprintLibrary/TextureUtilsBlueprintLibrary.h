@@ -1,0 +1,31 @@
+// Copyright 2024 An@stacioDev All rights reserved.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "TextureUtilsBlueprintLibrary.generated.h"
+
+UCLASS()
+class UTILITYMODULE_API UTextureUtilsBlueprintLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	static const uint8* ReadTextureToBuffer(UTexture2D* Texture);
+	static TArray<uint8> ReadTextureToArray(UTexture2D* Texture);
+
+	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
+	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const uint8* DataBuffer);
+	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
+	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const uint8* DataBuffer);
+
+private:
+	static FColor GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer);
+	static FColor GetColorFromIndex(uint32 Index, const uint8* DataBuffer);
+	
+	static int32 GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height, bool& bOutResult);
+
+	static bool ValidateTexture(const UTexture2D* Texture);
+   
+};
+
