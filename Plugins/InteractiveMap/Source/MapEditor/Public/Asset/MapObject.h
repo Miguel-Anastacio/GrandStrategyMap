@@ -80,7 +80,9 @@ public:
 
 	int GetIndexOfTileSelected(const FColor& Color);
 
-	FColor GetColorFromUv(const FVector2D& uv) const;
+	FColor GetColorFromUv(const FVector2D& Uv) const;
+
+	void LoadLookupMap(const FString& FilePath);
 
 private:
 	UPROPERTY()

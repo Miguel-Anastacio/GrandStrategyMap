@@ -185,8 +185,8 @@ FColor UAssetCreatorFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 		return FColor();
 	}
 
-	return FColor(DataBuffer[index+2],
-		DataBuffer[index + 1],
+	return FColor(DataBuffer[index+1],
+		DataBuffer[index + 2],
 		DataBuffer[index],
 		DataBuffer[index + 3]);
 }
@@ -221,13 +221,13 @@ FColor UAssetCreatorFunctionLibrary::GetColorFromUV(UTexture2D* texture, const F
 	}
 	
 
-	return FColor(DataBuffer[index+2],
-		DataBuffer[index + 1],
+	return FColor(DataBuffer[index+1],
+		DataBuffer[index + 2],
 		DataBuffer[index],
 		DataBuffer[index + 3]);
 }
 
-FColor UAssetCreatorFunctionLibrary::	GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
+FColor UAssetCreatorFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
 {
 	if(!Texture)
 		return FColor();

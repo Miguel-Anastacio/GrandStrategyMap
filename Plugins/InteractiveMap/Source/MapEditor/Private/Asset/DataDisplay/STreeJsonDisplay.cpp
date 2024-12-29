@@ -93,7 +93,7 @@ bool STreeJsonDisplay::FillDocuments(const UScriptStruct* StructType,
             }
 
             bool bResult = false;
-            FString PropertyValue = UGenericStructWidget::GetPropertyValueAsString(Property, StructData, bResult);
+            FString PropertyValue = UDataManagerFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
 
         	UE_LOG(LogInteractiveMapEditor, Display, TEXT("Property Name: %s"), *Property->GetFName().ToString());
             if (bResult)
@@ -168,7 +168,7 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
             }
 
             bool bResult = false;
-            FString PropertyValue = UGenericStructWidget::GetPropertyValueAsString(Property, StructData, bResult);
+            FString PropertyValue = UDataManagerFunctionLibrary::GetPropertyValueAsString(Property, StructData, bResult);
             if (bResult)
             {
                 const FName PropertyName = Property->GetFName();

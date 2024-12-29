@@ -3,24 +3,24 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "TextureCompiler.h"
-#include "VisualizeTexture.h"
 #include "Assets/AssetCreatorFunctionLibrary.h"
 #include "FileIO/DataManagerFunctionLibrary.h"
 #include "FileIO/FilePickerFunctionLibrary.h"
-#include "Log/LogFunctionLibrary.h"
 
 #if WITH_EDITOR
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	
 	if(LookupTexture)
 	{
 		FTextureCompilingManager::Get().FinishCompilation({LookupTexture});
-		auto rawBuffer = UAssetCreatorFunctionLibrary::ReadTextureToBuffer(LookupTexture);
 		LookupTextureData = UAssetCreatorFunctionLibrary::ReadTextureToArray(LookupTexture);
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %llu"), sizeof(*rawBuffer))
+		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %d"), LookupTextureData.Num());
 	}
+
+	LoadLookupMap(LookupFilePath);
+	
+
 	OnObjectChanged.Broadcast();
 }
 
@@ -79,26 +79,8 @@ void UMapObject::LoadDataFromFile()
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Data Type not selected"));
 		return;
 	}
-	
 	MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilesNames[0], StructType);
 	FilePathMapData = FilesNames[0];
-
-	// Load lookup
-	auto Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(LookupFilePath);
-	for(const auto& Entry : Lookup)
-	{
-		if(FCString::Atoi(*Entry.Name) == 24)
-		{
-			int a = 0;
-		}
-			LookupTable.Add(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
-	}
-	for(const auto& Entry : LookupTable)
-	{
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
-	}
-	
-	// ULogFunctionLibrary::LogArrayInstancedStructs(MapData, "Log Map Data Structs", StructType);
 }
 
 void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
@@ -117,20 +99,17 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 {
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("FColor: %s"), *Color.ToString());
-	// for(const auto& Entry : LookupTable)
-	// {
-	// 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
-	// }
-	if(const int* ID = LookupTable.Find(Color))
+	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Lookup Table size: %d"), LookupTable.Num());
+	if(const int32* ID = LookupTable.Find(Color))
 	{
 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("ID: %d"), *ID);
-		int Index = -1;
+		int32 Index = -1;
 		for(const auto& Data : MapData)
 		{
-			bool OutResult = false;
-			const int StructId = UDataManagerFunctionLibrary::GetPropertyValueFromStruct<int>(StructType, Data, "ID", OutResult);
 			Index++;
-			if(!OutResult)
+			bool bOutResult = false;
+			const int32 StructId = UDataManagerFunctionLibrary::GetPropertyValueFromStruct<int32>(StructType, Data, "ID", bOutResult);
+			if(!bOutResult)
 			{
 				continue;
 			}
@@ -143,16 +122,30 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 	else
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color not in LookupTable"));
+		return -1;
 	}
 	
 	UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color in LookupTable but ID not in Map Data"));
 	return -1;
 }
 
-FColor UMapObject::GetColorFromUv(const FVector2D& uv) const 
+FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
 {
-	FTextureCompilingManager::Get().FinishCompilation({LookupTexture});
-	const uint8* rawBuffer = UAssetCreatorFunctionLibrary::ReadTextureToBuffer(LookupTexture);
-	return UAssetCreatorFunctionLibrary::GetColorFromUV(LookupTexture, uv, rawBuffer);
+	return UAssetCreatorFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
+}
+
+void UMapObject::LoadLookupMap(const FString& FilePath)
+{
+	const TArray<FLookupEntry> Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(LookupFilePath);
+	LookupTable.Empty();
+	for(const auto& Entry : Lookup)
+	{
+		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+	}
+	for(const auto& Entry : LookupTable)
+	{
+		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
+	}
+
 }
 #endif
