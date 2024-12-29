@@ -4,6 +4,7 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
+#include "Assets/AssetCreatorFunctionLibrary.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,68 +20,24 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 {
 	if (Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released)
 	{
-		//// TEST
-		FIntPoint MousePos;
-		Viewport->GetMousePos(MousePos, false);
-		GetHitLocationInEditor(this, HitX, HitY);
-		
-		if (!HitProxy)
-			return;
-		
-		if (!HitProxy->IsA(HActor::StaticGetType()))
-		{
-			return;
-		}
-		
-		HActor* ActorHitProxy = static_cast<HActor*>(HitProxy);
-		if (!ActorHitProxy)
-		{
-			return;
-		}
-		if(!ActorHitProxy->Actor)
-			return;
-		
-		AMapAsset* MapHit = Cast<AMapAsset>(ActorHitProxy->Actor);
-		if(!MapHit)
-			return;
-		
-		// FHitResult Hit;
-		// Hit.Component = MapHit->MapMesh;
-		// FVector2D uvs;
-		// // UGameplayStatics::FindCollisionUV(Hit, 0, uvs);
-		
-		// const FLinearColor Color = FPlatformApplicationMisc::GetScreenPixelColor(FVector2D(MousePos));
-		// UTextureRenderTarget2D* test = NewObject<UTextureRenderTarget2D>(MapHit);
-		// UKismetRenderingLibrary::pix
-		
-		// const int Index = MapHit->MapObject->GetIndexOfTileSelected(Color.ToFColor(true));
-		
-		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color on screen: %s"), *Color.ToString());
-		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("Index: %d"), Index);
-		
-		
+		GetHitLocationInEditor(HitX, HitY);
 	}
-	else
-	{
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("No hit proxy detected at the clicked location."));
-	}
-
+	
 	// Optionally, pass unhandled clicks to the base class
 	FEditorViewportClient::ProcessClick(View, HitProxy, Key, Event, HitX, HitY);
 }
 
-void FMapObjectViewportClient::GetHitLocationInEditor(FEditorViewportClient* ViewportClient, int32 ScreenX, int32 ScreenY)
+void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 ScreenY)
 {
-	if (Viewport && ViewportClient)
+	if (Viewport)
 	{
 		// Create a scene view to perform the deprojection
 		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
 			Viewport,
-			ViewportClient->GetWorld()->Scene,
-			ViewportClient->EngineShowFlags));
+			this->GetWorld()->Scene,
+			this->EngineShowFlags));
          
-		FSceneView* SceneView = ViewportClient->CalcSceneView(&ViewFamily);
-
+		FSceneView* SceneView = this->CalcSceneView(&ViewFamily);
 		if (SceneView)
 		{
 			// Deproject screen coordinates into world space
@@ -96,38 +53,18 @@ void FMapObjectViewportClient::GetHitLocationInEditor(FEditorViewportClient* Vie
 			CollisionParams.bTraceComplex = true; // Enable complex collision
 			CollisionParams.bReturnFaceIndex = true;
 
-			if (ViewportClient->GetWorld()->LineTraceSingleByChannel(HitResult, WorldOrigin, TraceEnd, ECC_Visibility, CollisionParams))
+			if (this->GetWorld()->LineTraceSingleByChannel(HitResult, WorldOrigin, TraceEnd, ECC_Visibility, CollisionParams))
 			{
-				// Output the hit location
-				FVector HitLocation = HitResult.Location;
-				UE_LOG(LogTemp, Log, TEXT("Hit World Location: %s"), *HitLocation.ToString());
-				FVector2d uvs;
-				UGameplayStatics::FindCollisionUV(HitResult, 0, uvs);
+				FVector2D Uvs;
+				UGameplayStatics::FindCollisionUV(HitResult, 0, Uvs);
 				AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
 				if(!MapAsset)
 					return;
+				FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
 				
-				FColor Color = MapAsset->MapObject->GetColorFromUv(uvs);
 				const int Index = MapAsset->MapObject->GetIndexOfTileSelected(Color);
-		
-				// UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color on screen: %s"), *Color.ToString());
-				UE_LOG(LogInteractiveMapEditor, Log, TEXT("Index: %d"), Index);
-				UE_LOG(LogInteractiveMapEditor, Log, TEXT("UVs: %f, %f"), uvs.X, uvs.Y);
-				
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("No hit detected at screen position (%d, %d)."), ScreenX, ScreenY);
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to calculate SceneView."));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid Viewport or ViewportClient."));
 	}
 }
 
@@ -147,10 +84,6 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	}
 
 	AMapAsset* PreviewMapAsset = GetWorld()->SpawnActor<AMapAsset>();
-	// GetWorld()->
-
-	int result = GetWorld()->GetNumControllers();
-	UE_LOG(LogInteractiveMapEditor, Display, TEXT("%d"), result);
 	PreviewMapAsset->MapObject = CustomObject.Get();
 	PreviewMapAsset->RerunConstructionScripts();
 }
