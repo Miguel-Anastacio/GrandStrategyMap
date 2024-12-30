@@ -13,18 +13,28 @@
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
+	// PropertyChangedEvent.Property
+	// TODO - CHECK WHICH PROPERTY CHANGED
 	if(LookupTexture)
 	{
-		FTextureCompilingManager::Get().FinishCompilation({LookupTexture});
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Size of buffer: %d"), LookupTextureData.Num());
 	}
-
-	LoadLookupMap(LookupFilePath);
 	
-
+	if(StructType)
+	{
+		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(StructType, FName("ID")))
+		{
+			// THROW ERROR AT USER  FACE
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct has no property with type ID"));
+			StructType = nullptr;
+			this->PostEditChange();
+		}
+	}
+	
+	LoadLookupMap(LookupFilePath);
 	OnObjectChanged.Broadcast();
 }
+
 
 void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
 {
@@ -93,8 +103,8 @@ void UMapObject::LoadDataFromFile()
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Data Type not selected"));
 		return;
 	}
-	MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilesNames[0], StructType);
-	FilePathMapData = FilesNames[0];
+	
+	SetMapDataFilePath(FilesNames[0]);
 }
 
 void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
@@ -107,6 +117,15 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 			return;
 		}
 		MapData = NewData;
+	}
+}
+
+void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
+{
+	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
+	if(LoadFromFile)
+	{
+		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, StructType);
 	}
 }
 

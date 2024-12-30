@@ -2,6 +2,7 @@
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
 #include "Asset/MapObject.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
@@ -130,19 +131,16 @@ void RMapEditorMenu::GenerateMap()
 
 void RMapEditorMenu::SaveMap() const
 {
-	
 	FString DirPath = FPaths::ProjectContentDir();
 	UFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Dir Selected: %s"), *DirPath);
 				
+	FPaths::NormalizeDirectoryName(DirPath);
 	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
 		return;
 	}
 	
-	// Cleanup Project ContentsDir
 	const FString ProjectContentsDir = FPaths::CreateStandardFilename(FPaths::ProjectContentDir());
 
 	const FString CompleteDirPath =  FPaths::CreateStandardFilename(DirPath);
@@ -151,13 +149,7 @@ void RMapEditorMenu::SaveMap() const
 	{
 		return;
 	}
-
-	
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Dir Selected Normalize remove content: %s"), *(DirPath));
-
-	
 	const FString PackagePath = "/Game/" + DirPath + "/";
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("PackagePath: %s"), *(PackagePath));
 	UTexture2D* TextureAsset = CreateLookupTextureAsset(PackagePath);
 	if(!TextureAsset)
 	{
@@ -173,10 +165,12 @@ void RMapEditorMenu::SaveMap() const
 	}
 
 	const FString LookupFilePath = CompleteDirPath + "/lookup.json";
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("LookupFilePath: %s"), *(LookupFilePath));
 	OutputLookupJson(LookupFilePath);
 	
-	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, Material);
+	const FString StubMapDataFilePath = CompleteDirPath + "/MapDataStub.json";
+	OutputStubMapDataJson(StubMapDataFilePath);
+	
+	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
 	
 	FString Message;
 	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
@@ -187,11 +181,19 @@ TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::T
 	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
 	const int Width = TileMap.Width();
 	const int Height = TileMap.Height();
-	return CreateTexture(buffer, Width, Height);
+	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
+	// if(buffer)
+	// {
+	// 	delete buffer;
+	// 	buffer = nullptr;
+	// }
+	return Texture;
 }
 
 TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
 {
+
+    // TODO - CORRECT THIS FUNCTION 
 	//Create a string containing the texture's path
 	FString PackageName = TEXT("/Game/ProceduralTextures/");
 	FString BaseTextureName = FString("LookupTexture");
@@ -220,7 +222,7 @@ TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* Buffer, unsigned Wid
 	// Update the texture to reflect changes
 	NewTexture->PostEditChange();
 
-	// TODO - CHANGE THIS 
+	// TODO - CHANGE THIS This function should not manage the buffer memory
 	//Since we don't need access to the pixel data anymore free the memory
 	delete[] Buffer;
 	Buffer = nullptr;
@@ -232,6 +234,7 @@ void RMapEditorMenu::OutputLookupJson(const FString& FilePath) const
 {
 	int32 Id = 0;
 	TArray<FTileIdData> OutputData;
+	OutputData.Reserve(Map.GetLookupTileMap().GetCellMap().size());
 	for (const auto& Cell : Map.GetLookupTileMap().GetCellMap())
 	{
 		OutputData.Emplace(FTileIdData(Cell.second.ConvertToHex().c_str(), Id));
@@ -268,12 +271,13 @@ UTexture2D* RMapEditorMenu::CreateLookupTextureAsset(const FString& PackagePath)
 	return Texture;
 }
 
-UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& Dir, UTexture2D* Texture, const FString& LookupFilePath, UMaterialInstanceConstant* Material) const
+UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
+													UMaterialInstanceConstant* Material) const
 {
-	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(Dir, "MapObject", UMapObject::StaticClass());
+	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MapObject", UMapObject::StaticClass());
 	FString Message;
 	bool bResult = false;
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(Dir + AssetPath, UMapObject::StaticClass(), nullptr, bResult, Message);
+	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMapObject::StaticClass(), nullptr, bResult, Message);
 	if(!Asset)
 	{
 		return nullptr;
@@ -285,6 +289,13 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& Dir, UTexture2D*
 	{
 		MapObject->MaterialOverride = Material;
 	}
+
+	if(MapEditorPreset && MapEditorPreset->TileDataStructType)
+	{
+		MapObject->StructType = MapEditorPreset->TileDataStructType;
+		MapObject->SetMapDataFilePath(MapDataFilePath);
+	}
+	
 	MapObject->PostEditChange();
 
 	return MapObject;
@@ -292,7 +303,6 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& Dir, UTexture2D*
 
 UMaterialInstanceConstant* RMapEditorMenu::CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const
 {
-	// Find material parent
 	if(MapEditorPreset && MapEditorPreset->Material)
 	{
 		const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MI_LookupMaterial", UMaterialInstance::StaticClass());
@@ -307,9 +317,31 @@ UMaterialInstanceConstant* RMapEditorMenu::CreateMaterialInstanceAsset(UTexture2
 		UMaterialInstanceConstant* MaterialInstance= Cast<UMaterialInstanceConstant>(Asset);
 		MaterialInstance->SetParentEditorOnly(MapEditorPreset->Material);
 		MaterialInstance->SetTextureParameterValueEditorOnly(FName("DynamicTexture"), Texture);
+		MaterialInstance->SetTextureParameterValueEditorOnly(FName("LookupTexture"), Texture);
 		MaterialInstance->PostEditChange();
 		return MaterialInstance;
 	}
 
 	return nullptr;
+}
+
+void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
+{
+	TArray<FInstancedStruct> Output;
+	const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
+	Output.Reserve(Size);
+	for (uint32 i = 0; i < Size; i++)
+	{
+		FInstancedStruct Struct (MapEditorPreset->TileDataStructType);
+		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", i))
+		{
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
+					*MapEditorPreset->TileDataStructType->GetName());
+			return;
+		}
+		
+		Output.Emplace(Struct);
+	}
+
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, MapEditorPreset->TileDataStructType, Output);
 }

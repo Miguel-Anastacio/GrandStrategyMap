@@ -6,14 +6,20 @@
 #include "InstancedStruct.h"
 #include "ADStructUtilsFunctionLibrary.generated.h"
 
-template<typename T>
+template<typename T, typename Enable = void>
 struct TPropertyTraits
 {
     using Type = void; // Default to void for unsupported types
 };
 
+template<typename  T>
+struct TPropertyTraits<T, std::enable_if_t<std::is_integral_v<T>>>
+{
+    using Type = FIntProperty;
+};
+
 template<>
-struct TPropertyTraits<int32>
+struct TPropertyTraits<uint32>
 {
     using Type = FIntProperty;
 };
@@ -71,6 +77,17 @@ public:
         }
         return T();
     }
+
+    template<typename T>
+    static bool StructHasPropertyWithTypeCompatible(const UScriptStruct* StructType, FName MustHavePropertyName)
+    {
+        if(const FProperty* Property = StructType->FindPropertyByName(MustHavePropertyName))
+        {
+            return IsTypeCompatible<T>(Property);
+        }
+        return false;
+    }
+
     
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)

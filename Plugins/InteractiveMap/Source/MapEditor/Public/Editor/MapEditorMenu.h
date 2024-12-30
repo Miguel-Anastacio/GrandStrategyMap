@@ -57,11 +57,14 @@ private:
 	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
-
+	
 	void OutputLookupJson(const FString& FilePath) const;
 	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
-	UMapObject* CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath, UMaterialInstanceConstant* Material) const;
+	UMapObject* CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath,const FString& MapDataFilePath,
+		UMaterialInstanceConstant* Material) const;
 	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
+	void OutputStubMapDataJson(const FString& FilePath) const;
+
 	
 	TObjectPtr<UTexture2D> LookupTexture;
 	TObjectPtr<UTexture2D> LookupLandTexture;

@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Editor/MapEditorPreset.h"
 
+#include "MapEditor.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+
 #if WITH_EDITOR
 UMapEditorPreset::UMapEditorPreset()
 {
@@ -15,6 +18,16 @@ void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
 	// OnObjectChanged.Broadcast();
+	if(TileDataStructType)
+	{
+		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(TileDataStructType, FName("ID")))
+		{
+			// THROW ERROR AT USER  FACE
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must have property with type ID"));
+			TileDataStructType = nullptr;
+			this->PostEditChange();
+		}
+	}
 }
 
 #endif}

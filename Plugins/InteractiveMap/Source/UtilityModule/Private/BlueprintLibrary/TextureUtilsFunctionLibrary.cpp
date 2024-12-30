@@ -69,7 +69,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
 {
-	if(IsTextureValid(Texture))
+	if(!IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Get Color From UV not Valid Texture"));
 		return FColor();
@@ -96,7 +96,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const F
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
 {
-	if(IsTextureValid(Texture))
+	if(!IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Get Color From UV not Valid Texture"));
 		return FColor();
@@ -123,7 +123,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 	const uint8* DataBuffer)
 {
 	bool bResult = false;
-	int32 Index = GetIndexFromUV(Uv, Width, Height, bResult);
+	const int32 Index = GetIndexFromUV(Uv, Width, Height, bResult);
 	if(!bResult)
 	{
 		return FColor();
@@ -166,6 +166,7 @@ int32 UTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 W
 		return -1;
 	}
 
+	bOutResult = true;
 	return Index;
 }
 

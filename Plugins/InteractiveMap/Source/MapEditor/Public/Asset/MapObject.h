@@ -24,6 +24,28 @@ struct FLookupEntry
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FExampleStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 ID = -1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Name = "ProvinceName";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 Population = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Owner = "ProvinceOwner";
+	
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Owner);
+	}
+};
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
@@ -43,14 +65,14 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
 	UTexture2D* LookupTexture;
-	UPROPERTY(EditAnywhere, Category = "Lookup")
-	UStaticMesh* Mesh;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
 	UMaterialInterface* MaterialOverride;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	FString LookupFilePath = "D:\\Dev\\Unreal\\GrandStrategyMap\\Content\\MapEditor\\Maps\\lookup.json";
+	// TODO - MAYBE REMOVE THIS
+	UPROPERTY()
+	UStaticMesh* Mesh;
 public:
+	
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
 	void SaveData() const;
@@ -68,8 +90,9 @@ public:
 	}
 	void SetLookupFilePath(const FString& FilePath)
 	{
-		this->LookupFilePath = FilePath;
+		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
 	}
+	void SetMapDataFilePath(const FString& FilePath, bool LoadFromFile = true);
 	
 	FString GetFilePath() const
 	{
@@ -94,6 +117,9 @@ private:
 
 	UPROPERTY()
 	TMap<FColor, int> LookupTable;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Lookup")
+	FString LookupFilePath;
 
 	UPROPERTY()
 	TArray<uint8> LookupTextureData;

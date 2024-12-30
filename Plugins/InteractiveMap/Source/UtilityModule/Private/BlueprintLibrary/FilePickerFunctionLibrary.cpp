@@ -65,8 +65,6 @@ void UFilePickerFunctionLibrary::OpenDirectoryDialog(const FString& DialogTitle,
 				DefaultPath,
 				OutFolderName
 			);
-
-			
 		}
 	}
 }
