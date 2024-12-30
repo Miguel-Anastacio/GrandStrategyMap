@@ -156,10 +156,11 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 	{
 		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
 	}
-	for(const auto& Entry : LookupTable)
-	{
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
-	}
+	
+	// for(const auto& Entry : LookupTable)
+	// {
+	// 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Color:%s, ID: %d"), *Entry.Key.ToString(), Entry.Value)
+	// }
 
 }
 #endif
