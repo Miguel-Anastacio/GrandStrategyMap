@@ -1,4 +1,4 @@
-#include "Assets/TextureFromBufferFactory.h"
+#include "Factories/TextureFromBufferFactory.h"
 UTexture2DFromBufferFactory::UTexture2DFromBufferFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -39,6 +39,7 @@ UObject* UTexture2DFromBufferFactory::FactoryCreateNew( UClass* InClass, UObject
 				FMemory::Memcpy(MipLock.Image.RawData, Buffer, BufferSize);
 			}
 		}
+		
 		Object->PostEditChange();
 	}
 	return Object;

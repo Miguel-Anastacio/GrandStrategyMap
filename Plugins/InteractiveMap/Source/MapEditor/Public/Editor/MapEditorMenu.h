@@ -11,6 +11,8 @@
 #include "MapEditor/MapGenerator/source/map/Map.h"
 #include "MapEditorMenu.generated.h"
 
+class UMapObject;
+
 USTRUCT(NotBlueprintType)
 struct FTileIdData 
 {
@@ -33,12 +35,12 @@ struct FTileIdData
 
 class STextureViewer;
 class FAdvancedPreviewScene;
-class UTexture2D;  
-class MAPEDITOR_API MapEditorMenu  
+class UTexture2D;
+class MAPEDITOR_API RMapEditorMenu
 {
 public:
-	MapEditorMenu();
-	~MapEditorMenu();
+	RMapEditorMenu();
+	 ~RMapEditorMenu();
 
 	void RegisterTabs();
 	TSharedRef<SDockTab> SpawnDetailsTab(const FSpawnTabArgs& Args);
@@ -48,17 +50,21 @@ public:
 	void GenerateMap();
 	void SaveMap() const;
 private:
-	UMapEditorPreset* MapEditorPreset;
+	UMapEditorPreset* MapEditorPreset = nullptr;
 	TSharedPtr<STextureViewer> TextureViewer;
 	MapGenerator::Map Map;
 
 	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
-	static TObjectPtr<UTexture2D> CreateTexture(uint8* buffer, unsigned width, unsigned height);
+	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 	
-	static const uint8* ReadTextureToBuffer(UTexture2D* texture);
+	void OutputLookupJson(const FString& FilePath) const;
+	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
+	UMapObject* CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath,const FString& MapDataFilePath,
+		UMaterialInstanceConstant* Material) const;
+	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
+	void OutputStubMapDataJson(const FString& FilePath) const;
 
-	static bool ValidateTexture(UTexture2D* texture);
 	
 	TObjectPtr<UTexture2D> LookupTexture;
 	TObjectPtr<UTexture2D> LookupLandTexture;

@@ -8,6 +8,45 @@
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "MapObject.generated.h"
 
+USTRUCT(BlueprintType)
+struct FLookupEntry
+{
+	GENERATED_BODY()
+    
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Color;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Name;
+
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("ColorInHex: %s, Name: %s"), *Color, *Name);
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FExampleStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 ID = -1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Name = "ProvinceName";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 Population = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Owner = "ProvinceOwner";
+	
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Owner);
+	}
+};
+
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
 UCLASS()
@@ -22,27 +61,42 @@ class MAPEDITOR_API UMapObject : public UObject
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* StructType;
-	
 	FOnAssetChanged OnObjectChanged;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	UTexture2D* LookupTexture;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	UMaterialInterface* MaterialOverride;
+
+	// TODO - MAYBE REMOVE THIS
+	UPROPERTY()
+	UStaticMesh* Mesh;
 public:
+	
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
 	void SaveData() const;
 	void LoadDataFromFile();
+	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	
-	void SetMapData(const TArray<FInstancedStruct>& NewData); 
 	TArray<FInstancedStruct>& GetMapData()
 	{
 		return MapData;
 	}
+	
 	void SetFilePath(const FString& filePath)
 	{
-		this->FilePath = filePath;
+		this->FilePathMapData = filePath;
 	}
+	void SetLookupFilePath(const FString& FilePath)
+	{
+		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
+	}
+	void SetMapDataFilePath(const FString& FilePath, bool LoadFromFile = true);
+	
 	FString GetFilePath() const
 	{
-		return this->FilePath;
+		return this->FilePathMapData;
 	}
 
 	void ClearMapData()
@@ -51,9 +105,25 @@ public:
 		StructType = nullptr;
 	}
 
+	int GetIndexOfTileSelected(const FColor& Color);
+
+	FColor GetColorFromUv(const FVector2D& Uv) const;
+
+	void LoadLookupMap(const FString& FilePath);
+
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TArray<FInstancedStruct> MapData;
-	UPROPERTY(VisibleAnywhere)
-	FString FilePath;
+
+	UPROPERTY()
+	TMap<FColor, int> LookupTable;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Lookup")
+	FString LookupFilePath;
+
+	UPROPERTY()
+	TArray<uint8> LookupTextureData;
+	
+	UPROPERTY(VisibleAnywhere, Category="Data")
+	FString FilePathMapData;
 };

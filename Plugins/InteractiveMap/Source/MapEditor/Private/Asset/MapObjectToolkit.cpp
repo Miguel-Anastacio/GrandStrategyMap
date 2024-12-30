@@ -1,15 +1,11 @@
 #include "Asset/MapObjectToolkit.h"
 #include "Asset/MapObject.h"
 #include "Asset/SMapObjectViewport.h"
-#include "Asset/DataDisplay/MapDataSettingsPreset.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
-#include "FileIO/FilePickerFunctionLibrary.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
-#include "FileIO/DataManagerFunctionLibrary.h"
-#include "Log/LogFunctionLibrary.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
@@ -27,23 +23,27 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 		->SetOrientation(Orient_Horizontal)
 		->Split
 		(
-			FTabManager::NewSplitter()
-			->SetOrientation(Orient_Vertical)
-			->SetSizeCoefficient(.65f)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(.5f)
-				->AddTab(MapViewportTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
-			)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(.5f)
-				->AddTab(MapStatsTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
-			)
+			FTabManager::NewStack()
+			->SetSizeCoefficient(.5f)
+			->AddTab(MapViewportTab, ETabState::OpenedTab)
+			->SetHideTabWell(true)
+			// FTabManager::NewSplitter()
+			// ->SetOrientation(Orient_Vertical)
+			// ->SetSizeCoefficient(.65f)
+			// ->Split
+			// (
+			// 	FTabManager::NewStack()
+			// 	->SetSizeCoefficient(.5f)
+			// 	->AddTab(MapViewportTab, ETabState::OpenedTab)
+			// 	->SetHideTabWell(true)
+			// )
+			// ->Split
+			// (
+			// 	FTabManager::NewStack()
+			// 	->SetSizeCoefficient(.5f)
+			// 	->AddTab(MapStatsTab, ETabState::OpenedTab)
+			// 	->SetHideTabWell(true)
+			// )
 		)
 		->Split
 		(
@@ -53,14 +53,14 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 			->Split
 			(
 				FTabManager::NewStack()
-				->SetSizeCoefficient(.6f)
+				->SetSizeCoefficient(0.35f)
 				->AddTab(DataSourceTab, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 			)
 			->Split
 			(
 				FTabManager::NewStack()
-				->SetSizeCoefficient(.4f)
+				->SetSizeCoefficient(.65f)
 				->AddTab(DataListTab, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 			)
@@ -126,10 +126,18 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				DetailsView
 			]
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("Load Data file"))
@@ -140,6 +148,10 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 				})
 			]
 			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.VAlign(VAlign_Top)
+			.HAlign(HAlign_Left)
+			.Padding(5)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("Save to file"))
@@ -160,7 +172,6 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		.TabRole(PanelTab)
 		[
 			SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
-			.StructType(FTestAdvanced::StaticStruct())
 			.MapObject(this->CustomObject.Get())
 		];
 	}))

@@ -47,19 +47,19 @@ public:
 		if(OwnerDocument)
 		{
 			if(OwnerDocument->MapObject)
+			{
 				OwnerDocument->MapObject->UpdateTileProperty(OwnerDocument->DocumentIndex, Property, Value);
+			}
 			else
+			{
 				UE_LOG(LogTemp, Error, TEXT("Owner Map Object is null: Document - %s"), *DisplayName.ToString());
+			}
 				
 		}
 		
 		if(!OwnerDocument)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Owner Document is null: Document - %s"), *DisplayName.ToString());
-		}
-		else if(!MapObject)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Map Object is null: Document - %s"), *DisplayName.ToString());
 		}
 	}
 
@@ -102,7 +102,6 @@ class STreeJsonDisplay : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS(STreeJsonDisplay)
     {}
-    	SLATE_ARGUMENT(const UScriptStruct*, StructType)        // The type of the struct
 		SLATE_ARGUMENT(UMapObject*, MapObject)      
     SLATE_END_ARGS()
 

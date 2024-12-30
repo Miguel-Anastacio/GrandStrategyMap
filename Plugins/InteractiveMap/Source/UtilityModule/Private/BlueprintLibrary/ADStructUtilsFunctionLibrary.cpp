@@ -1,23 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
+#pragma once
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "UtilityModule.h"
 
-#include "UserWidgets/CustomStructWidget.h"
-
-#include "Blueprint/WidgetTree.h"
-#include "Components/VerticalBox.h"
-#include "Field/FieldSystemNoiseAlgo.h"
-#include "UserWidgets/CustomEditableText.h"
-
-void UGenericStructWidget::NativeOnInitialized()
-{
-	Super::NativeOnInitialized();
-}
-
-void UGenericStructWidget::NativePreConstruct()
-{
-	Super::NativePreConstruct();
-}
-
-FString UGenericStructWidget::GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult)
+FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult)
 {
 	OutResult = true;
 	if (!Property || !StructObject)
@@ -25,7 +11,6 @@ FString UGenericStructWidget::GetPropertyValueAsString(FProperty* Property, cons
 		OutResult = false;
 		return TEXT("Invalid Property or Instance");
 	}
-
 	const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(StructObject);
 
 	if (FIntProperty* IntProperty = CastField<FIntProperty>(Property))
@@ -57,21 +42,4 @@ FString UGenericStructWidget::GetPropertyValueAsString(FProperty* Property, cons
 		OutResult = false;
 		return TEXT("Invalid Property or Instance");
 	}
-}
-
-void UGenericStructWidget::CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue,UClass* classPtr)
-{
-	UCustomEditableText* newWidget = WidgetTree->ConstructWidget<UCustomEditableText>(classPtr);
-	if(newWidget)
-	{
-		newWidget->SetValues(FText::FromString(FieldValue), FText::FromString(FieldValue));
-		newWidget->SetIDText(FText::FromName(FieldName));
-		StructHolder->AddChildToVerticalBox(newWidget);
-		Fields.Add(newWidget);
-	}
-}
-
-void UGenericStructWidget::CreateFieldWidget(const FName& FieldName, const FString& FieldValue)
-{
-	
 }

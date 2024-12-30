@@ -20,6 +20,29 @@ struct FMapDetails
 };
 
 USTRUCT(BlueprintType)
+struct FNoiseDetails
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int Seed = 12002943;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	int Octaves = 4;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Frequency = 0.05f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Scale = 1.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float Lacunarity = 2.0f;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	float LineThickness = 1.0f;
+};
+
+USTRUCT(BlueprintType)
 struct FModuleDefinition
 {
 	GENERATED_BODY()
@@ -35,24 +58,10 @@ struct FModuleDefinition
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Ocean Settings")
 	FMapDetails OceanDetails;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	int Seed = 12002943;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	int Octaves = 4;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	float Frequency = 0.05f;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	float Scale = 1.0f;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	float Lacunarity = 2.0f;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Settings")
-	float LineThickness = 1.0f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Noise Settings")
+	FNoiseDetails NoiseDetails;
+	
 };
 
 UCLASS()
@@ -65,16 +74,23 @@ class MAPEDITOR_API UMapEditorPreset : public UObject
 #endif
 
 public:
-
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FModuleDefinition MapEditorDetails;
 	
 	FOnAssetChanged OnObjectChanged;
+	UPROPERTY()
+	UMaterial* Material =nullptr;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* TileDataStructType;
+
+	UMapEditorPreset();
+	
 	MapGenerator::NoiseData GetNoiseData() const
 	{
-		return MapGenerator::NoiseData(MapEditorDetails.Seed, MapEditorDetails.Octaves, MapEditorDetails.Frequency, MapEditorDetails.Scale,
-										MapEditorDetails.Lacunarity, 0.2);
+		return MapGenerator::NoiseData(MapEditorDetails.NoiseDetails.Seed, MapEditorDetails.NoiseDetails.Octaves, MapEditorDetails.NoiseDetails.Frequency,
+										MapEditorDetails.NoiseDetails.Scale, MapEditorDetails.NoiseDetails.Lacunarity, 0.2);
 	};
 	MapGenerator::LookupFeatures LandSettings() const
 	{
@@ -92,8 +108,6 @@ public:
 		const uint32 width = MapEditorDetails.HeightMapTexture->GetSizeX();
 		const uint32 height = MapEditorDetails.HeightMapTexture->GetSizeY();
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
-											width, height, MapEditorDetails.LineThickness, MapEditorDetails.CutoffHeight);
+											width, height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
 	}
-	
-
 };

@@ -131,11 +131,11 @@ void AClickableMap::SaveMapTextureData()
 	{
 		for (int32 X = 0; X < Width; ++X)
 		{
-			int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
-			uint8 B = Data[Index];
-			uint8 G = Data[Index + 1];
-			uint8 R = Data[Index + 2];
-			uint8 A = Data[Index + 3];
+			const int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
+			const uint8 B = Data[Index];
+			const uint8 G = Data[Index + 1];
+			const uint8 R = Data[Index + 2];
+			const uint8 A = Data[Index + 3];
 
 			SetPixelColorInt(Index, MapColorCodeTextureData, FColor(R, G, B, A));
 
