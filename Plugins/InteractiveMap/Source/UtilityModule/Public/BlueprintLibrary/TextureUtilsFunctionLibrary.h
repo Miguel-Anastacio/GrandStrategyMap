@@ -25,7 +25,7 @@ private:
 	
 	static int32 GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height, bool& bOutResult);
 
-	static bool ValidateTexture(const UTexture2D* Texture);
+	static bool IsTextureValid(const UTexture2D* Texture);
    
 };
 

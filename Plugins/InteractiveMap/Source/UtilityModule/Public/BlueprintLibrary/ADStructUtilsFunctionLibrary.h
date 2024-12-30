@@ -73,11 +73,11 @@ public:
     }
     
     template<typename T>
-    static bool SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
+    static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
-        if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
+        if(FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
         {
-            return SetPropertyValue<T>(Property, InstancedStruct.GetMemory(), NewValue);
+            return SetPropertyValue<T>(Property, InstancedStruct.GetMutableMemory(), NewValue);
         }
         
         return false;

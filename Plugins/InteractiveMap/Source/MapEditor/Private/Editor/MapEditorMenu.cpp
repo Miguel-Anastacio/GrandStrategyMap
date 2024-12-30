@@ -1,37 +1,38 @@
 #include "Editor/MapEditorMenu.h"
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
-#include "TextureCompiler.h"
+#include "Asset/MapObject.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
+#include "Materials/MaterialInstanceConstant.h"
 
-MapEditorMenu::MapEditorMenu() : Map(1028, 1028)
+RMapEditorMenu::RMapEditorMenu() : Map(1028, 1028)
 {
 	RegisterTabs();
 }
 
-MapEditorMenu::~MapEditorMenu()
+RMapEditorMenu::~RMapEditorMenu()
 {
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(ViewportTab);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(ParametersTab);
 }
 
-void MapEditorMenu::RegisterTabs()
+void RMapEditorMenu::RegisterTabs()
 {
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ViewportTab, FOnSpawnTab::CreateRaw(this, &MapEditorMenu::SpawnViewport))
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ViewportTab, FOnSpawnTab::CreateRaw(this, &RMapEditorMenu::SpawnViewport))
 		.SetDisplayName(NSLOCTEXT("YourModule", "ViewportTab", "Viewport"))
 		.SetTooltipText(NSLOCTEXT("YourModule", "ViewportTabTooltip", "Open the Viewport tab"));
 
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ParametersTab, FOnSpawnTab::CreateRaw(this, &MapEditorMenu::SpawnDetailsTab))
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(ParametersTab, FOnSpawnTab::CreateRaw(this, &RMapEditorMenu::SpawnDetailsTab))
 	.SetDisplayName(NSLOCTEXT("YourModule", "DetailsTab", "Details"))
 	.SetTooltipText(NSLOCTEXT("YourModule", "DetailsTabTooltip", "Open the Details tab"));
 }
 
 
-TSharedRef<SDockTab> MapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
+TSharedRef<SDockTab> RMapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
 {
 	FDetailsViewArgs DetailsViewArgs;
 	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
@@ -83,11 +84,11 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
 		];	
 }
 
-TSharedRef<SDockTab> MapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
+TSharedRef<SDockTab> RMapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 {
 	MapEditorPreset = NewObject<UMapEditorPreset>();
 	TextureViewer = MakeShared<STextureViewer>();
-	MapEditorPreset->OnObjectChanged.AddRaw(this, &MapEditorMenu::GenerateMap);
+	MapEditorPreset->OnObjectChanged.AddRaw(this, &RMapEditorMenu::GenerateMap);
 	return SNew(SDockTab)
 	[
 		SNew(SOverlay)
@@ -98,10 +99,15 @@ TSharedRef<SDockTab> MapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 	];
 }
 
-void MapEditorMenu::GenerateMap()
+void RMapEditorMenu::GenerateMap()
 {
 	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
 	const uint8* Data = UTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
+	if(!Data)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to read Height Map texture"));
+		return;
+	}
 	
 	// temp just to test
 	// TODO - improve this, adjust MapGeneratorLib
@@ -121,39 +127,35 @@ void MapEditorMenu::GenerateMap()
 	}
 }
 
-void MapEditorMenu::SaveMap() const
+void RMapEditorMenu::SaveMap() const
 {
-	FString message;
-	uint8_t* buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
-	bool result = false;
-	FString dir("/Game/MapEditor/Maps/");
-	auto assetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(dir, "LookupTexture" ,UTexture2D::StaticClass());
-	UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(dir + assetPath, buffer, Map.Width(), Map.Height(), result, message);
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
-	if(buffer)
+	FString Dir("/Game/MapEditor/Maps1/");
+	UTexture2D* TextureAsset = CreateLookupTextureAsset(Dir);
+	if(!TextureAsset)
 	{
-		delete[] buffer;
-		buffer = nullptr;
+		return;
 	}
-
-	// Output Json File with lookup data
-	int32 Id = 0;
-	TArray<FTileIdData> OutputData;
-	dir = ("MapEditor/Maps/");
-	for (const auto& cell : Map.GetLookupTileMap().GetCellMap())
+	
+	Dir = "/Game/MapEditor/Maps1/Material";
+	UMaterialInstanceConstant* Material = CreateMaterialInstanceAsset(TextureAsset, Dir);
+	if(!Material)
 	{
-		OutputData.Emplace(FTileIdData(cell.second.ConvertToHex().c_str(), Id));
-		Id++;
+		UE_LOG(LogTemp, Error, TEXT("Failed to create material Asset"));
+		return;
 	}
-	UDataManagerFunctionLibrary::WriteArrayToJsonFile(FPaths::ProjectContentDir() + dir + "lookup.json", OutputData, result, message);
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *message);
+	
+	Dir = "/MapEditor/Maps1/";
+	FString LookupFilePath = FPaths::ProjectContentDir() + Dir + "lookup.json";
+	OutputLookupJson(LookupFilePath);
 
+	Dir = "/Game/MapEditor/Maps1/";
+	CreateMapObjectAsset(Dir, TextureAsset, LookupFilePath, Material);
 
-	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, message);
-
+	FString Message;
+	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
-TObjectPtr<UTexture2D> MapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
+TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
 {
 	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
 	const int Width = TileMap.Width();
@@ -161,7 +163,7 @@ TObjectPtr<UTexture2D> MapEditorMenu::CreateLookupTexture(const MapGenerator::Ti
 	return CreateTexture(buffer, Width, Height);
 }
 
-TObjectPtr<UTexture2D> MapEditorMenu::CreateTexture(uint8* buffer, unsigned width, unsigned height)
+TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* buffer, unsigned width, unsigned height)
 {
 	//Create a string containing the texture's path
 	FString PackageName = TEXT("/Game/ProceduralTextures/");
@@ -196,5 +198,91 @@ TObjectPtr<UTexture2D> MapEditorMenu::CreateTexture(uint8* buffer, unsigned widt
 	buffer = nullptr;
 	
 	return NewTexture;
+}
+
+void RMapEditorMenu::OutputLookupJson(const FString& FilePath) const
+{
+	int32 Id = 0;
+	TArray<FTileIdData> OutputData;
+	for (const auto& Cell : Map.GetLookupTileMap().GetCellMap())
+	{
+		OutputData.Emplace(FTileIdData(Cell.second.ConvertToHex().c_str(), Id));
+		Id++;
+	}
+	bool bResult = false;
+	FString Message;
+	UDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, OutputData, bResult, Message);
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
+}
+
+UTexture2D* RMapEditorMenu::CreateLookupTextureAsset(const FString& Dir) const
+{
+	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(Dir, "LookupTexture", UTexture2D::StaticClass());
+	FString Message;
+	bool bResult = false;
+	uint8_t* Buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
+	UTexture2D* Texture = UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(Dir + AssetPath, Buffer, Map.Width(), Map.Height(), bResult, Message);
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
+
+	if(Texture)
+	{
+		Texture->CompressionSettings = TC_EditorIcon;
+		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->PostEditChange();
+	}
+	
+	if(Buffer)
+	{
+		delete[] Buffer;
+		Buffer = nullptr;
+	}
+
+	return Texture;
+}
+
+UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& Dir, UTexture2D* Texture, const FString& LookupFilePath, UMaterialInstanceConstant* Material) const
+{
+	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(Dir, "MapObject", UMapObject::StaticClass());
+	FString Message;
+	bool bResult = false;
+	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(Dir + AssetPath, UMapObject::StaticClass(), nullptr, bResult, Message);
+	if(!Asset)
+	{
+		return nullptr;
+	}
+	UMapObject* MapObject = Cast<UMapObject>(Asset);
+	MapObject->LookupTexture = Texture;
+	MapObject->SetLookupFilePath(LookupFilePath);
+	MapObject->MaterialOverride = Material;
+	MapObject->PostEditChange();
+
+	return MapObject;
+}
+
+UMaterialInstanceConstant* RMapEditorMenu::CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& Dir) const
+{
+	// Find material parent
+	if(MapEditorPreset && MapEditorPreset->Material)
+	{
+		FString temp = "/Game/MI_Material";
+		UPackage* Package = CreatePackage(*temp);
+	
+		FString Message;
+		bool bResult = false;
+		UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(temp, UMaterialInstanceConstant::StaticClass(), nullptr, bResult, Message);
+		if(!Asset)
+		{
+			return nullptr;
+		}
+
+		UMaterialInstanceConstant* MaterialInstance= Cast<UMaterialInstanceConstant>(Asset);
+		MaterialInstance->SetParentEditorOnly(MapEditorPreset->Material);
+		MaterialInstance->SetTextureParameterValueEditorOnly(FName("DynamicTexture"), Texture);
+		MaterialInstance->PostEditChange();
+
+		return MaterialInstance;
+	}
+
+	return nullptr;
 }
 

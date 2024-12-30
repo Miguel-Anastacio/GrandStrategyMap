@@ -39,6 +39,7 @@ UObject* UTexture2DFromBufferFactory::FactoryCreateNew( UClass* InClass, UObject
 				FMemory::Memcpy(MipLock.Image.RawData, Buffer, BufferSize);
 			}
 		}
+		
 		Object->PostEditChange();
 	}
 	return Object;

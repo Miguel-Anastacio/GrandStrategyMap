@@ -19,12 +19,11 @@ public:
 	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
 	UFUNCTION(Blueprintable, Category= "Asset Creation")
-	static UObject* CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data, uint32 Width, uint32 Height,
+	static UTexture2D* CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data, uint32 Width, uint32 Height,
 											bool& bOutSuccess, FString& OutInfoMessage);
 	
-	static UObject* CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data, uint32 Width, uint32 Height,
+	static UTexture2D* CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data, uint32 Width, uint32 Height,
 											bool& bOutSuccess, FString& OutInfoMessage);
-
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
 	static FString CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass);

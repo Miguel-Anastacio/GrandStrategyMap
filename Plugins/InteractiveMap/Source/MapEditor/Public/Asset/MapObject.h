@@ -66,6 +66,10 @@ public:
 	{
 		this->FilePathMapData = filePath;
 	}
+	void SetLookupFilePath(const FString& FilePath)
+	{
+		this->LookupFilePath = FilePath;
+	}
 	
 	FString GetFilePath() const
 	{

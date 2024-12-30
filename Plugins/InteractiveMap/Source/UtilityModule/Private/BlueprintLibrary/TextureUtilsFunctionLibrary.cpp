@@ -8,11 +8,12 @@ TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Textu
 {
 	// Initialize an empty TArray to hold the texture data
 	TArray<uint8> DataArray;
-	if(ValidateTexture(Texture))
+	if(!IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Array not Valid Texture"));
 		return DataArray;
-	} 
+	}
+	FTextureCompilingManager::Get().FinishCompilation({Texture});
 
 	// Lock the texture for reading
 	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
@@ -30,7 +31,7 @@ TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Textu
 
 const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
 {
-	if(ValidateTexture(Texture))
+	if(!IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Buffer not Valid Texture"));
 		return nullptr;
@@ -68,7 +69,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
 {
-	if(ValidateTexture(Texture))
+	if(IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Get Color From UV not Valid Texture"));
 		return FColor();
@@ -95,7 +96,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const F
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
 {
-	if(ValidateTexture(Texture))
+	if(IsTextureValid(Texture))
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Get Color From UV not Valid Texture"));
 		return FColor();
@@ -168,16 +169,22 @@ int32 UTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 W
 	return Index;
 }
 
-bool UTextureUtilsFunctionLibrary::ValidateTexture(const UTexture2D* Texture)
+bool UTextureUtilsFunctionLibrary::IsTextureValid(const UTexture2D* Texture)
 {
 	if(!Texture)
+	{
 		return false;
+	}
 	if(Texture->CompressionSettings != TC_EditorIcon)
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *Texture->GetName());
 		return false;
 	}
-	// TODO - Validate Mip Map settings
+	if(Texture->MipGenSettings != TMGS_NoMipmaps)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("%s has wrong Mipmap settings, please use NoMipmaps"), *Texture->GetName());
+		return false;
+	}
 
 	return true;
 }

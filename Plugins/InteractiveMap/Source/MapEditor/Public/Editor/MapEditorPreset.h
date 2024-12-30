@@ -65,12 +65,16 @@ class MAPEDITOR_API UMapEditorPreset : public UObject
 #endif
 
 public:
-
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FModuleDefinition MapEditorDetails;
 	
 	FOnAssetChanged OnObjectChanged;
+	UPROPERTY()
+	UMaterial* Material =nullptr;
 
+	UMapEditorPreset();
+	
 	MapGenerator::NoiseData GetNoiseData() const
 	{
 		return MapGenerator::NoiseData(MapEditorDetails.Seed, MapEditorDetails.Octaves, MapEditorDetails.Frequency, MapEditorDetails.Scale,
@@ -94,6 +98,8 @@ public:
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
 											width, height, MapEditorDetails.LineThickness, MapEditorDetails.CutoffHeight);
 	}
+
+	
 	
 
 };

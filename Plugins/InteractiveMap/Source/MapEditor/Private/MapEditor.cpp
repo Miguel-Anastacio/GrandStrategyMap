@@ -25,10 +25,10 @@ void FInteractiveMapEditorModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Map Generator Editor module has been unloaded"));
 
-	if(_MapEditorMenu)
+	if(MapEditorMenu)
 	{
-		delete _MapEditorMenu;
-		_MapEditorMenu = NULL;
+		delete MapEditorMenu;
+		MapEditorMenu = nullptr;
 	}
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TEXT("CustomEditorLayout"));
 }
@@ -124,9 +124,9 @@ const TSharedRef<FTabManager::FLayout> FInteractiveMapEditorModule::CreateCustom
 
 void FInteractiveMapEditorModule::RegisterTabs()
 {
-	if(!_MapEditorMenu)
+	if(!MapEditorMenu)
 	{
-		_MapEditorMenu = new MapEditorMenu();
+		MapEditorMenu = new RMapEditorMenu();
 	}
 	
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(MapEditorMainTab, FOnSpawnTab::CreateRaw(this, &FInteractiveMapEditorModule::SpawnMainTab))

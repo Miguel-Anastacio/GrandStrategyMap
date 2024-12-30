@@ -8,6 +8,12 @@ AMapAsset::AMapAsset()
 	RootComponent = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	MapMesh = CreateDefaultSubobject<UStaticMeshComponent>("MapMesh");
 	MapMesh->SetupAttachment(RootComponent);
+
+	ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMeshFinder(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	if (PlaneMeshFinder.Succeeded())
+	{
+		MapMesh->SetStaticMesh(PlaneMeshFinder.Object);
+	}
 }
 
 void AMapAsset::BeginPlay()
@@ -23,7 +29,6 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 		return;
 	if(MapObject->Mesh)
 	{
-		MapMesh->SetStaticMesh(MapObject->Mesh);
 		MapMesh->SetWorldScale3D(FVector(20, 15, 1));
 	}
 	if(MapObject->MaterialOverride)
