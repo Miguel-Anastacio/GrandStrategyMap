@@ -3,6 +3,7 @@
 #include "DataDisplay/MapDataSettingsPreset.h"
 #include "BlueprintLibrary/DataStructs.h"
 
+class SMapObjectViewport;
 class STreeJsonDisplay;
 class UMapDataSettings;
 class UMapObject;
@@ -20,10 +21,13 @@ public:
 	virtual FText GetBaseToolkitName() const override { return INVTEXT("Map Object Editor"); }
 	virtual FString GetWorldCentricTabPrefix() const override { return "MapObjectEditor"; }
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::White; }
+
+	void UpdateTreeSelection(int32 Index) const;
 	
 private:
 	void OnLoadFile() const;
 	
 	TWeakObjectPtr<UMapObject> CustomObject = nullptr;
 	TSharedPtr<STreeJsonDisplay> TreeDisplay = nullptr;
+	TSharedPtr<SMapObjectViewport> MapViewport = nullptr;
 };

@@ -26,7 +26,7 @@ public:
     {
 
     }
-	const TArray<TSharedPtr<FDocumentInfo>> GetSubDocuments() const
+	TArray<TSharedPtr<FDocumentInfo>> GetSubDocuments() const
 	{
 		return SubDocuments;
 	};
@@ -46,20 +46,14 @@ public:
 	{
 		if(OwnerDocument)
 		{
-			if(OwnerDocument->MapObject)
-			{
-				OwnerDocument->MapObject->UpdateTileProperty(OwnerDocument->DocumentIndex, Property, Value);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Owner Map Object is null: Document - %s"), *DisplayName.ToString());
-			}
-				
+			OwnerDocument->UpdateStruct(Property, Value);
 		}
-		
-		if(!OwnerDocument)
+		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Owner Document is null: Document - %s"), *DisplayName.ToString());
+			if(MapObject)
+            {
+            	MapObject->UpdateTileProperty(OwnerDocument->DocumentIndex, Property, Value);
+            }
 		}
 	}
 
@@ -108,10 +102,6 @@ public:
     /** Constructor and widget setup */
     void Construct(const FArguments& InArgs, FTabManager* InTabManager);
 
-	~STreeJsonDisplay()
-	{
-		
-	};	
 	static bool FillDocuments(const UScriptStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
 											 const TArray<FInstancedStruct>& StructInstances);
 
@@ -126,9 +116,10 @@ public:
 	void OnGetChildren(TSharedPtr<FDocumentInfo>Item, TArray<TSharedPtr<FDocumentInfo>>& OutChildren);
 	void OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo);
 
-	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo);
+	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo) const;
+	void SelectDocument(uint32 Index) const;
 
-	void UpdateMap(const FString& Property, const FString& Value);
+	static void StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument);
 	
 	UClass* DataClass;
 

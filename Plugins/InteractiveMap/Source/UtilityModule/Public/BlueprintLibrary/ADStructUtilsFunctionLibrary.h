@@ -88,6 +88,7 @@ public:
         return false;
     }
 
+    static void ProcessAllPropertiesOfStruct(const FInstancedStruct& StructInstance);
     
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)

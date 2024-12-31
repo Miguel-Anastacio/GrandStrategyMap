@@ -4,6 +4,8 @@
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
+#include "Asset/MapObjectToolkit.h"
+#include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"
@@ -57,13 +59,24 @@ void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 Scree
 			{
 				FVector2D Uvs;
 				UGameplayStatics::FindCollisionUV(HitResult, 0, Uvs);
-				AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
+				const AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
 				if(!MapAsset)
 					return;
 				FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
 				
 				const int Index = MapAsset->MapObject->GetIndexOfTileSelected(Color);
+				// bool Executed = OnClickedOnMapDelegate.ExecuteIfBound(Index);
+
+				if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
+				{
+					if(ViewportWidget->MapObjectToolKit.IsValid())
+					{
+						ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
+					}
+				}
+				
 			}
+				
 		}
 	}
 }
@@ -76,7 +89,7 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
 	CustomObject = InArgs._EditingObject;
-
+	MapObjectToolKit = InArgs._Toolkit;
 	if (!CustomObject.IsValid())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Editing asset is null"));
@@ -86,11 +99,6 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	AMapAsset* PreviewMapAsset = GetWorld()->SpawnActor<AMapAsset>();
 	PreviewMapAsset->MapObject = CustomObject.Get();
 	PreviewMapAsset->RerunConstructionScripts();
-}
-
-SMapObjectViewport::~SMapObjectViewport()
-{
-
 }
 
 void SMapObjectViewport::UpdatePreviewActor()
@@ -118,5 +126,6 @@ TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 	// LevelViewportClient->bDisableInput = true;
 	// LevelViewportClient->inpu
 	// LevelViewportClient->SetOrthoZoom(1.0f);
+	
 	return LevelViewportClient.ToSharedRef();
 }

@@ -2,16 +2,20 @@
 #include "SCommonEditorViewportToolbarBase.h"
 #include "SEditorViewport.h"
 
+class FMapObjectToolkit;
+class STreeJsonDisplay;
 class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;
 
+DECLARE_DELEGATE_OneParam(FOnClickedOnMapSignature, uint32);
 class FMapObjectViewportClient : public FEditorViewportClient
 {
 public:
 	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport);
 	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
 	void GetHitLocationInEditor(int32 ScreenX, int32 ScreenY);
+	FOnClickedOnMapSignature OnClickedOnMapDelegate;
 };
 
 
@@ -20,12 +24,12 @@ class SMapObjectViewport: public SEditorViewport, public ICommonEditorViewportTo
 public:
 	SLATE_BEGIN_ARGS(SMapObjectViewport) : _EditingObject(nullptr) {}
 
-	SLATE_ARGUMENT(UMapObject*, EditingObject )
+	SLATE_ARGUMENT(UMapObject*, EditingObject)
+	SLATE_ARGUMENT(TWeakPtr<FMapObjectToolkit>, Toolkit)
 	
 SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
-	~SMapObjectViewport();
 	void UpdatePreviewActor();
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
@@ -36,6 +40,7 @@ SLATE_END_ARGS()
 	virtual void OnFloatingButtonClicked() override {}
 	
 	TSoftObjectPtr<UMapObject> CustomObject = nullptr;
+	TWeakPtr<FMapObjectToolkit> MapObjectToolKit = nullptr;
 
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;

@@ -82,8 +82,9 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 			SNew(SOverlay)
 			+ SOverlay::Slot()
 			[
-				SNew(SMapObjectViewport)
+				SAssignNew(MapViewport, SMapObjectViewport)
 				.EditingObject(CustomObject.Get())
+				.Toolkit(TWeakPtr<FMapObjectToolkit>(SharedThis(this)))
 			]
 		];
 	}))
@@ -177,6 +178,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
+	
 }
 
 void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& TabManagerRef)
@@ -188,6 +190,14 @@ void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& Tab
 	FAssetEditorToolkit::UnregisterTabSpawners(TabManagerRef);
 }
 
+void FMapObjectToolkit::UpdateTreeSelection(int32 Index) const
+{
+	if(TreeDisplay)
+	{
+		TreeDisplay->SelectDocument(Index);
+	}
+}
+
 void FMapObjectToolkit::OnLoadFile() const
 {
 	if(!CustomObject.IsValid())
@@ -195,6 +205,7 @@ void FMapObjectToolkit::OnLoadFile() const
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Map Object is NULL"));
 		return;
 	}
+	
 	CustomObject->LoadDataFromFile();
 	if(TreeDisplay)
 	{
