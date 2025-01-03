@@ -50,15 +50,8 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Invalid Index on Update Tile Property '%s'"), *PropertyName);
 		return;
 	}
-	
-	if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct<FString>(MapData[Index], PropertyName, NewValue))
-	{
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("No Matching Property with the compatible values: '%s'"), *PropertyName);
-	}
-	else
-	{
-		UE_LOG(LogInteractiveMapEditor, Log, TEXT("Property does not exist in struct '%s'"), *PropertyName);
-	}
+
+	UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(MapData[Index], PropertyName, NewValue);
 }
 
 void UMapObject::SaveData() const

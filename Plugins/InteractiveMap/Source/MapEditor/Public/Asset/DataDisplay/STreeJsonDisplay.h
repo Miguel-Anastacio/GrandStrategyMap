@@ -52,7 +52,7 @@ public:
 		{
 			if(MapObject)
             {
-            	MapObject->UpdateTileProperty(OwnerDocument->DocumentIndex, Property, Value);
+            	MapObject->UpdateTileProperty(DocumentIndex, Property, Value);
             }
 		}
 	}
@@ -85,6 +85,7 @@ class SEditablePropertyWidget : public SCompoundWidget
 	FSlateTextEditedSignature TextEditedDelegate;
 	TSharedPtr<STextBlock> TextBlock;
 	TSharedPtr<SEditableText> EditableText;
+	FName PropertyID;
 	FDocumentInfo* DocumentInfo;
 	
 };
@@ -118,8 +119,10 @@ public:
 
 	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo) const;
 	void SelectDocument(uint32 Index) const;
+	static void LogDocuments(const TArray<TSharedPtr<FDocumentInfo>>& DocumentInfos);
 
 	static void StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument);
+	static void StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument, const TArray<FName>& IgnoredProperties);
 	
 	UClass* DataClass;
 

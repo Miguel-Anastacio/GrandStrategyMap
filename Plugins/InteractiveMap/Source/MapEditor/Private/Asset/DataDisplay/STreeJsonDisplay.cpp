@@ -24,7 +24,6 @@ void SEditablePropertyWidget::Construct(const FArguments& args)
 				if(CommitType == ETextCommit::Type::OnEnter)
 				{
 					TextCommitDelegate.ExecuteIfBound(this, Text, CommitType);
-					// TextEditedDelegate.ExecuteIfBound(TextBlock.Get()->GetText().ToString(), EditableText.Get()->GetText().ToString());
 					if(DocumentInfo)
 					{
 						DocumentInfo->UpdateStruct(TextBlock.Get()->GetText().ToString(), EditableText.Get()->GetText().ToString());
@@ -158,8 +157,9 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
     	}
     	
         StructPropertiesToDocument(StructInstance, RootDocument);
-        	
     }
+	
+	// LogDocuments(Documents);
     return true;
 }
 
@@ -226,6 +226,10 @@ void STreeJsonDisplay::OnGetChildren(TSharedPtr<FDocumentInfo> Item, TArray<TSha
 {
 	const auto& SubCategories = Item->GetSubDocuments();
 	OutChildren.Append(SubCategories);
+	// for(auto& SubItem : SubCategories)
+	// {
+	// 	OutChildren.Append(SubItem->GetSubDocuments());
+	// }
 }
 
 void STreeJsonDisplay::OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo)
@@ -249,6 +253,19 @@ void STreeJsonDisplay::SelectDocument(uint32 Index) const
 	SelectDocument(Documents[Index]);
 }
 
+void STreeJsonDisplay::LogDocuments(const TArray<TSharedPtr<FDocumentInfo>>& DocumentInfos)
+{
+	for(const auto& DocumentInfo : DocumentInfos)
+	{
+		UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Document: %s, %s"), *DocumentInfo->DisplayName.ToString(), *DocumentInfo->SomeData.ToString());
+		LogDocuments(DocumentInfo->GetSubDocuments());
+		for(const auto& SubDocument : DocumentInfo->GetSubDocuments())
+		{
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Document: %s, %s"), *DocumentInfo->SomeData.ToString(), *DocumentInfo->SomeData.ToString());
+		}
+	}
+}
+
 
 void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument)
 {
@@ -264,11 +281,11 @@ void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& Struct
 			continue;
 		}
 
-		bool bResult = false;
 		const FName PropertyName = Property->GetFName();
 		if(PropertyName == TEXT("ID"))
 			continue;
 		
+		bool bResult = false;
 		const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property,  StructInstance.GetMemory(), bResult);
 		if (bResult)
 		{
@@ -276,20 +293,37 @@ void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& Struct
 			continue;
 		}
 		
+		bResult = false;
 		const int32 PropertyValueInt = UADStructUtilsFunctionLibrary::GetPropertyValue<int32>(Property,  StructInstance.GetMemory(), bResult);
 		if (bResult)
 		{
 			RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::AsNumber(PropertyValueInt), RootDocument)));
 			continue;
 		}
+		bResult = false;
+		const float PropertyValueFloat = UADStructUtilsFunctionLibrary::GetPropertyValue<float>(Property,  StructInstance.GetMemory(), bResult);
+		if (bResult)
+		{
+			RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::AsNumber(PropertyValueFloat), RootDocument)));
+			continue;
+		}
+		
 		//TODO - ADD SUPPORT FOR OTHER COMMON TYPES
 		//  NOT WORKING !!!!
-		const FInstancedStruct PropertyValueStruct = UADStructUtilsFunctionLibrary::GetPropertyValue<FInstancedStruct>(Property,  StructInstance.GetMemory(), bResult);
+		bResult = false;
+		const FInstancedStruct PropertyValueStruct = UADStructUtilsFunctionLibrary::GetStructFromProperty(Property,  StructInstance.GetMemory(), bResult);
 		if (bResult)
 		{
 			TSharedPtr<FDocumentInfo> NewDocument = MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::GetEmpty(), RootDocument));
+			RootDocument->AddSubDocument(NewDocument);
 			StructPropertiesToDocument(PropertyValueStruct, NewDocument);
 		}
 	}
 
+}
+
+void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& StructInstance,
+	TSharedPtr<FDocumentInfo>& RootDocument, const TArray<FName>& IgnoredProperties)
+{
+	
 }

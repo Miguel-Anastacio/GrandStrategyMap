@@ -25,6 +25,12 @@ struct TPropertyTraits<uint32>
 };
 
 template<>
+struct TPropertyTraits<uint8>
+{
+    using Type = FIntProperty;
+};
+
+template<>
 struct TPropertyTraits<float>
 {
     using Type = FFloatProperty;
@@ -54,11 +60,12 @@ struct TPropertyTraits<UScriptStruct>
     using Type = FStructProperty;
 };
 
+
 UCLASS()
 class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-
+    
 public:
     static FString GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult);
     /// TODO - Add Specializations and expose them to Blueprints
@@ -88,8 +95,6 @@ public:
         return false;
     }
 
-    static void ProcessAllPropertiesOfStruct(const FInstancedStruct& StructInstance);
-    
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
@@ -100,6 +105,12 @@ public:
         
         return false;
     }
+    
+    UFUNCTION(BlueprintCallable, Category="Struct Utils")
+    static bool SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);
+    
+    static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
+
     
     template<typename T, typename V>
     static T GetPropertyValue(const FProperty* Property, const V* Object, bool& bOutResult)
@@ -127,9 +138,9 @@ public:
         T Result = TPropertyTypeFundamentals<T>::GetPropertyValue(ValuePtr);
         return Result;
     }
-
+    
     template<typename T, typename  V>
-    static bool SetPropertyValue(FProperty* Property, V* Object, const T& NewValue)
+    static bool SetPropertyValue(const FProperty* Property, V* Object, const T& NewValue)
     {
         if(!Object)
         {
@@ -150,6 +161,22 @@ public:
     }
     
 private:
+    struct FStructProp
+    {
+        const UScriptStruct* StructType;
+        void* Object;
+        const FProperty* Property;
+
+        FStructProp(const UScriptStruct* structType, void* _Object, const FProperty* _Property) :
+                        StructType(structType), Object(_Object), Property(_Property) {};
+        FStructProp() : StructType(nullptr), Object(nullptr), Property(nullptr) {};
+
+        bool IsValid() const
+        {
+            return StructType && Object;
+        }
+    };
+    static FStructProp GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory, const UScriptStruct* StructType);
     // Generalized compatibility check
     template<typename T>
     static bool IsTypeCompatible(const FProperty* Property)
@@ -160,8 +187,7 @@ private:
         using ExpectedPropertyType = typename TPropertyTraits<T>::Type;
         if constexpr (std::is_same_v<ExpectedPropertyType, FStructProperty>)
         {
-            const FStructProperty* StructProperty = CastField<FStructProperty>(Property);
-            if (StructProperty)
+            if ( const FStructProperty* StructProperty = CastField<FStructProperty>(Property))
             {
                 // Ensure the struct type matches
                 return StructProperty->Struct->GetFName() == T::StaticStruct()->GetFName();
@@ -178,5 +204,6 @@ private:
             return false;
         }
     }
+
 };
 
