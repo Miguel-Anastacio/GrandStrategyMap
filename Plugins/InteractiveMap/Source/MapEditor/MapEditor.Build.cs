@@ -27,6 +27,7 @@ public class MapEditor : ModuleRules
 			new string[]
 			{
 				"Core",
+				"ApplicationCore",
 				"RHI",
 				"RenderCore",
 				"UtilityModule",

@@ -3,8 +3,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "Types/SlateEnums.h"
-#include "CustomStructWidget.generated.h"
+#include "GenericStructWidget.generated.h"
 
 class UCustomEditableText;
 class UVerticalBox;
@@ -18,17 +20,6 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	
-	template<typename T, typename V>
-	T GetPropertyValue(FProperty* Property, const V* object)
-	{
-		// return object->GetPropertyValue<T>(Property);
-		void* ValuePtr = Property->ContainerPtrToValuePtr<void>(object);
-		T Result = TPropertyTypeFundamentals<T>::GetPropertyValue(ValuePtr);
-		return Result;
-	}
-
-	static FString GetPropertyValueAsString(FProperty* Property, const void* structObject, bool& OutResult);
-	
 	template<typename T>
 	void InitializeFromStructEditable(const T& structInstance, UClass* classPtr)
 	{
@@ -37,9 +28,9 @@ public:
 		{
 			FProperty* Property = *It;
 			FName PropertyName = Property->GetFName();
-			bool result = false;
-			FString PropertyValue = GetPropertyValueAsString(Property, &structInstance, result);
-			if(result)
+			bool bResult = false;
+			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, &structInstance, bResult);
+			if(bResult)
 			{
 				CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);
 			}

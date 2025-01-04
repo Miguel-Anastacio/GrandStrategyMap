@@ -4,8 +4,8 @@
 #include "CoreMinimal.h"
 #include "CustomEditableText.h"
 #include "Types/SlateEnums.h"
-#include "CustomStructWidget.h"
-#include "FileIO/DataStructs.h"
+#include "GenericStructWidget.h"
+#include "BlueprintLibrary/DataStructs.h"
 #include "TestStructWidget.generated.h"
 
 class UVerticalBox;

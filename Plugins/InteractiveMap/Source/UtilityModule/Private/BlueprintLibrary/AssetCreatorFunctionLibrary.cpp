@@ -1,11 +1,12 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#include "Assets/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
-#include "Assets//TextureFromBufferFactory.h"
+#include "UtilityModule.h"
+#include "Factories/TextureFromBufferFactory.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
-	bool& bOutSuccess, FString& OutInfoMessage)
+                                                   bool& bOutSuccess, FString& OutInfoMessage)
 {
 	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
@@ -34,7 +35,7 @@ UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UCl
 		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Factory cannot create desired Asset Class. '%s'"), *assetPath);
 		return nullptr;
 	}
-
+	FString path = FPaths::GetPath(assetPath);
 	UObject* Asset = AssetTools.CreateAsset(FPaths::GetBaseFilename(assetPath), FPaths::GetPath(assetPath), assetClass, Factory);
 	if(!Asset)
 	{
@@ -48,16 +49,29 @@ UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UCl
 	return Asset;
 }
 
-UObject* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data,
+UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data,
 											uint32 Width, uint32 Height, bool& bOutSuccess, FString& OutInfoMessage)
 {
-	uint8* buffer = Data.GetData();
-	return CreateTextureAssetFromBuffer(AssetPath, buffer, Width, Height, bOutSuccess, OutInfoMessage);
+	if(Data.IsEmpty())
+	{
+		bOutSuccess = false;
+		UE_LOG(LogUtilityModule, Error, TEXT("Create Texture Asset From Array Failed: Array is empty"));
+		return nullptr;
+	}
+	
+	uint8* Buffer = Data.GetData();
+	return CreateTextureAssetFromBuffer(AssetPath, Buffer, Width, Height, bOutSuccess, OutInfoMessage);
 }
 
-UObject* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data,
+UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data,
 	uint32 Width, uint32 Height, bool& bOutSuccess, FString& OutInfoMessage)
 {
+	if(!Data)
+	{
+		bOutSuccess = false;
+		UE_LOG(LogUtilityModule, Error, TEXT("Create Texture Asset From Buffer Failed: Buffer is NULL"));
+		return nullptr;
+	}
 	UTexture2DFromBufferFactory* Factory = NewObject<UTexture2DFromBufferFactory>();
 	Factory->Height = Height;
 	Factory->Width = Width;
@@ -134,7 +148,5 @@ bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& Out
 	{
 		result = UEditorLoadingAndSavingUtils::SaveDirtyPackages(true, true);
 	}
-
 	return result;
 }
-

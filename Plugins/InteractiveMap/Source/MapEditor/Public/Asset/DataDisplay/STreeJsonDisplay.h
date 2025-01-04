@@ -26,7 +26,7 @@ public:
     {
 
     }
-	const TArray<TSharedPtr<FDocumentInfo>> GetSubDocuments() const
+	TArray<TSharedPtr<FDocumentInfo>> GetSubDocuments() const
 	{
 		return SubDocuments;
 	};
@@ -46,20 +46,14 @@ public:
 	{
 		if(OwnerDocument)
 		{
-			if(OwnerDocument->MapObject)
-				OwnerDocument->MapObject->UpdateTileProperty(OwnerDocument->DocumentIndex, Property, Value);
-			else
-				UE_LOG(LogTemp, Error, TEXT("Owner Map Object is null: Document - %s"), *DisplayName.ToString());
-				
+			OwnerDocument->UpdateStruct(Property, Value);
 		}
-		
-		if(!OwnerDocument)
+		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Owner Document is null: Document - %s"), *DisplayName.ToString());
-		}
-		else if(!MapObject)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Map Object is null: Document - %s"), *DisplayName.ToString());
+			if(MapObject)
+            {
+            	MapObject->UpdateTileProperty(DocumentIndex, Property, Value);
+            }
 		}
 	}
 
@@ -91,6 +85,7 @@ class SEditablePropertyWidget : public SCompoundWidget
 	FSlateTextEditedSignature TextEditedDelegate;
 	TSharedPtr<STextBlock> TextBlock;
 	TSharedPtr<SEditableText> EditableText;
+	FName PropertyID;
 	FDocumentInfo* DocumentInfo;
 	
 };
@@ -102,17 +97,12 @@ class STreeJsonDisplay : public SCompoundWidget
 public:
     SLATE_BEGIN_ARGS(STreeJsonDisplay)
     {}
-    	SLATE_ARGUMENT(const UScriptStruct*, StructType)        // The type of the struct
 		SLATE_ARGUMENT(UMapObject*, MapObject)      
     SLATE_END_ARGS()
 
     /** Constructor and widget setup */
     void Construct(const FArguments& InArgs, FTabManager* InTabManager);
 
-	~STreeJsonDisplay()
-	{
-		
-	};	
 	static bool FillDocuments(const UScriptStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
 											 const TArray<FInstancedStruct>& StructInstances);
 
@@ -127,9 +117,12 @@ public:
 	void OnGetChildren(TSharedPtr<FDocumentInfo>Item, TArray<TSharedPtr<FDocumentInfo>>& OutChildren);
 	void OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo);
 
-	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo);
+	void SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo) const;
+	void SelectDocument(uint32 Index) const;
+	static void LogDocuments(const TArray<TSharedPtr<FDocumentInfo>>& DocumentInfos);
 
-	void UpdateMap(const FString& Property, const FString& Value);
+	static void StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument);
+	static void StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument, const TArray<FName>& IgnoredProperties);
 	
 	UClass* DataClass;
 

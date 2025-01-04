@@ -33,7 +33,7 @@ public:
 
     const FSlateBrush* GetMainBrush() const;
 
-    void SetTextures(TArray<UTexture2D*> textures);
+    void SetTextures(const TArray<UTexture2D*>& Textures);
 
 protected:
     static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);

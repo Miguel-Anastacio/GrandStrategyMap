@@ -6,9 +6,8 @@
 #include "AssetTypeCategories.h"
 #include "Modules/ModuleManager.h"
 
-class MapEditorMenu;
+class RMapEditorMenu;
 class UMapEditorPreset;
-DECLARE_LOG_CATEGORY_EXTERN(LogInteractiveMap, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogInteractiveMapEditor, Log, All);
 static FName ViewportTab = FName(TEXT("ViewportTab"));
 static FName ParametersTab = FName(TEXT("DetailsTab"));
@@ -37,7 +36,7 @@ public:
 
 private:
 	FName MapEditorMainTab = FName(TEXT("MapEditorMainTab"));
-	MapEditorMenu* _MapEditorMenu;
+	RMapEditorMenu* MapEditorMenu = nullptr;
 
 
 };

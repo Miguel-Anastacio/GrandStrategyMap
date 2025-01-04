@@ -1,8 +1,8 @@
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "MapEditor.h"
 #include "Asset/MapObject.h"
-#include "Log/LogFunctionLibrary.h"
-#include "UserWidgets/CustomStructWidget.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "UserWidgets/GenericStructWidget.h"
 
 void SEditablePropertyWidget::Construct(const FArguments& args)
 {
@@ -24,7 +24,6 @@ void SEditablePropertyWidget::Construct(const FArguments& args)
 				if(CommitType == ETextCommit::Type::OnEnter)
 				{
 					TextCommitDelegate.ExecuteIfBound(this, Text, CommitType);
-					// TextEditedDelegate.ExecuteIfBound(TextBlock.Get()->GetText().ToString(), EditableText.Get()->GetText().ToString());
 					if(DocumentInfo)
 					{
 						DocumentInfo->UpdateStruct(TextBlock.Get()->GetText().ToString(), EditableText.Get()->GetText().ToString());
@@ -93,7 +92,7 @@ bool STreeJsonDisplay::FillDocuments(const UScriptStruct* StructType,
             }
 
             bool bResult = false;
-            FString PropertyValue = UGenericStructWidget::GetPropertyValueAsString(Property, StructData, bResult);
+            FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, StructData, bResult);
 
         	UE_LOG(LogInteractiveMapEditor, Display, TEXT("Property Name: %s"), *Property->GetFName().ToString());
             if (bResult)
@@ -133,15 +132,13 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
 	}
 	
 	UScriptStruct* StructType = MapObject->StructType;
-	const auto StructInstances = MapObject->GetMapData();
-	
 	if (!StructType)
     {
         UE_LOG(LogInteractiveMapEditor, Error, TEXT("StructType is null."));
         return false;
     }
 
-    for (const FInstancedStruct& StructInstance : StructInstances)
+    for (const FInstancedStruct& StructInstance : MapObject->GetMapData())
     {
         if (!StructInstance.IsValid() || StructInstance.GetScriptStruct() != StructType)
         {
@@ -149,61 +146,25 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
             continue;
         }
 
-        const void* StructData = StructInstance.GetMemory();
-        if (!StructData)
-        {
-            UE_LOG(LogInteractiveMapEditor, Error, TEXT("StructData is null."));
-            continue;
-        }
-
-        // Process the properties of the struct
-        TSharedPtr<FDocumentInfo> RootDocument = MakeShareable(new FDocumentInfo(FText::FromName(StructType->GetFName()), FText::GetEmpty()));
-        for (TFieldIterator<FProperty> It(StructType); It; ++It)
-        {
-            FProperty* Property = *It;
-            if (!Property)
-            {
-                UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Encountered null property in struct '%s'."), *StructType->GetName());
-                continue;
-            }
-
-            bool bResult = false;
-            FString PropertyValue = UGenericStructWidget::GetPropertyValueAsString(Property, StructData, bResult);
-            if (bResult)
-            {
-                const FName PropertyName = Property->GetFName();
-
-                // If the property name is "ID", create a root document
-                if (PropertyName == FName("ID"))
-                {
-                    RootDocument->DisplayName = FText::FromString(PropertyValue);
-                }
-                else
-                {
-                    // Add sub-documents for other properties
-                    RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::FromString(PropertyValue), RootDocument)));
-                }
-            }
-        }
-
-        // Add the populated root document to the documents array
-        if (RootDocument.IsValid())
-        {
-        	RootDocument->DocumentIndex = Documents.Num();
-        	RootDocument->MapObject = MapObject;
-            Documents.Add(RootDocument);
-        }
+    	bool bResult = false;
+    	const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(StructInstance, "ID", bResult);
+        TSharedPtr<FDocumentInfo> RootDocument = MakeShareable(new FDocumentInfo(FText::FromString("ID"), FText::AsNumber(ID)));
+    	if(bResult)
+    	{
+    		RootDocument->DocumentIndex = Documents.Num();
+    		RootDocument->MapObject = MapObject;
+    		Documents.Add(RootDocument);
+    	}
+    	
+        StructPropertiesToDocument(StructInstance, RootDocument);
     }
-
-	// ULogFunctionLibrary::LogArrayInstancedStructs(StructInstances, "Log Map Data Structs", StructType);
-
+	
+	// LogDocuments(Documents);
     return true;
 }
 
 TSharedRef<ITableRow> STreeJsonDisplay::GenerateListRow(TSharedPtr< FDocumentInfo > InItem, const TSharedRef<STableViewBase>& OwnerTable)
 {
-	// TSharedRef<SEditablePropertyWidget> EditablePropertyWidget = MakeShareable(new SEditablePropertyWidget());
-	// EditablePropertyWidget->TextCommitDelegate.BindLambda()
 	return SNew( STableRow< TSharedRef<FDocumentInfo> >, OwnerTable )
 	[
 		SNew(SEditablePropertyWidget).LabelText(InItem->DisplayName).Value(InItem->SomeData).Document(InItem.Get())
@@ -255,7 +216,6 @@ void STreeJsonDisplay::RebuildTreeFromMap(UMapObject* Map)
 	{
 		DocumentInfos.Add(*doc);
 	}
-	ULogFunctionLibrary::LogArray(DocumentInfos, "Map Documents");
 	if( TreeView.IsValid())
 	{
 		TreeView->RequestTreeRefresh();
@@ -266,6 +226,10 @@ void STreeJsonDisplay::OnGetChildren(TSharedPtr<FDocumentInfo> Item, TArray<TSha
 {
 	const auto& SubCategories = Item->GetSubDocuments();
 	OutChildren.Append(SubCategories);
+	// for(auto& SubItem : SubCategories)
+	// {
+	// 	OutChildren.Append(SubItem->GetSubDocuments());
+	// }
 }
 
 void STreeJsonDisplay::OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelectInfo::Type SelectInfo)
@@ -273,18 +237,93 @@ void STreeJsonDisplay::OnSelectionChanged(TSharedPtr<FDocumentInfo> Item, ESelec
 	// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Selected Item: %s"), *Item->DisplayName.ToString());
 }
 
-void STreeJsonDisplay::SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo)
+void STreeJsonDisplay::SelectDocument(const TSharedPtr<FDocumentInfo>& DocumentInfo) const
 {
-	if(ensure(TreeView.IsValid()))
+	if(ensure(TreeView.IsValid()) && DocumentInfo.IsValid())
 	{
 		TreeView->SetSelection(DocumentInfo);
+		TreeView->SetItemExpansion(DocumentInfo, true);
 	}
 }
 
-void STreeJsonDisplay::UpdateMap(const FString& Property, const FString& Value)
+void STreeJsonDisplay::SelectDocument(uint32 Index) const
 {
-	if(MapObject)
+	if(Index >= static_cast<uint32>(Documents.Num()))
+		return;
+	SelectDocument(Documents[Index]);
+}
+
+void STreeJsonDisplay::LogDocuments(const TArray<TSharedPtr<FDocumentInfo>>& DocumentInfos)
+{
+	for(const auto& DocumentInfo : DocumentInfos)
 	{
-		// MapObject->UpdateTileProperty()
+		UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Document: %s, %s"), *DocumentInfo->DisplayName.ToString(), *DocumentInfo->SomeData.ToString());
+		LogDocuments(DocumentInfo->GetSubDocuments());
+		for(const auto& SubDocument : DocumentInfo->GetSubDocuments())
+		{
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Document: %s, %s"), *DocumentInfo->SomeData.ToString(), *DocumentInfo->SomeData.ToString());
+		}
 	}
+}
+
+
+void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& StructInstance, TSharedPtr<FDocumentInfo>& RootDocument)
+{
+	// Process all the other properties of the struct
+	const UScriptStruct* StructType = StructInstance.GetScriptStruct();
+	
+	for (TFieldIterator<FProperty> It(StructType); It; ++It)
+	{
+		const FProperty* Property = *It;
+		if (!Property)
+		{
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Encountered null property in struct '%s'."), *StructType->GetName());
+			continue;
+		}
+
+		const FName PropertyName = Property->GetFName();
+		if(PropertyName == TEXT("ID"))
+			continue;
+		
+		bool bResult = false;
+		const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property,  StructInstance.GetMemory(), bResult);
+		if (bResult)
+		{
+			RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::FromString(PropertyValue), RootDocument)));
+			continue;
+		}
+		
+		bResult = false;
+		const int32 PropertyValueInt = UADStructUtilsFunctionLibrary::GetPropertyValue<int32>(Property,  StructInstance.GetMemory(), bResult);
+		if (bResult)
+		{
+			RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::AsNumber(PropertyValueInt), RootDocument)));
+			continue;
+		}
+		bResult = false;
+		const float PropertyValueFloat = UADStructUtilsFunctionLibrary::GetPropertyValue<float>(Property,  StructInstance.GetMemory(), bResult);
+		if (bResult)
+		{
+			RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::AsNumber(PropertyValueFloat), RootDocument)));
+			continue;
+		}
+		
+		//TODO - ADD SUPPORT FOR OTHER COMMON TYPES
+		//  NOT WORKING !!!!
+		bResult = false;
+		const FInstancedStruct PropertyValueStruct = UADStructUtilsFunctionLibrary::GetStructFromProperty(Property,  StructInstance.GetMemory(), bResult);
+		if (bResult)
+		{
+			TSharedPtr<FDocumentInfo> NewDocument = MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::GetEmpty(), RootDocument));
+			RootDocument->AddSubDocument(NewDocument);
+			StructPropertiesToDocument(PropertyValueStruct, NewDocument);
+		}
+	}
+
+}
+
+void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& StructInstance,
+	TSharedPtr<FDocumentInfo>& RootDocument, const TArray<FName>& IgnoredProperties)
+{
+	
 }

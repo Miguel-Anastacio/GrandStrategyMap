@@ -1,60 +1,131 @@
 #include "Asset/SMapObjectViewport.h"
 #include "AdvancedPreviewScene.h"
+#include "EngineUtils.h"
 #include "Asset/MapObject.h"
 #include "MapEditor.h"
-#include "Engine/PointLight.h"
+#include "Asset/MapAssetActor.h"
+#include "Asset/MapObjectToolkit.h"
+#include "Asset/DataDisplay/STreeJsonDisplay.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "Math/Color.h"  
+#include "HAL/PlatformApplicationMisc.h"
+#include "Kismet/GameplayStatics.h"
+
+FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport)
+		: FEditorViewportClient(nullptr, InPreviewScene, InViewport)
+{
+	
+}
+
+void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event,
+	uint32 HitX, uint32 HitY)
+{
+	if (Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released)
+	{
+		GetHitLocationInEditor(HitX, HitY);
+	}
+	
+	// Optionally, pass unhandled clicks to the base class
+	FEditorViewportClient::ProcessClick(View, HitProxy, Key, Event, HitX, HitY);
+}
+
+void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 ScreenY)
+{
+	if (Viewport)
+	{
+		// Create a scene view to perform the deprojection
+		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+			Viewport,
+			this->GetWorld()->Scene,
+			this->EngineShowFlags));
+         
+		FSceneView* SceneView = this->CalcSceneView(&ViewFamily);
+		if (SceneView)
+		{
+			// Deproject screen coordinates into world space
+			FVector WorldOrigin, WorldDirection;
+			SceneView->DeprojectFVector2D(FVector2D(ScreenX, ScreenY), WorldOrigin, WorldDirection);
+
+			// Define a trace end point (far along the direction vector)
+			FVector TraceEnd = WorldOrigin + (WorldDirection * 100000.0f);
+
+			// Perform a line trace
+			FHitResult HitResult;
+			FCollisionQueryParams CollisionParams;
+			CollisionParams.bTraceComplex = true; // Enable complex collision
+			CollisionParams.bReturnFaceIndex = true;
+
+			if (this->GetWorld()->LineTraceSingleByChannel(HitResult, WorldOrigin, TraceEnd, ECC_Visibility, CollisionParams))
+			{
+				FVector2D Uvs;
+				UGameplayStatics::FindCollisionUV(HitResult, 0, Uvs);
+				const AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
+				if(!MapAsset)
+					return;
+				FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
+				
+				const int Index = MapAsset->MapObject->GetIndexOfTileSelected(Color);
+				// bool Executed = OnClickedOnMapDelegate.ExecuteIfBound(Index);
+
+				if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
+				{
+					if(ViewportWidget->MapObjectToolKit.IsValid())
+					{
+						ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
+					}
+				}
+				
+			}
+				
+		}
+	}
+}
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
 {
 	// We need to create a new Scene before constructing this viewport. Otherwise, it will default to grabbing the one from the main World in the Editor
 	AdvancedPreviewScene = MakeShareable(new FAdvancedPreviewScene(FPreviewScene::ConstructionValues()));
-
+	
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
 	CustomObject = InArgs._EditingObject;
-
+	MapObjectToolKit = InArgs._Toolkit;
 	if (!CustomObject.IsValid())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Editing asset is null"));
 		return;
 	}
 
-	CustomObject->OnObjectChanged.AddSP(this, &SMapObjectViewport::UpdatePreviewActor);
-	UpdatePreviewActor();
+	AMapAsset* PreviewMapAsset = GetWorld()->SpawnActor<AMapAsset>();
+	PreviewMapAsset->MapObject = CustomObject.Get();
+	PreviewMapAsset->RerunConstructionScripts();
 }
 
 void SMapObjectViewport::UpdatePreviewActor()
 {
-	if (PreviewActor)
-	{
-		PreviewActor->Destroy();
-		PreviewActor = nullptr;
-	}
+	
 }
 
 void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SEditorViewport::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
-	
-	if (PreviewActor)
-	{
-		// float X = CustomObject->Radius * FMath::Cos(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
-		// float Y = CustomObject->Radius * FMath::Sin(FPlatformTime::Seconds() * 0.1f * CustomObject->Speed);
-		// PreviewActor->SetActorLocation(FVector(X,Y,0));
-	}
 }
 
 TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 {
-	LevelViewportClient = MakeShareable(new FEditorViewportClient(nullptr, AdvancedPreviewScene.Get(), SharedThis(this)));
+	LevelViewportClient = MakeShareable(new FMapObjectViewportClient(AdvancedPreviewScene.Get(), SharedThis(this)));
 	
-	LevelViewportClient->ViewportType = LVT_Perspective;
+	LevelViewportClient->ViewportType = LVT_OrthoXY;
 	LevelViewportClient->bSetListenerPosition = false;
 	LevelViewportClient->SetRealtime(true);
 	
-	LevelViewportClient->SetViewLocation( FVector(-25000.f,0.f,500));
-	LevelViewportClient->SetViewRotation( FRotator(-30.0f, -90.0f, 0.0f) );
-	LevelViewportClient->SetViewLocationForOrbiting( FVector::ZeroVector );
+	// LevelViewportClient->SetViewLocation( FVector(1000000.0f,-200.f, 0.f));
+	// LevelViewportClient->SetViewRotation( FRotator(-90.0f, -90.0f, 0.0f) );
+	// LevelViewportClient->SetViewLocationForOrbiting( FVector::ZeroVector );
+	LevelViewportClient->SetViewLocationForOrbiting(FVector(200, -150, 400));
+	// LevelViewportClient->bDisableInput = true;
+	// LevelViewportClient->inpu
+	// LevelViewportClient->SetOrthoZoom(1.0f);
 	
 	return LevelViewportClient.ToSharedRef();
 }

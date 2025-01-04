@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "FileIO/DataManagerFunctionLibrary.h"
+#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "HAL/PlatformFileManager.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
@@ -53,7 +53,7 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 }
 
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, UScriptStruct* structType)
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
 	TArray<FInstancedStruct> OutArray;
@@ -72,13 +72,32 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 		FInstancedStruct NewInstancedStruct;
 		if (DeserializeJsonToFInstancedStruct(JsonObject, structType, NewInstancedStruct))
 		{
-			ObjectHasMissingFiels(JsonObject, index, FilePath, structType);
+			ObjectHasMissingFields(JsonObject, index, FilePath, structType);
 			OutArray.Add(MoveTemp(NewInstancedStruct));
 		}
 
 		index++;
 	}
 	return OutArray;
+}
+
+void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
+	const TArray<FInstancedStruct>& Array)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
+	for (const auto& Value : Array)
+	{
+		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, StructType);
+		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
+	}
+
+	bool bResult = false;
+	FString OutInfoMessage;
+	WriteJson(FilePath, JsonValueArray, bResult, OutInfoMessage);
+	if(!bResult)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array: %s"), *OutInfoMessage);
+	}
 }
 
 bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject, const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct)
@@ -94,26 +113,79 @@ bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TShare
 	return true;
 }
 
-void* UDataManagerFunctionLibrary::CreateStructInstance(const UStruct* StructType)
+TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType)
 {
-	if (!StructType)
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	if(FJsonObjectConverter::UStructToJsonObject(StructType, Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid StructType"));
-		return nullptr;
+		return JsonObject;
 	}
 
-	// Allocate memory for the struct instance
-	void* StructMemory = FMemory::Malloc(StructType->GetStructureSize());
-	if (!StructMemory)
+	UE_LOG(LogUtilityModule, Error, TEXT("Failed to serialize instanced struct of type %s"), *StructType->GetName());
+	return nullptr;
+}
+
+int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
+{
+	FString temp = hex.Reverse();
+	auto chars = temp.GetCharArray();
+	temp = temp.ToUpper();
+	int32 total = 0;
+	for (int i = 0; i < temp.Len(); i++)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to allocate memory for struct"));
-		return nullptr;
+		const int32* value = HexMap.Find(temp[i]);
+		if (value)
+		{
+			total += FMath::Pow(16.f, i) * (*value);
+		}
+		else
+		{
+			UE_LOG(LogUtilityModule, Warning, TEXT("Invalid Hex value"));
+		}
+	}
+	return total;
+}
+
+FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
+{
+	TMap<TCHAR, int32> HexMap;
+	HexMap.Reserve(16);
+	HexMap.Add('0', 0);
+	HexMap.Add('1', 1);
+	HexMap.Add('2', 2);
+	HexMap.Add('3', 3);
+	HexMap.Add('4', 4);
+	HexMap.Add('5', 5);
+	HexMap.Add('6', 6);
+	HexMap.Add('7', 7);
+	HexMap.Add('8', 8);
+	HexMap.Add('9', 9);
+	HexMap.Add('A', 10);
+	HexMap.Add('B', 11);
+	HexMap.Add('C', 12);
+	HexMap.Add('D', 13);
+	HexMap.Add('E', 14);
+	HexMap.Add('F', 15);
+
+	if (Color.StartsWith(FString("#")))
+	{
+		const FString noPrefix = Color.RightChop(1);
+		const FString r = noPrefix.LeftChop(6);
+		const FString g = noPrefix.Mid(2, 2);
+		const FString b = noPrefix.Mid(4, 2);
+		const FString alpha = noPrefix.RightChop(6);
+
+		FColor ColorValue;
+		ColorValue.R = HexToDecimal(r, HexMap);
+		ColorValue.G = HexToDecimal(g, HexMap);
+		ColorValue.B = HexToDecimal(b, HexMap);
+		ColorValue.A = HexToDecimal(alpha, HexMap);
+
+		return ColorValue;
 	}
 
-	// Initialize the struct memory
-	StructType->InitializeStruct(StructMemory);
-
-	return StructMemory;
+	UE_LOG(LogUtilityModule, Error, TEXT("Color is not hexadecimal format"));
+	return FColor();
 }
 
 void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
@@ -169,6 +241,7 @@ void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTab
 	}
 }
 
+// FInstanced Struct method is more versatile
 TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
 {
 	return LoadCustomDataFromJson<FTestBasic>(FilePath);
@@ -179,11 +252,11 @@ TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FStrin
 	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
 }
 
-void UDataManagerFunctionLibrary::ObjectHasMissingFiels(const TSharedPtr<FJsonObject> Object, int Index, const FString& FilePath, UStruct* StructType)
+void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
-		FProperty* Property = *It;
+		const FProperty* Property = *It;
 
 		// Get property name
 		FString PropertyName = Property->GetName();
