@@ -14,8 +14,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
 #include "InteractiveMap.h"
-//#include "InteractiveMap.h"
-// Sets default values
+#include "MapObject.h"
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 	: AActor(ObjectInitializer)
 {
@@ -43,6 +42,7 @@ void AClickableMap::PostInitializeComponents()
 }
 void AClickableMap::InitializeMap_Implementation()
 {
+	MapLookUpTexture = MapAsset->LookupTexture;
 	if (!MapLookUpTexture)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Map Look up Texture not assigned"));
@@ -51,6 +51,11 @@ void AClickableMap::InitializeMap_Implementation()
 	//// Data
 	MapDataComponent->CreateLookUpTable();
 	MapDataComponent->ReadDataTables();
+	// if(MapAsset)
+	// {
+	// 	MapDataComponent->SetProvinceDataMap(MapAsset->GetMapData());
+	// }
+	
 	MapDataComponent->SetCountryProvinces();
 
 	// Visual

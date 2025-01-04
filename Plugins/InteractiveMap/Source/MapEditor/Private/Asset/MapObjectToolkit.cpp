@@ -1,5 +1,5 @@
 #include "Asset/MapObjectToolkit.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "Asset/SMapObjectViewport.h"
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "Widgets/Text/STextBlock.h"

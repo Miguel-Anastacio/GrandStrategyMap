@@ -50,7 +50,7 @@ struct FExampleStruct
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
 UCLASS()
-class MAPEDITOR_API UMapObject : public UObject
+class SHAREDMODULE_API UMapObject : public UObject
 {
 	GENERATED_BODY()
 

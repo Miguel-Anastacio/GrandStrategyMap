@@ -4,6 +4,7 @@
 #include "Map/MapEnums.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 
 UMapDataComponent::UMapDataComponent()
 {
@@ -169,20 +170,37 @@ void UMapDataComponent::CreateLookUpTable()
 			LookUpTable.Add(FVector(itemRGB->Color.R, itemRGB->Color.G, itemRGB->Color.B), name);
 		}
 	}
+	
+
+
+	
 }
 
 void UMapDataComponent::ReadDataTables()
 {
 	if (!UDataManagerFunctionLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Province Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
 	if(!UDataManagerFunctionLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
+	
 	if(!UDataManagerFunctionLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
 		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
 }
+
+// void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
+// {
+// 	NewProvinceDataMap.Empty();
+// 	NewProvinceDataMap.Reserve(Data.Num());
+// 	for(const auto& StructInstanced : Data)
+// 	{
+// 		bool bResult = false;
+// 		int ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(StructInstanced, "ID", bResult);
+// 		if(bResult)
+// 		{
+// 			NewProvinceDataMap.Emplace(ID, StructInstanced);
+// 		}
+// 	}
+// }
 
 void UMapDataComponent::SetCountryProvinces()
 {

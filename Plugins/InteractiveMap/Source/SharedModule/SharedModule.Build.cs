@@ -2,9 +2,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class MapEditor : ModuleRules
+public class SharedModule : ModuleRules
 {
-	public MapEditor(ReadOnlyTargetRules Target) : base(Target)
+	public SharedModule(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -27,15 +27,13 @@ public class MapEditor : ModuleRules
 			new string[]
 			{
 				"Core",
-				"ApplicationCore",
 				"RHI",
 				"RenderCore",
-				"UtilityModule",
 				"StructUtils",
-				"SharedModule"
+				"UtilityModule"
 				// ... add other public dependencies that you statically link with here ...
 			}
-			);
+		);
 			
 		
 		PrivateDependencyModuleNames.AddRange(
@@ -44,29 +42,23 @@ public class MapEditor : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"InputCore",
-                "Slate",	
-				"SlateCore",
-                "UMG",
 				"Json",
 				"JsonUtilities",
 				"AssetTools",
-				"AssetDefinition",
-				"AdvancedPreviewScene",
 				"ToolMenus",
 				"UnrealEd",
-				"EditorStyle",
-				"WorkspaceMenuStructure",
-				"PropertyEditor",
+				"Slate",	
+				"SlateCore",
+				"UMG"
 				// ... add private dependencies that you statically link with here ...	
 			}
-			);
-		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
+		);
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
 			}
-			);
+		);
 	}
 }

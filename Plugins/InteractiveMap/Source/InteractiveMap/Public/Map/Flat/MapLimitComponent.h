@@ -16,10 +16,6 @@ class INTERACTIVEMAP_API UMapLimitComponent : public USceneComponent
 
 public:
 
- /*   template<typename ReturnType, typename ClassToCreateByDefault>
-    ReturnType* CreateDefaultSubobjectHelper(FName SubobjectFName, UClass* classToCreateByDefault, bool bIsRequired, bool bIsTransient) {
-        return CreateDefaultSubobject<ReturnType>(SubobjectFName, ReturnType::StaticClass(), classToCreateByDefault, bIsRequired, bIsTransient);
-    }*/
     /** Default constructor. */
     UMapLimitComponent();
 
@@ -35,7 +31,7 @@ public:
     void Attach(USceneComponent* root);
     FORCEINLINE UBoxComponent* GetBoxComponent() { return Box; };
 
-    void CreateVisualComponent(TSubclassOf<UMapVisualComponent> mapVisualClass);
+    void CreateVisualComponent(const TSubclassOf<UMapVisualComponent>& mapVisualClass);
 
 protected:
     /** Called when the game starts. */

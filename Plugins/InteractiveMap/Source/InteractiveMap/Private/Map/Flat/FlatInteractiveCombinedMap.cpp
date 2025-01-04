@@ -37,7 +37,6 @@ void AFlatInteractiveCombinedMap::SetMapMode_Implementation(MapMode mode)
 	
 		break;
 	case MapMode::TERRAIN:
-
 		if (mesh)
 		{
 			mesh->SetMaterial(0, TerrainDynamicMaterial);

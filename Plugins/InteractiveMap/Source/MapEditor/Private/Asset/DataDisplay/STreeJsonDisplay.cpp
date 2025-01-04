@@ -1,6 +1,6 @@
 #include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "MapEditor.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "UserWidgets/GenericStructWidget.h"
 

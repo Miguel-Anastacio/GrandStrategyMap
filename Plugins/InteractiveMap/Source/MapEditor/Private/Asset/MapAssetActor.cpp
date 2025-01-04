@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Asset/MapAssetActor.h"
 
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 
 AMapAsset::AMapAsset()
 {

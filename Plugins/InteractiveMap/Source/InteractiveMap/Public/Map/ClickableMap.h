@@ -27,6 +27,7 @@ public:
 	virtual void InitializeMap_Implementation();
 
 	virtual void Tick(float DeltaTime) override;
+
 	//------------------------------- Data -----------------------------------------
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	TMap<FVector, FName> GetLookUpTable() const;
@@ -150,7 +151,10 @@ protected:
 	// The root of the map.
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapRoot;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	TObjectPtr<class UMapObject> MapAsset;
+	
 	// The visual representation of the map 
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;

@@ -126,17 +126,6 @@ struct FProvinceData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FVariantProvinceData : public FTableRowBase
-{
-    GENERATED_BODY()
-
-    // UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    TMap<FString, TVariant<int, float, FString, bool>> Properties;
-    // TVariant<FString, int64> StringOrInt64Holder;
-    
-};
-
-USTRUCT(BlueprintType)
 struct FCountryData : public FTableRowBase
 {
     GENERATED_BODY()

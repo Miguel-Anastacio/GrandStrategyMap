@@ -1,7 +1,7 @@
 #include "Editor/MapEditorMenu.h"
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"

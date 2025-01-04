@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "Components/ActorComponent.h"
 #include "Map/MapUtils.h"
 #include "Map/MapEnums.h"
 #include "MapDataComponent.generated.h"
-
 
 
 /**
@@ -77,6 +77,8 @@ protected:
     /** Reads data tables. */
     void ReadDataTables();
 
+    // void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
+
     /** Sets country provinces. */
     void SetCountryProvinces();
 
@@ -93,11 +95,12 @@ protected:
     FColor GetCultureColor(const FProvinceData* data) const;
 
 protected:
+    // TODO: REMOVE
     /** Data table for the map. */
     UPROPERTY(EditAnywhere, Category = "Data")
     UDataTable* MapDataTable;
 
-    /** Data table for provinces. */
+    /** Data table for provinces.  TODO: REMOVE */
     UPROPERTY(EditAnywhere, Category = "Data")
     UDataTable* ProvinceDataTable;
 
@@ -112,7 +115,7 @@ protected:
     /** Lookup table. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FVector, FName> LookUpTable;
-
+    
     /** Province data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FName, FProvinceData> ProvinceDataMap;
@@ -126,4 +129,16 @@ protected:
     TMap<FName, FColoredData> VisualPropertiesDataMap;
 
     friend class AClickableMap;
+    //// ------------------------------------------------------------------------
+    /** New Lookup table. */
+    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    TMap<FColor, int> NewLookupTable;
+
+    // /** New Province data map. */
+    // UPROPERTY(BlueprintReadOnly, Category = "Map Data")
+    // TMap<int, FInsstancedStruct> NewProvinceDataMap;
+    
+
+    
+    
 };

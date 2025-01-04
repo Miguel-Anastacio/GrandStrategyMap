@@ -27,7 +27,7 @@
 		},
 		{
 			"Name": "MapEditor",
-			"Type": "Editor",
+			"Type": "Editor", 
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine"
