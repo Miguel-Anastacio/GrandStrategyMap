@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InstancedStruct.h"
+#include "MapObject.h"
 #include "Components/ActorComponent.h"
 #include "Map/MapUtils.h"
 #include "Map/MapEnums.h"
@@ -25,10 +26,10 @@ public:
 protected:
     /** Gets the lookup table. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    TMap<FVector, FName> GetLookUpTable() const;
+    TMap<FColor, int> GetLookUpTable() const;
 
     /** Gets the province data map. */
-    FORCEINLINE TMap<FName, FProvinceData>* GetProvinceDataMap() { return &ProvinceDataMap; };
+    FORCEINLINE TMap<int, FInstancedStruct>* GetProvinceDataMap() { return &ProvinceDataMap; };
 
     /** Gets the country data map. */
     FORCEINLINE TMap<FName, FCountryData>* GetCountryDataMap() { return &CountryDataMap; };
@@ -38,14 +39,14 @@ protected:
 
     /** Gets the province ID. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    FName GetProvinceID(const FVector& color, bool out_result) const;
+    int GetProvinceID(const FColor& Color, bool& bOutResult) const;
 
     /** Gets province data by name. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    void GetProvinceData(FName name, FProvinceData& out_data) const;
+    void GetProvinceData(int name, FInstancedStruct& out_data) const;
 
     /** Gets province data by name. */
-    FProvinceData* GetProvinceData(FName name);
+    FInstancedStruct* GetProvinceData(int ID);
 
     /** Gets data from ID/tag. */
     template<class T>
@@ -65,7 +66,7 @@ protected:
      * @return True if the update is successful, false otherwise.
      */
     UFUNCTION(BlueprintCallable, Category = "Map Data")
-    bool UpdateProvinceData(const FProvinceData& data, FName id, MapMode& out_mapToUpdate, FColor& out_newColor);
+    bool UpdateProvinceData(const FProvinceData& data, int ID, MapMode& out_mapToUpdate, FColor& out_newColor);
 
     /** Updates country data. */
     UFUNCTION(BlueprintCallable, Category = "Map Data")
@@ -77,13 +78,13 @@ protected:
     /** Reads data tables. */
     void ReadDataTables();
 
-    // void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
+    void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
 
     /** Sets country provinces. */
     void SetCountryProvinces();
 
     /** Gets country color. */
-    bool GetCountryColor(const FVector& color, FColor& out_countryColor) const;
+    bool GetCountryColor(const FColor& Color, FColor& out_countryColor) const;
 
     /** Gets country color. */
     FColor GetCountryColor(const FProvinceData* data) const;
@@ -94,6 +95,9 @@ protected:
     /** Gets culture color. */
     FColor GetCultureColor(const FProvinceData* data) const;
 
+    void LoadFromMapObject(const UMapObject* MapObject);
+
+    int* FindId(const FColor& Color);
 protected:
     // TODO: REMOVE
     /** Data table for the map. */
@@ -118,7 +122,7 @@ protected:
     
     /** Province data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<FName, FProvinceData> ProvinceDataMap;
+    TMap<int, FInstancedStruct> ProvinceDataMap;
 
     /** Country data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
@@ -134,9 +138,6 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FColor, int> NewLookupTable;
 
-    // /** New Province data map. */
-    // UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    // TMap<int, FInsstancedStruct> NewProvinceDataMap;
     
 
     

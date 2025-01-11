@@ -84,6 +84,11 @@ public:
 		return MapData;
 	}
 	
+	TArray<FInstancedStruct> GetMapDataValue() const
+	{
+		return MapData;
+	}
+	
 	void SetFilePath(const FString& filePath)
 	{
 		this->FilePathMapData = filePath;
@@ -110,6 +115,16 @@ public:
 	FColor GetColorFromUv(const FVector2D& Uv) const;
 
 	void LoadLookupMap(const FString& FilePath);
+
+	TMap<FColor, int> GetLookupTable() const
+	{
+		return LookupTable;
+	};
+
+	TArray<uint8> GetLookupTextureData() const
+	{
+		return LookupTextureData;
+	}
 
 private:
 	UPROPERTY()

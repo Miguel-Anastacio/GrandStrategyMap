@@ -133,18 +133,18 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
 {
-	// Data read from texture is in GBRA format
-	return FColor(DataBuffer[Index+1],
-		DataBuffer[Index + 2],
+	// Data read from texture is in BGRA format
+	return FColor(DataBuffer[Index + 2],
+		DataBuffer[Index + 1],
 		DataBuffer[Index],
 		DataBuffer[Index + 3]);
 }
 
 FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const uint8* DataBuffer)
 {
-	// Data read from texture is in GBRA format
-	return FColor(DataBuffer[Index+1],
-		DataBuffer[Index + 2],
+	// Data read from texture is in BGRA format
+	return FColor(DataBuffer[Index + 2],
+		DataBuffer[Index + 1],
 		DataBuffer[Index],
 		DataBuffer[Index + 3]);
 }

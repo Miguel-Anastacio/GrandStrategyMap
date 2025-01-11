@@ -31,7 +31,8 @@ public class InteractiveMap : ModuleRules
 				"RenderCore",
 				"VictoryBPLibrary",
 				"UtilityModule",
-				"SharedModule"
+				"SharedModule",
+				"StructUtils"
              
 				// ... add other public dependencies that you statically link with here ...
 			}

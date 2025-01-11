@@ -1,11 +1,13 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "GameFramework/Actor.h"
 #include "MapUtils.h"
 #include "MapEnums.h"
 #include "ClickableMap.generated.h"
 
+class UMapObject;
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
@@ -30,21 +32,22 @@ public:
 
 	//------------------------------- Data -----------------------------------------
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	TMap<FVector, FName> GetLookUpTable() const;
+	TMap<FColor, int> GetLookUpTable() const;
 
-	TMap<FName, FProvinceData>* GetProvinceDataMap();
-	TMap<FName, FCountryData>* GetCountryDataMap();
+	TMap<int, FInstancedStruct>* GetProvinceDataMap() const;
+	TMap<FName, FCountryData>* GetCountryDataMap(); 
 	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	FName GetProvinceID(const FVector& color, bool& out_result) const;
+	int GetProvinceID(const FColor& Color, bool& bOutResult) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	void GetProvinceData(FName name, FProvinceData& out_data) const;
-	FProvinceData* GetProvinceData(FName name);
+	void GetProvinceData(int ID, FInstancedStruct& OutData) const;
+	
+	FInstancedStruct* GetProvinceData(int ID);
 
 
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateProvinceData(const FProvinceData& data, FName id);
+	bool UpdateProvinceData(const FInstancedStruct& Data, int ID);
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	bool UpdateCountryData(const FCountryData& data, FName id);
 
@@ -109,6 +112,8 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Map")
 	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
+
+	void LoadMapAsset(UMapObject* MapObject);
 	
 	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
 	void SaveMapTextureData();
@@ -216,6 +221,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
 	MapMode CurrentMapMode = MapMode::POLITICAL;
 
+	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
+	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
+	// void CreateDynamicTextureComponents();
 
 
 };

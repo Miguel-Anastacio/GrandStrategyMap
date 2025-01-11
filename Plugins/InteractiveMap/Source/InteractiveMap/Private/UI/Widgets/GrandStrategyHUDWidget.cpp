@@ -81,17 +81,17 @@ void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 {
 	if (button == SaveDataButton)
 	{
-		TMap<FName, FProvinceData>* provinceMapData = GameMap->GetProvinceDataMap();
+		TMap<int, FInstancedStruct>* provinceMapData = GameMap->GetProvinceDataMap();
 		if (!provinceMapData)
 			return;
 
-		bool result;
+		bool result = false;
 		FString outMessageInfo;
 		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
+		// UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);

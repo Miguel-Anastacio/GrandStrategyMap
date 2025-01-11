@@ -3,10 +3,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #pragma once
-
-#pragma once
-
-// #include "../MapGenerator/source/map/map.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RHIResources.h"
