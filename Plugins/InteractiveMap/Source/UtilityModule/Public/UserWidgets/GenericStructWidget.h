@@ -19,6 +19,7 @@ public:
 
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 	
 	template<typename T>
 	void InitializeFromStructEditable(const T& structInstance, UClass* classPtr)
@@ -37,10 +38,17 @@ public:
 		}
 	}
 
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Custom Struct Display")
-	UVerticalBox* StructHolder;
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
+	UPanelWidget* MainPanel;
 
-	TArray<UCustomEditableText*> Fields;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> WidgetType;
+
+	UPROPERTY(EditAnywhere)
+	UScriptStruct* StructType;
+	
+	UPROPERTY()
+	TArray<UUserWidget*> Fields;
 	
 protected:
 	// To be implemented in Blueprint or C++
@@ -48,4 +56,7 @@ protected:
 	void CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue, UClass* classPtr);
 	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
 	void CreateFieldWidget(const FName& FieldName, const FString& FieldValue);
+
+	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Custom Struct Display")
+	void CreatePanelSlots();
 };

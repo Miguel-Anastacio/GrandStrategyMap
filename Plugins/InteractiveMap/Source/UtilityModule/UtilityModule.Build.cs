@@ -48,7 +48,8 @@ public class UtilityModule : ModuleRules
 				"UnrealEd",
 				"Slate",	
 				"SlateCore",
-				"UMG"
+				"UMG", 
+				"UMGEditor", 
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
