@@ -6,7 +6,7 @@
 #include "UI/Widgets/ProvinceEditorWidget.h"
 #include "UI/Widgets/EditCountriesContainerWidget.h"
 #include "InteractiveMap.h"
-void AManagerHUD::DisplayProvinceEditorWidget(const FProvinceData& provinceData, FName id)
+void AManagerHUD::DisplayProvinceEditorWidget(const FInstancedStruct& ProvinceData, int Id)
 {
 	if (!ProvinceEditorWidget)
 	{
@@ -21,7 +21,7 @@ void AManagerHUD::DisplayProvinceEditorWidget(const FProvinceData& provinceData,
 	}
 
 	ProvinceEditorWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	ProvinceEditorWidget->SetProvinceData(provinceData, id);
+	ProvinceEditorWidget->SetProvinceData(ProvinceData, Id);
 }
 UE_DISABLE_OPTIMIZATION
 void AManagerHUD::DisplayCountryContainerEditorWidget()

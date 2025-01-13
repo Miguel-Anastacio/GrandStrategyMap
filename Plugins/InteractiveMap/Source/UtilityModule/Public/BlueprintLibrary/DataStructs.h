@@ -43,10 +43,10 @@ struct FTestAdvanced
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     int32 Population = 0;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    FString Name;
+    FString Name = "Name";
     // bool Type = false;
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    FLinearColor Color;
+    FLinearColor Color = FLinearColor::Black;
     FString ToString() const
     {
         return FString::Printf(TEXT("Id: %d, Name: %s, Population: %d"), ID, *Name, Population);

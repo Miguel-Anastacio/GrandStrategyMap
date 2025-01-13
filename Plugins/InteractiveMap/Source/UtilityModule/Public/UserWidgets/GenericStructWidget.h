@@ -20,6 +20,11 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void InitFromStruct(const FInstancedStruct& InstancedStruct);
+
+	virtual void InitFromStruct_Implementation(const FInstancedStruct& InstancedStruct);
 	
 	template<typename T>
 	void InitializeFromStructEditable(const T& structInstance, UClass* classPtr)
@@ -33,13 +38,14 @@ public:
 			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, &structInstance, bResult);
 			if(bResult)
 			{
-				CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);
+				// CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);
 			}
 		}
 	}
-
+	int Columns = 1;
+	// int Rows = 0;
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
-	UPanelWidget* MainPanel;
+	class UGridPanel* MainPanel;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> WidgetType;
@@ -48,14 +54,14 @@ public:
 	UScriptStruct* StructType;
 	
 	UPROPERTY()
-	TArray<UUserWidget*> Fields;
+	TMap<FName, TWeakObjectPtr<UUserWidget>> WidgetFields;
 	
 protected:
 	// To be implemented in Blueprint or C++
 	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	void CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue, UClass* classPtr);
+	// void CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue, UClass* classPtr);
 	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	void CreateFieldWidget(const FName& FieldName, const FString& FieldValue);
+	// void CreateFieldWidget(const FName& FieldName, const FString& FieldValue);
 
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Custom Struct Display")
 	void CreatePanelSlots();

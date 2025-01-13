@@ -29,7 +29,7 @@ public:
 	 * @param id The ID of the province.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void DisplayProvinceEditorWidget(const FProvinceData& provinceData, FName id);
+	void DisplayProvinceEditorWidget(const FInstancedStruct& ProvinceData, int Id);
 
 	/**
 	 * Displays the country container editor widget.

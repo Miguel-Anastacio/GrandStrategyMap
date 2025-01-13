@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
 //#include "../../Map/MapEnums.h"
+#include "InstancedStruct.h"
 #include "Map/MapUtils.h"
 #include "ProvinceEditorWidget.generated.h"
 
@@ -25,7 +26,7 @@ public:
 	 * @param provinceID The unique identifier of the province.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-	void SetProvinceData(const FProvinceData& data, FName provinceID);
+	void SetProvinceData(const FInstancedStruct& Data, int ProvinceID);
 
 	/**
 	 * Sets the reference to the interactive map actor.
@@ -33,7 +34,7 @@ public:
 	 * @param map Pointer to the interactive map actor.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-	void SetInteractiveMapReference(class AClickableMap* map);
+	void SetInteractiveMapReference(class AClickableMap* Map);
 
 protected:
 	/**
@@ -50,31 +51,16 @@ protected:
 	 */
 	UFUNCTION(Category = "Province Editor")
 	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
-
-	/**
-	 * Custom editable text widgets for editing province properties.
-	 */
+	
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	UCustomEditableText* NameCustomInput;
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	UCustomEditableText* OwnerCustomInput;
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	UCustomEditableText* ReligionCustomInput;
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	UCustomEditableText* CultureCustomInput;
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	UCustomEditableText* PopulationCustomInput;
-
-	/**
-	 * Member variables storing information about the currently selected province and the interactive map.
-	 */
-protected:
+	class UGenericStructWidget* ProvinceDataWidget;
 	// The unique identifier of the currently selected province.
-	FName ProvinceSelectedID; 
+	int ProvinceSelectedID; 
 	// Data structure containing information about the currently selected province.
-	FProvinceData ProvinceSelectedData; 
+	FInstancedStruct ProvinceSelectedData; 
 	// Pointer to the interactive map actor used as a reference for this component.
+	UPROPERTY()
 	class AClickableMap* GameMapReference; 
 
 };

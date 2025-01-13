@@ -145,14 +145,13 @@ void ABirdEyeController::MouseClick()
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Clicked on province ID: %d"),ID);
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Color searched: %s"), *Color.ToString());
 			UE_LOG(LogInteractiveMap, Warning, TEXT("UVs: %s"), *uvs.ToString());
-
 			
-			FInstancedStruct* data = Map->GetProvinceData(ID);
-			if (data)
+			FInstancedStruct* Data = Map->GetProvinceData(ID);
+			if (Data)
 			{
 				ProvinceHoveredDelegate.Broadcast(Color);
 
-				// ProvinceClickedDelegate.Broadcast(ID, *data);
+				ProvinceClickedDelegate.Broadcast(ID, *Data);
 				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 				if (hud)
 				{
@@ -231,13 +230,13 @@ void ABirdEyeController::HideHUD()
 	}
 }
 
-void ABirdEyeController::ShowProvinceInfo(FName id, FProvinceData data)
+void ABirdEyeController::ShowProvinceInfo(int Id, const FInstancedStruct& Data)
 {
 	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
 	if (hud)
 	{
 		hud->SetInteractiveMapReference(Map);
-		hud->DisplayProvinceEditorWidget(data, id);
+		hud->DisplayProvinceEditorWidget(Data, Id);
 		bProvinceSelected = true;
 	}
 }

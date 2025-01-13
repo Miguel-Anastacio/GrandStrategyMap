@@ -3,7 +3,7 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "UtilityModule.h"
 
-FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(FProperty* Property, const void* StructObject, bool& OutResult)
+FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult)
 {
 	OutResult = true;
 	if (!Property || !StructObject)
@@ -13,27 +13,27 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(FProperty* Prope
 	}
 	const void* ValuePtr = Property->ContainerPtrToValuePtr<void>(StructObject);
 
-	if (FIntProperty* IntProperty = CastField<FIntProperty>(Property))
+	if (const FIntProperty* IntProperty = CastField<FIntProperty>(Property))
 	{
 		return FString::FromInt(IntProperty->GetPropertyValue(ValuePtr));
 	}
-	else if (FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
+	else if (const FFloatProperty* FloatProperty = CastField<FFloatProperty>(Property))
 	{
 		return FString::SanitizeFloat(FloatProperty->GetPropertyValue(ValuePtr));
 	}
-	else if (FBoolProperty* BoolProperty = CastField<FBoolProperty>(Property))
+	else if (const FBoolProperty* BoolProperty = CastField<FBoolProperty>(Property))
 	{
 		return BoolProperty->GetPropertyValue(ValuePtr) ? TEXT("True") : TEXT("False");
 	}
-	else if (FStrProperty* StrProperty = CastField<FStrProperty>(Property))
+	else if (const FStrProperty* StrProperty = CastField<FStrProperty>(Property))
 	{
 		return StrProperty->GetPropertyValue(ValuePtr);
 	}
-	else if (FNameProperty* NameProperty = CastField<FNameProperty>(Property))
+	else if (const FNameProperty* NameProperty = CastField<FNameProperty>(Property))
 	{
 		return NameProperty->GetPropertyValue(ValuePtr).ToString();
 	}
-	else if (FTextProperty* TextProperty = CastField<FTextProperty>(Property))
+	else if (const FTextProperty* TextProperty = CastField<FTextProperty>(Property))
 	{
 		return TextProperty->GetPropertyValue(ValuePtr).ToString();
 	}
@@ -44,8 +44,24 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(FProperty* Prope
 	}
 }
 
+FString UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct,
+	const FString& PropertyName, bool& OutResult)
+{
+	OutResult = false;
+	if(!InstancedStruct.IsValid())
+	{
+		return FString("Invalid Property or Instance");
+	}
+	
+	if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
+	{
+		return GetPropertyValueAsString(Property, InstancedStruct.GetMemory(), OutResult);
+	}
+	return FString("Invalid Property or Instance");
+}
+
 bool UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct,
-	const FString& PropertyName, const FString& NewValue)
+                                                                             const FString& PropertyName, const FString& NewValue)
 {
 	const FStructProp Container = GetContainerThatHoldsProperty(PropertyName, InstancedStruct.GetMutableMemory(), InstancedStruct.GetScriptStruct());
 	if(Container.IsValid())

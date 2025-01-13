@@ -2,20 +2,40 @@
 
 #include "UserWidgets/GenericStructWidget.h"
 
+#include "UtilityModule.h"
 #include "WidgetBlueprint.h"
-#include "WidgetBlueprintEditorUtils.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "Components/NamedSlot.h"
-#include "Components/Overlay.h"
-#include "Components/TextBlock.h"
-#include "Components/VerticalBox.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "UserWidgets/CustomEditableText.h"
 
 void UGenericStructWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+	int32 Index = 0;
+	WidgetFields.Empty();
+	for (TFieldIterator<FProperty> It(StructType); It; ++It)
+	{
+		const FProperty* Property = *It;
+		if (!Property)
+		{
+			continue;
+		}
+		// MainPanel->AddChildToGrid(NewWidget, RowIndex);
+		if(Index >= MainPanel->GetChildrenCount())
+		{
+			return;
+		}
+		
+		UUserWidget* Widget = Cast<UUserWidget>(MainPanel->GetChildAt(Index));
+		Index++;
+		if(!Widget)
+		{
+			continue;
+		}
+		
+		WidgetFields.Emplace(Property->GetName(), Widget);
+	}
 }
 
 void UGenericStructWidget::NativePreConstruct()
@@ -27,7 +47,7 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 {
 	Super::ReleaseSlateResources(bReleaseChildren);
 	// Clear any lingering Slate widgets from the Fields array
-	Fields.Empty();
+	// WidgetFields.Empty();
 
 	// If the MainPanel (or AssetGridPanel) has any lingering children, clear them
 	if (MainPanel)
@@ -36,20 +56,21 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 	}
 }
 
-void UGenericStructWidget::CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue,UClass* ClassPtr)
+void UGenericStructWidget::InitFromStruct_Implementation(const FInstancedStruct& InstancedStruct)
 {
-	if(UCustomEditableText* NewWidget = WidgetTree->ConstructWidget<UCustomEditableText>(ClassPtr))
+	UE_LOG(LogUtilityModule, Error, TEXT("Fields Size %d"), WidgetFields.Num());
+	for(TPair<FName, TWeakObjectPtr<UUserWidget>>& WidgetPair : WidgetFields)
 	{
-		NewWidget->SetValues(FText::FromString(FieldValue), FText::FromString(FieldValue));
-		NewWidget->SetIDText(FText::FromName(FieldName));
-		// StructHolder->AddChildToVerticalBox(NewWidget);
-		Fields.Add(NewWidget);
+		const FName& Key = WidgetPair.Key;
+		TWeakObjectPtr<UUserWidget> Value = WidgetPair.Value;
+		 if(UCustomEditableText* EditableText = Cast<UCustomEditableText>(Value.Get()))
+		 {
+		 	EditableText->SetIDText(FText::FromName(Key));
+		 	bool bResult = false;
+		 	FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, Key.ToString(), bResult);
+		 	EditableText->SetValues(FText::FromString(Text), FText::FromString(Text));
+		}
 	}
-}
-
-void UGenericStructWidget::CreateFieldWidget(const FName& FieldName, const FString& FieldValue)
-{
-	
 }
 
 void UGenericStructWidget::CreatePanelSlots()
@@ -65,10 +86,15 @@ void UGenericStructWidget::CreatePanelSlots()
 
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	UPanelWidget* AssetGridPanel = Cast<UPanelWidget>(MainAsset->WidgetTree->FindWidget("MainPanel"));
-
+	UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
+	if(!AssetGridPanel)
+	{
+		// log
+		return;
+	}
 	AssetGridPanel->ClearChildren();
-	Fields.Empty();
+	WidgetFields.Empty();
+	int RowIndex = 0;
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
@@ -78,8 +104,9 @@ void UGenericStructWidget::CreatePanelSlots()
 		}
 		if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(WidgetType))
 		{
-			AssetGridPanel->AddChild(NewWidget);
-			Fields.Emplace(NewWidget);
+			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
+			WidgetFields.Emplace(Property->GetName(), NewWidget);
+			RowIndex++;
 		}
 	}
 	
@@ -87,6 +114,5 @@ void UGenericStructWidget::CreatePanelSlots()
 	MainAsset->Modify();
 	
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-	// FWidgetBlueprintEditorUt
 #endif
 }

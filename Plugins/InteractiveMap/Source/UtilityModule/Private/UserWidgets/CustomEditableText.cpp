@@ -12,7 +12,7 @@ void UCustomEditableText::NativeOnInitialized()
 void UCustomEditableText::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	ID->SetText(IDText);
+	// ID->SetText(IDText);
 }
 
 void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)
@@ -28,5 +28,5 @@ void UCustomEditableText::SetValues(const FText& current, const FText& input)
 
 void UCustomEditableText::SetIDText(const FText& text)
 {
-	ID->SetText(IDText);
+	ID->SetText(text);
 }
