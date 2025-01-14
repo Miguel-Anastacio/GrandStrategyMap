@@ -67,7 +67,10 @@ class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctio
 	GENERATED_BODY()
     
 public:
+    // UFUNCTION(BlueprintCallable)
     static FString GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult);
+    
+    UFUNCTION(BlueprintCallable, BlueprintPure)
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
     /// TODO - Add Specializations and expose them to Blueprints
     

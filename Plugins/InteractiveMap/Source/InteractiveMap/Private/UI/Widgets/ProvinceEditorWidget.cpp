@@ -15,6 +15,7 @@ void UProvinceEditorWidget::SetProvinceData(const FInstancedStruct& Data, int Pr
 	}
 	if(ProvinceDataWidget->StructType != Data.GetScriptStruct())
 	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("Province Data struct of Map does not match Struct Specified in Widget %s"), *ProvinceDataWidget->GetName())
 		return;
 	}
 	ProvinceDataWidget->InitFromStruct(Data);
@@ -28,7 +29,6 @@ void UProvinceEditorWidget::SetInteractiveMapReference(AClickableMap* map)
 void UProvinceEditorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
 }
 
 void UProvinceEditorWidget::UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod)

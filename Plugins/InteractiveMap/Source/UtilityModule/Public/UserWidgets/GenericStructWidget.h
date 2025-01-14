@@ -26,24 +26,11 @@ public:
 
 	virtual void InitFromStruct_Implementation(const FInstancedStruct& InstancedStruct);
 	
-	template<typename T>
-	void InitializeFromStructEditable(const T& structInstance, UClass* classPtr)
-	{
-		// Iterate over the struct's properties
-		for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
-		{
-			FProperty* Property = *It;
-			FName PropertyName = Property->GetFName();
-			bool bResult = false;
-			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, &structInstance, bResult);
-			if(bResult)
-			{
-				// CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);
-			}
-		}
-	}
+	UPROPERTY(EditAnywhere)
 	int Columns = 1;
-	// int Rows = 0;
+	UPROPERTY(EditAnywhere)
+	int Rows = 0;
+	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
 	class UGridPanel* MainPanel;
 
@@ -53,9 +40,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UScriptStruct* StructType;
 	
-	UPROPERTY()
-	TMap<FName, TWeakObjectPtr<UUserWidget>> WidgetFields;
-	
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FName, UUserWidget*> WidgetFields;
+
 protected:
 	// To be implemented in Blueprint or C++
 	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")

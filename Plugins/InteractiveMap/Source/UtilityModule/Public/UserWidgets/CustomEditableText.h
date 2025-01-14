@@ -28,8 +28,8 @@ class UTILITYMODULE_API UCustomEditableText : public UUserWidget
 
 public:
     /** Sets the initial values for the editable text widget. */
-    void SetValues(const FText& text, const FText& input);
-    void SetIDText(const FText& text);
+    void SetValues(const FText& text, const FText& input) const;
+    void SetIDText(const FText& text) const;
 
 public:
     /** Delegate for editable text commit events. */

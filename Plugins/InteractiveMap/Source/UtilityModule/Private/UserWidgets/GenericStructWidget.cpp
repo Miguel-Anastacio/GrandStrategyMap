@@ -12,29 +12,28 @@
 void UGenericStructWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	int32 Index = 0;
 	WidgetFields.Empty();
+	
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
-		if (!Property)
-		{
-			continue;
-		}
-		// MainPanel->AddChildToGrid(NewWidget, RowIndex);
-		if(Index >= MainPanel->GetChildrenCount())
-		{
-			return;
-		}
-		
-		UUserWidget* Widget = Cast<UUserWidget>(MainPanel->GetChildAt(Index));
-		Index++;
-		if(!Widget)
+		if(!Property)
 		{
 			continue;
 		}
 		
-		WidgetFields.Emplace(Property->GetName(), Widget);
+		FName FieldName = Property->GetFName();
+		for(const auto& Widget : MainPanel->GetAllChildren())
+		{
+			if(FieldName == Widget->GetName())
+			{
+				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
+				{
+					WidgetFields.Emplace(FieldName, UserWidget);
+					break;
+				}
+			}
+		}
 	}
 }
 
@@ -46,10 +45,6 @@ void UGenericStructWidget::NativePreConstruct()
 void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 {
 	Super::ReleaseSlateResources(bReleaseChildren);
-	// Clear any lingering Slate widgets from the Fields array
-	// WidgetFields.Empty();
-
-	// If the MainPanel (or AssetGridPanel) has any lingering children, clear them
 	if (MainPanel)
 	{
 		MainPanel->ClearChildren();
@@ -58,17 +53,16 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 
 void UGenericStructWidget::InitFromStruct_Implementation(const FInstancedStruct& InstancedStruct)
 {
-	UE_LOG(LogUtilityModule, Error, TEXT("Fields Size %d"), WidgetFields.Num());
-	for(TPair<FName, TWeakObjectPtr<UUserWidget>>& WidgetPair : WidgetFields)
+	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& Key = WidgetPair.Key;
-		TWeakObjectPtr<UUserWidget> Value = WidgetPair.Value;
-		 if(UCustomEditableText* EditableText = Cast<UCustomEditableText>(Value.Get()))
-		 {
-		 	EditableText->SetIDText(FText::FromName(Key));
-		 	bool bResult = false;
-		 	FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, Key.ToString(), bResult);
-		 	EditableText->SetValues(FText::FromString(Text), FText::FromString(Text));
+		const UUserWidget* Value = WidgetPair.Value;
+		if(const UCustomEditableText* EditableText = Cast<UCustomEditableText>(Value))
+		{
+			EditableText->SetIDText(FText::FromName(Key));
+			bool bResult = false;
+			FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, Key.ToString(), bResult);
+			EditableText->SetValues(FText::FromString(Text), FText::FromString(Text));
 		}
 	}
 }
@@ -80,8 +74,7 @@ void UGenericStructWidget::CreatePanelSlots()
 		return;
 
 	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
-
-	UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
 	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
 
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
@@ -93,7 +86,6 @@ void UGenericStructWidget::CreatePanelSlots()
 		return;
 	}
 	AssetGridPanel->ClearChildren();
-	WidgetFields.Empty();
 	int RowIndex = 0;
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
@@ -104,8 +96,8 @@ void UGenericStructWidget::CreatePanelSlots()
 		}
 		if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(WidgetType))
 		{
+			NewWidget->Rename(*Property->GetName());
 			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
-			WidgetFields.Emplace(Property->GetName(), NewWidget);
 			RowIndex++;
 		}
 	}

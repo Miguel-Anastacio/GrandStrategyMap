@@ -20,13 +20,13 @@ void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type Comm
 	TextCommitDelegate.Broadcast(this, Text, CommitMethod);
 }
 
-void UCustomEditableText::SetValues(const FText& current, const FText& input)
+void UCustomEditableText::SetValues(const FText& current, const FText& input) const
 {
 	CurrentValue->SetText(current);
 	InputValue->SetText(input);
 }
 
-void UCustomEditableText::SetIDText(const FText& text)
+void UCustomEditableText::SetIDText(const FText& text) const
 {
 	ID->SetText(text);
 }
