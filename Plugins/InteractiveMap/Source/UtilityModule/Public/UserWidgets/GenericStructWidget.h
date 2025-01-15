@@ -20,12 +20,11 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void InitFromStruct(const FInstancedStruct& InstancedStruct);
 
-	virtual void InitFromStruct_Implementation(const FInstancedStruct& InstancedStruct);
-	
 	UPROPERTY(EditAnywhere)
 	int Columns = 1;
 	UPROPERTY(EditAnywhere)
@@ -35,7 +34,9 @@ public:
 	class UGridPanel* MainPanel;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> WidgetType;
+	TSubclassOf<UUserWidget> DefaultWidgetType;
+	UPROPERTY(EditAnywhere)
+	TMap<FName, TSubclassOf<UUserWidget>> WidgetTypesMap;
 
 	UPROPERTY(EditAnywhere)
 	UScriptStruct* StructType;
