@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "InteractiveMap.h"
 #include "MapObject.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
@@ -51,11 +52,6 @@ void AClickableMap::InitializeMap_Implementation()
 		UE_LOG(LogInteractiveMap, Error, TEXT("Map Look up Texture not assigned"));
 		return;
 	}
-	//// Data
-	// MapDataComponent->CreateLookUpTable();
-	MapDataComponent->ReadDataTables();
-
-	
 	MapDataComponent->SetCountryProvinces();
 
 	// Visual
@@ -114,25 +110,115 @@ void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const
 	pixelArray[index + 2] = color.R;
 	pixelArray[index + 3] = color.A;
 }
+#if WITH_EDITOR
+void AClickableMap::CreateDynamicTextureComponents( const TArray<FVisualPropertyType>& VisualPropertyTypes)
+{
+	if(!MapLookUpTexture)
+		return;
+	
+	const int32 Width = MapLookUpTexture->GetSizeX();
+	const int32 Height = MapLookUpTexture->GetSizeY();
+	for(const auto& VisualPropertyType : VisualPropertyTypes)
+	{
+		const FName ComponentName = FName(*FString::Printf(TEXT("DynamicTextureComponent_%s"), *VisualPropertyType.Type.ToString()));
+		UDynamicTextureComponent* TextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(ComponentName);
 
-// void AClickableMap::CreateDynamicTextureComponents()
-// {
-// 	// MapDataComponent->VisualPropertiesDataMap()
-// 	/*
-// 	 * FOR EACH VISUAL PROPERTY TYPE
-// 	 * CREATE A DYNAMIC TEXTURE COMPONENT
-// 	 * store it in a map where the key is the type, f.ex: Religion, Political
-// 	 * then create texture from lookup, data, 
-// 	 *
-// 	 *
-// 	 */
-// }
+		TextureComponent->InitializeTexture(Width, Height);
+		TextureComponent->DynamicMaterial = UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this);
+		TextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", TextureComponent->GetTexture());
+		TextureComponent->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		// Use a regular texture not a virtual texture
+		TextureComponent->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
+		
+		MapModesTextureComponents.Emplace(VisualPropertyType.Type, TextureComponent);
+	}
+}
 
+void AClickableMap::FillDynamicTextureComponents(const TMap<FName, TArray<FVisualProperty>>& VisualProperties, const TArray<uint8>& LookupTextureData)
+{
+	const int32 Width = MapLookUpTexture->GetSizeX();
+	const int32 Height = MapLookUpTexture->GetSizeY();
+	if(LookupTextureData.Num() != Width*Height*4)
+		return;
+	
+	// Read color of each pixel
+	for (int32 Y = 0; Y < Height; ++Y)
+	{
+		for (int32 X = 0; X < Width; ++X)
+		{
+			const int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
+			const uint8 B = LookupTextureData[Index];
+			const uint8 G = LookupTextureData[Index + 1];
+			const uint8 R = LookupTextureData[Index + 2];
+			const int* ID = MapDataComponent->FindId(FColor(R, G, B));
+			if (ID)
+			{
+				FInstancedStruct* InstancedStruct = GetProvinceData(*ID);
+				if (!InstancedStruct)
+				{
+					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
+					return;
+				}
+				
+				for (TFieldIterator<FProperty> It(MapAsset->StructType); It; ++It)
+				{
+					const FProperty* Property = *It;
+					if (!Property)
+					{
+						continue;
+					}
+					// check if property is visual
+					const FName PropertyTypeName = Property->GetFName();
+					auto* AllPropertiesOfType = VisualProperties.Find(PropertyTypeName);
+					if(!AllPropertiesOfType)
+					{
+						continue;
+					}
+					
+					bool bResult = false;
+					const FString Tag = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(*InstancedStruct, PropertyTypeName.ToString(), bResult);
+					if(!bResult)
+					{
+						UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
+						continue;
+					}
+					
+					for(auto& VisualProperty : *AllPropertiesOfType)
+					{
+						if(Tag != VisualProperty.Tag)
+						{
+							continue;
+						}
+						// finally set pixels of texture component that matches this visual property type
+						if(UDynamicTextureComponent** TextureComponent = MapModesTextureComponents.Find(PropertyTypeName))
+						{
+							(*TextureComponent)->SetPixelValue(X, Y, VisualProperty.Color);
+						}
+					}
+				}
+			}
+			else
+			{
+				
+				// PoliticalMapTextureComponent->SetPixelValue(X, Y, FColor::Black);
+				// ReligiousMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
+				// CultureMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
+			}
 
+		}
+	}
+}
+#endif
+
+//TODO - TO BE REMOVED
 void AClickableMap::SaveMapTextureData()
 {
 	if (!IsValid(MapLookUpTexture))
 		return;
+
+	// Create Dynamic Texture Components
+	
+	
 	
 	// Get the dimensions of the texture
 	const int32 Width = MapLookUpTexture->GetSizeX();
@@ -151,7 +237,7 @@ void AClickableMap::SaveMapTextureData()
 			const uint8 R = MapColorCodeTextureData[Index + 2];
 			
 			// const FName* ID = MapDataComponent->LookUpTable.Find(FVector(R, G, B));
-			const int* ID = MapDataComponent->NewLookupTable.Find(FColor(R, G, B));
+			const int* ID = MapDataComponent->FindId(FColor(R, G, B));
 			if (ID)
 			{
 				FInstancedStruct* province = GetProvinceData(*ID);
@@ -160,10 +246,6 @@ void AClickableMap::SaveMapTextureData()
 					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
 					return;
 				}
-
-				// PoliticalMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCountryColor(province));
-				// ReligiousMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetReligionColor(province));
-				// CultureMapTextureComponent->SetPixelValue(X, Y, MapDataComponent->GetCultureColor(province));
 
 			}
 			else
@@ -365,30 +447,30 @@ void AClickableMap::UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& ol
 				continue;
 
 			// get province id from the array that holds the original look up texture pixel data
-			FName* id = MapDataComponent->LookUpTable.Find(FVector(MapColorCodeTextureData[Index+2],
-											MapColorCodeTextureData[Index + 1],
-											MapColorCodeTextureData[Index]));
-			if (!id)
-				continue;
-
-			bool found = false;
-			// cycle through provinces to update 
-			// if it matches the id of this pixel then update the color
-			for (auto& idToUpdate : provinceIDs)
-			{
-				if ((*id) == idToUpdate)
-				{
-					pixelArray[Index + 2] = newColor.R;
-					pixelArray[Index + 1] = newColor.G;
-					pixelArray[Index + 0] = newColor.B;
-					pixelArray[Index + 3] = newColor.A;
-					found = true;
-				}
-
-				if (found)
-					break;
-
-			}
+			// FName* id = MapDataComponent->NewLookupTable.Find(FVector(MapColorCodeTextureData[Index+2],
+			// 								MapColorCodeTextureData[Index + 1],
+			// 								MapColorCodeTextureData[Index]));
+			// if (!id)
+			// 	continue;
+			//
+			// bool found = false;
+			// // cycle through provinces to update 
+			// // if it matches the id of this pixel then update the color
+			// for (auto& idToUpdate : provinceIDs)
+			// {
+			// 	if ((*id) == idToUpdate)
+			// 	{
+			// 		pixelArray[Index + 2] = newColor.R;
+			// 		pixelArray[Index + 1] = newColor.G;
+			// 		pixelArray[Index + 0] = newColor.B;
+			// 		pixelArray[Index + 3] = newColor.A;
+			// 		found = true;
+			// 	}
+			//
+			// 	if (found)
+			// 		break;
+			//
+			// }
 		}
 	}
 }
@@ -604,6 +686,7 @@ void AClickableMap::LoadMapAsset(UMapObject* MapObject)
 	}
 	MapLookUpTexture = MapObject->LookupTexture;
 	MapColorCodeTextureData = MapObject->GetLookupTextureData();
+	
 
 	// Load Data
 	MapDataComponent->LoadFromMapObject(MapObject);

@@ -76,18 +76,6 @@ struct FProvinceIDData : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FProvinceIDDataRGB: public FTableRowBase
-{
-    GENERATED_BODY()
-    FProvinceIDDataRGB() {};
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ID")
-    FColor Color;
-
-};
-
-
-USTRUCT(BlueprintType)
 struct FProvinceData : public FTableRowBase
 {
     GENERATED_BODY()
@@ -165,4 +153,38 @@ struct FCountryData : public FTableRowBase
 
         // Add more fields as needed
     }
+};
+
+
+USTRUCT(BlueprintType)
+struct FVisualPropertyType : public FTableRowBase
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere)
+    UMaterialInterface* MaterialInstance = nullptr;
+
+    UPROPERTY(EditAnywhere)
+    FName Type;
+
+    bool operator == (const FVisualPropertyType& Other) const
+    {
+        return Other.Type == Type;
+    }
+    friend uint32 GetTypeHash (const FVisualPropertyType& Other)
+    {
+        return GetTypeHash(Other.Type);
+    }
+};
+
+
+USTRUCT(BlueprintType)
+struct FVisualProperty : public FTableRowBase
+{
+    GENERATED_BODY()
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FName Type = "Null";
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FName Tag;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FColor Color = FColor::Black;
 };

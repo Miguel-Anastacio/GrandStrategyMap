@@ -11,6 +11,17 @@ UMapDataComponent::UMapDataComponent()
 
 }
 
+void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	ReadDataTables();
+}
+
+const TMap<FVisualPropertyType, TArray<FVisualProperty>>& UMapDataComponent::GetVisualPropertiesMap() const
+{
+	return VisualPropertiesMap;
+}
+
 TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
 {
 	return NewLookupTable;
@@ -28,15 +39,27 @@ int UMapDataComponent::GetProvinceID(const FColor& Color, bool& bOutResult) cons
 	return -1;
 }
 
-void UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& out_data) const
+void UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
 {
 	const FInstancedStruct* data = ProvinceDataMap.Find(ID);
 	if (data)
 	{
-		out_data = (*data);
-		out_data = (*data);
+		Out_Data = (*data);
+		Out_Data = (*data);
 	}
 }
+
+// FInstancedStruct UMapDataComponent::GetProvinceData(int ID, bool& OutResult)
+// {
+// 	FInstancedStruct* Data = ProvinceDataMap.Find(ID);
+// 	if (Data)
+// 	{
+// 		OutResult = true;
+// 		return *Data;
+// 	}
+// 	OutResult = false;
+// 	return FInstancedStruct();
+// }
 
 FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
 {
@@ -45,7 +68,6 @@ FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
 	{
 		return data;
 	}
-
 	return nullptr;
 }
 
@@ -58,60 +80,6 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, int id, Ma
 		return false;
 	}
 	return false;
-	// if (province->Owner != data.Owner)
-	// {
-	// 	FCountryData* newOwnerCountry = CountryDataMap.Find(data.Owner);
-	// 	if (!newOwnerCountry)
-	// 	{
-	// 		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid owner - update not possible"));
-	// 		return false;
-	// 	}
-	//
-	// 	out_newColor = newOwnerCountry->Color;
-	// 	out_mapToUpdate = MapMode::POLITICAL;
-	//
-	// 	newOwnerCountry->Provinces.Add(id);
-	// 	FCountryData* currentOwner = CountryDataMap.Find(province->Owner);
-	// 	if(currentOwner)
-	// 		currentOwner->Provinces.RemoveSingle(id);
-	//
-	// 	(*province) = data;
-	//
-	// 	return true;
-	// }
-	// else if (province->Religion != data.Religion)
-	// {
-	// 	out_newColor = GetReligionColor(&data);
-	// 	if (out_newColor == FColor(0, 0, 0, 0))
-	// 	{
-	// 		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid religion - update not possible"));
-	// 		return false;
-	// 	}
-	//
-	// 	(*province) = data;
-	// 	out_mapToUpdate = MapMode::RELIGIOUS;
-	//
-	// 	return true;
-	// }
-	// else if (province->Culture != data.Culture)
-	// {
-	// 	out_newColor = GetCultureColor(&data);
-	// 	if (out_newColor == FColor(0, 0, 0, 0))
-	// 	{
-	// 		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid culture - update not possible"));
-	// 		return false;
-	// 	}
-	//
-	// 	(*province) = data;
-	// 	out_mapToUpdate = MapMode::CULTURAL;
-	// 	return true;
-	// }
-	// else
-	// {
-	// 	(*province) = data;
-	// 	return true;
-	// }
-
 }
 
 bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
@@ -133,53 +101,30 @@ bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
 		return false;
 	}
 }
-
-
-void UMapDataComponent::CreateLookUpTable()
-{
-	if (!MapDataTable)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-		return;
-	}
-
-	TArray<FName> RowNames = MapDataTable->GetRowNames();
-	TMap<TCHAR, int32> HexMap;
-	InitHexMap(HexMap);
-	for (auto& name : RowNames)
-	{
-		// Color in HEX as a string
-		FProvinceIDData* Item = MapDataTable->FindRow<FProvinceIDData>(name, "");
-		if (Item)
-		{
-			FString temp = Item->Color;
-			temp = temp.EndsWith(FString("FF")) ? temp : temp.Append(TEXT("FF"));
-
-			FColor sRGBColor = Item->ConvertHexStringToRGB(temp, HexMap);
-
-			LookUpTable.Add(FVector(sRGBColor.R, sRGBColor.G, sRGBColor.B), name);
-			continue;
-		}
-
-		// Color in FColor format
-		FProvinceIDDataRGB* itemRGB = MapDataTable->FindRow<FProvinceIDDataRGB>(name, "");
-		if (itemRGB)
-		{
-			LookUpTable.Add(FVector(itemRGB->Color.R, itemRGB->Color.G, itemRGB->Color.B), name);
-		}
-	}
-}
-
+#if WITH_EDITOR
 void UMapDataComponent::ReadDataTables()
 {
-	// if (!UDataManagerFunctionLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
-		// UE_LOG(LogInteractiveMap, Error, TEXT("Province Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-	if(!UDataManagerFunctionLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
-		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+	TArray<FVisualPropertyType*> AllTypes;
+	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
+	{
+	}
+	TArray<FVisualProperty*> VisualProperties;
+	UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
 	
-	if(!UDataManagerFunctionLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
-		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+	for(const auto& Type : AllTypes)
+	{
+		TArray<FVisualProperty> VisualPropertiesOfType;
+		for(const auto& Property : VisualProperties)
+		{
+			if(Type->Type == Property->Type)
+			{
+				VisualPropertiesOfType.Emplace(*Property);
+			}
+		}
+		VisualPropertiesMap.Emplace(*Type, VisualPropertiesOfType);
+	}
 }
+#endif
 
 void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
 {
@@ -228,81 +173,6 @@ void UMapDataComponent::SetCountryProvinces()
 
 		// country->Provinces.Add(province.Key);
 	}
-}
-
-bool UMapDataComponent::GetCountryColor(const FColor& Color, FColor& out_countryColor) const
-{
-	const int* id = NewLookupTable.Find(Color);
-	if (id)
-	{
-		const FInstancedStruct* province = ProvinceDataMap.Find(*id);
-		if (!province)
-			return false;
-		// const FCountryData* country = CountryDataMap.Find(province->Owner);
-		// if (!country)
-		// 	return false;
-		//
-		// out_countryColor = country->Color;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-FColor UMapDataComponent::GetCountryColor(const FProvinceData* data) const
-{
-	FColor color = FColor(0, 0, 0, 0);
-	if (data)
-	{
-		const FCountryData* country = CountryDataMap.Find(data->Owner);
-		if (!country)
-			return color;
-
-		return country->Color;
-	}
-	return color;
-}
-
-FColor UMapDataComponent::GetReligionColor(const FProvinceData* data) const
-{
-	FColor color = FColor(0, 0, 0, 0);
-
-	if (data)
-	{
-		const FColoredData* religion = VisualPropertiesDataMap.Find(data->Religion);
-		if (!religion)
-		{
-			return FColor(0, 0, 0, 0);
-		}
-
-		if (religion->Type != FName("Religion"))
-			return FColor(0, 0, 0, 0);
-
-
-		return religion->Color;
-	}
-	return FColor(0, 0, 0, 0);
-}
-
-FColor UMapDataComponent::GetCultureColor(const FProvinceData* data) const
-{
-	FColor color = FColor(0, 0, 0, 0);
-	if (data)
-	{
-		const FColoredData* culture = VisualPropertiesDataMap.Find(data->Culture);
-		if (!culture)
-		{
-			return FColor(0, 0, 0, 0);
-		}
-
-		if (culture->Type != FName("Culture"))
-			return FColor(0, 0, 0, 0);
-
-		return culture->Color;
-	}
-	return FColor(0, 0, 0, 0);
 }
 
 void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)

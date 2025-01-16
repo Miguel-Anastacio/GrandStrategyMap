@@ -152,6 +152,10 @@ protected:
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	void SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color);
 
+#if WITH_EDITOR
+	void CreateDynamicTextureComponents(const TArray<FVisualPropertyType>& VisualPropertyTypes);
+	void FillDynamicTextureComponents(const TMap<FName, TArray<FVisualProperty>>& VisualProperties, const TArray<uint8>& LookupTextureData);
+#endif
 protected:
 	// The root of the map.
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
@@ -224,6 +228,7 @@ protected:
 	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
 	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
 	// void CreateDynamicTextureComponents();
+	TMap<FName, UDynamicTextureComponent*> MapModesTextureComponents;
 
 
 };

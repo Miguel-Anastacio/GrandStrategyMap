@@ -23,6 +23,10 @@ public:
     /** Default constructor. */
     UMapDataComponent();
 
+    virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+
+    const TMap<FVisualPropertyType, TArray<FVisualProperty>>& GetVisualPropertiesMap() const;
+
 protected:
     /** Gets the lookup table. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
@@ -43,7 +47,10 @@ protected:
 
     /** Gets province data by name. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    void GetProvinceData(int name, FInstancedStruct& out_data) const;
+    void GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
+    
+    // UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
+    // FInstancedStruct GetProvinceDataBP(int ID, bool& OutResult);
 
     /** Gets province data by name. */
     FInstancedStruct* GetProvinceData(int ID);
@@ -72,9 +79,6 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Map Data")
     bool UpdateCountryData(const FCountryData& data, FName id);
 
-    /** Creates the lookup table. */
-    void CreateLookUpTable();
-
     /** Reads data tables. */
     void ReadDataTables();
 
@@ -83,43 +87,21 @@ protected:
     /** Sets country provinces. */
     void SetCountryProvinces();
 
-    /** Gets country color. */
-    bool GetCountryColor(const FColor& Color, FColor& out_countryColor) const;
-
-    /** Gets country color. */
-    FColor GetCountryColor(const FProvinceData* data) const;
-
-    /** Gets religion color. */
-    FColor GetReligionColor(const FProvinceData* data) const;
-
-    /** Gets culture color. */
-    FColor GetCultureColor(const FProvinceData* data) const;
-
     void LoadFromMapObject(const UMapObject* MapObject);
 
     int* FindId(const FColor& Color);
 protected:
-    // TODO: REMOVE
-    /** Data table for the map. */
-    UPROPERTY(EditAnywhere, Category = "Data")
-    UDataTable* MapDataTable;
+#if WITH_EDITORONLY_DATA
+    /** Data table for visual property types */
+    UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types")
+    UDataTable* VisualPropertyTypesDT;
 
-    /** Data table for provinces.  TODO: REMOVE */
-    UPROPERTY(EditAnywhere, Category = "Data")
-    UDataTable* ProvinceDataTable;
+    /** Data table for visual properties */
+    UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
+    UDataTable* VisualPropertiesDT;
+#endif
+    TMap<FVisualPropertyType, TArray<FVisualProperty>> VisualPropertiesMap;
 
-    /** Data table for countries. */
-    UPROPERTY(EditAnywhere, Category = "Data")
-    UDataTable* CountryDataTable;
-
-    /** Data table for visual properties. */
-    UPROPERTY(EditAnywhere, Category = "Data")
-    UDataTable* VisualPropertiesDataTable;
-
-    /** Lookup table. */
-    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<FVector, FName> LookUpTable;
-    
     /** Province data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<int, FInstancedStruct> ProvinceDataMap;

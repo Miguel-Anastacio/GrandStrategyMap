@@ -121,7 +121,7 @@ public:
 		return LookupTable;
 	};
 
-	TArray<uint8> GetLookupTextureData() const
+	const TArray<uint8>& GetLookupTextureData() const
 	{
 		return LookupTextureData;
 	}
