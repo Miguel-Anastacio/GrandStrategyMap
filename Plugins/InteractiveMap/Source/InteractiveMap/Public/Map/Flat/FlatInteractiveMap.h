@@ -20,7 +20,7 @@ protected:
 	void BeginPlay() override;
 	virtual void InitializeMap_Implementation() override;
 
-	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void SetMapMode_Implementation(const FName& Mode) override;
 	UFUNCTION(BlueprintCallable, Category = "Limit")
 	void UpdateLimits();
 

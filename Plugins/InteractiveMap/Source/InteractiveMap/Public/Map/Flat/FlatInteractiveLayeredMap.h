@@ -18,6 +18,6 @@ class INTERACTIVEMAP_API AFlatInteractiveLayeredMap : public AFlatInteractiveMap
 public:
 	AFlatInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
 	
-	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void SetMapMode_Implementation(const FName& Mode) override;
 	virtual void InitializeMap_Implementation() override;
 };

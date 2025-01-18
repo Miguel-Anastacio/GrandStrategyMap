@@ -14,7 +14,6 @@ void UCustomEditableText::NativeOnInitialized()
 void UCustomEditableText::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	// ID->SetText(IDText);
 }
 
 void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)

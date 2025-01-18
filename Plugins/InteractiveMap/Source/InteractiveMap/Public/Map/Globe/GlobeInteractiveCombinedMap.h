@@ -13,7 +13,7 @@ class INTERACTIVEMAP_API AGlobeInteractiveCombinedMap : public AGlobeInteractive
 
 public:
 	AGlobeInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
-	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void SetMapMode_Implementation(const FName& mode) override;
 	virtual void InitializeMap_Implementation() override;
 
 protected:

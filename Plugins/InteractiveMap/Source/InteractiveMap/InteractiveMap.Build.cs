@@ -32,7 +32,10 @@ public class InteractiveMap : ModuleRules
 				"VictoryBPLibrary",
 				"UtilityModule",
 				"SharedModule",
-				"StructUtils"
+				"StructUtils",
+				"UMGEditor",
+				"UMG", 
+				"UnrealEd",
              
 				// ... add other public dependencies that you statically link with here ...
 			}
@@ -49,7 +52,7 @@ public class InteractiveMap : ModuleRules
 				"SlateCore",
                 "UMG",
 				"Json",
-				"JsonUtilities",
+				"JsonUtilities", "UMGEditor",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -88,6 +88,17 @@ class SHAREDMODULE_API UMapObject : public UObject
 #endif
 	
 public:
+	
+#if WITH_EDITORONLY_DATA
+	/** Data table for visual property types */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types")
+	UDataTable* VisualPropertyTypesDT;
+
+	/** Data table for visual properties */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
+	UDataTable* VisualPropertiesDT;
+#endif
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* StructType;
 	FOnAssetChanged OnObjectChanged;

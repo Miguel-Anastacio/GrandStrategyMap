@@ -8,9 +8,23 @@
 #include "Rendering/Texture2DResource.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DynamicTexture.generated.h"
+
 /**
  * Component for dynamically updating a texture.
  */
+USTRUCT()
+struct FArrayOfPixels
+{
+	GENERATED_BODY()
+	TArray<FIntVector2> PixelPositions;
+
+	explicit FArrayOfPixels(const FIntVector2& NewPosition)
+	{
+		PixelPositions.Emplace(NewPosition);
+	};
+	FArrayOfPixels(){};
+};
+
 struct FUpdateTextureRegion2D;
 UCLASS(ClassGroup = (Custom))
 class INTERACTIVEMAP_API UDynamicTexture : public UObject
@@ -39,6 +53,8 @@ public:
 	void SetPixelColor(int32 X, int32 Y, const FLinearColor& Color);
 	void SetPixelValue(int32 X, int32 Y, const FColor& Color);
 
+	void InitMaterial(UMaterialInstanceDynamic* MaterialInstanceDynamic, UTexture* LookupTexture, float TextureType);
+
 	/**
 	 * Draw a texture onto the dynamic texture.
 	 *
@@ -55,16 +71,13 @@ public:
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
 
 	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
-	FORCEINLINE uint32 GetTextureDataSqrtSize() { return TextureDataSqrtSize; };
+	FORCEINLINE uint32 GetTextureDataSqrtSize() const { return TextureDataSqrtSize; };
 
-	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureWidth = 512;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	int32 TextureHeight = 512;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Texture")
-	UMaterialInstanceDynamic* DynamicMaterial;
+	UMaterialInstanceDynamic* DynamicMaterial = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Texture")
 	FName DynamicMaterialParamName = "DynamicTexture";
@@ -85,5 +98,4 @@ private:
 
 	// Total Count of Pixels in Texture
 	uint32 TextureTotalPixels;
-
 };

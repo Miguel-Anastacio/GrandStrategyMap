@@ -24,8 +24,8 @@ class INTERACTIVEMAP_API AClickableMap : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AClickableMap(const FObjectInitializer& ObjectInitializer);
-
-
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	
 	UFUNCTION(BlueprintNativeEvent, Category = "Map")
 	void InitializeMap();
 	virtual void InitializeMap_Implementation();
@@ -67,10 +67,10 @@ public:
 	FColor GetColorFromLookUpTexture(FVector2D uv) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
-	void SetMapMode(MapMode mode);
-	virtual void SetMapMode_Implementation(MapMode mode);
+	void SetMapMode(const FName& Mode);
+	virtual void SetMapMode_Implementation(const FName& Mode);
 
-	void SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh);
+	void SetMeshMaterial(const FName& Mode, UStaticMeshComponent* Mesh);
 
 	// Update Visual Data
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
@@ -217,7 +217,7 @@ protected:
 
 	// The current map mode.
 	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
-	MapMode CurrentMapMode = MapMode::POLITICAL;
+	FName CurrentMapMode = "Country";
 
 	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
 	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;

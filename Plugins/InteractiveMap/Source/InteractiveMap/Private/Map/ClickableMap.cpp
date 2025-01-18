@@ -32,6 +32,15 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 	DynamicTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 }
 
+void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if(MapDataComponent && MapAsset)
+	{
+		MapDataComponent->ReadDataTables(MapAsset->VisualPropertiesDT, MapAsset->VisualPropertyTypesDT);
+	}
+}
+
 void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -48,18 +57,16 @@ void AClickableMap::InitializeMap_Implementation()
 	MapDataComponent->SetCountryProvinces();
 
 	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	// Create Dynamic Textures
+	// Fill them
 	CreateMapModes();
-	UDynamicTexture* DynamicTextureTest = *MapModesTextureComponents.Find("Country");
+	// set Current texture in Component
+	UDynamicTexture* DynamicTextureTest = *MapModesTextureComponents.Find("Landscape");
 	DynamicTextureComponent->SetDynamicTexture(DynamicTextureTest);
 	DynamicTextureComponent->UpdateTexture();
-	// DynamicTextureComponent->InitializeTexture();
-	
 	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
-	// DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", MapLookUpTexture);
-	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	DynamicTextureComponent->GetMaterialInstance()->SetScalarParameterValue("TextureType", 1.0f);
 
-	SetMapMode_Implementation(MapMode::POLITICAL);
+	SetMapMode_Implementation(FName("Landscape"));
 	
 	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
 
@@ -68,21 +75,6 @@ void AClickableMap::InitializeMap_Implementation()
 	if (player)
 	{
 		player->SetInteractiveMap(this);
-	}
-
-	if (!TerrainMapMaterial)
-		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Map Material is not valid"));
-
-	// Terrain Material
-	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(TerrainMapMaterial, this);
-	TerrainDynamicMaterial = DynMaterial;
-	if (!TerrainTexture)
-		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Texture is not valid"));
-	if (TerrainDynamicMaterial)
-	{
-		TerrainDynamicMaterial->SetTextureParameterValue("TerrainTexture", TerrainTexture); 
-		TerrainDynamicMaterial->SetScalarParameterValue("TextureType", 0.0f);
-		TerrainDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
 	}
 }
 // Called when the game starts or when spawned
@@ -119,15 +111,10 @@ void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& Vi
 	const int32 Height = MapLookUpTexture->GetSizeY();
 	for(const auto& VisualPropertyType : VisualPropertyTypes)
 	{
-		const FName ComponentName = FName(*FString::Printf(TEXT("DynamicTextureComponent_%s"), *VisualPropertyType.Type.ToString()));
 		UDynamicTexture* DynamicTexture = NewObject<UDynamicTexture>();
-
 		DynamicTexture->InitializeDynamicTexture(Width, Height);
-		DynamicTexture->DynamicMaterial = UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this);
-		DynamicTexture->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-		// Use a regular texture not a virtual texture
-		DynamicTexture->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
-		
+		DynamicTexture->InitMaterial(UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this),
+										MapLookUpTexture, 1.0f);
 		MapModesTextureComponents.Emplace(VisualPropertyType.Type, DynamicTexture);
 	}
 }
@@ -149,50 +136,45 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 			const uint8 G = LookupTextureData[Index + 1];
 			const uint8 R = LookupTextureData[Index + 2];
 			const int* ID = MapDataComponent->FindId(FColor(R, G, B));
-			if (ID)
+			if (!ID)
 			{
-				FInstancedStruct* InstancedStruct = GetProvinceData(*ID);
-				if (!InstancedStruct)
+				// UE_LOG(LogInteractiveMap, Error, TEXT("Error color not in lookup table %s"), *FColor(R, G, B).ToString());
+				continue;
+			}
+			FInstancedStruct* InstancedStruct = GetProvinceData(*ID);
+			if (!InstancedStruct)
+			{
+				UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
+				return;
+			}
+
+			for(const auto& Visual  : VisualProperties)
+			{
+				const FProperty* Property = InstancedStruct->GetScriptStruct()->FindPropertyByName(Visual.Key);
+				if (!Property)
 				{
-					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
-					return;
+					continue;
 				}
 				
-				for (TFieldIterator<FProperty> It(MapAsset->StructType); It; ++It)
+				const FName PropertyTypeName = Property->GetFName();
+				bool bResult = false;
+				const FString Tag = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(*InstancedStruct, PropertyTypeName.ToString(), bResult);
+				if(!bResult)
 				{
-					const FProperty* Property = *It;
-					if (!Property)
+					UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
+					continue;
+				}
+
+				for(auto& VisualProperty : Visual.Value.VisualProperties)
+				{
+					if(Tag != VisualProperty.Tag)
 					{
 						continue;
 					}
-					// check if property is visual
-					const FName PropertyTypeName = Property->GetFName();
-					auto* AllPropertiesOfType = VisualProperties.Find(PropertyTypeName);
-					if(!AllPropertiesOfType)
+					// finally set pixels of texture component that matches this visual property type
+					if(UDynamicTexture** TextureComponent = MapModesTextureComponents.Find(PropertyTypeName))
 					{
-						// UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
-						continue;
-					}
-					
-					bool bResult = false;
-					const FString Tag = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(*InstancedStruct, PropertyTypeName.ToString(), bResult);
-					if(!bResult)
-					{
-						UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
-						continue;
-					}
-					
-					for(auto& VisualProperty : AllPropertiesOfType->VisualProperties)
-					{
-						if(Tag != VisualProperty.Tag)
-						{
-							continue;
-						}
-						// finally set pixels of texture component that matches this visual property type
-						if(UDynamicTexture** TextureComponent = MapModesTextureComponents.Find(PropertyTypeName))
-						{
-							(*TextureComponent)->SetPixelValue(X, Y, VisualProperty.Color);
-						}
+						(*TextureComponent)->SetPixelValue(X, Y, VisualProperty.Color);
 					}
 				}
 			}
@@ -467,12 +449,12 @@ TMap<int, FInstancedStruct>* AClickableMap::GetProvinceDataMap() const
 }
 TMap<FName, FCountryData>* AClickableMap::GetCountryDataMap()
 {
-	return  MapDataComponent->GetCountryDataMap();
+	return  nullptr;
 }
 
 TMap<FName, FColoredData>* AClickableMap::GetVisualPropertiesDataMap()
 {
-	return MapDataComponent->GetVisualPropertiesDataMap();
+	return nullptr;
 }
 
 int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
@@ -480,49 +462,18 @@ int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
 	return MapDataComponent->GetProvinceID(Color, bOutResult);
 }
 
-void AClickableMap::SetMapMode_Implementation(MapMode mode)
+
+void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 {
-	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
-	SetMeshMaterial(mode, mesh);
-	MapModeChangedDelegate.Broadcast(CurrentMapMode, mode);
-	CurrentMapMode = mode;
-}
-
-void AClickableMap::SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh)
-{
-	if(mesh)
+	if(UDynamicTexture** CurrentDyntTexture = MapModesTextureComponents.Find(Mode))
 	{
-		mesh->SetMaterial(0, DynamicTextureComponent->GetMaterialInstance());
-	}
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-
-		if (mesh)
+		DynamicTextureComponent->SetDynamicTexture(*CurrentDyntTexture);
+		DynamicTextureComponent->UpdateTexture();
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
+		if(UStaticMeshComponent* StaticMeshComponent = MapVisualComponent->GetMapGameplayMeshComponent())
 		{
-			// mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+			StaticMeshComponent->SetMaterial(0, DynamicTextureComponent->GetMaterialInstance());
 		}
-		break;
-	case MapMode::RELIGIOUS:
-
-		if (mesh)
-		{
-			// mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
-		}
-
-		break;
-	case MapMode::CULTURAL:
-
-		if (mesh)
-		{
-			// mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
-		}
-		break;
-	case MapMode::TERRAIN:
-
-		break;
-	default:
-		break;
 	}
 }
 
@@ -567,16 +518,15 @@ bool AClickableMap::UpdateCountryData(const FCountryData& data, FName id)
 
 bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
 {
-	FCountryData* country = MapDataComponent->CountryDataMap.Find(id);
+	// FCountryData* country = MapDataComponent->CountryDataMap.Find(id);
 	
-	if (!country)
-		return false;
+	// if (!country)
+	return false;
 
 	// UpdatePixelArray(*PoliticalMapTextureComponent->GetTextureData(), country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
-	country->Color = color.ToFColor(true);
+	// country->Color = color.ToFColor(true);
 
 	// PoliticalMapTextureComponent->UpdateTexture();
-	return true;
 
 }
 
@@ -608,26 +558,11 @@ void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, 
 
 void AClickableMap::UpdateProvinceHovered(const FColor& color)
 {
-	switch (CurrentMapMode)
+	// possible improve, just add dynMaterial ref to DynamicTextureComponent
+	//  so then just update the current 
+	for(const auto& DynTextures : MapModesTextureComponents)
 	{
-	case MapMode::POLITICAL:
-		// if(PoliticalMapTextureComponent->DynamicMaterial)
-			// PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
-		break;
-	case MapMode::RELIGIOUS:
-		// if(ReligiousMapTextureComponent->DynamicMaterial)
-			// ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
-		break;
-	case MapMode::CULTURAL:
-		// if(CultureMapTextureComponent->DynamicMaterial)
-			// CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
-		break;
-	case MapMode::TERRAIN:
-		if(TerrainDynamicMaterial)
-			TerrainDynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
-		break;
-	default:
-		break;
+		DynTextures.Value->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 	}
 }
 

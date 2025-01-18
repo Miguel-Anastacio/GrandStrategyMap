@@ -33,7 +33,6 @@ public:
 
     const TMap<FVisualPropertyType, FArrayOfVisualProperties>& GetVisualPropertiesMap() const;
     TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
-    
 
 protected:
     /** Gets the lookup table. */
@@ -42,12 +41,6 @@ protected:
 
     /** Gets the province data map. */
     FORCEINLINE TMap<int, FInstancedStruct>* GetProvinceDataMap() { return &ProvinceDataMap; };
-
-    /** Gets the country data map. */
-    FORCEINLINE TMap<FName, FCountryData>* GetCountryDataMap() { return &CountryDataMap; };
-
-    /** Gets the visual properties data map. */
-    FORCEINLINE TMap<FName, FColoredData>* GetVisualPropertiesDataMap() { return &VisualPropertiesDataMap; };
 
     /** Gets the province ID. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
@@ -88,7 +81,7 @@ protected:
     bool UpdateCountryData(const FCountryData& data, FName id);
 
     /** Reads data tables. */
-    void ReadDataTables();
+    void ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable);
 
     void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
 
@@ -118,23 +111,10 @@ protected:
     /** Province data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<int, FInstancedStruct> ProvinceDataMap;
-
-    /** Country data map. */
-    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<FName, FCountryData> CountryDataMap;
-
-    /** Visual properties data map. */
-    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<FName, FColoredData> VisualPropertiesDataMap;
-
+    
     friend class AClickableMap;
     //// ------------------------------------------------------------------------
     /** New Lookup table. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FColor, int> NewLookupTable;
-
-    
-
-    
-    
 };

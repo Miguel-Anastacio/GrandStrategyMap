@@ -17,7 +17,7 @@ class INTERACTIVEMAP_API AFlatInteractiveCombinedMap : public AFlatInteractiveMa
 
 public:
 	AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
-	virtual void SetMapMode_Implementation(MapMode mode) override;
+	virtual void SetMapMode_Implementation(const FName& mode) override;
 	virtual void InitializeMap_Implementation() override;
 	//virtual void UpdateProvinceHovered(const FColor& color) override;
 

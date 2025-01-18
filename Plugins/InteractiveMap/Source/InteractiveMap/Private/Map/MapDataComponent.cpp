@@ -14,7 +14,7 @@ UMapDataComponent::UMapDataComponent()
 void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	ReadDataTables();
+	// ReadDataTables();
 }
 
 const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
@@ -94,33 +94,40 @@ bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, int id, Ma
 
 bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
 {
-	FCountryData* country = CountryDataMap.Find(id);
-	if (country)
-	{
-		if (country->CountryName != data.CountryName)
-		{
-			(*country) = data;
-			return true;
-		}
-
-		return false;
-	}
-	else
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
-		return false;
-	}
+	// FCountryData* country = CountryDataMap.Find(id);
+	// if (country)
+	// {
+	// 	if (country->CountryName != data.CountryName)
+	// 	{
+	// 		(*country) = data;
+	// 		return true;
+	// 	}
+	//
+	// 	return false;
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
+	// 	return false;
+	// }
+	return false;
 }
 #if WITH_EDITOR
-void UMapDataComponent::ReadDataTables()
+void UMapDataComponent::ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable)
 {
+	if(!VpDataTable|| !VpTypeDataTable)
+	{
+		UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
+		return;
+	}
+	
 	VisualPropertiesMap.Empty();	
 	TArray<FVisualPropertyType*> AllTypes;
-	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
+	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VpTypeDataTable, AllTypes))
 	{
 	}
 	TArray<FVisualProperty*> VisualProperties;
-	UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
+	UDataManagerFunctionLibrary::ReadDataTableToArray(VpDataTable, VisualProperties);
 	
 	for(const auto& Type : AllTypes)
 	{
@@ -157,19 +164,6 @@ void UMapDataComponent::SetCountryProvinces()
 	TArray<FName> countriesToIgnore;
 
 	// see which countries already had province data from file
-	for (auto& country : CountryDataMap)
-	{
-		country.Value.Provinces.Empty();
-		if (country.Value.Provinces.Num() > 0)
-			countriesToIgnore.Emplace(country.Key);
-	}
-
-	// if all countries then exit function
-	if (countriesToIgnore.Num() == CountryDataMap.Num())
-	{
-		return;
-	}
-
 	for (auto& province : ProvinceDataMap)
 	{
 		// FCountryData* country = CountryDataMap.Find(province.Value.Owner);

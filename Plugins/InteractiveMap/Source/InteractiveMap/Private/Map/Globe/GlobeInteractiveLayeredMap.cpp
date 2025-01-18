@@ -18,36 +18,36 @@ AGlobeInteractiveLayeredMap::AGlobeInteractiveLayeredMap(const FObjectInitialize
 		GameplayMapMaterial = MaterialFinder.Object;
 }
 
-void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(MapMode mode)
+void AGlobeInteractiveLayeredMap::SetMapMode_Implementation(const FName& mode)
 {
 	Super::SetMapMode_Implementation(mode);
 	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
 	UStaticMeshComponent* terrainMesh = MapVisualComponent->GetMapTerrainMeshComponent();
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-		mesh->SetVisibility(true);
-		terrainMesh->SetVisibility(false);
-		break;
-	case MapMode::RELIGIOUS:
-		mesh->SetVisibility(true);
-		terrainMesh->SetVisibility(false);
-
-		break;
-	case MapMode::CULTURAL:
-		mesh->SetVisibility(true);
-		terrainMesh->SetVisibility(false);
-
-		break;
-	case MapMode::TERRAIN:
-		mesh->SetVisibility(false);
-		terrainMesh->SetVisibility(true);
-		terrainMesh->SetMaterial(0, TerrainDynamicMaterial);
-
-		break;
-	default:
-		break;
-	}
+	// switch (mode)
+	// {
+	// case MapMode::POLITICAL:
+	// 	mesh->SetVisibility(true);
+	// 	terrainMesh->SetVisibility(false);
+	// 	break;
+	// case MapMode::RELIGIOUS:
+	// 	mesh->SetVisibility(true);
+	// 	terrainMesh->SetVisibility(false);
+	//
+	// 	break;
+	// case MapMode::CULTURAL:
+	// 	mesh->SetVisibility(true);
+	// 	terrainMesh->SetVisibility(false);
+	//
+	// 	break;
+	// case MapMode::TERRAIN:
+	// 	mesh->SetVisibility(false);
+	// 	terrainMesh->SetVisibility(true);
+	// 	terrainMesh->SetMaterial(0, TerrainDynamicMaterial);
+	//
+	// 	break;
+	// default:
+	// 	break;
+	// }
 }
 
 void AGlobeInteractiveLayeredMap::InitializeMap_Implementation()

@@ -22,7 +22,7 @@ public:
 
 protected:
 	/** Native initialization override. */
-	void NativeOnInitialized() override;
+	virtual void NativeOnInitialized() override;
 
 	/** Sets the map mode based on the clicked button. */
 	UFUNCTION()
@@ -33,21 +33,9 @@ protected:
 	void SaveDataToJson(UCustomButtonWidget* button);
 
 protected:
-	/** Button for switching to the political map mode. */
+	/** Button for saving general data. */
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> PoliticalMapButton;
-
-	/** Button for switching to the religious map mode. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> ReligiousMapButton;
-
-	/** Button for switching to the culture map mode. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> CultureMapButton;
-
-	/** Button for switching to the terrain map mode. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> TerrainMapButton;
+	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
 
 	/** Button for saving general data. */
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
@@ -70,6 +58,7 @@ protected:
 	FString FileNameCountry = FString("CountryCustom.json");
 
 	/** Reference to the interactive map. */
+	UPROPERTY()
 	class AClickableMap* GameMap;
 
 };

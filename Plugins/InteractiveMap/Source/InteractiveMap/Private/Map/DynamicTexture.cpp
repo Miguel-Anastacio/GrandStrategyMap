@@ -56,8 +56,15 @@ void UDynamicTexture::SetPixelValue(int32 X, int32 Y, const FColor& Color)
 	TextureData[start + 1] = Color.G;
 	TextureData[start + 2] = Color.R;
 	TextureData[start + 3] = Color.A;
+	
 }
 
+void UDynamicTexture::InitMaterial(UMaterialInstanceDynamic* MaterialInstanceDynamic, UTexture* LookupTexture, float TextureType)
+{
+	DynamicMaterial = MaterialInstanceDynamic;
+	DynamicMaterial->SetTextureParameterValue("LookUpTexture", LookupTexture);
+	DynamicMaterial->SetScalarParameterValue("TextureType", TextureType);
+}
 
 void UDynamicTexture::DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter /*= FLinearColor::White*/)
 {
@@ -93,7 +100,7 @@ void UDynamicTexture::InitializeDynamicTexture()
 	TextureDataSqrtSize = TextureWidth * 4;
 	// Initialize Texture Data Array
 	TextureData.AddDefaulted(TextureDataSize);
-	FillTexture(FColor::Blue);
+	FillTexture(FColor::White);
 }
 
 void UDynamicTexture::InitializeDynamicTexture(uint32 width, uint32 height)

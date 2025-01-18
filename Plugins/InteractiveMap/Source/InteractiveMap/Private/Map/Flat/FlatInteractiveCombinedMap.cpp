@@ -20,31 +20,31 @@ AFlatInteractiveCombinedMap::AFlatInteractiveCombinedMap(const FObjectInitialize
 		GameplayMapMaterial = MaterialFinder.Object;
 }
 
-void AFlatInteractiveCombinedMap::SetMapMode_Implementation(MapMode mode)
+void AFlatInteractiveCombinedMap::SetMapMode_Implementation(const FName& mode)
 {
 	Super::SetMapMode_Implementation(mode);
 
 	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-	
-		break;
-	case MapMode::RELIGIOUS:
-		
-		break;
-	case MapMode::CULTURAL:
-	
-		break;
-	case MapMode::TERRAIN:
-		if (mesh)
-		{
-			mesh->SetMaterial(0, TerrainDynamicMaterial);
-		}
-		break;
-	default:
-		break;
-	}
+	// switch (mode)
+	// {
+	// case MapMode::POLITICAL:
+	//
+	// 	break;
+	// case MapMode::RELIGIOUS:
+	// 	
+	// 	break;
+	// case MapMode::CULTURAL:
+	//
+	// 	break;
+	// case MapMode::TERRAIN:
+	// 	if (mesh)
+	// 	{
+	// 		mesh->SetMaterial(0, TerrainDynamicMaterial);
+	// 	}
+	// 	break;
+	// default:
+	// 	break;
+	// }
 
 	UpdateLimits();
 	
