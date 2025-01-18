@@ -17,9 +17,19 @@ void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& Pro
 	ReadDataTables();
 }
 
-const TMap<FVisualPropertyType, TArray<FVisualProperty>>& UMapDataComponent::GetVisualPropertiesMap() const
+const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
 {
 	return VisualPropertiesMap;
+}
+
+TMap<FName, FArrayOfVisualProperties> UMapDataComponent::GetVisualPropertyNameMap() const
+{
+	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
+	for(auto& VpType : VisualPropertiesMap)
+	{
+		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
+	}
+	return VisualPropertiesNameMap;
 }
 
 TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
@@ -104,6 +114,7 @@ bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
 #if WITH_EDITOR
 void UMapDataComponent::ReadDataTables()
 {
+	VisualPropertiesMap.Empty();	
 	TArray<FVisualPropertyType*> AllTypes;
 	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
 	{
@@ -113,15 +124,15 @@ void UMapDataComponent::ReadDataTables()
 	
 	for(const auto& Type : AllTypes)
 	{
-		TArray<FVisualProperty> VisualPropertiesOfType;
+		FArrayOfVisualProperties ArrayOf;
 		for(const auto& Property : VisualProperties)
 		{
 			if(Type->Type == Property->Type)
 			{
-				VisualPropertiesOfType.Emplace(*Property);
+				ArrayOf.VisualProperties.Emplace(*Property);
 			}
 		}
-		VisualPropertiesMap.Emplace(*Type, VisualPropertiesOfType);
+		VisualPropertiesMap.Emplace(*Type, ArrayOf.VisualProperties);
 	}
 }
 #endif
@@ -185,4 +196,46 @@ void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)
 int* UMapDataComponent::FindId(const FColor& Color)
 {
 	return NewLookupTable.Find(Color);
+}
+
+FVisualProperty UMapDataComponent::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
+{
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
+	if(!PropertiesOfType)
+	{
+		return FVisualProperty();
+	}
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
+}
+
+FVisualProperty UMapDataComponent::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
+{
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
+	if(!PropertiesOfType)
+	{
+		return FVisualProperty();
+	}
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
 }

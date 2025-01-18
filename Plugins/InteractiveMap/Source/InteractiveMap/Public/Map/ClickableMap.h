@@ -7,6 +7,8 @@
 #include "MapEnums.h"
 #include "ClickableMap.generated.h"
 
+struct FArrayOfVisualProperties;
+class UDynamicTexture;
 class UMapObject;
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
@@ -110,9 +112,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Map")
-	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
-
 	void LoadMapAsset(UMapObject* MapObject);
 	
 	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
@@ -152,10 +151,13 @@ protected:
 	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
 	void SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color);
 
-#if WITH_EDITOR
-	void CreateDynamicTextureComponents(const TArray<FVisualPropertyType>& VisualPropertyTypes);
-	void FillDynamicTextureComponents(const TMap<FName, TArray<FVisualProperty>>& VisualProperties, const TArray<uint8>& LookupTextureData);
-#endif
+	UFUNCTION(CallInEditor, BlueprintCallable)
+	void CreateMapModes();
+// #if WITH_EDITOR
+	
+	void CreateDynamicTextures(const TArray<FVisualPropertyType>& VisualPropertyTypes);
+	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData);
+// #endif
 protected:
 	// The root of the map.
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
@@ -185,15 +187,7 @@ protected:
 
 	// The political map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;
-
-	// The religious map texture component.
-	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> ReligiousMapTextureComponent;
-
-	// The culture map texture component.
-	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> CultureMapTextureComponent;
+	TObjectPtr<UDynamicTextureComponent> DynamicTextureComponent;
 
 	// Material that shows the current gameplay map.
 	// Political, religious, or terrain.
@@ -228,7 +222,8 @@ protected:
 	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
 	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
 	// void CreateDynamicTextureComponents();
-	TMap<FName, UDynamicTextureComponent*> MapModesTextureComponents;
+	UPROPERTY()
+	TMap<FName, UDynamicTexture*> MapModesTextureComponents;
 
 
 };

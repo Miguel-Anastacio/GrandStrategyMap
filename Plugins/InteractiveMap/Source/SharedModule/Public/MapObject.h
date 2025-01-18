@@ -47,6 +47,35 @@ struct FExampleStruct
 	}
 };
 
+USTRUCT(BlueprintType)
+struct FMapDataStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 ID = -1;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Name = "ProvinceName";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int32 Population = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Country = "POR";
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Religion = "CAT";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Culture = "BAS";
+	
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
+	}
+};
+
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
 UCLASS()

@@ -66,7 +66,7 @@ void AFlatInteractiveCombinedMap::InitializeMap_Implementation()
 	{
 		BorderDynamicMaterial = UMaterialInstanceDynamic::Create(BorderMaterial, this);
 		//BorderDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-		SetBorderLookUpTexture(BorderDynamicMaterial, PoliticalMapTextureComponent);
+		// SetBorderLookUpTexture(BorderDynamicMaterial, PoliticalMapTextureComponent);
 
 		BorderMaterialRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 2048, 1024, ETextureRenderTargetFormat::RTF_RGBA8, FLinearColor::White);
 		UpdateBorder(BorderDynamicMaterial, BorderMaterialRenderTarget);

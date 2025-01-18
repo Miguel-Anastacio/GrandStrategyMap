@@ -10,7 +10,13 @@
 #include "Map/MapEnums.h"
 #include "MapDataComponent.generated.h"
 
-
+USTRUCT(BlueprintType)
+struct FArrayOfVisualProperties
+{
+    GENERATED_BODY()
+    UPROPERTY()
+    TArray<FVisualProperty> VisualProperties;
+};
 /**
  * Component for managing map data.
  */
@@ -25,7 +31,9 @@ public:
 
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
-    const TMap<FVisualPropertyType, TArray<FVisualProperty>>& GetVisualPropertiesMap() const;
+    const TMap<FVisualPropertyType, FArrayOfVisualProperties>& GetVisualPropertiesMap() const;
+    TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
+    
 
 protected:
     /** Gets the lookup table. */
@@ -90,6 +98,10 @@ protected:
     void LoadFromMapObject(const UMapObject* MapObject);
 
     int* FindId(const FColor& Color);
+
+    FVisualProperty GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const;
+    FVisualProperty GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const;
+    
 protected:
 #if WITH_EDITORONLY_DATA
     /** Data table for visual property types */
@@ -100,7 +112,8 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
     UDataTable* VisualPropertiesDT;
 #endif
-    TMap<FVisualPropertyType, TArray<FVisualProperty>> VisualPropertiesMap;
+    UPROPERTY()
+    TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
 
     /** Province data map. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")

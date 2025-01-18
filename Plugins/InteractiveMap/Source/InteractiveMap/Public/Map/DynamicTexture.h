@@ -4,33 +4,29 @@
 
 #pragma once
 #include "CoreMinimal.h"
-#include "DynamicTexture.h"
-#include "Components/ActorComponent.h"
 #include "RHIResources.h"
 #include "Rendering/Texture2DResource.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "DynamicTextureComponent.generated.h"
-class UDynamicTexture;
+#include "DynamicTexture.generated.h"
 /**
- * Holds data that represents a dynamic texture.
+ * Component for dynamically updating a texture.
  */
 struct FUpdateTextureRegion2D;
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class INTERACTIVEMAP_API UDynamicTextureComponent : public UActorComponent
+UCLASS(ClassGroup = (Custom))
+class INTERACTIVEMAP_API UDynamicTexture : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UDynamicTextureComponent();
+	UDynamicTexture();
 public:
-	void SetDynamicTexture(UDynamicTexture* DynTexture);
 	/**
 	 * Fill the entire texture with a specified color.
 	 * @param Color The color to fill the texture with.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	void FillTexture(const FLinearColor& Color) const;
+	void FillTexture(const FLinearColor& Color);
 
 	/**
 	 * Set the color of a pixel in the texture.
@@ -40,8 +36,8 @@ public:
 	 * @param Color The color to set the pixel to.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
-	void SetPixelColor(int32 X, int32 Y, const FLinearColor& Color) const;
-	void SetPixelValue(int32 X, int32 Y, const FColor& Color) const;
+	void SetPixelColor(int32 X, int32 Y, const FLinearColor& Color);
+	void SetPixelValue(int32 X, int32 Y, const FColor& Color);
 
 	/**
 	 * Draw a texture onto the dynamic texture.
@@ -54,43 +50,40 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dynamic Texture")
 	void DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter = FLinearColor::White);
 
-	/**
-	 * Update the texture object from texture data.
-	 * @param bFreeData Whether to free the data after updating.
-	 */
-	void UpdateTexture(bool bFreeData = false);
-
-	/**
-	* Get the dynamic texture.
-	* @return The dynamic texture.
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dynamic Texture")
-	UTexture2D* GetTexture() const;
-
-	void InitializeTexture(uint32 width, uint32 height);
+	void InitializeDynamicTexture(uint32 width, uint32 height);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter = FLinearColor::White);
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
 
-	FORCEINLINE TArray<uint8>* GetTextureData() const { return DynamicTextureData->GetTextureData(); };
+	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
+	FORCEINLINE uint32 GetTextureDataSqrtSize() { return TextureDataSqrtSize; };
 
-	UMaterialInstanceDynamic* GetMaterialInstance() const;
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
+	int32 TextureWidth = 512;
 
-	void InitializeTexture();
-protected:
-	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
+	int32 TextureHeight = 512;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Texture")
+	UMaterialInstanceDynamic* DynamicMaterial;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Texture")
+	FName DynamicMaterialParamName = "DynamicTexture";
 
 private:
 	// Initialize the Dynamic Texture
+	void InitializeDynamicTexture();
 
 private:
-	UPROPERTY()
-	UDynamicTexture* DynamicTextureData;
-	// Texture Object
-	UPROPERTY()
-	UTexture2D* DynamicTexture;
+	// Array that contains the Texture Data
+	TArray<uint8> TextureData;
 
-	// Update Region Struct
-	FUpdateTextureRegion2D* TextureRegion;
+	// Total Bytes of Texture Data
+	uint32 TextureDataSize;
 
+	// Texture Data Sqrt Size
+	uint32 TextureDataSqrtSize;
+
+	// Total Count of Pixels in Texture
+	uint32 TextureTotalPixels;
 
 };

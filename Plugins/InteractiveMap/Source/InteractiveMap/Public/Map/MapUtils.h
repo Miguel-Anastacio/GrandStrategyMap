@@ -174,6 +174,9 @@ struct FVisualPropertyType : public FTableRowBase
     {
         return GetTypeHash(Other.Type);
     }
+
+    FVisualPropertyType(const FName& Name) : MaterialInstance(nullptr), Type(Name){};
+    FVisualPropertyType() : MaterialInstance(nullptr), Type(){};
 };
 
 

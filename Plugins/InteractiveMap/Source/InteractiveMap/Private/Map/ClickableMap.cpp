@@ -27,16 +27,9 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 	MapRoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MapRoot"));
 	RootComponent = MapRoot;
 
-	//MapVisualComponent = CreateDefaultSubobject<UMapVisualComponent>(TEXT("Map Visual"));
-	//MapVisualComponent->SetupAttachment(RootComponent);
-	//MapVisualComponent->AttachMeshes(RootComponent);
-
 	MapDataComponent = CreateDefaultSubobject<UMapDataComponent>(TEXT("Map Data"));
 
-	PoliticalMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
-	ReligiousMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Religious Map Texture"));
-	CultureMapTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Culture Map Texture"));
-
+	DynamicTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 }
 
 void AClickableMap::PostInitializeComponents()
@@ -54,20 +47,20 @@ void AClickableMap::InitializeMap_Implementation()
 	}
 	MapDataComponent->SetCountryProvinces();
 
-	// Visual
-	int32 width = MapLookUpTexture->GetSizeX();
-	int32 height = MapLookUpTexture->GetSizeY();
-	PoliticalMapTextureComponent->InitializeTexture(width, height);
-	ReligiousMapTextureComponent->InitializeTexture(width, height);
-	CultureMapTextureComponent->InitializeTexture(width, height);
+	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
+	CreateMapModes();
+	UDynamicTexture* DynamicTextureTest = *MapModesTextureComponents.Find("Country");
+	DynamicTextureComponent->SetDynamicTexture(DynamicTextureTest);
+	DynamicTextureComponent->UpdateTexture();
+	// DynamicTextureComponent->InitializeTexture();
+	
+	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
+	// DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", MapLookUpTexture);
+	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	DynamicTextureComponent->GetMaterialInstance()->SetScalarParameterValue("TextureType", 1.0f);
 
-	// Visual Data
-	SaveMapTextureData();
-	CreateMapTexture(PoliticalMapTextureComponent);
-	CreateMapTexture(ReligiousMapTextureComponent);
-	CreateMapTexture(CultureMapTextureComponent);
-
-	MapVisualComponent->GetMapGameplayMeshComponent()->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+	SetMapMode_Implementation(MapMode::POLITICAL);
+	
 	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
 
 	// set referene in player class
@@ -83,17 +76,14 @@ void AClickableMap::InitializeMap_Implementation()
 	// Terrain Material
 	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(TerrainMapMaterial, this);
 	TerrainDynamicMaterial = DynMaterial;
-
 	if (!TerrainTexture)
 		UE_LOG(LogInteractiveMap, Error, TEXT("Terrain Texture is not valid"));
-
 	if (TerrainDynamicMaterial)
 	{
 		TerrainDynamicMaterial->SetTextureParameterValue("TerrainTexture", TerrainTexture); 
 		TerrainDynamicMaterial->SetScalarParameterValue("TextureType", 0.0f);
 		TerrainDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
 	}
-
 }
 // Called when the game starts or when spawned
 void AClickableMap::BeginPlay()
@@ -110,9 +100,18 @@ void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const
 	pixelArray[index + 2] = color.R;
 	pixelArray[index + 3] = color.A;
 }
-#if WITH_EDITOR
-void AClickableMap::CreateDynamicTextureComponents( const TArray<FVisualPropertyType>& VisualPropertyTypes)
+
+void AClickableMap::CreateMapModes()
 {
+	TArray<FVisualPropertyType> Types;
+	MapDataComponent->GetVisualPropertiesMap().GetKeys(Types);
+	CreateDynamicTextures(Types);
+	FillDynamicTextures(MapDataComponent->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
+}
+// #if WITH_EDITOR
+void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& VisualPropertyTypes)
+{
+	MapLookUpTexture = MapAsset->LookupTexture;
 	if(!MapLookUpTexture)
 		return;
 	
@@ -121,20 +120,19 @@ void AClickableMap::CreateDynamicTextureComponents( const TArray<FVisualProperty
 	for(const auto& VisualPropertyType : VisualPropertyTypes)
 	{
 		const FName ComponentName = FName(*FString::Printf(TEXT("DynamicTextureComponent_%s"), *VisualPropertyType.Type.ToString()));
-		UDynamicTextureComponent* TextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(ComponentName);
+		UDynamicTexture* DynamicTexture = NewObject<UDynamicTexture>();
 
-		TextureComponent->InitializeTexture(Width, Height);
-		TextureComponent->DynamicMaterial = UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this);
-		TextureComponent->DynamicMaterial->SetTextureParameterValue("DynamicTexture", TextureComponent->GetTexture());
-		TextureComponent->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+		DynamicTexture->InitializeDynamicTexture(Width, Height);
+		DynamicTexture->DynamicMaterial = UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this);
+		DynamicTexture->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
 		// Use a regular texture not a virtual texture
-		TextureComponent->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
+		DynamicTexture->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
 		
-		MapModesTextureComponents.Emplace(VisualPropertyType.Type, TextureComponent);
+		MapModesTextureComponents.Emplace(VisualPropertyType.Type, DynamicTexture);
 	}
 }
 
-void AClickableMap::FillDynamicTextureComponents(const TMap<FName, TArray<FVisualProperty>>& VisualProperties, const TArray<uint8>& LookupTextureData)
+void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData)
 {
 	const int32 Width = MapLookUpTexture->GetSizeX();
 	const int32 Height = MapLookUpTexture->GetSizeY();
@@ -172,6 +170,7 @@ void AClickableMap::FillDynamicTextureComponents(const TMap<FName, TArray<FVisua
 					auto* AllPropertiesOfType = VisualProperties.Find(PropertyTypeName);
 					if(!AllPropertiesOfType)
 					{
+						// UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
 						continue;
 					}
 					
@@ -183,32 +182,24 @@ void AClickableMap::FillDynamicTextureComponents(const TMap<FName, TArray<FVisua
 						continue;
 					}
 					
-					for(auto& VisualProperty : *AllPropertiesOfType)
+					for(auto& VisualProperty : AllPropertiesOfType->VisualProperties)
 					{
 						if(Tag != VisualProperty.Tag)
 						{
 							continue;
 						}
 						// finally set pixels of texture component that matches this visual property type
-						if(UDynamicTextureComponent** TextureComponent = MapModesTextureComponents.Find(PropertyTypeName))
+						if(UDynamicTexture** TextureComponent = MapModesTextureComponents.Find(PropertyTypeName))
 						{
 							(*TextureComponent)->SetPixelValue(X, Y, VisualProperty.Color);
 						}
 					}
 				}
 			}
-			else
-			{
-				
-				// PoliticalMapTextureComponent->SetPixelValue(X, Y, FColor::Black);
-				// ReligiousMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
-				// CultureMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
-			}
-
 		}
 	}
 }
-#endif
+// #endif
 
 //TODO - TO BE REMOVED
 void AClickableMap::SaveMapTextureData()
@@ -250,9 +241,7 @@ void AClickableMap::SaveMapTextureData()
 			}
 			else
 			{
-				PoliticalMapTextureComponent->SetPixelValue(X, Y, FColor::Black);
-				ReligiousMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
-				CultureMapTextureComponent->SetPixelValue(X, Y,  FColor::Black);
+
 			}
 
 		}
@@ -269,17 +258,9 @@ void AClickableMap::Tick(float DeltaTime)
 void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
 {
 	textureCompoment->UpdateTexture();
-
-	if (!GameplayMapMaterial)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Gameplay Map Material not assigned"));
-	}
-	UMaterialInstanceDynamic* DynMaterial = UMaterialInstanceDynamic::Create(GameplayMapMaterial, this);
-	textureCompoment->DynamicMaterial = DynMaterial;
-	textureCompoment->DynamicMaterial->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
-	textureCompoment->DynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	// Use a regular texture not a virtual texture
-	textureCompoment->DynamicMaterial->SetScalarParameterValue("TextureType", 1.0f);
+	textureCompoment->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
+	textureCompoment->GetMaterialInstance()->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	textureCompoment->GetMaterialInstance()->SetScalarParameterValue("TextureType", 1.0f);
 }
 
 void AClickableMap::RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode)
@@ -351,7 +332,7 @@ void AClickableMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID, 
 			return;
 		}
 
-		textureComponent = PoliticalMapTextureComponent;
+		// textureComponent = PoliticalMapTextureComponent;
 
 		break;
 	case MapMode::RELIGIOUS:
@@ -363,7 +344,7 @@ void AClickableMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID, 
 			return;
 		}
 
-		textureComponent = ReligiousMapTextureComponent;
+		// textureComponent = ReligiousMapTextureComponent;
 
 		break;
 	case MapMode::CULTURAL:
@@ -374,7 +355,7 @@ void AClickableMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID, 
 			return;
 		}
 
-		textureComponent = CultureMapTextureComponent;
+		// textureComponent = CultureMapTextureComponent;
 
 		break;
 	case MapMode::TERRAIN:
@@ -400,13 +381,13 @@ void AClickableMap::UpdateMapTexture(MapMode mode)
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
-		textureComponent = PoliticalMapTextureComponent;
+		// textureComponent = PoliticalMapTextureComponent;
 		break;
 	case MapMode::RELIGIOUS:
-		textureComponent = ReligiousMapTextureComponent;
+		// textureComponent = ReligiousMapTextureComponent;
 		break;
 	case MapMode::CULTURAL:
-		textureComponent = CultureMapTextureComponent;
+		// textureComponent = CultureMapTextureComponent;
 		break;
 	case MapMode::TERRAIN:
 		break;
@@ -509,20 +490,24 @@ void AClickableMap::SetMapMode_Implementation(MapMode mode)
 
 void AClickableMap::SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh)
 {
+	if(mesh)
+	{
+		mesh->SetMaterial(0, DynamicTextureComponent->GetMaterialInstance());
+	}
 	switch (mode)
 	{
 	case MapMode::POLITICAL:
 
 		if (mesh)
 		{
-			mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
+			// mesh->SetMaterial(0, PoliticalMapTextureComponent->DynamicMaterial);
 		}
 		break;
 	case MapMode::RELIGIOUS:
 
 		if (mesh)
 		{
-			mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
+			// mesh->SetMaterial(0, ReligiousMapTextureComponent->DynamicMaterial);
 		}
 
 		break;
@@ -530,7 +515,7 @@ void AClickableMap::SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh)
 
 		if (mesh)
 		{
-			mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
+			// mesh->SetMaterial(0, CultureMapTextureComponent->DynamicMaterial);
 		}
 		break;
 	case MapMode::TERRAIN:
@@ -587,10 +572,10 @@ bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
 	if (!country)
 		return false;
 
-	UpdatePixelArray(*PoliticalMapTextureComponent->GetTextureData(), country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
+	// UpdatePixelArray(*PoliticalMapTextureComponent->GetTextureData(), country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
 	country->Color = color.ToFColor(true);
 
-	PoliticalMapTextureComponent->UpdateTexture();
+	// PoliticalMapTextureComponent->UpdateTexture();
 	return true;
 
 }
@@ -598,9 +583,9 @@ bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
 void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
 {
 	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), renderTarget, material);
-	PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	// PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	// ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
+	// CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 }
 
@@ -626,16 +611,16 @@ void AClickableMap::UpdateProvinceHovered(const FColor& color)
 	switch (CurrentMapMode)
 	{
 	case MapMode::POLITICAL:
-		if(PoliticalMapTextureComponent->DynamicMaterial)
-			PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
+		// if(PoliticalMapTextureComponent->DynamicMaterial)
+			// PoliticalMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::RELIGIOUS:
-		if(ReligiousMapTextureComponent->DynamicMaterial)
-			ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
+		// if(ReligiousMapTextureComponent->DynamicMaterial)
+			// ReligiousMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::CULTURAL:
-		if(CultureMapTextureComponent->DynamicMaterial)
-			CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
+		// if(CultureMapTextureComponent->DynamicMaterial)
+			// CultureMapTextureComponent->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
 		break;
 	case MapMode::TERRAIN:
 		if(TerrainDynamicMaterial)
@@ -644,36 +629,6 @@ void AClickableMap::UpdateProvinceHovered(const FColor& color)
 	default:
 		break;
 	}
-}
-
-FColor AClickableMap::GetColorFromUV(UTexture2D* texture, FVector2D uv) const
-{
-	if(!texture)
-		return FColor();
-
-	int32 width = texture->GetSizeX();
-	int32 height = texture->GetSizeY();
-
-	//int32 Index = (y * Width + x) * 4;
-	int32 y = uv.Y * height;
-	int32 x = uv.X * width;
-
-	int32 index = (y * width + x) * 4;
-	
-	index = index % 4 + index;
-
-	if (index < 0 || index > width * height * 4 - 4)
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid index from uvs"));
-		return FColor();
-	}
-
-	FColor color = FColor(MapColorCodeTextureData[index+2],
-		MapColorCodeTextureData[index + 1],
-		MapColorCodeTextureData[index],
-		MapColorCodeTextureData[index + 3]);
-
-	return color;
 }
 
 void AClickableMap::LoadMapAsset(UMapObject* MapObject)
