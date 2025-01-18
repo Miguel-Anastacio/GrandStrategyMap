@@ -19,10 +19,6 @@ void UMapModeSelectorWidget::SetInteractiveMapReference(class AClickableMap* Map
 void UMapModeSelectorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	MapModeButtonMapping.Empty();
-
-	// TArray<FVisualPropertyType*> PropTypes;
-	// UDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->VisualPropertyTypesDT, PropTypes);
 	for(const auto& Widget : GridPanel->GetAllChildren())
 	{
 		if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))

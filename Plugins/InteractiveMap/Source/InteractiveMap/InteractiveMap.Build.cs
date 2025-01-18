@@ -36,6 +36,7 @@ public class InteractiveMap : ModuleRules
 				"UMGEditor",
 				"UMG", 
 				"UnrealEd",
+				"ShadersModule"
              
 				// ... add other public dependencies that you statically link with here ...
 			}

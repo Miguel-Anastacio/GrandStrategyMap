@@ -17,6 +17,7 @@
 #include "MapObject.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
+#include "ShadersModule/Public/ReplaceColorComputeShader/ReplaceColorComputeShader.h"
 
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 	: AActor(ObjectInitializer)
@@ -44,7 +45,37 @@ void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& Propert
 void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	MapTileChangeDelegate.AddDynamic(this, &AClickableMap::OnMapTileChanged);
 }
+
+void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
+{
+	if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+	{
+		if(CurrentData->GetScriptStruct() == Data.GetScriptStruct())
+		{
+			*CurrentData = Data;
+		}
+	}
+
+	UDynamicTexture* CurrentTextureData = DynamicTextureComponent->GetDynamicTexture();
+	bool bResult = false;
+	FColor OldColor = MapDataComponent->GetVisualProperty(FName("Country"), FName("POR"), bResult).Color;
+	FIntVector3 Vec(OldColor.R, OldColor.G, OldColor.B);
+	TArray<FColorReplace> Colors;
+	Colors.Emplace(FColorReplace{Vec, FIntVector3{255, 0, 0}});
+	FReplaceColorComputeShaderDispatchParams Params(*CurrentTextureData->GetTextureData(), Colors);
+ 
+	// Executes the compute shader and calls the TFunction when complete.
+	FReplaceColorComputeShaderInterface::Dispatch(Params, [](TArray<uint32> OutputVal)
+	{
+		for(uint32 number : OutputVal)
+		{
+			UE_LOG(LogInteractiveMap, Warning, TEXT("OutputValue %d"), number);
+		}
+	});
+}
+
 void AClickableMap::InitializeMap_Implementation()
 {
 	// LOAD FROM MAP ASSET
@@ -408,32 +439,6 @@ void AClickableMap::UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& ol
 
 			if (color != oldColor)
 				continue;
-
-			// get province id from the array that holds the original look up texture pixel data
-			// FName* id = MapDataComponent->NewLookupTable.Find(FVector(MapColorCodeTextureData[Index+2],
-			// 								MapColorCodeTextureData[Index + 1],
-			// 								MapColorCodeTextureData[Index]));
-			// if (!id)
-			// 	continue;
-			//
-			// bool found = false;
-			// // cycle through provinces to update 
-			// // if it matches the id of this pixel then update the color
-			// for (auto& idToUpdate : provinceIDs)
-			// {
-			// 	if ((*id) == idToUpdate)
-			// 	{
-			// 		pixelArray[Index + 2] = newColor.R;
-			// 		pixelArray[Index + 1] = newColor.G;
-			// 		pixelArray[Index + 0] = newColor.B;
-			// 		pixelArray[Index + 3] = newColor.A;
-			// 		found = true;
-			// 	}
-			//
-			// 	if (found)
-			// 		break;
-			//
-			// }
 		}
 	}
 }

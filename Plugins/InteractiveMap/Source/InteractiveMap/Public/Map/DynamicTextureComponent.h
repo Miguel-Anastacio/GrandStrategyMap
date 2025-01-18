@@ -25,6 +25,10 @@ public:
 	UDynamicTextureComponent();
 public:
 	void SetDynamicTexture(UDynamicTexture* DynTexture);
+	UDynamicTexture* GetDynamicTexture() const
+	{
+		return DynamicTextureData;
+	};
 	/**
 	 * Fill the entire texture with a specified color.
 	 * @param Color The color to fill the texture with.

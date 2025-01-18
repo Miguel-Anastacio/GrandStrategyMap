@@ -14,6 +14,7 @@ class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapTileChangeSignature, int, Id, const FInstancedStruct&, Data);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapInitializedSignature, AClickableMap*, map);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapModeChangedSignature, MapMode, oldMode, MapMode, newMode);
 UCLASS(Abstract, NotBlueprintable)
@@ -108,9 +109,15 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapModeChangedSignature MapModeChangedDelegate;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+	FMapTileChangeSignature MapTileChangeDelegate;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnMapTileChanged(int ID, const FInstancedStruct& Data);
 
 	void LoadMapAsset(UMapObject* MapObject);
 	
