@@ -7,6 +7,7 @@ public class ShadersModule: ModuleRules
 	public ShadersModule(ReadOnlyTargetRules Target) : base(Target) 
 
 	{
+		PublicDependencyModuleNames.AddRange(new string[] { "UtilityModule" });
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PrivateIncludePaths.AddRange(new string[] 
@@ -28,7 +29,8 @@ public class ShadersModule: ModuleRules
 			"Renderer",
 			"RenderCore",
 			"RHI",
-			"Projects"
+			"Projects",
+			"UtilityModule"
 		});
 		
 		if (Target.bBuildEditor == true)

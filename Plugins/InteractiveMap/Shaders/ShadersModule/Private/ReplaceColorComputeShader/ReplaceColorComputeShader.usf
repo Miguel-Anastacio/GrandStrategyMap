@@ -8,9 +8,11 @@ struct FColourReplace
 };
 
 int ColourCount;                    // Total number of color replacement rules
-int PixelCount;                     // Total number of pixels in the buffer
+int PixelCount;
+int ChunkSize;                      
 StructuredBuffer<FColourReplace> ColorReplacementDataBuffer;  // Color replacement rules
-RWStructuredBuffer<int> PixelBuffer;  // Pixel data buffer (assumed to be an array of int representing RGBA)
+StructuredBuffer<int> PixelBuffer; // Pixel data buffer (assumed to be an array of int representing RGBA)
+RWStructuredBuffer<int> OutputBuffer; // Pixel data buffer (assumed to be an array of int representing RGBA)
 
 // Main compute shader entry point
 [numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
@@ -18,7 +20,7 @@ void ReplaceColorComputeShader(
     uint3 DispatchThreadId : SV_DispatchThreadID,  // ID of the current thread (pixel)
     uint GroupIndex : SV_GroupIndex)                // ID of the dispatch group
 {
-    // Calculate the pixel index
+    // uint PixelIndex = DispatchThreadId.x * DispatchThreadId.y;
     uint PixelIndex = DispatchThreadId.x;
 
     // Ensure we don't process out-of-bound pixels
@@ -31,94 +33,21 @@ void ReplaceColorComputeShader(
     uint PixelColor = PixelBuffer[PixelIndex];
 
     // Extract the RGBA components from the uint pixel color
-    uint A = (PixelColor >> 24) & 0xFF;
-    uint R = (PixelColor >> 16) & 0xFF;
-    uint G = (PixelColor >> 8) & 0xFF;
     uint B = PixelColor & 0xFF;
+    uint G = (PixelColor >> 8) & 0x00FF;
+    uint R = (PixelColor >> 16) & 0xFF; 
+    uint A = (PixelColor >> 24) & 0xFF;
 
-    // Iterate through the replacement rules
-    // for (int i = 0; i < ColourCount; ++i)
-    // {
-    //     FColourReplace ReplacementRule = ColorReplacementDataBuffer[i];
-    //
-    //     // Check if the pixel matches the color to replace
-    //     if (R == ReplacementRule.ColorToReplace.x &&
-    //         G == ReplacementRule.ColorToReplace.y &&
-    //         B == ReplacementRule.ColorToReplace.z)
-    //     {
-    //         // Replace the pixel color with the new color
-    //         R = ReplacementRule.NewColor.x;
-    //         G = ReplacementRule.NewColor.y;
-    //         B = ReplacementRule.NewColor.z;
-    //         break;  // Exit loop once replacement is done
-    //     }
-    // }
-
-    // Repack the modified RGBA values into a single uint
-    uint NewPixelColor = (R << 24) | (G << 16) | (B << 8) | A;
-    // test
-    NewPixelColor = (255 << 24) | (0 << 16) | (0 << 8) | A;
-
-    // Write the modified pixel color back to the buffer
-    PixelBuffer[PixelIndex] = NewPixelColor;
+    OutputBuffer[PixelIndex] =  (A << 24) | (R << 16) | (G << 8) | B;
+    // OutputBuffer[PixelIndex] =  0xFF00FF00;
+    for(int i = 0; i < ColourCount; i++)
+    {
+        const int3 Replace = ColorReplacementDataBuffer[i].ColorToReplace;
+        const int3 NewColor = ColorReplacementDataBuffer[i].NewColor;
+        if(R == Replace.x && G == Replace.y && B == Replace.z)
+        {
+            uint NewPixelColor = (A << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;
+            OutputBuffer[PixelIndex] = NewPixelColor;
+        }
+    }
 }
-
-// // Struct to define color replacement rules
-// struct FColourReplace
-// {
-//     int3 ColorToReplace;  // RGB color to replace
-//     int3 NewColor;        // New RGB color to replace with
-// };
-//
-// int ColourCount;                    // Total number of color replacement rules
-// int PixelCount;                     // Total number of pixels in the buffer
-// RWByteAddressBuffer PixelBuffer;    // Pixel data buffer (assumed to be an array of uint8 representing RGBA)
-//
-// // Main compute shader entry point
-// [numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
-// void ReplaceColorComputeShader(
-//     uint3 DispatchThreadId : SV_DispatchThreadID,  // ID of the current thread (pixel)
-//     uint GroupIndex : SV_GroupIndex)                // ID of the dispatch group
-// {
-//     // Calculate the pixel index
-//     uint PixelIndex = DispatchThreadId.x;
-//
-//     // Ensure we don't process out-of-bound pixels
-//     if (PixelIndex >= PixelCount)
-//     {
-//         return;
-//     }
-//
-//     // Offsets for reading RGBA components from the PixelBuffer
-//     uint ByteOffset = PixelIndex * 4;  // Assuming each pixel has 4 uint8 components (RGBA)
-//
-//     // Read the current pixel color (R, G, B, A) from the buffer
-//     uint8 R = PixelBuffer.Load(ByteOffset + 0);
-//     uint8 G = PixelBuffer.Load(ByteOffset + 1);
-//     uint8 B = PixelBuffer.Load(ByteOffset + 2);
-//     uint8 A = PixelBuffer.Load(ByteOffset + 3);
-//
-//     // Iterate through the replacement rules
-//     for (int i = 0; i < ColourCount; ++i)
-//     {
-//         FColourReplace ReplacementRule = ColorReplacementDataBuffer[i];
-//
-//         // Check if the pixel matches the color to replace
-//         if (R == uint8(ReplacementRule.ColorToReplace.x) &&
-//             G == uint8(ReplacementRule.ColorToReplace.y) &&
-//             B == uint8(ReplacementRule.ColorToReplace.z))
-//         {
-//             // Replace the pixel color with the new color
-//             R = uint8(ReplacementRule.NewColor.x);
-//             G = uint8(ReplacementRule.NewColor.y);
-//             B = uint8(ReplacementRule.NewColor.z);
-//             break;  // Exit loop once replacement is done
-//         }
-//     }
-//
-//     // Write the modified pixel color back to the buffer
-//     PixelBuffer.Store(ByteOffset + 0, R);
-//     PixelBuffer.Store(ByteOffset + 1, G);
-//     PixelBuffer.Store(ByteOffset + 2, B);
-//     PixelBuffer.Store(ByteOffset + 3, A);
-// }

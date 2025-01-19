@@ -19,6 +19,8 @@ public:
 	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
 	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const uint8* DataBuffer);
 
+	static TArray<uint32> PackUint8ToUint32(const TArray<uint8>& DataArray);
+	static TArray<uint8> UnPackUint32ToUint8(const TArray<uint32>& DataArray);
 private:
 	static FColor GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer);
 	static FColor GetColorFromIndex(uint32 Index, const uint8* DataBuffer);
@@ -26,6 +28,7 @@ private:
 	static int32 GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height, bool& bOutResult);
 
 	static bool IsTextureValid(const UTexture2D* Texture);
+
    
 };
 

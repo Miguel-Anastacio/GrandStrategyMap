@@ -5,12 +5,23 @@
 #include "Map/DynamicTexture.h"
 #include "RHICommandList.h"
 #include "RenderingThread.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Engine/Texture2D.h"
 
 // Sets default values for this component's properties
 UDynamicTexture::UDynamicTexture()
 {
 	
+}
+
+void UDynamicTexture::SetTextureData(const TArray<uint8>& NewData)
+{
+	TextureData = NewData;
+}
+
+void UDynamicTexture::SetTextureData(const TArray<uint32>& NewData)
+{
+	SetTextureData(UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(NewData));
 }
 
 void UDynamicTexture::FillTexture(const FLinearColor& Color)
@@ -99,6 +110,7 @@ void UDynamicTexture::InitializeDynamicTexture()
 	TextureDataSize = TextureTotalPixels * 4;
 	TextureDataSqrtSize = TextureWidth * 4;
 	// Initialize Texture Data Array
+	TextureData.Empty();
 	TextureData.AddDefaulted(TextureDataSize);
 	FillTexture(FColor::White);
 }

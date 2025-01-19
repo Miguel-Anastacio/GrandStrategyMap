@@ -58,21 +58,23 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 		}
 	}
 
-	UDynamicTexture* CurrentTextureData = DynamicTextureComponent->GetDynamicTexture();
+	UDynamicTexture* DynamicTexture = DynamicTextureComponent->GetDynamicTexture();
 	bool bResult = false;
 	FColor OldColor = MapDataComponent->GetVisualProperty(FName("Country"), FName("POR"), bResult).Color;
 	FIntVector3 Vec(OldColor.R, OldColor.G, OldColor.B);
 	TArray<FColorReplace> Colors;
-	Colors.Emplace(FColorReplace{Vec, FIntVector3{255, 0, 0}});
-	FReplaceColorComputeShaderDispatchParams Params(*CurrentTextureData->GetTextureData(), Colors);
+	Colors.Emplace(FColorReplace{Vec, FIntVector3{0, 0, 255}});
+	FReplaceColorComputeShaderDispatchParams Params(*DynamicTexture->GetTextureData(), Colors);
  
 	// Executes the compute shader and calls the TFunction when complete.
-	FReplaceColorComputeShaderInterface::Dispatch(Params, [](TArray<uint32> OutputVal)
+	FReplaceColorComputeShaderInterface::Dispatch(Params, [this](TArray<uint32> OutputVal)
 	{
-		for(uint32 number : OutputVal)
-		{
-			UE_LOG(LogInteractiveMap, Warning, TEXT("OutputValue %d"), number);
-		}
+		UDynamicTexture* CurrentTextureData = DynamicTextureComponent->GetDynamicTexture();
+		CurrentTextureData->SetTextureData(OutputVal);
+		// CurrentTextureData->SetTextureData(UTextureUtilsFunctionLibrary::PackUint8ToUint32(*CurrentTextureData->GetTextureData()));
+		this->DynamicTextureComponent->UpdateTexture();
+		
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
 	});
 }
 

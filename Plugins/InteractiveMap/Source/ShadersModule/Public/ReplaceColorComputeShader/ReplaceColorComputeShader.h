@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "GenericPlatform/GenericPlatformMisc.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -21,31 +22,8 @@ struct SHADERSMODULE_API FReplaceColorComputeShaderDispatchParams
 	FReplaceColorComputeShaderDispatchParams(const TArray<uint8>& Pixels, const TArray<FColorReplace>& ReplacementRules)
 		: ReplacementRules(ReplacementRules)
 	{
-
-		// Ensure the input array has at least 4 bytes to process
-		int32 NumElements = Pixels.Num();
-		int32 NumPackedElements = NumElements / 4; // Number of uint32 values we can pack
-		int32 Remainder = NumElements % 4; // Remaining bytes that don't form a full uint32
-		PixelArray.Empty(NumPackedElements); // Clear the array before filling it
-		if (Remainder != 0)
-		{
-			return;
-		}
+		PixelArray = UTextureUtilsFunctionLibrary::PackUint8ToUint32(Pixels);
 		
-		PixelArray.Reserve(NumPackedElements);
-		for (int32 i = 0; i < NumPackedElements; ++i)
-		{
-			// Grab the next 4 bytes from the uint8 array
-			uint32 PackedValue = 0;
-
-			// Combine 4 uint8s into a single uint32
-			PackedValue |= Pixels[i * 4 + 0] << 0;   // First byte at the lowest byte position
-			PackedValue |= Pixels[i * 4 + 1] << 8;   // Second byte shifted by 8 bits
-			PackedValue |= Pixels[i * 4 + 2] << 16;  // Third byte shifted by 16 bits
-			PackedValue |= Pixels[i * 4 + 3] << 24;  // Fourth byte shifted by 24 bits
-			// Add the packed value to the uint32 array
-			PixelArray.Emplace(PackedValue);
-		}
 	};
 };
 

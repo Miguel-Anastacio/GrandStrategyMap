@@ -131,6 +131,58 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
+TArray<uint32> UTextureUtilsFunctionLibrary::PackUint8ToUint32(const TArray<uint8>& DataArray)
+{
+	TArray<uint32> PackedArray;
+	// Ensure the input array has at least 4 bytes to process
+	const int32 NumElements = DataArray.Num();
+	const int32 NumPackedElements = NumElements / 4; // Number of uint32 values we can pack
+	if (NumElements % 4 != 0)
+	{
+		return PackedArray;
+	}
+		
+	PackedArray.Reserve(NumPackedElements);
+	for (int32 i = 0; i < NumPackedElements; ++i)
+	{
+		// Grab the next 4 bytes from the uint8 array
+		uint32 PackedValue = 0;
+
+		// Combine 4 uint8s into a single uint32
+		PackedValue |= static_cast<uint32>(DataArray[i * 4 + 0] << 0);   // First byte at the lowest byte position	B
+		PackedValue |= static_cast<uint32>(DataArray[i * 4 + 1] << 8);   // Second byte shifted by 8 bits			G
+		PackedValue |= static_cast<uint32>(DataArray[i * 4 + 2] << 16);  // Third byte shifted by 16 bits			R
+		PackedValue |= static_cast<uint32>(DataArray[i * 4 + 3] << 24);  // Fourth byte shifted by 24 bits			A
+		// Add the packed value to the uint32 array
+		PackedArray.Emplace(PackedValue);
+	}
+	return PackedArray;
+}
+
+TArray<uint8> UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(const TArray<uint32>& DataArray)
+{
+	TArray<uint8> UnPackedArray;
+	// Ensure the input array has at least 4 bytes to process
+	const int32 NumElements = DataArray.Num();
+	const int32 NumUnPackedElements = NumElements * 4; // Number of uint32 values we can pack
+	if (NumUnPackedElements % 4 != 0)
+	{
+		return UnPackedArray;
+	}
+		
+	UnPackedArray.Reserve(NumUnPackedElements);
+	for (int32 i = 0; i < NumElements; ++i)
+	{
+		// Grab the next 4 bytes from the uint8 array
+		const uint32 PackedValue = DataArray[i];
+		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 0));
+		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 8));
+		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 16));
+		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 24));
+	}
+	return UnPackedArray;
+};
+
 FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
 {
 	// Data read from texture is in BGRA format

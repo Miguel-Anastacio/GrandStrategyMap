@@ -35,6 +35,9 @@ public:
 	// Sets default values for this component's properties
 	UDynamicTexture();
 public:
+
+	void SetTextureData(const TArray<uint8>& NewData);
+	void SetTextureData(const TArray<uint32>& NewData);
 	/**
 	 * Fill the entire texture with a specified color.
 	 * @param Color The color to fill the texture with.
