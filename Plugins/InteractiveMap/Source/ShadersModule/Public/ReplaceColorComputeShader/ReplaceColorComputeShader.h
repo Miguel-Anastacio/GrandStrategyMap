@@ -13,6 +13,10 @@ struct FColorReplace
 {
 	FIntVector3 ColorToReplace;
 	FIntVector3 NewColor;
+
+	FColorReplace(const FIntVector3& OldColor, const FIntVector3& Color) : ColorToReplace(OldColor), NewColor(Color) {};
+	FColorReplace(const FColor& OldColor, const FColor& Color) :
+	ColorToReplace(FIntVector3(OldColor.R, OldColor.G, OldColor.B)), NewColor(FIntVector3(Color.R, Color.G, Color.B)) {};
 };
 struct SHADERSMODULE_API FReplaceColorComputeShaderDispatchParams
 {

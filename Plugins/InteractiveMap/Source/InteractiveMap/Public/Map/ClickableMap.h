@@ -13,6 +13,16 @@ class UMapObject;
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
+USTRUCT()
+struct FPositions
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	TArray<FVector2D> PosArray;
+	// UPROPERTY()
+	// FColor PixelColor;
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapTileChangeSignature, int, Id, const FInstancedStruct&, Data);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapInitializedSignature, AClickableMap*, map);
@@ -95,7 +105,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
 
-
+	UFUNCTION(CallInEditor, Category="Map")
+	void FillPixelMap();
 
 public:
 	// Delegate triggered when map data changes impacts the visual representation of the map
@@ -230,7 +241,11 @@ protected:
 	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
 	// void CreateDynamicTextureComponents();
 	UPROPERTY()
-	TMap<FName, UDynamicTexture*> MapModesTextureComponents;
+	TMap<FName, UDynamicTexture*> MapModeDynamicTextures;
+	
+	UPROPERTY()
+	TMap<FColor, FPositions> PixelMap;
+	
 
 
 };

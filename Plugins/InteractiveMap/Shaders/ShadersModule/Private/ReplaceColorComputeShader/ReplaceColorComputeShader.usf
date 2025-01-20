@@ -35,7 +35,7 @@ void ReplaceColorComputeShader(
     // Extract the RGBA components from the uint pixel color
     uint B = PixelColor & 0xFF;
     uint G = (PixelColor >> 8) & 0x00FF;
-    uint R = (PixelColor >> 16) & 0xFF; 
+    uint R = (PixelColor >> 16) & 0xFF;
     uint A = (PixelColor >> 24) & 0xFF;
 
     OutputBuffer[PixelIndex] =  (A << 24) | (R << 16) | (G << 8) | B;
@@ -44,6 +44,10 @@ void ReplaceColorComputeShader(
     {
         const int3 Replace = ColorReplacementDataBuffer[i].ColorToReplace;
         const int3 NewColor = ColorReplacementDataBuffer[i].NewColor;
+        // Alpha marks which pixels to update
+        if(A != 1)
+            break;
+        
         if(R == Replace.x && G == Replace.y && B == Replace.z)
         {
             uint NewPixelColor = (A << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;

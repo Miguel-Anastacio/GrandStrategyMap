@@ -73,7 +73,6 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure)
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
     /// TODO - Add Specializations and expose them to Blueprints
-    
     template<typename T>
     static T GetPropertyValueFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
     {
@@ -99,6 +98,8 @@ public:
         return false;
     }
 
+    
+
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
@@ -109,6 +110,8 @@ public:
         
         return false;
     }
+    UFUNCTION(BlueprintCallable, Category="Struct Utils")
+    static FInstancedStruct SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue, bool& bResult);
     
     UFUNCTION(BlueprintCallable, Category="Struct Utils")
     static bool SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);

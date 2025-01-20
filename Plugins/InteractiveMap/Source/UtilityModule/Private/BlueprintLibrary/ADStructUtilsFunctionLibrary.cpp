@@ -60,6 +60,17 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const 
 	return FString("Invalid Property or Instance");
 }
 
+
+FInstancedStruct UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct,
+	const FString& PropertyName, const FString& NewValue, bool& bResult)
+{
+	FInstancedStruct InstancedStructCopy;
+	InstancedStructCopy.InitializeAs(InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
+	FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName));
+	bResult = SetPropertyValue(Property, InstancedStructCopy.GetMutableMemory(), NewValue);
+	return InstancedStructCopy;
+}
+
 bool UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct,
                                                                              const FString& PropertyName, const FString& NewValue)
 {
