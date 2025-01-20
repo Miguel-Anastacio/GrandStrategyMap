@@ -83,7 +83,7 @@ public:
 	UMaterial* Material =nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* TileDataStructType;
+	UScriptStruct* TileDataStructType = nullptr;;
 
 	UMapEditorPreset();
 	
@@ -105,9 +105,9 @@ public:
 
 	MapGenerator::LookupMapData GetLookupMapData() const
 	{
-		const uint32 width = MapEditorDetails.HeightMapTexture->GetSizeX();
-		const uint32 height = MapEditorDetails.HeightMapTexture->GetSizeY();
+		const uint32 Width = MapEditorDetails.HeightMapTexture->GetSizeX();
+		const uint32 Height = MapEditorDetails.HeightMapTexture->GetSizeY();
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
-											width, height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
+											Width, Height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
 	}
 };

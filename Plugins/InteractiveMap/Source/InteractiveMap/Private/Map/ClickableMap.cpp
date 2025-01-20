@@ -56,7 +56,7 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 		if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
 			return;
 			
-		// TODO - For now update all textures
+		// TODO - For now update all textures -> Improvement: Update Only the Properties that changed
 		for(auto& DynamicTextures : MapModeDynamicTextures)
 		{
 			bool bResult = false;
@@ -64,41 +64,23 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 			UDynamicTexture* DynamicTexture = DynamicTextures.Value;
 			
 			// Get current Value color
-			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(*CurrentData, PropertyName.ToString(), bResult);
-			FColor OldColor = MapDataComponent->GetVisualProperty(DynamicTextures.Key, FName(*PropertyValue), bResult).Color;
-			UE_LOG(LogInteractiveMap, Warning, TEXT("CurrentData: - TAG: %s Old Color %s"), *PropertyValue, *OldColor.ToString());
-
+			FColor OldColor = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 			// Get new value color
-			PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName.ToString(), bResult);
-			FColor NewColor = MapDataComponent->GetVisualProperty(DynamicTextures.Key, FName(*PropertyValue), bResult).Color;
-			UE_LOG(LogInteractiveMap, Warning, TEXT("Property Name %s: NewData: - TAG: %s New Color %s"), *PropertyName.ToString(), *PropertyValue, *NewColor.ToString());
+			FColor NewColor = MapDataComponent->GetPropertyColorFromInstancedStruct(Data, PropertyName, bResult);
 
-			const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
-			const FPositions* Positions = PixelMap.Find(*Color);
-			auto DataBuffer = *DynamicTexture->GetTextureData();
-
-			const int32 Width = DynamicTexture->TextureWidth;
-			for(const auto& Pos : Positions->PosArray)
-			{
-				const int32 Index = (Pos.Y * Width + Pos.X) * 4;
-				DataBuffer[Index + 3] = 1;
-			}
-
-			// auto PackedData = UTextureUtilsFunctionLibrary::PackUint8ToUint32(dataBuffer);
+			// Mark pixels that belong to province to be replaced
+			auto DataBuffer = GetPixelsToEditMarked(DynamicTexture, ID);
 			
 			const FReplaceColorComputeShaderDispatchParams Params(DataBuffer, {FColorReplace(OldColor, NewColor)});
 			FReplaceColorComputeShaderInterface::Dispatch(Params, [this, PropertyName](TArray<uint32> OutputVal)
 			{
-				// update all textures
-				UDynamicTexture** TextureDynData = MapModeDynamicTextures.Find(PropertyName);
-				if(TextureDynData)
+				if(	UDynamicTexture** TextureDynData = MapModeDynamicTextures.Find(PropertyName))
 				{
 					(*TextureDynData)->SetTextureData(OutputVal);
 				}
 				this->DynamicTextureComponent->UpdateTexture();
 			});
 		}
-
 		// update province data
 		*CurrentData = Data;
 	}
@@ -209,7 +191,7 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 
 			for(const auto& Visual  : VisualProperties)
 			{
-				const FProperty* Property = InstancedStruct->GetScriptStruct()->FindPropertyByName(Visual.Key);
+				const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(InstancedStruct->GetScriptStruct(), Visual.Key);
 				if (!Property)
 				{
 					continue;
@@ -240,6 +222,23 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 		}
 	}
 }
+
+TArray<uint8> AClickableMap::GetPixelsToEditMarked(UDynamicTexture* Texture, int ID)
+{
+	const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
+	const FPositions* Positions = PixelMap.Find(*Color);
+	TArray<uint8> DataBuffer = *Texture->GetTextureData();
+
+	const int32 Width = Texture->TextureWidth;
+	for(const auto& Pos : Positions->PosArray)
+	{
+		const int32 Index = (Pos.Y * Width + Pos.X) * 4;
+		DataBuffer[Index + 3] = 1;
+	}
+
+	return DataBuffer;
+}
+
 // #endif
 
 //TODO - TO BE REMOVED

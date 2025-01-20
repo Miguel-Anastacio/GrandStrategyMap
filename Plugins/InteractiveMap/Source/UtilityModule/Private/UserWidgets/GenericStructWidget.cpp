@@ -23,7 +23,7 @@ void UGenericStructWidget::NativeOnInitialized()
 			continue;
 		}
 		
-		FName FieldName = Property->GetFName();
+		FName FieldName(*Property->GetDisplayNameText().ToString());
 		for(const auto& Widget : MainPanel->GetAllChildren())
 		{
 			if(FieldName == Widget->GetName())
@@ -68,7 +68,7 @@ void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& 
 				{
 					continue;
 				}
-				WidgetTypesMap.Emplace(Property->GetName(), DefaultWidgetType);
+				WidgetTypesMap.Emplace(FName(*Property->GetDisplayNameText().ToString()), DefaultWidgetType);
 			}
 		}
 	}
@@ -121,13 +121,13 @@ void UGenericStructWidget::CreatePanelSlots()
 		{
 			continue;
 		}
-		
-		if(const TSubclassOf<UUserWidget>* WidgetType = WidgetTypesMap.Find(Property->GetFName()))
+		FName PropertyName = FName(*Property->GetDisplayNameText().ToString());
+		if(const TSubclassOf<UUserWidget>* WidgetType = WidgetTypesMap.Find(PropertyName))
 		{
 			// TODO - BUG WHEN CREATING PANEL SLOTS THAT ALREADY EXIST
 			if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*WidgetType))
 			{
-				NewWidget->Rename(*Property->GetName());
+				NewWidget->Rename(*PropertyName.ToString());
 				AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
 				RowIndex++;
 			}

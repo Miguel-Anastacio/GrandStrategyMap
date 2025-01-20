@@ -53,6 +53,8 @@ protected:
     // UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
     // FInstancedStruct GetProvinceDataBP(int ID, bool& OutResult);
 
+    FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, bool& OutResult) const;
+
     /** Gets province data by name. */
     FInstancedStruct* GetProvinceData(int ID);
 

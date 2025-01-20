@@ -160,14 +160,11 @@ FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const
 
 void UMapObject::LoadLookupMap(const FString& FilePath)
 {
-	const TArray<FLookupEntry> Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(LookupFilePath);
+	const TArray<FLookupEntry> Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(FilePath);
 	LookupTable.Empty();
 	for(const auto& Entry : Lookup)
 	{
 		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
 	}
-	
-
-
 }
 #endif

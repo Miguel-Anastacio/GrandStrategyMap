@@ -281,7 +281,7 @@ void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& Struct
 			continue;
 		}
 
-		const FName PropertyName = Property->GetFName();
+		const FName PropertyName(*Property->GetDisplayNameText().ToString());
 		if(PropertyName == TEXT("ID"))
 			continue;
 		
@@ -309,7 +309,6 @@ void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& Struct
 		}
 		
 		//TODO - ADD SUPPORT FOR OTHER COMMON TYPES
-		//  NOT WORKING !!!!
 		bResult = false;
 		const FInstancedStruct PropertyValueStruct = UADStructUtilsFunctionLibrary::GetStructFromProperty(Property,  StructInstance.GetMemory(), bResult);
 		if (bResult)

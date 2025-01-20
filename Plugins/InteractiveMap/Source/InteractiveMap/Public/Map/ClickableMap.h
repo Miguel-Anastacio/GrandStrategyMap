@@ -175,6 +175,8 @@ protected:
 	
 	void CreateDynamicTextures(const TArray<FVisualPropertyType>& VisualPropertyTypes);
 	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData);
+
+	TArray<uint8> GetPixelsToEditMarked(UDynamicTexture* Texture, int ID);
 // #endif
 protected:
 	// The root of the map.

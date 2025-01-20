@@ -67,9 +67,8 @@ class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctio
 	GENERATED_BODY()
     
 public:
-    // UFUNCTION(BlueprintCallable)
-    static FString GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult);
     
+    static FString GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult);
     UFUNCTION(BlueprintCallable, BlueprintPure)
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
     /// TODO - Add Specializations and expose them to Blueprints
@@ -77,7 +76,7 @@ public:
     static T GetPropertyValueFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
     {
         OutResult = false;
-        if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
+        if(const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(), FName(*PropertyName)))
         {
             T PropertyValue = GetPropertyValue<T>(Property, InstancedStruct.GetMemory(), OutResult);
             if(OutResult)
@@ -89,21 +88,22 @@ public:
     }
 
     template<typename T>
-    static bool StructHasPropertyWithTypeCompatible(const UScriptStruct* StructType, FName MustHavePropertyName)
+    static bool StructHasPropertyWithTypeCompatible(const UScriptStruct* StructType, const FName& MustHavePropertyName)
     {
-        if(const FProperty* Property = StructType->FindPropertyByName(MustHavePropertyName))
+        if(!StructType)
+            return false;
+        
+        if(const FProperty* Property = FindPropertyByDisplayName(StructType, MustHavePropertyName))
         {
             return IsTypeCompatible<T>(Property);
         }
         return false;
     }
 
-    
-
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
-        if(FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
+        if(const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(), FName(*PropertyName)))
         {
             return SetPropertyValue<T>(Property, InstancedStruct.GetMutableMemory(), NewValue);
         }
@@ -117,6 +117,8 @@ public:
     static bool SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);
     
     static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
+
+    static FProperty* FindPropertyByDisplayName(const UScriptStruct* Struct, const FName& DisplayName);
 
     
     template<typename T, typename V>

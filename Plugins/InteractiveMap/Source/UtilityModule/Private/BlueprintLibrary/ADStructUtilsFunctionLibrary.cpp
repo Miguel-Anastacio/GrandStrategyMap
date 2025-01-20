@@ -53,7 +53,7 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const 
 		return FString("Invalid Property or Instance");
 	}
 	
-	if(const FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName)))
+	if(const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(), FName(*PropertyName)))
 	{
 		return GetPropertyValueAsString(Property, InstancedStruct.GetMemory(), OutResult);
 	}
@@ -66,7 +66,7 @@ FInstancedStruct UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(const F
 {
 	FInstancedStruct InstancedStructCopy;
 	InstancedStructCopy.InitializeAs(InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
-	FProperty* Property = InstancedStruct.GetScriptStruct()->FindPropertyByName(FName(*PropertyName));
+	const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(),  FName(*PropertyName));
 	bResult = SetPropertyValue(Property, InstancedStructCopy.GetMutableMemory(), NewValue);
 	return InstancedStructCopy;
 }
@@ -115,8 +115,26 @@ FInstancedStruct UADStructUtilsFunctionLibrary::GetStructFromProperty(const FPro
 	return FInstancedStruct();
 }
 
+FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScriptStruct* Struct,const FName& DisplayName )
+{
+	 return  Struct->FindPropertyByName(DisplayName);
+	
+	// if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
+	// 	return Property;
+	
+	// for (TFieldIterator<FProperty> It(Struct); It; ++It)
+	// {
+	// 	const FProperty* DisplayProperty = *It;
+	// 	if(FName(*DisplayProperty->GetDisplayNameText().ToString()) == DisplayName)
+	// 	{
+	// 		return *It;
+	// 	}
+	// }
+	// return nullptr;
+}
+
 UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory,
-	const UScriptStruct* StructType)
+                                                                                                        const UScriptStruct* StructType)
 {
 	if(!StructType)
 	{
@@ -130,8 +148,8 @@ UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetCon
 		{
 			continue;
 		}
-
-		if(PropertyName == Property->GetFName())
+		
+		if(PropertyName == Property->GetDisplayNameText().ToString())
 		{
 			return FStructProp(StructType, StructMemory, Property);
 		}

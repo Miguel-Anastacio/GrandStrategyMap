@@ -259,7 +259,7 @@ void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonO
 		const FProperty* Property = *It;
 
 		// Get property name
-		FString PropertyName = Property->GetName();
+		FString PropertyName = Property->GetDisplayNameText().ToString();
 
 		// Check if the JSON object contains the field
 		if (!Object->HasField(PropertyName))
