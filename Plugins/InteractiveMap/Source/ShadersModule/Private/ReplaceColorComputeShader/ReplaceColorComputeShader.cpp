@@ -160,8 +160,8 @@ void FReplaceColorComputeShaderInterface::DispatchRenderThread(FRHICommandListIm
 					}
 				);
 				// Debugging log to check group count
-				UE_LOG(LogTemp, Warning, TEXT("Dispatch Pass %d: GroupCount %s"), PassIndex, *GroupCount.ToString());
-				UE_LOG(LogTemp, Warning, TEXT("Dispatch Pass %d: Pixel Start %d"), PassIndex, StartPixel);
+				// UE_LOG(LogTemp, Warning, TEXT("Dispatch Pass %d: GroupCount %s"), PassIndex, *GroupCount.ToString());
+				// UE_LOG(LogTemp, Warning, TEXT("Dispatch Pass %d: Pixel Start %d"), PassIndex, StartPixel);
 				UE_LOG(LogTemp, Warning, TEXT("Dispatch Pass %d: Pixels per dispatch %d"), PassIndex, PixelsPerDispatch);
 			}
 			

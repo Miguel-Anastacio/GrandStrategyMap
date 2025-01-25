@@ -21,36 +21,32 @@ public:
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostLoad() override;
 
 	UFUNCTION(BlueprintCallable)
 	void InitFromStruct(const FInstancedStruct& InstancedStruct);
 
 	UPROPERTY(EditAnywhere)
 	int Columns = 1;
-	UPROPERTY(EditAnywhere)
-	int Rows = 0;
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
 	class UGridPanel* MainPanel;
 
-	UPROPERTY(EditAnywhere)
+	// Widget used by defaulr
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
 	TSubclassOf<UUserWidget> DefaultWidgetType;
-	UPROPERTY(EditAnywhere)
+	// Specify which widget to use for each Property
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widgets")
 	TMap<FName, TSubclassOf<UUserWidget>> WidgetTypesMap;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
 	UScriptStruct* StructType;
 	
 	UPROPERTY(BlueprintReadOnly)
 	TMap<FName, UUserWidget*> WidgetFields;
 
 protected:
-	// To be implemented in Blueprint or C++
-	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	// void CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue, UClass* classPtr);
-	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	// void CreateFieldWidget(const FName& FieldName, const FString& FieldValue);
-
-	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Custom Struct Display")
+	void InitializeWidgetTypesMap();
+	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widgets")
 	void CreatePanelSlots();
 };

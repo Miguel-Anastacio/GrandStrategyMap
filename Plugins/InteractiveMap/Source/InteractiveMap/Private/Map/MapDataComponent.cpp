@@ -49,14 +49,15 @@ int UMapDataComponent::GetProvinceID(const FColor& Color, bool& bOutResult) cons
 	return -1;
 }
 
-void UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
+bool UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
 {
 	const FInstancedStruct* data = ProvinceDataMap.Find(ID);
 	if (data)
 	{
 		Out_Data = (*data);
-		Out_Data = (*data);
+		return true;
 	}
+	return false;
 }
 
 FColor UMapDataComponent::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName,
@@ -167,6 +168,14 @@ void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
 		{
 			ProvinceDataMap.Emplace(ID, StructInstanced);
 		}
+	}
+}
+
+void UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
+{
+	if(FInstancedStruct* Current = ProvinceDataMap.Find(ID))
+	{
+		*Current = NewData;
 	}
 }
 

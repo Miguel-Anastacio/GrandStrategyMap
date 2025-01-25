@@ -67,6 +67,28 @@ class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctio
 	GENERATED_BODY()
     
 public:
+    // Iterates through all properties of a struct, pass function to perform for each property
+    template<typename FuncType>
+    static void ForEachProperty(const UStruct* StructType, FuncType Func)
+    {
+        for (FProperty* Property = StructType->PropertyLink; Property != nullptr; Property = Property->PropertyLinkNext)
+        {
+            if (!Property)
+            {
+                continue;
+            }
+            Func(Property);
+        }
+    }
+    // Iterates through all properties of a struct, pass function to perform for each property
+    template<typename FuncType>
+    static void ForEachProperty(const FInstancedStruct& InstancedStruct, FuncType Func)
+    {
+        const UStruct* Struct = InstancedStruct.GetScriptStruct();
+        if(!Struct)
+            return;
+        ForEachProperty(Struct, Func);
+    }
     
     static FString GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult);
     UFUNCTION(BlueprintCallable, BlueprintPure)

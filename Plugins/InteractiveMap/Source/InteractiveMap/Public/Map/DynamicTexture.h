@@ -74,6 +74,7 @@ public:
 	void DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter = FLinearColor::White);
 
 	FORCEINLINE TArray<uint8>* GetTextureData() { return &TextureData; };
+	FORCEINLINE TArray<uint8> GetTextureDataCopy() { return TextureData; };
 	FORCEINLINE uint32 GetTextureDataSqrtSize() const { return TextureDataSqrtSize; };
 
 	int32 TextureWidth = 512;

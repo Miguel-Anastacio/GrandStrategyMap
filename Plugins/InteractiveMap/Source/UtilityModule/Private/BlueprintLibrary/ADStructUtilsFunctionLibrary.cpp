@@ -117,10 +117,23 @@ FInstancedStruct UADStructUtilsFunctionLibrary::GetStructFromProperty(const FPro
 
 FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScriptStruct* Struct,const FName& DisplayName )
 {
-	 return  Struct->FindPropertyByName(DisplayName);
+	 // return  Struct->FindPropertyByName(DisplayName);
 	
-	// if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
-	// 	return Property;
+	if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
+		return Property;
+
+	
+	// TERRIBLE PERFORMANCE !!!!!!!p!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	for (FProperty* DisplayProperty = Struct->PropertyLink; DisplayProperty != nullptr; DisplayProperty = DisplayProperty->PropertyLinkNext)
+	{
+		const FString StaticPropertyName = DisplayProperty->GetName();
+		if (StaticPropertyName.Contains(DisplayName.ToString()))
+		{
+			return DisplayProperty;
+		}
+	}
+	return nullptr;
+
 	
 	// for (TFieldIterator<FProperty> It(Struct); It; ++It)
 	// {
@@ -130,7 +143,6 @@ FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScrip
 	// 		return *It;
 	// 	}
 	// }
-	// return nullptr;
 }
 
 UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory,

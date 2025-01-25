@@ -9,7 +9,6 @@
 #include "Map/MapUtils.h"
 #include "Map/MapEnums.h"
 #include "MapDataComponent.generated.h"
-
 USTRUCT(BlueprintType)
 struct FArrayOfVisualProperties
 {
@@ -48,7 +47,7 @@ protected:
 
     /** Gets province data by name. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    void GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
+    bool GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
     
     // UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
     // FInstancedStruct GetProvinceDataBP(int ID, bool& OutResult);
@@ -86,6 +85,7 @@ protected:
     void ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable);
 
     void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
+    void SetProvinceData(const FInstancedStruct& NewData, int ID);
 
     /** Sets country provinces. */
     void SetCountryProvinces();

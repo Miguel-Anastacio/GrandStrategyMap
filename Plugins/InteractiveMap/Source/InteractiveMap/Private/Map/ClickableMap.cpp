@@ -46,6 +46,7 @@ void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	MapTileChangeDelegate.AddDynamic(this, &AClickableMap::OnMapTileChanged);
+	MapTileChangeMultipleDelegate.AddDynamic(this, &AClickableMap::OnMapTileChangedMultiple);
 	FillPixelMap();
 }
 
@@ -57,19 +58,16 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 			return;
 			
 		// TODO - For now update all textures -> Improvement: Update Only the Properties that changed
-		for(auto& DynamicTextures : MapModeDynamicTextures)
+		for(const auto& [PropertyName, DynamicTexture] : MapModeDynamicTextures)
 		{
 			bool bResult = false;
-			FName PropertyName = DynamicTextures.Key;
-			UDynamicTexture* DynamicTexture = DynamicTextures.Value;
-			
 			// Get current Value color
 			FColor OldColor = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 			// Get new value color
 			FColor NewColor = MapDataComponent->GetPropertyColorFromInstancedStruct(Data, PropertyName, bResult);
 
 			// Mark pixels that belong to province to be replaced
-			auto DataBuffer = GetPixelsToEditMarked(DynamicTexture, ID);
+			auto DataBuffer = GetPixelsToEditMarked(DynamicTexture, {ID}, 0);
 			
 			const FReplaceColorComputeShaderDispatchParams Params(DataBuffer, {FColorReplace(OldColor, NewColor)});
 			FReplaceColorComputeShaderInterface::Dispatch(Params, [this, PropertyName](TArray<uint32> OutputVal)
@@ -84,6 +82,68 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 		// update province data
 		*CurrentData = Data;
 	}
+}
+
+void AClickableMap::OnMapTileChangedMultiple(const TArray<FTilePair>& NewData)
+{
+	for(const auto& [PropertyName, DynamicTexture] : MapModeDynamicTextures)
+	{
+		bool bResult = false;
+		TMap<FColorPair, TArray<int>> BatchesOfProvinces;
+		for(const auto& [ID, Data] : NewData)
+		{
+			if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+			{
+				if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
+					return;
+
+				FColor OldColor = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
+				// Get new value color
+				FColor NewColor = MapDataComponent->GetPropertyColorFromInstancedStruct(Data, PropertyName, bResult);
+				if(OldColor == NewColor)
+					continue;
+				
+				if(TArray<int>* IDs = BatchesOfProvinces.Find(FColorPair(NewColor, OldColor)))
+				{
+					IDs->Emplace(ID);
+				}
+				else
+				{
+					BatchesOfProvinces.Emplace(FColorPair(NewColor, OldColor), {ID});
+				}
+
+				*CurrentData = Data;
+			}	
+		}
+		
+		if(BatchesOfProvinces.IsEmpty())
+			continue;
+
+		// Mark all Pixels that are to be edited by the compute shader
+		TArray<uint8> DataBuffer = DynamicTexture->GetTextureDataCopy();
+		TArray<FColorReplace> ColorReplaces;
+		ColorReplaces.Reserve(BatchesOfProvinces.Num());
+		uint8 Marker = 0;
+		for (const auto& [Key, IDs] : BatchesOfProvinces)
+		{
+			MarkPixelsToEdit(DataBuffer, IDs, Marker);
+			ColorReplaces.Emplace(FColorReplace{Key.OldColor, Key.Color});
+			Marker++;
+		}
+
+		// dispatch all changes to this dynamic texture
+		const FReplaceColorComputeShaderDispatchParams Params(DataBuffer, ColorReplaces);
+		FReplaceColorComputeShaderInterface::Dispatch(Params, [this, PropertyName](TArray<uint32> OutputVal)
+		{
+			if(	UDynamicTexture** TextureDynData = MapModeDynamicTextures.Find(PropertyName))
+			{
+				(*TextureDynData)->SetTextureData(OutputVal);
+			}
+			this->DynamicTextureComponent->UpdateTexture();
+		});
+	}
+
+	
 }
 
 void AClickableMap::InitializeMap_Implementation()
@@ -109,7 +169,6 @@ void AClickableMap::InitializeMap_Implementation()
 
 	SetMapMode_Implementation(FName("Landscape"));
 	
-	MapDataChangedDelegate.AddDynamic(this, &AClickableMap::UpdateMapTexture);
 
 	// set referene in player class
 	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
@@ -223,20 +282,38 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 	}
 }
 
-TArray<uint8> AClickableMap::GetPixelsToEditMarked(UDynamicTexture* Texture, int ID)
+TArray<uint8> AClickableMap::GetPixelsToEditMarked(UDynamicTexture* Texture, const TArray<int>& IDs, uint8 MarkerValue)
 {
-	const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
-	const FPositions* Positions = PixelMap.Find(*Color);
 	TArray<uint8> DataBuffer = *Texture->GetTextureData();
-
-	const int32 Width = Texture->TextureWidth;
-	for(const auto& Pos : Positions->PosArray)
+	for(const auto& ID : IDs)
 	{
-		const int32 Index = (Pos.Y * Width + Pos.X) * 4;
-		DataBuffer[Index + 3] = 1;
-	}
+		const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
+		const FPositions* Positions = PixelMap.Find(*Color);
 
+		const int32 Width = Texture->TextureWidth;
+		for(const auto& Pos : Positions->PosArray)
+		{
+			const int32 Index = (Pos.Y * Width + Pos.X) * 4;
+			DataBuffer[Index + 3] = MarkerValue;
+		}
+	}
 	return DataBuffer;
+}
+
+void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<int>& IDs, uint8 MarkerValue) const
+{
+	for(const auto& ID : IDs)
+	{
+		const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
+		const FPositions* Positions = PixelMap.Find(*Color);
+
+		const int32 Width = MapLookUpTexture->GetSizeX();
+		for(const auto& Pos : Positions->PosArray)
+		{
+			const int32 Index = (Pos.Y * Width + Pos.X) * 4;
+			PixelBuffer[Index + 3] = MarkerValue;
+		}
+	}
 }
 
 // #endif
@@ -570,7 +647,7 @@ bool AClickableMap::UpdateProvinceData(const FInstancedStruct& Data, int ID)
 	// bool dataChanged = MapDataComponent->UpdateProvinceData(data, id, mapToUpdate, color);
 	if (mapToUpdate != MapMode::TERRAIN)
 	{
-		MapDataChangedDelegate.Broadcast(mapToUpdate);
+		// MapDataChangedDelegate.Broadcast(mapToUpdate);
 		return true;
 	}
 	
@@ -578,9 +655,9 @@ bool AClickableMap::UpdateProvinceData(const FInstancedStruct& Data, int ID)
 	return false;
 }
 
-bool AClickableMap::UpdateCountryData(const FCountryData& data, FName id)
+bool AClickableMap::UpdateCountryData(const FCountryData& Data, FName id)
 {
-	return MapDataComponent->UpdateCountryData(data, id);
+	return MapDataComponent->UpdateCountryData(Data, id);
 }
 
 bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
@@ -623,13 +700,13 @@ void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, 
 	borderMat->SetTextureParameterValue("LookUpTexture", textureComponent->GetTexture());
 }
 
-void AClickableMap::UpdateProvinceHovered(const FColor& color)
+void AClickableMap::UpdateProvinceHovered(const FColor& Color)
 {
 	// possible improve, just add dynMaterial ref to DynamicTextureComponent
 	//  so then just update the current 
 	for(const auto& DynTextures : MapModeDynamicTextures)
 	{
-		DynTextures.Value->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", color);
+		DynTextures.Value->DynamicMaterial->SetVectorParameterValue("ProvinceHighlighted", Color);
 	}
 }
 

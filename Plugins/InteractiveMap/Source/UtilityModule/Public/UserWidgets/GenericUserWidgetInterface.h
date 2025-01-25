@@ -22,7 +22,6 @@ class UTILITYMODULE_API IGenericUserWidgetInterface
 
 public:
 	// Example of a function declaration in the interface
-	// UFUNCTION(BlueprintCallable)
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void PerformAction(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const;
 };

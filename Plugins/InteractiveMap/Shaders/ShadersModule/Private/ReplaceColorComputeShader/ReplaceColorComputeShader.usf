@@ -45,13 +45,14 @@ void ReplaceColorComputeShader(
         const int3 Replace = ColorReplacementDataBuffer[i].ColorToReplace;
         const int3 NewColor = ColorReplacementDataBuffer[i].NewColor;
         // Alpha marks which pixels to update
-        if(A != 1)
-            break;
+        if(A != i)
+            continue;
         
         if(R == Replace.x && G == Replace.y && B == Replace.z)
         {
             uint NewPixelColor = (A << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;
             OutputBuffer[PixelIndex] = NewPixelColor;
         }
+        // OutputBuffer[PixelIndex] = 0xFFFFFFFF;
     }
 }

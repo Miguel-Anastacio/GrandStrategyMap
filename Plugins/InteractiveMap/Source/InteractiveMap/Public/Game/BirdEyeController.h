@@ -19,7 +19,7 @@ struct FInputActionInstance;
 // Delegate signature
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnProvinceClickedSignature, int, ProvinceID, FInstancedStruct, data);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapClickedSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnProvinceHoveredSignature, FColor, Color);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnProvinceHoveredSignature, FColor, Color, int, ProvinceID);
 
 /**     
  * Base Controller class for interactive maps, handles input for mouse clicks, camera movement, menus and camera zoom
@@ -97,7 +97,7 @@ protected:
     void ShowProvinceInfo(int Id, const FInstancedStruct& Data);
 
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
-    void HighlightProvince(FColor color);
+    void HighlightProvince(const FColor& Color);
 
 protected:
     /** Offset for mouse click on Z-axis. */

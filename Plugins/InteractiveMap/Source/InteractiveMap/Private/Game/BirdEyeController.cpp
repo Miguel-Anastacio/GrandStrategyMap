@@ -37,41 +37,41 @@ void ABirdEyeController::BeginPlay()
 void ABirdEyeController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FHitResult hit;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, hit))
+	FHitResult Hit;
+	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, Hit))
 	{
-		FVector start = hit.ImpactPoint;
-		FVector end = hit.ImpactPoint;
-		start.Z = hit.ImpactPoint.Z + zOffset;
-		end.Z = hit.ImpactPoint.Z - zOffset;
-		FCollisionQueryParams params;
-		params.AddIgnoredActor(this);
-		params.bTraceComplex = true;
-		params.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, MouseTraceChannel, params))
+		FVector Start = Hit.ImpactPoint;
+		FVector End = Hit.ImpactPoint;
+		Start.Z = Hit.ImpactPoint.Z + zOffset;
+		End.Z = Hit.ImpactPoint.Z - zOffset;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.bTraceComplex = true;
+		QueryParams.bReturnFaceIndex = true;
+		if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, End, MouseTraceChannel, QueryParams))
 			return;
-		if (!IsValid(hit.GetActor()))
+		if (!IsValid(Hit.GetActor()))
 			return;
 
 		if(!Map)
-			Map = Cast<AClickableMap>(hit.GetActor());
+			Map = Cast<AClickableMap>(Hit.GetActor());
 
 		if (Map)
 		{
 			FVector2D uvs = FVector2D(0, 0);
-			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			FColor Color = Map->GetColorFromLookUpTexture(uvs);
+			UGameplayStatics::FindCollisionUV(Hit, 0, uvs);
+			const FColor Color = Map->GetColorFromLookUpTexture(uvs);
 
 			bool bResult;
-			int id = Map->GetProvinceID(Color, bResult);
+			const int ID = Map->GetProvinceID(Color, bResult);
 
 			if (bResult && !bProvinceSelected)
 			{
-				ProvinceHoveredDelegate.Broadcast(Color);
+				ProvinceHoveredDelegate.Broadcast(Color, ID);
 			}
 			else if (!bProvinceSelected)
 			{
-				ProvinceHoveredDelegate.Broadcast(Color);
+				ProvinceHoveredDelegate.Broadcast(Color, ID);
 			}
 		}
 	}
@@ -149,7 +149,7 @@ void ABirdEyeController::MouseClick()
 			FInstancedStruct* Data = Map->GetProvinceData(ID);
 			if (Data)
 			{
-				ProvinceHoveredDelegate.Broadcast(Color);
+				ProvinceHoveredDelegate.Broadcast(Color, ID);
 
 				ProvinceClickedDelegate.Broadcast(ID, *Data);
 				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
@@ -232,17 +232,17 @@ void ABirdEyeController::HideHUD()
 
 void ABirdEyeController::ShowProvinceInfo(int Id, const FInstancedStruct& Data)
 {
-	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-	if (hud)
+	AManagerHUD* HUD = Cast<AManagerHUD>(GetHUD());
+	if (HUD)
 	{
-		hud->SetInteractiveMapReference(Map);
-		hud->DisplayProvinceEditorWidget(Data, Id);
+		HUD->SetInteractiveMapReference(Map);
+		HUD->DisplayProvinceEditorWidget(Data, Id);
 		bProvinceSelected = true;
 	}
 }
 
-void ABirdEyeController::HighlightProvince(FColor color)
+void ABirdEyeController::HighlightProvince(const FColor& Color)
 {
-	Map->UpdateProvinceHovered(color);
+	Map->UpdateProvinceHovered(Color);
 }
 

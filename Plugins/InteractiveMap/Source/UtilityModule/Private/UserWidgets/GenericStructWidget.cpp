@@ -54,24 +54,23 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 
 void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
+#if WITH_EDITOR
+	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UGenericStructWidget, StructType))
+	{
+		InitializeWidgetTypesMap();
+	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	// when struct changes populate WidgetTypesMap with Names and default Widget 
-	if(PropertyChangedEvent.GetPropertyName() == FName("StructType"))
-	{
-		WidgetTypesMap.Empty();
-		if(StructType)
-		{
-			for (TFieldIterator<FProperty> It(StructType); It; ++It)
-			{
-				const FProperty* Property = *It;
-				if (!Property)
-				{
-					continue;
-				}
-				WidgetTypesMap.Emplace(FName(*Property->GetDisplayNameText().ToString()), DefaultWidgetType);
-			}
-		}
-	}
+	// if(PropertyChangedEvent.GetPropertyName() == FName("StructType"))
+#endif
+}
+
+void UGenericStructWidget::PostLoad()
+{
+	Super::PostLoad();
+#if WITH_EDITOR
+	InitializeWidgetTypesMap();
+#endif
 }
 
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
@@ -85,6 +84,35 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 		{
 			IGenericUserWidgetInterface::Execute_PerformAction(Value, Key, InstancedStruct);
 		}
+	}
+}
+
+void UGenericStructWidget::InitializeWidgetTypesMap()
+{
+	if(StructType)
+	{
+		WidgetTypesMap.Empty();
+		for (TFieldIterator<FProperty> It(StructType); It; ++It)
+		{
+			const FProperty* Property = *It;
+			if (!Property)
+			{
+				continue;
+			}
+			WidgetTypesMap.Emplace(FName(*Property->GetDisplayNameText().ToString()), DefaultWidgetType);
+		}
+
+		const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
+		if (!WidgetBlueprintGeneratedClass)
+			return;
+		const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+		if (!Package)
+			return;
+		UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+		if (!MainAsset)
+			return;
+		MainAsset->Modify();
+		// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
 	}
 }
 
@@ -113,26 +141,27 @@ void UGenericStructWidget::CreatePanelSlots()
 	}
 	
 	AssetGridPanel->ClearChildren();
+	AssetGridPanel->Modify();
+	MainAsset->Modify();
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+	
 	int RowIndex = 0;
-	for (TFieldIterator<FProperty> It(StructType); It; ++It)
+	UADStructUtilsFunctionLibrary::ForEachProperty(StructType, [this, AssetGridPanel, &RowIndex, MainAsset](const FProperty* Property)
 	{
-		const FProperty* Property = *It;
-		if (!Property)
+		const FName PropertyName = FName(*Property->GetDisplayNameText().ToString());
+		const TSubclassOf<UUserWidget>* WidgetTypeFromMap = WidgetTypesMap.Find(PropertyName);
+		TSubclassOf<UUserWidget> WidgetType = DefaultWidgetType;
+		if(WidgetTypeFromMap && *WidgetTypeFromMap)
 		{
-			continue;
+			WidgetType = *WidgetTypeFromMap;
 		}
-		FName PropertyName = FName(*Property->GetDisplayNameText().ToString());
-		if(const TSubclassOf<UUserWidget>* WidgetType = WidgetTypesMap.Find(PropertyName))
+		if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*WidgetType))
 		{
-			// TODO - BUG WHEN CREATING PANEL SLOTS THAT ALREADY EXIST
-			if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*WidgetType))
-			{
-				NewWidget->Rename(*PropertyName.ToString());
-				AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
-				RowIndex++;
-			}
+			NewWidget->Rename(*PropertyName.ToString());
+			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
+			RowIndex++;
 		}
-	}
+	});
 	
 	AssetGridPanel->Modify();
 	MainAsset->Modify();

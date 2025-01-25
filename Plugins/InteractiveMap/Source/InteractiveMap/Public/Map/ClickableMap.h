@@ -13,6 +13,35 @@ class UMapObject;
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
+USTRUCT(BlueprintType)
+struct FTilePair
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	int ID = -1;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FInstancedStruct Data;
+};
+
+struct FColorPair
+{
+	FColor Color;
+	FColor OldColor;
+	FColorPair(const FColor& Color, const FColor& OldColor) : Color(Color), OldColor(OldColor) {}
+	FColorPair(): Color(FColor::White), OldColor(FColor::White) {}
+
+	bool operator == (const FColorPair& Other) const
+	{
+		return Other.Color == Color && Other.OldColor == OldColor;
+	}
+	friend  uint32 GetTypeHash (const FColorPair& Other)
+	{
+		return GetTypeHash(Other.Color) + GetTypeHash(Other.OldColor);
+	}
+};
+
 USTRUCT()
 struct FPositions
 {
@@ -23,8 +52,8 @@ struct FPositions
 	// FColor PixelColor;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapTileChangeSignature, int, Id, const FInstancedStruct&, Data);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapTileChangeMultipleSignature, const TArray<FTilePair>&, NewData);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapInitializedSignature, AClickableMap*, map);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapModeChangedSignature, MapMode, oldMode, MapMode, newMode);
 UCLASS(Abstract, NotBlueprintable)
@@ -62,7 +91,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	bool UpdateProvinceData(const FInstancedStruct& Data, int ID);
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateCountryData(const FCountryData& data, FName id);
+	bool UpdateCountryData(const FCountryData& Data, FName id);
 
 	// Get data from tag/id
 	template<class T>
@@ -109,10 +138,6 @@ public:
 	void FillPixelMap();
 
 public:
-	// Delegate triggered when map data changes impacts the visual representation of the map
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
-	FMapDataChangedSignature MapDataChangedDelegate;
-
 	// Delegate triggered when map initialization is finished
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapInitializedSignature MapInitializationDelegate;
@@ -120,15 +145,19 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapModeChangedSignature MapModeChangedDelegate;
 
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")  
 	FMapTileChangeSignature MapTileChangeDelegate;
 	
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")  
+	FMapTileChangeMultipleSignature MapTileChangeMultipleDelegate;
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
 	void OnMapTileChanged(int ID, const FInstancedStruct& Data);
+	UFUNCTION()
+	void OnMapTileChangedMultiple(const TArray<FTilePair>& NewData);
 
 	void LoadMapAsset(UMapObject* MapObject);
 	
@@ -176,7 +205,8 @@ protected:
 	void CreateDynamicTextures(const TArray<FVisualPropertyType>& VisualPropertyTypes);
 	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData);
 
-	TArray<uint8> GetPixelsToEditMarked(UDynamicTexture* Texture, int ID);
+	TArray<uint8> GetPixelsToEditMarked(UDynamicTexture* Texture, const TArray<int>& IDs, uint8 MarkerValue);
+	void MarkPixelsToEdit(TArray<uint8>& PixelBuffer,const TArray<int>& IDs, uint8 MarkerValue) const;
 // #endif
 protected:
 	// The root of the map.
