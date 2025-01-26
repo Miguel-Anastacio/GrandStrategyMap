@@ -178,7 +178,7 @@ TArray<uint8> UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(const TArray<uin
 		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 0));
 		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 8));
 		UnPackedArray.Emplace(static_cast<uint8>(PackedValue >> 16));
-		UnPackedArray.Emplace(static_cast<uint8>(255 >> 24));
+		UnPackedArray.Emplace(static_cast<uint8>(255));
 	}
 	return UnPackedArray;
 };

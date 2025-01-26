@@ -34,7 +34,7 @@ void ReplaceColorComputeShader(
 
     // Extract the RGBA components from the uint pixel color
     uint B = PixelColor & 0xFF;
-    uint G = (PixelColor >> 8) & 0x00FF;
+    uint G = (PixelColor >> 8) & 0xFF;
     uint R = (PixelColor >> 16) & 0xFF;
     uint A = (PixelColor >> 24) & 0xFF;
 
@@ -48,9 +48,9 @@ void ReplaceColorComputeShader(
         if(A != i)
             continue;
         
-        if(R == Replace.x && G == Replace.y && B == Replace.z)
+        // if(R == Replace.x && G == Replace.y && B == Replace.z)
         {
-            uint NewPixelColor = (A << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;
+            uint NewPixelColor = (0xFF << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;
             OutputBuffer[PixelIndex] = NewPixelColor;
         }
         // OutputBuffer[PixelIndex] = 0xFFFFFFFF;

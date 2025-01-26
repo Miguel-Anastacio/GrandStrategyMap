@@ -212,6 +212,18 @@ int* UMapDataComponent::FindId(const FColor& Color)
 	return NewLookupTable.Find(Color);
 }
 
+FColor UMapDataComponent::GetColor(int ID) const
+{
+	for(const auto& [Color, Id] : GetLookUpTable())
+    {
+    	if(ID == Id)
+    	{
+    		return Color;
+    	}
+    }
+	return FColor(0, 0, 0, 0);
+}
+
 FVisualProperty UMapDataComponent::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
 {
 	OutResult = false;

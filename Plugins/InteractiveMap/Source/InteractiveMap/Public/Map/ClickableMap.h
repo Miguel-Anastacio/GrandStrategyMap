@@ -158,14 +158,11 @@ protected:
 	void OnMapTileChanged(int ID, const FInstancedStruct& Data);
 	UFUNCTION()
 	void OnMapTileChangedMultiple(const TArray<FTilePair>& NewData);
-
+	
+	void UpdateDynamicTextures(const TArray<int>& IDs);
+	
 	void LoadMapAsset(UMapObject* MapObject);
 	
-	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
-	void SaveMapTextureData();
-	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
-
-
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
 	void RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode);
 	/**

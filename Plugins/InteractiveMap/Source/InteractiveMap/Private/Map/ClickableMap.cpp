@@ -47,7 +47,6 @@ void AClickableMap::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	MapTileChangeDelegate.AddDynamic(this, &AClickableMap::OnMapTileChanged);
 	MapTileChangeMultipleDelegate.AddDynamic(this, &AClickableMap::OnMapTileChangedMultiple);
-	FillPixelMap();
 }
 
 void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
@@ -56,66 +55,57 @@ void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
 	{
 		if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
 			return;
-			
-		// TODO - For now update all textures -> Improvement: Update Only the Properties that changed
-		for(const auto& [PropertyName, DynamicTexture] : MapModeDynamicTextures)
-		{
-			bool bResult = false;
-			// Get current Value color
-			FColor OldColor = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
-			// Get new value color
-			FColor NewColor = MapDataComponent->GetPropertyColorFromInstancedStruct(Data, PropertyName, bResult);
-
-			// Mark pixels that belong to province to be replaced
-			auto DataBuffer = GetPixelsToEditMarked(DynamicTexture, {ID}, 0);
-			
-			const FReplaceColorComputeShaderDispatchParams Params(DataBuffer, {FColorReplace(OldColor, NewColor)});
-			FReplaceColorComputeShaderInterface::Dispatch(Params, [this, PropertyName](TArray<uint32> OutputVal)
-			{
-				if(	UDynamicTexture** TextureDynData = MapModeDynamicTextures.Find(PropertyName))
-				{
-					(*TextureDynData)->SetTextureData(OutputVal);
-				}
-				this->DynamicTextureComponent->UpdateTexture();
-			});
-		}
-		// update province data
+		
 		*CurrentData = Data;
+		UpdateDynamicTextures({ID});
 	}
 }
 
 void AClickableMap::OnMapTileChangedMultiple(const TArray<FTilePair>& NewData)
 {
+	TArray<int> IDs;
+	IDs.Reserve(NewData.Num());
+	for(const auto& [ID, Data] : NewData)
+	{
+		if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+		{
+			if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
+				return;
+			*CurrentData = Data;
+			IDs.Emplace(ID);
+		}	
+	}
+	
+	UpdateDynamicTextures(IDs);
+}
+
+void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
+{
+	if(IDs.IsEmpty())
+		return;
+	
 	for(const auto& [PropertyName, DynamicTexture] : MapModeDynamicTextures)
 	{
 		bool bResult = false;
-		TMap<FColorPair, TArray<int>> BatchesOfProvinces;
-		for(const auto& [ID, Data] : NewData)
+		TMap<FColor, TArray<int>> BatchesOfProvinces;
+		for(const auto& ID : IDs)
 		{
-			if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+			if(const FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
 			{
-				if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
-					return;
-
-				FColor OldColor = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
-				// Get new value color
-				FColor NewColor = MapDataComponent->GetPropertyColorFromInstancedStruct(Data, PropertyName, bResult);
-				if(OldColor == NewColor)
-					continue;
+				const FColor Color = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
+				if(!bResult)
+					break;
 				
-				if(TArray<int>* IDs = BatchesOfProvinces.Find(FColorPair(NewColor, OldColor)))
+				if(TArray<int>* IdsToEdit = BatchesOfProvinces.Find(Color))
 				{
-					IDs->Emplace(ID);
+					IdsToEdit->Emplace(ID);
 				}
 				else
 				{
-					BatchesOfProvinces.Emplace(FColorPair(NewColor, OldColor), {ID});
+					BatchesOfProvinces.Emplace(FColor(Color), {ID});
 				}
-
-				*CurrentData = Data;
 			}	
 		}
-		
 		if(BatchesOfProvinces.IsEmpty())
 			continue;
 
@@ -124,10 +114,11 @@ void AClickableMap::OnMapTileChangedMultiple(const TArray<FTilePair>& NewData)
 		TArray<FColorReplace> ColorReplaces;
 		ColorReplaces.Reserve(BatchesOfProvinces.Num());
 		uint8 Marker = 0;
-		for (const auto& [Key, IDs] : BatchesOfProvinces)
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Property: %s"), *PropertyName.ToString())
+		for (const auto& [Key, BatchIDs] : BatchesOfProvinces)
 		{
-			MarkPixelsToEdit(DataBuffer, IDs, Marker);
-			ColorReplaces.Emplace(FColorReplace{Key.OldColor, Key.Color});
+			MarkPixelsToEdit(DataBuffer, BatchIDs, Marker);
+			ColorReplaces.Emplace(FColorReplace{FColor::White, Key});
 			Marker++;
 		}
 
@@ -142,8 +133,6 @@ void AClickableMap::OnMapTileChangedMultiple(const TArray<FTilePair>& NewData)
 			this->DynamicTextureComponent->UpdateTexture();
 		});
 	}
-
-	
 }
 
 void AClickableMap::InitializeMap_Implementation()
@@ -183,6 +172,19 @@ void AClickableMap::BeginPlay()
 	Super::BeginPlay();
 
 	InitializeMap_Implementation();
+	const int ID = 0;
+	const FColor* Color = MapAsset->GetLookupTable().FindKey(ID);
+	if(!Color)
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("Begin play ID not in lookupTable %d"), ID);
+	}
+		
+	const FPositions* Positions = PixelMap.Find(*Color);
+	if(!Positions)
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("begin play ID %d"), ID);
+		UE_LOG(LogInteractiveMap, Error, TEXT("Begin play Color not in PixelMap %s"), *Color->ToString());
+	}
 }
 
 void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color)
@@ -221,65 +223,25 @@ void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& Vi
 
 void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData)
 {
+	FillPixelMap();
 	const int32 Width = MapLookUpTexture->GetSizeX();
 	const int32 Height = MapLookUpTexture->GetSizeY();
 	if(LookupTextureData.Num() != Width*Height*4)
 		return;
-	
-	// Read color of each pixel
-	for (int32 Y = 0; Y < Height; ++Y)
+
+	if(PixelMap.Num() != MapAsset->GetLookupTable().Num())
 	{
-		for (int32 X = 0; X < Width; ++X)
-		{
-			const int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
-			const uint8 B = LookupTextureData[Index];
-			const uint8 G = LookupTextureData[Index + 1];
-			const uint8 R = LookupTextureData[Index + 2];
-			const int* ID = MapDataComponent->FindId(FColor(R, G, B));
-			if (!ID)
-			{
-				// UE_LOG(LogInteractiveMap, Error, TEXT("Error color not in lookup table %s"), *FColor(R, G, B).ToString());
-				continue;
-			}
-			FInstancedStruct* InstancedStruct = GetProvinceData(*ID);
-			if (!InstancedStruct)
-			{
-				UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
-				return;
-			}
-
-			for(const auto& Visual  : VisualProperties)
-			{
-				const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(InstancedStruct->GetScriptStruct(), Visual.Key);
-				if (!Property)
-				{
-					continue;
-				}
-				
-				const FName PropertyTypeName = Property->GetFName();
-				bool bResult = false;
-				const FString Tag = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(*InstancedStruct, PropertyTypeName.ToString(), bResult);
-				if(!bResult)
-				{
-					UE_LOG(LogInteractiveMap, Error, TEXT("Property %s is visual but type is not convertible to string"), *PropertyTypeName.ToString())
-					continue;
-				}
-
-				for(auto& VisualProperty : Visual.Value.VisualProperties)
-				{
-					if(Tag != VisualProperty.Tag)
-					{
-						continue;
-					}
-					// finally set pixels of texture component that matches this visual property type
-					if(UDynamicTexture** TextureComponent = MapModeDynamicTextures.Find(PropertyTypeName))
-					{
-						(*TextureComponent)->SetPixelValue(X, Y, VisualProperty.Color);
-					}
-				}
-			}
-		}
+		UE_LOG(LogInteractiveMap, Error, TEXT("Pixel Map does not match lookup"))
 	}
+	// for(const auto& [Color, ID] : MapAsset->GetLookupTable())
+	// {
+	// 	UE_LOG(LogInteractiveMap, Warning, TEXT("Color %s, %d"), *Color.ToString(), ID);
+	// }
+	
+	TArray<int> IDs;
+	IDs.Reserve(MapDataComponent->GetLookUpTable().Num());
+	MapAsset->GetLookupTable().GenerateValueArray(IDs);
+	UpdateDynamicTextures(IDs);
 }
 
 TArray<uint8> AClickableMap::GetPixelsToEditMarked(UDynamicTexture* Texture, const TArray<int>& IDs, uint8 MarkerValue)
@@ -304,8 +266,20 @@ void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<in
 {
 	for(const auto& ID : IDs)
 	{
-		const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
-		const FPositions* Positions = PixelMap.Find(*Color);
+		FColor Color = MapDataComponent->GetColor(ID);
+		
+		// if(!Color)
+		// {
+		// 	UE_LOG(LogInteractiveMap, Error, TEXT("ID not in lookupTable %d"), ID);
+		// 	continue;	
+		// }
+		
+		const FPositions* Positions = PixelMap.Find(Color);
+		if(!Positions)
+		{
+			UE_LOG(LogInteractiveMap, Error, TEXT("Color not in PixelMap %s"), *Color.ToString());
+			continue;
+		}
 
 		const int32 Width = MapLookUpTexture->GetSizeX();
 		for(const auto& Pos : Positions->PosArray)
@@ -316,68 +290,11 @@ void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<in
 	}
 }
 
-// #endif
-
-//TODO - TO BE REMOVED
-void AClickableMap::SaveMapTextureData()
-{
-	if (!IsValid(MapLookUpTexture))
-		return;
-
-	// Create Dynamic Texture Components
-	
-	
-	
-	// Get the dimensions of the texture
-	const int32 Width = MapLookUpTexture->GetSizeX();
-	const int32 Height = MapLookUpTexture->GetSizeY();
-	if(MapColorCodeTextureData.Num() != Width*Height*4)
-		return;
-	
-	// Read color of each pixel
-	for (int32 Y = 0; Y < Height; ++Y)
-	{
-		for (int32 X = 0; X < Width; ++X)
-		{
-			const int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
-			const uint8 B = MapColorCodeTextureData[Index];
-			const uint8 G = MapColorCodeTextureData[Index + 1];
-			const uint8 R = MapColorCodeTextureData[Index + 2];
-			
-			// const FName* ID = MapDataComponent->LookUpTable.Find(FVector(R, G, B));
-			const int* ID = MapDataComponent->FindId(FColor(R, G, B));
-			if (ID)
-			{
-				FInstancedStruct* province = GetProvinceData(*ID);
-				if (!province)
-				{
-					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
-					return;
-				}
-
-			}
-			else
-			{
-
-			}
-
-		}
-	}
-}
-
 // Called every frame
 void AClickableMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void AClickableMap::CreateMapTexture(UDynamicTextureComponent* textureCompoment)
-{
-	textureCompoment->UpdateTexture();
-	textureCompoment->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", textureCompoment->GetTexture());
-	textureCompoment->GetMaterialInstance()->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
-	textureCompoment->GetMaterialInstance()->SetScalarParameterValue("TextureType", 1.0f);
 }
 
 void AClickableMap::RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode)
@@ -633,7 +550,6 @@ void AClickableMap::FillPixelMap()
 				NewPosition.PosArray.Emplace(FVector2D(X, Y));
 				PixelMap.Emplace(Color, NewPosition);
 			}
-			
 		}
 	}
 }

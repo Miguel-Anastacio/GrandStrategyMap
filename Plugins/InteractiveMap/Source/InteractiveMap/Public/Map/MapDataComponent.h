@@ -93,6 +93,7 @@ protected:
     void LoadFromMapObject(const UMapObject* MapObject);
 
     int* FindId(const FColor& Color);
+    FColor GetColor(int ID) const;
 
     FVisualProperty GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const;
     FVisualProperty GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const;
