@@ -29,7 +29,7 @@ void UCountryEditorWidget::UpdateColor(const FLinearColor& color)
 {
 	if (GameMapReference)
 	{
-		GameMapReference->UpdateCountryColor(color, CountryTag);
+		// GameMapReference->UpdateCountryColor(color, CountryTag);
 	}
 }
 
@@ -43,10 +43,10 @@ void UCountryEditorWidget::UpdateData(UCustomEditableText* editedText, const FTe
 			{
 				FString dummy = Text.ToString();
 				CountryData.CountryName = dummy;
-				if (GameMapReference->UpdateCountryData(CountryData, CountryTag))
-				{
-					editedText->SetValues(Text, FText::FromString(FString("______")));
-				}
+				// if (GameMapReference->UpdateCountryData(CountryData, CountryTag))
+				// {
+				// 	editedText->SetValues(Text, FText::FromString(FString("______")));
+				// }
 			}
 		}
 	}

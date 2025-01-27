@@ -65,30 +65,11 @@ protected:
         return data;
     }
 
-     /**
-     * Updates province data.
-     *
-     * @param data The new data to update.
-     * @param id The ID of the province.
-     * @param out_mapToUpdate Reference to the map mode to update.
-     * @param out_newColor Reference to the new color.
-     * @return True if the update is successful, false otherwise.
-     */
-    UFUNCTION(BlueprintCallable, Category = "Map Data")
-    bool UpdateProvinceData(const FProvinceData& data, int ID, MapMode& out_mapToUpdate, FColor& out_newColor);
-
-    /** Updates country data. */
-    UFUNCTION(BlueprintCallable, Category = "Map Data")
-    bool UpdateCountryData(const FCountryData& data, FName id);
-
     /** Reads data tables. */
     void ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable);
 
     void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
-    void SetProvinceData(const FInstancedStruct& NewData, int ID);
-
-    /** Sets country provinces. */
-    void SetCountryProvinces();
+    bool SetProvinceData(const FInstancedStruct& NewData, int ID);
 
     void LoadFromMapObject(const UMapObject* MapObject);
 

@@ -93,37 +93,6 @@ FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
 	return nullptr;
 }
 
-bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, int id, MapMode& out_mapToUpdate, FColor& out_newColor)
-{
-	FInstancedStruct* province = ProvinceDataMap.Find(id);
-	if (!province)
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
-		return false;
-	}
-	return false;
-}
-
-bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
-{
-	// FCountryData* country = CountryDataMap.Find(id);
-	// if (country)
-	// {
-	// 	if (country->CountryName != data.CountryName)
-	// 	{
-	// 		(*country) = data;
-	// 		return true;
-	// 	}
-	//
-	// 	return false;
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
-	// 	return false;
-	// }
-	return false;
-}
 #if WITH_EDITOR
 void UMapDataComponent::ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable)
 {
@@ -171,33 +140,22 @@ void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
 	}
 }
 
-void UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
+bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
 {
-	if(FInstancedStruct* Current = ProvinceDataMap.Find(ID))
+	FInstancedStruct* CurrentData = GetProvinceData(ID);
+	if(!CurrentData)
 	{
-		*Current = NewData;
+		UE_LOG(LogInteractiveMap, Error, TEXT("ID does not exist in Map Data"))
+		return false;
 	}
-}
-
-void UMapDataComponent::SetCountryProvinces()
-{
-	TArray<FName> countriesToIgnore;
-
-	// see which countries already had province data from file
-	for (auto& province : ProvinceDataMap)
+	if(CurrentData->GetScriptStruct() != NewData.GetScriptStruct())
 	{
-		// FCountryData* country = CountryDataMap.Find(province.Value.Owner);
-		// if (!country)
-		// {
-		// 	UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Component: Province has an invalid Owner"));
-		// 	continue;
-		// }
-		//
-		// if (countriesToIgnore.Contains(province.Value.Owner))
-		// 	continue;
-
-		// country->Provinces.Add(province.Key);
+		UE_LOG(LogInteractiveMap, Error, TEXT("New struct type does not match current"))
+		return false;
 	}
+	
+	*CurrentData = NewData;
+	return true;
 }
 
 void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)

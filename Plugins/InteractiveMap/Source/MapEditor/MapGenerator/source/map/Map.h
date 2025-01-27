@@ -89,14 +89,16 @@ namespace MapGenerator
 	// void SaveLookupMapToFile(const char* filename) const;
 	// void SaveHeightMapToFile(const char* filename) const;
 
-	void RegenerateLookUp(const LookupMapData &data);
+	void RegenerateLookUp(const LookupMapData &data, std::function<void(float, std::string_view)> progressCallback = nullptr);
 	void RegenerateLookupBorders(const LookupMapData &data);
 
 	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height);
-	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const LookupMapData& data);
+	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const LookupMapData& data,
+						std::function<void(float, std::string_view)> progressCallback = nullptr);
 
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight);
-	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data);
+	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data,
+									std::function<void(float, std::string_view)> progressCallback = nullptr);
 
 	// void SaveMap(const char* filePath);
 	void SaveMap(const std::string &filePath) const;

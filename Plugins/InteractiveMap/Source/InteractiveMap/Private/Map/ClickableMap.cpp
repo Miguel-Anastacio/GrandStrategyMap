@@ -45,38 +45,21 @@ void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& Propert
 void AClickableMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	MapTileChangeDelegate.AddDynamic(this, &AClickableMap::OnMapTileChanged);
-	MapTileChangeMultipleDelegate.AddDynamic(this, &AClickableMap::OnMapTileChangedMultiple);
+	MapTileChangedDelegate.AddDynamic(this, &AClickableMap::UpdateDynamicTextures);
 }
 
-void AClickableMap::OnMapTileChanged(int ID, const FInstancedStruct& Data)
-{
-	if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
-	{
-		if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
-			return;
-		
-		*CurrentData = Data;
-		UpdateDynamicTextures({ID});
-	}
-}
-
-void AClickableMap::OnMapTileChangedMultiple(const TArray<FTilePair>& NewData)
+void AClickableMap::SetMapTiles(const TArray<FTilePair>& NewData)
 {
 	TArray<int> IDs;
 	IDs.Reserve(NewData.Num());
 	for(const auto& [ID, Data] : NewData)
 	{
-		if(FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+		if(MapDataComponent->SetProvinceData(Data, ID))
 		{
-			if(CurrentData->GetScriptStruct() != Data.GetScriptStruct())
-				return;
-			*CurrentData = Data;
 			IDs.Emplace(ID);
-		}	
+		}
 	}
-	
-	UpdateDynamicTextures(IDs);
+	MapTileChangedDelegate.Broadcast(IDs);
 }
 
 void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
@@ -144,12 +127,9 @@ void AClickableMap::InitializeMap_Implementation()
 		UE_LOG(LogInteractiveMap, Error, TEXT("Map Look up Texture not assigned"));
 		return;
 	}
-	MapDataComponent->SetCountryProvinces();
-
 	DynamicTextureComponent->InitializeTexture(MapLookUpTexture->GetSizeX(), MapLookUpTexture->GetSizeY());
-	// Create Dynamic Textures
-	// Fill them
 	CreateMapModes();
+	
 	// set Current texture in Component
 	UDynamicTexture* DynamicTextureTest = *MapModeDynamicTextures.Find("Landscape");
 	DynamicTextureComponent->SetDynamicTexture(DynamicTextureTest);
@@ -158,7 +138,6 @@ void AClickableMap::InitializeMap_Implementation()
 
 	SetMapMode_Implementation(FName("Landscape"));
 	
-
 	// set referene in player class
 	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	if (player)
@@ -170,29 +149,7 @@ void AClickableMap::InitializeMap_Implementation()
 void AClickableMap::BeginPlay()
 {
 	Super::BeginPlay();
-
 	InitializeMap_Implementation();
-	const int ID = 0;
-	const FColor* Color = MapAsset->GetLookupTable().FindKey(ID);
-	if(!Color)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Begin play ID not in lookupTable %d"), ID);
-	}
-		
-	const FPositions* Positions = PixelMap.Find(*Color);
-	if(!Positions)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("begin play ID %d"), ID);
-		UE_LOG(LogInteractiveMap, Error, TEXT("Begin play Color not in PixelMap %s"), *Color->ToString());
-	}
-}
-
-void AClickableMap::SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color)
-{
-	pixelArray[index ] = color.B;
-	pixelArray[index + 1] = color.G;
-	pixelArray[index + 2] = color.R;
-	pixelArray[index + 3] = color.A;
 }
 
 void AClickableMap::CreateMapModes()
@@ -202,7 +159,13 @@ void AClickableMap::CreateMapModes()
 	CreateDynamicTextures(Types);
 	FillDynamicTextures(MapDataComponent->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
 }
-// #if WITH_EDITOR
+
+void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)
+{
+	MapDataComponent->SetProvinceData(Data, ID);
+	MapTileChangedDelegate.Broadcast({ID});
+}
+
 void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& VisualPropertyTypes)
 {
 	MapLookUpTexture = MapAsset->LookupTexture;
@@ -233,10 +196,6 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Pixel Map does not match lookup"))
 	}
-	// for(const auto& [Color, ID] : MapAsset->GetLookupTable())
-	// {
-	// 	UE_LOG(LogInteractiveMap, Warning, TEXT("Color %s, %d"), *Color.ToString(), ID);
-	// }
 	
 	TArray<int> IDs;
 	IDs.Reserve(MapDataComponent->GetLookUpTable().Num());
@@ -244,35 +203,11 @@ void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperti
 	UpdateDynamicTextures(IDs);
 }
 
-TArray<uint8> AClickableMap::GetPixelsToEditMarked(UDynamicTexture* Texture, const TArray<int>& IDs, uint8 MarkerValue)
-{
-	TArray<uint8> DataBuffer = *Texture->GetTextureData();
-	for(const auto& ID : IDs)
-	{
-		const FColor* Color = MapDataComponent->GetLookUpTable().FindKey(ID);
-		const FPositions* Positions = PixelMap.Find(*Color);
-
-		const int32 Width = Texture->TextureWidth;
-		for(const auto& Pos : Positions->PosArray)
-		{
-			const int32 Index = (Pos.Y * Width + Pos.X) * 4;
-			DataBuffer[Index + 3] = MarkerValue;
-		}
-	}
-	return DataBuffer;
-}
-
 void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<int>& IDs, uint8 MarkerValue) const
 {
 	for(const auto& ID : IDs)
 	{
 		FColor Color = MapDataComponent->GetColor(ID);
-		
-		// if(!Color)
-		// {
-		// 	UE_LOG(LogInteractiveMap, Error, TEXT("ID not in lookupTable %d"), ID);
-		// 	continue;	
-		// }
 		
 		const FPositions* Positions = PixelMap.Find(Color);
 		if(!Positions)
@@ -295,173 +230,6 @@ void AClickableMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void AClickableMap::RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode)
-{
-	int32 Width = MapLookUpTexture->GetSizeX();
-	int32 Height = MapLookUpTexture->GetSizeY();
-
-	for (int32 Y = 0; Y < Height; ++Y)
-	{
-		for (int32 X = 0; X < Width; ++X)
-		{
-			int32 Index = (Y * Width + X) * 4; // 4 bytes per pixel (RGBA)
-			uint8 B = MapColorCodeTextureData[Index];
-			uint8 G = MapColorCodeTextureData[Index + 1];
-			uint8 R = MapColorCodeTextureData[Index + 2];
-			uint8 A = MapColorCodeTextureData[Index + 3];
-
-
-			FColor pixelColor = FColor(0, 0, 0, 0);
-			bool bResult = false;
-			const int ID = GetProvinceID(FColor(R,G,B), bResult);
-			if (bResult)
-			{
-				FInstancedStruct* province = GetProvinceData(ID);
-				if (!province)
-				{
-					UE_LOG(LogInteractiveMap, Error, TEXT("Error province present in look up table but not in province map data"));
-					return;
-				}
-
-				// switch (mode)
-				// {
-				// case MapMode::POLITICAL:
-				// 	textureCompoment->SetPixelValue(X, Y, MapDataComponent->GetCountryColor(province));
-				// 	break;
-				// case MapMode::RELIGIOUS:
-				// 	textureCompoment->SetPixelValue(X, Y, MapDataComponent->GetReligionColor(province));
-				// 	break;
-				// case MapMode::CULTURAL:
-				// 	textureCompoment->SetPixelValue(X, Y, MapDataComponent->GetCultureColor(province));
-				// 	break;
-				// case MapMode::TERRAIN:
-				// 	break;
-				// default:
-				// 	break;
-				// }
-			}
-			else
-			{
-				textureCompoment->SetPixelValue(X, Y, pixelColor);
-			}
-
-		}
-	}
-}
-
-void AClickableMap::UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor)
-{
-	FColor oldColor;
-	UDynamicTextureComponent* textureComponent = nullptr;
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-	
-		// oldColor = MapDataComponent->GetCountryColor(MapDataComponent->ProvinceDataMap.Find(provinceID));
-		if (oldColor == FColor(0, 0, 0, 0))
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Province or Country data not found"));
-			return;
-		}
-
-		// textureComponent = PoliticalMapTextureComponent;
-
-		break;
-	case MapMode::RELIGIOUS:
-
-		// oldColor = MapDataComponent->GetReligionColor(MapDataComponent->ProvinceDataMap.Find(provinceID));
-		if (oldColor == FColor(0, 0, 0, 0))
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Province data not found"));
-			return;
-		}
-
-		// textureComponent = ReligiousMapTextureComponent;
-
-		break;
-	case MapMode::CULTURAL:
-		// oldColor = MapDataComponent->GetCultureColor(MapDataComponent->ProvinceDataMap.Find(provinceID));
-		if (oldColor == FColor(0, 0, 0, 0))
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Province data not found"));
-			return;
-		}
-
-		// textureComponent = CultureMapTextureComponent;
-
-		break;
-	case MapMode::TERRAIN:
-
-		break;
-	default:
-		break;
-	}
-
-	if (!textureComponent)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Invalid Map Mode"));
-		return;
-	}
-
-	//UpdatePixelArray(*textureComponent->GetTextureData(), oldColor, newColor, textureComponent->GetTexture(), {provinceID});
-	RefreshDynamicTextureDataBuffer(textureComponent, mode);
-	textureComponent->UpdateTexture();
-}
-void AClickableMap::UpdateMapTexture(MapMode mode)
-{
-	UDynamicTextureComponent* textureComponent = nullptr;
-	switch (mode)
-	{
-	case MapMode::POLITICAL:
-		// textureComponent = PoliticalMapTextureComponent;
-		break;
-	case MapMode::RELIGIOUS:
-		// textureComponent = ReligiousMapTextureComponent;
-		break;
-	case MapMode::CULTURAL:
-		// textureComponent = CultureMapTextureComponent;
-		break;
-	case MapMode::TERRAIN:
-		break;
-	default:
-		break;
-	}
-
-	if (!textureComponent)
-		return;
-
-	RefreshDynamicTextureDataBuffer(textureComponent, mode);
-	textureComponent->UpdateTexture();
-}
-void AClickableMap::UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs)
-{
-	int32 Width = texture->GetSizeX();
-	int32 Height = texture->GetSizeY();
-
-	if (pixelArray.Num() != Width * Height * 4)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Mismatch size between texture and pixel array when updating texture"));
-		return;
-	}
-
-	for (int32 y = 0; y < Height; y++)
-	{
-		for (int32 x = 0; x < Width; x++)
-		{
-			int32 Index = (y * Width + x) * 4;
-			
-			//FColor(30, )
-			FColor color = FColor(pixelArray[Index + 2],
-				pixelArray[Index + 1],
-				pixelArray[Index],
-				pixelArray[Index + 3]);
-
-			if (color != oldColor)
-				continue;
-		}
-	}
 }
 
 TMap<FColor, int> AClickableMap::GetLookUpTable() const
@@ -554,41 +322,6 @@ void AClickableMap::FillPixelMap()
 	}
 }
 
-bool AClickableMap::UpdateProvinceData(const FInstancedStruct& Data, int ID)
-{
-	FInstancedStruct* province = MapDataComponent->ProvinceDataMap.Find(ID);
-	MapMode mapToUpdate = MapMode::TERRAIN;
-	FColor color = FColor();
-
-	// bool dataChanged = MapDataComponent->UpdateProvinceData(data, id, mapToUpdate, color);
-	if (mapToUpdate != MapMode::TERRAIN)
-	{
-		// MapDataChangedDelegate.Broadcast(mapToUpdate);
-		return true;
-	}
-	
-	// return dataChanged;
-	return false;
-}
-
-bool AClickableMap::UpdateCountryData(const FCountryData& Data, FName id)
-{
-	return MapDataComponent->UpdateCountryData(Data, id);
-}
-
-bool AClickableMap::UpdateCountryColor(const FLinearColor& color, FName id)
-{
-	// FCountryData* country = MapDataComponent->CountryDataMap.Find(id);
-	
-	// if (!country)
-	return false;
-
-	// UpdatePixelArray(*PoliticalMapTextureComponent->GetTextureData(), country->Color, color.ToFColor(true), PoliticalMapTextureComponent->GetTexture(), country->Provinces);
-	// country->Color = color.ToFColor(true);
-
-	// PoliticalMapTextureComponent->UpdateTexture();
-
-}
 
 void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
 {
@@ -637,7 +370,6 @@ void AClickableMap::LoadMapAsset(UMapObject* MapObject)
 	MapLookUpTexture = MapObject->LookupTexture;
 	MapColorCodeTextureData = MapObject->GetLookupTextureData();
 	
-
 	// Load Data
 	MapDataComponent->LoadFromMapObject(MapObject);
 	
