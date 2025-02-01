@@ -33,6 +33,7 @@ public:
 	const TSharedRef<FTabManager::FLayout> CreateCustomLayout() const;
 	void RegisterTabs();
 	TSharedRef<SDockTab> SpawnMainTab(const FSpawnTabArgs& Args) const;
+	TSharedRef<SDockTab> SpawMapEditorWindow(const FSpawnTabArgs& Args) const;
 
 private:
 	FName MapEditorMainTab = FName(TEXT("MapEditorMainTab"));

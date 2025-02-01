@@ -27,9 +27,9 @@ public:
     // UFUNCTION()
 
     const FSlateBrush* GetMainBrush() const;
-    void SetMainBrush(const TSharedPtr<FSlateBrush>& InBrush);
+    void SetMainBrush(const TSharedPtr<FSlateBrush>& InBrush) const;
     void SetMainBrush(UTexture2D* InTexture);
-
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
     virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
     virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
     virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -42,6 +42,7 @@ private:
     TSharedPtr<FSlateBrush> MainBrush;
 
     float CurrentZoom = 1.0f;
+    FVector2D PanOffSet = FVector2D(0.0f);
     FBox2D CurrentUVRegion = FBox2D(FVector2D(0, 0), FVector2D(1, 1));
     FVector2D DragStartLocation;
     bool bIsDragging = false;

@@ -67,11 +67,6 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
 				{
 					// Button click handler logic
 					GenerateMap();
-					// USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(
-					// [&, this](TFunction<void(float, std::string_view)> ProgressCallback)
-					// {
-					// 	GenerateMap(ProgressCallback);
-					// });
 					return FReply::Handled();
 				})
 			]
@@ -121,7 +116,6 @@ void RMapEditorMenu::GenerateMap()
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
 	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
-	// Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData());
 	USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
@@ -138,9 +132,6 @@ void RMapEditorMenu::GenerateMap()
 			}
 
 		});
-	
-	
-	
 }
 
 void RMapEditorMenu::SaveMap() const
@@ -188,6 +179,14 @@ void RMapEditorMenu::SaveMap() const
 	
 	FString Message;
 	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+}
+
+void RMapEditorMenu::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	if(MapEditorPreset)
+	{
+		Collector.AddReferencedObject(MapEditorPreset);
+	}
 }
 
 TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)

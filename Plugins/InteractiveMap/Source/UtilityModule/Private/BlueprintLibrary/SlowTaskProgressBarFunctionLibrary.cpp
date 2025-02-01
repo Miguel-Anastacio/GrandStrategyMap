@@ -15,22 +15,12 @@ void USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(TFuncti
 	SlowTask.MakeDialog();
 	auto ProgressCallback = [&](float Progress, std::string_view message)
 	{
-		// if(CurrentProgress >= 100)
-		// {
-		// 	CurrentProgress = 0.0f;
-		// }
-		// if (SlowTask.ShouldCancel())
-		// {
-		// 	// Handle cancellation
-		// 	UE_LOG(LogTemp, Warning, TEXT("Operation canceled by user!"));
-		// 	return false; // Returning false signals the library to stop, if supported
-		// }
 		CurrentProgress += Progress;
 		// Update the progress bar
 		SlowTask.EnterProgressFrame(
 			CurrentProgress,
 			FText::Format(
-				NSLOCTEXT("SlowTask", "Processing", "Progress: {0}% ({1})"),
+				NSLOCTEXT("SlowTask", "Processing", "({1})"),
 				FText::AsNumber(FMath::RoundToInt(CurrentProgress)), // First parameter: Progress as a percentage
 				FText::FromString(FString(message.data()))    // Second parameter: Convert std::string_view
 			)

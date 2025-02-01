@@ -32,7 +32,7 @@ public class MapEditor : ModuleRules
 				"RenderCore",
 				"UtilityModule",
 				"StructUtils",
-				"SharedModule"
+				"SharedModule", "Engine"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

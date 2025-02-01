@@ -62,13 +62,13 @@ void FInteractiveMapEditorModule::RegisterMenus() const
 
 	// MyPluginSection.AddSeparator("MySeparator"); // Add a separator
 
-	MyPluginSection.AddMenuEntry(
-		"TerrainCreator",
-		FText::FromString("Terrain Generator Editor"),
-		FText::FromString("Launch Terrain Generator"),
-		FSlateIcon(),
-		FUIAction(FExecuteAction::CreateRaw(this, &FInteractiveMapEditorModule::LaunchTerrainCreator))
-	);
+	// MyPluginSection.AddMenuEntry(
+	// 	"TerrainCreator",
+	// 	FText::FromString("Terrain Generator Editor"),
+	// 	FText::FromString("Launch Terrain Generator"),
+	// 	FSlateIcon(),
+	// 	FUIAction(FExecuteAction::CreateRaw(this, &FInteractiveMapEditorModule::LaunchTerrainCreator))
+	// );
 
 	// Refresh the menus
 	ToolMenus->RefreshAllWidgets();
@@ -77,11 +77,6 @@ void FInteractiveMapEditorModule::RegisterMenus() const
 void FInteractiveMapEditorModule::LaunchMapEditor() const
 {
 	FGlobalTabmanager::Get()->TryInvokeTab(MapEditorMainTab);
-}
-
-void FInteractiveMapEditorModule::LaunchTerrainCreator() const
-{
-	UE_LOG(LogInteractiveMapEditor, Log, TEXT("Launching Terrain Creator Editor"));
 }
 
 TSharedPtr<FSlateStyleSet> FInteractiveMapEditorModule::CustomAssetsEditorSlateStyle;
