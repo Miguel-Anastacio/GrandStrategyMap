@@ -70,9 +70,9 @@ namespace MapGenerator
 		buffer.reserve(m_tiles.size() * 4);
 		for (auto &tile : m_tiles)
 		{
-			buffer.emplace_back(tile.color.R);
-			buffer.emplace_back(tile.color.G);
 			buffer.emplace_back(tile.color.B);
+			buffer.emplace_back(tile.color.G);
+			buffer.emplace_back(tile.color.R);
 			buffer.emplace_back(tile.color.A);
 		}
 
@@ -90,8 +90,8 @@ namespace MapGenerator
 				const int tileIndex = (i * Width() + j);
 				const int index = tileIndex * 4;
 				buffer[index] = m_tiles[tileIndex].color.B;
-				buffer[index + 1] = m_tiles[tileIndex].color.R;
-				buffer[index + 2] = m_tiles[tileIndex].color.G;
+				buffer[index + 1] = m_tiles[tileIndex].color.G;
+				buffer[index + 2] = m_tiles[tileIndex].color.R;
 				buffer[index + 3] = m_tiles[tileIndex].color.A;
 				
 			}

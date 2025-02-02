@@ -1,0 +1,58 @@
+#include "/Engine/Public/Platform.ush"
+
+// Struct to define color replacement rules
+struct FColourReplace
+{
+    int3 ColorToReplace;  // RGB color to replace
+    int3 NewColor;        // New RGB color to replace with
+};
+
+int ColourCount;                    // Total number of color replacement rules
+int PixelCount;
+int ChunkSize;                      
+StructuredBuffer<FColourReplace> ColorReplacementDataBuffer;  // Color replacement rules
+StructuredBuffer<int> PixelBuffer; // Pixel data buffer (assumed to be an array of int representing RGBA)
+RWStructuredBuffer<int> OutputBuffer; // Pixel data buffer (assumed to be an array of int representing RGBA)
+
+// Main compute shader entry point
+[numthreads(THREADS_X, THREADS_Y, THREADS_Z)]
+void ReplaceColorComputeShader(
+    uint3 DispatchThreadId : SV_DispatchThreadID,  // ID of the current thread (pixel)
+    uint GroupIndex : SV_GroupIndex)                // ID of the dispatch group
+{
+    // uint PixelIndex = DispatchThreadId.x * DispatchThreadId.y;
+    uint PixelIndex = DispatchThreadId.x;
+
+    // Ensure we don't process out-of-bound pixels
+    if (PixelIndex >= PixelCount)
+    {
+        return;
+    }
+
+    // Read the current pixel color (R, G, B, A)
+    uint PixelColor = PixelBuffer[PixelIndex];
+
+    // Extract the RGBA components from the uint pixel color
+    uint B = PixelColor & 0xFF;
+    uint G = (PixelColor >> 8) & 0xFF;
+    uint R = (PixelColor >> 16) & 0xFF;
+    uint A = (PixelColor >> 24) & 0xFF;
+
+    OutputBuffer[PixelIndex] =  (A << 24) | (R << 16) | (G << 8) | B;
+    // OutputBuffer[PixelIndex] =  0xFF00FF00;
+    for(int i = 0; i < ColourCount; i++)
+    {
+        const int3 Replace = ColorReplacementDataBuffer[i].ColorToReplace;
+        const int3 NewColor = ColorReplacementDataBuffer[i].NewColor;
+        // Alpha marks which pixels to update
+        if(A != i)
+            continue;
+        
+        // if(R == Replace.x && G == Replace.y && B == Replace.z)
+        {
+            uint NewPixelColor = (0xFF << 24) | (NewColor.x << 16) | (NewColor.y << 8) | NewColor.z;
+            OutputBuffer[PixelIndex] = NewPixelColor;
+        }
+        // OutputBuffer[PixelIndex] = 0xFFFFFFFF;
+    }
+}

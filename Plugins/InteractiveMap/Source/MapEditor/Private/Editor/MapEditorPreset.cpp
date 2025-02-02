@@ -17,17 +17,19 @@ UMapEditorPreset::UMapEditorPreset()
 void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	// OnObjectChanged.Broadcast();
+	bool bFound = false;
 	if(TileDataStructType)
 	{
+		FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(TileDataStructType, FName("ID"));
 		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(TileDataStructType, FName("ID")))
 		{
 			// THROW ERROR AT USER  FACE
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must have property with type ID"));
-			TileDataStructType = nullptr;
-			this->PostEditChange();
+            UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must have property with type ID"));
+            TileDataStructType = nullptr;
+            this->PostEditChange();
 		}
 	}
+
 }
 
 #endif}

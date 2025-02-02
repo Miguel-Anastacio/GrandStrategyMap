@@ -7,7 +7,7 @@
 
 
 UCLASS()
-class UTILITYMODULE_API UFilePickerFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULEEDITOR_API UFilePickerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 	

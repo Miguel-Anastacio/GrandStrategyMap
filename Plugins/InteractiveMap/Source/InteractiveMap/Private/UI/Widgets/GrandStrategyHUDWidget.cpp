@@ -7,6 +7,7 @@
 #include "InteractiveMap.h"
 #include "Misc/Paths.h"
 #include "Engine/Engine.h"
+#include "UI/Widgets/MapModeSelectorWidget.h"
 
 void UGrandStrategyHUDWidget::SetGameMapReference()
 {
@@ -14,6 +15,10 @@ void UGrandStrategyHUDWidget::SetGameMapReference()
 	if (actor)
 	{
 		GameMap = Cast<AClickableMap>(actor);
+		if(UMapModeSelectorWidget)
+		{
+			UMapModeSelectorWidget->SetInteractiveMapReference(GameMap);
+		}
 	}
 }
 
@@ -21,22 +26,22 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	SetGameMapReference();
-	if (PoliticalMapButton)
-	{
-		PoliticalMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	}
-	if (ReligiousMapButton)
-	{
-		ReligiousMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	}
-	if (CultureMapButton)
-	{
-		CultureMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	}
-	if (TerrainMapButton)
-	{
-		TerrainMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	}
+	// if (PoliticalMapButton)
+	// {
+	// 	PoliticalMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
+	// }
+	// if (ReligiousMapButton)
+	// {
+	// 	ReligiousMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
+	// }
+	// if (CultureMapButton)
+	// {
+	// 	CultureMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
+	// }
+	// if (TerrainMapButton)
+	// {
+	// 	TerrainMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
+	// }
 
 	if (SaveDataButton)
 	{
@@ -55,43 +60,43 @@ void UGrandStrategyHUDWidget::SetMapMode(UCustomButtonWidget* button)
 		UE_LOG(LogInteractiveMap, Warning, TEXT("Map Variable not set in hud widget"));
 		return;
 	}
-	if (button == PoliticalMapButton)
-	{
-		GameMap->SetMapMode(MapMode::POLITICAL);
-		return;
-	}
-	if (button == ReligiousMapButton)
-	{
-		GameMap->SetMapMode(MapMode::RELIGIOUS);
-		return;
-	}
-	if (button == CultureMapButton)
-	{
-		GameMap->SetMapMode(MapMode::CULTURAL);
-		return;
-	}
-	if (button == TerrainMapButton)
-	{
-		GameMap->SetMapMode(MapMode::TERRAIN);
-		return;
-	}
+	// if (button == PoliticalMapButton)
+	// {
+	// 	GameMap->SetMapMode(MapMode::POLITICAL);
+	// 	return;
+	// }
+	// if (button == ReligiousMapButton)
+	// {
+	// 	GameMap->SetMapMode(MapMode::RELIGIOUS);
+	// 	return;
+	// }
+	// if (button == CultureMapButton)
+	// {
+	// 	GameMap->SetMapMode(MapMode::CULTURAL);
+	// 	return;
+	// }
+	// if (button == TerrainMapButton)
+	// {
+	// 	GameMap->SetMapMode(MapMode::TERRAIN);
+	// 	return;
+	// }
 }
 
 void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 {
 	if (button == SaveDataButton)
 	{
-		TMap<FName, FProvinceData>* provinceMapData = GameMap->GetProvinceDataMap();
+		TMap<int, FInstancedStruct>* provinceMapData = GameMap->GetProvinceDataMap();
 		if (!provinceMapData)
 			return;
 
-		bool result;
+		bool result = false;
 		FString outMessageInfo;
 		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
 
 		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
 
-		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
+		// UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
 		if (!result)
 		{
 			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);

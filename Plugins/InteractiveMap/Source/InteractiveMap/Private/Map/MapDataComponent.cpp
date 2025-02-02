@@ -4,291 +4,222 @@
 #include "Map/MapEnums.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "InteractiveMap.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 
 UMapDataComponent::UMapDataComponent()
 {
 
 }
 
-TMap<FVector, FName> UMapDataComponent::GetLookUpTable() const
+void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	return LookUpTable;
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	// ReadDataTables();
 }
 
-FName UMapDataComponent::GetProvinceID(const FVector& color, bool out_result) const
+const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
 {
-	const FName* ID = LookUpTable.Find(color);
-	if (ID)
+	return VisualPropertiesMap;
+}
+
+TMap<FName, FArrayOfVisualProperties> UMapDataComponent::GetVisualPropertyNameMap() const
+{
+	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
+	for(auto& VpType : VisualPropertiesMap)
 	{
-		out_result = true;
+		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
+	}
+	return VisualPropertiesNameMap;
+}
+
+TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
+{
+	return NewLookupTable;
+}
+
+int UMapDataComponent::GetProvinceID(const FColor& Color, bool& bOutResult) const
+{
+	if (const int* ID = NewLookupTable.Find(Color))
+	{
+		bOutResult = true;
 		return (*ID);
 	}
 
-	out_result = false;
-	return FName();
+	bOutResult = false;
+	return -1;
 }
 
-void UMapDataComponent::GetProvinceData(FName name, FProvinceData& out_data) const
+bool UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
 {
-	const FProvinceData* data = ProvinceDataMap.Find(name);
+	const FInstancedStruct* data = ProvinceDataMap.Find(ID);
 	if (data)
 	{
-		out_data = (*data);
-		out_data = (*data);
+		Out_Data = (*data);
+		return true;
 	}
+	return false;
 }
 
-FProvinceData* UMapDataComponent::GetProvinceData(FName name)
+FColor UMapDataComponent::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName,
+	bool& OutResult) const
 {
-	FProvinceData* data = ProvinceDataMap.Find(name);
+	const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
+
+	if (!OutResult)
+		return FColor::Black;
+		
+	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
+}
+
+// FInstancedStruct UMapDataComponent::GetProvinceData(int ID, bool& OutResult)
+// {
+// 	FInstancedStruct* Data = ProvinceDataMap.Find(ID);
+// 	if (Data)
+// 	{
+// 		OutResult = true;
+// 		return *Data;
+// 	}
+// 	OutResult = false;
+// 	return FInstancedStruct();
+// }
+
+FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
+{
+	FInstancedStruct* data = ProvinceDataMap.Find(ID);
 	if (data)
 	{
 		return data;
 	}
-
 	return nullptr;
 }
 
-bool UMapDataComponent::UpdateProvinceData(const FProvinceData& data, FName id, MapMode& out_mapToUpdate, FColor& out_newColor)
+#if WITH_EDITOR
+void UMapDataComponent::ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable)
 {
-	FProvinceData* province = ProvinceDataMap.Find(id);
-	if (!province)
+	if(!VpDataTable|| !VpTypeDataTable)
 	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
-		return false;
-	}
-
-	if (province->Owner != data.Owner)
-	{
-		FCountryData* newOwnerCountry = CountryDataMap.Find(data.Owner);
-		if (!newOwnerCountry)
-		{
-			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid owner - update not possible"));
-			return false;
-		}
-
-		out_newColor = newOwnerCountry->Color;
-		out_mapToUpdate = MapMode::POLITICAL;
-
-		newOwnerCountry->Provinces.Add(id);
-		FCountryData* currentOwner = CountryDataMap.Find(province->Owner);
-		if(currentOwner)
-			currentOwner->Provinces.RemoveSingle(id);
-
-		(*province) = data;
-
-		return true;
-	}
-	else if (province->Religion != data.Religion)
-	{
-		out_newColor = GetReligionColor(&data);
-		if (out_newColor == FColor(0, 0, 0, 0))
-		{
-			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid religion - update not possible"));
-			return false;
-		}
-
-		(*province) = data;
-		out_mapToUpdate = MapMode::RELIGIOUS;
-
-		return true;
-	}
-	else if (province->Culture != data.Culture)
-	{
-		out_newColor = GetCultureColor(&data);
-		if (out_newColor == FColor(0, 0, 0, 0))
-		{
-			UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid culture - update not possible"));
-			return false;
-		}
-
-		(*province) = data;
-		out_mapToUpdate = MapMode::CULTURAL;
-		return true;
-	}
-	else
-	{
-		(*province) = data;
-		return true;
-	}
-
-
-}
-
-bool UMapDataComponent::UpdateCountryData(const FCountryData& data, FName id)
-{
-	FCountryData* country = CountryDataMap.Find(id);
-	if (country)
-	{
-		if (country->CountryName != data.CountryName)
-		{
-			(*country) = data;
-			return true;
-		}
-
-		return false;
-	}
-	else
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("Invalid province id - update not possible"));
-		return false;
-	}
-}
-
-
-void UMapDataComponent::CreateLookUpTable()
-{
-	if (!MapDataTable)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
+		UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
 		return;
 	}
-
-	TArray<FName> RowNames = MapDataTable->GetRowNames();
-	TMap<TCHAR, int32> HexMap;
-	InitHexMap(HexMap);
-	for (auto& name : RowNames)
+	
+	VisualPropertiesMap.Empty();	
+	TArray<FVisualPropertyType*> AllTypes;
+	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VpTypeDataTable, AllTypes))
 	{
-		// Color in HEX as a string
-		FProvinceIDData* Item = MapDataTable->FindRow<FProvinceIDData>(name, "");
-		if (Item)
+	}
+	TArray<FVisualProperty*> VisualProperties;
+	UDataManagerFunctionLibrary::ReadDataTableToArray(VpDataTable, VisualProperties);
+	
+	for(const auto& Type : AllTypes)
+	{
+		FArrayOfVisualProperties ArrayOf;
+		for(const auto& Property : VisualProperties)
 		{
-			FString temp = Item->Color;
-			temp = temp.EndsWith(FString("FF")) ? temp : temp.Append(TEXT("FF"));
-
-			FColor sRGBColor = Item->ConvertHexStringToRGB(temp, HexMap);
-
-			LookUpTable.Add(FVector(sRGBColor.R, sRGBColor.G, sRGBColor.B), name);
-			continue;
+			if(Type->Type == Property->Type)
+			{
+				ArrayOf.VisualProperties.Emplace(*Property);
+			}
 		}
+		VisualPropertiesMap.Emplace(*Type, ArrayOf.VisualProperties);
+	}
+}
+#endif
 
-		// Color in FColor format
-		FProvinceIDDataRGB* itemRGB = MapDataTable->FindRow<FProvinceIDDataRGB>(name, "");
-		if (itemRGB)
+void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
+{
+	ProvinceDataMap.Empty();
+	ProvinceDataMap.Reserve(Data.Num());
+	for(const auto& StructInstanced : Data)
+	{
+		bool bResult = false;
+		int ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(StructInstanced, "ID", bResult);
+		if(bResult)
 		{
-			LookUpTable.Add(FVector(itemRGB->Color.R, itemRGB->Color.G, itemRGB->Color.B), name);
+			ProvinceDataMap.Emplace(ID, StructInstanced);
 		}
 	}
 }
 
-void UMapDataComponent::ReadDataTables()
+bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
 {
-	if (!UDataManagerFunctionLibrary::ReadDataTable(ProvinceDataTable, ProvinceDataMap))
-		UE_LOG(LogInteractiveMap, Error, TEXT("Province Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
-	if(!UDataManagerFunctionLibrary::ReadDataTable(CountryDataTable, CountryDataMap))
-		UE_LOG(LogInteractiveMap, Error, TEXT("Country Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
-	if(!UDataManagerFunctionLibrary::ReadDataTable(VisualPropertiesDataTable, VisualPropertiesDataMap))
-		UE_LOG(LogInteractiveMap, Error, TEXT("Visual Properties Data Table not set. Make sure it is assigned in the Interactive Map Data Component"));
-
-}
-
-void UMapDataComponent::SetCountryProvinces()
-{
-	TArray<FName> countriesToIgnore;
-
-	// see which countries already had province data from file
-	for (auto& country : CountryDataMap)
+	FInstancedStruct* CurrentData = GetProvinceData(ID);
+	if(!CurrentData)
 	{
-		country.Value.Provinces.Empty();
-		if (country.Value.Provinces.Num() > 0)
-			countriesToIgnore.Emplace(country.Key);
-	}
-
-	// if all countries then exit function
-	if (countriesToIgnore.Num() == CountryDataMap.Num())
-	{
-		return;
-	}
-
-	for (auto& province : ProvinceDataMap)
-	{
-		FCountryData* country = CountryDataMap.Find(province.Value.Owner);
-		if (!country)
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Map Data Component: Province has an invalid Owner"));
-			continue;
-		}
-
-		if (countriesToIgnore.Contains(province.Value.Owner))
-			continue;
-
-		country->Provinces.Add(province.Key);
-	}
-}
-
-bool UMapDataComponent::GetCountryColor(const FVector& color, FColor& out_countryColor) const
-{
-	const FName* id = LookUpTable.Find(color);
-	if (id)
-	{
-		const FProvinceData* province = ProvinceDataMap.Find(*id);
-		if (!province)
-			return false;
-		const FCountryData* country = CountryDataMap.Find(province->Owner);
-		if (!country)
-			return false;
-
-		out_countryColor = country->Color;
-		return true;
-	}
-	else
-	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("ID does not exist in Map Data"))
 		return false;
 	}
+	if(CurrentData->GetScriptStruct() != NewData.GetScriptStruct())
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("New struct type does not match current"))
+		return false;
+	}
+	
+	*CurrentData = NewData;
+	return true;
 }
 
-FColor UMapDataComponent::GetCountryColor(const FProvinceData* data) const
+void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)
 {
-	FColor color = FColor(0, 0, 0, 0);
-	if (data)
-	{
-		const FCountryData* country = CountryDataMap.Find(data->Owner);
-		if (!country)
-			return color;
-
-		return country->Color;
-	}
-	return color;
+	NewLookupTable = MapObject->GetLookupTable();
+	SetProvinceDataMap(MapObject->GetMapDataValue());
+	// TODO: Load Visual Properties and Countries
 }
 
-FColor UMapDataComponent::GetReligionColor(const FProvinceData* data) const
+int* UMapDataComponent::FindId(const FColor& Color)
 {
-	FColor color = FColor(0, 0, 0, 0);
+	return NewLookupTable.Find(Color);
+}
 
-	if (data)
-	{
-		const FColoredData* religion = VisualPropertiesDataMap.Find(data->Religion);
-		if (!religion)
-		{
-			return FColor(0, 0, 0, 0);
-		}
-
-		if (religion->Type != FName("Religion"))
-			return FColor(0, 0, 0, 0);
-
-
-		return religion->Color;
-	}
+FColor UMapDataComponent::GetColor(int ID) const
+{
+	for(const auto& [Color, Id] : GetLookUpTable())
+    {
+    	if(ID == Id)
+    	{
+    		return Color;
+    	}
+    }
 	return FColor(0, 0, 0, 0);
 }
 
-FColor UMapDataComponent::GetCultureColor(const FProvinceData* data) const
+FVisualProperty UMapDataComponent::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
 {
-	FColor color = FColor(0, 0, 0, 0);
-	if (data)
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
+	if(!PropertiesOfType)
 	{
-		const FColoredData* culture = VisualPropertiesDataMap.Find(data->Culture);
-		if (!culture)
-		{
-			return FColor(0, 0, 0, 0);
-		}
-
-		if (culture->Type != FName("Culture"))
-			return FColor(0, 0, 0, 0);
-
-		return culture->Color;
+		return FVisualProperty();
 	}
-	return FColor(0, 0, 0, 0);
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
+}
+
+FVisualProperty UMapDataComponent::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
+{
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
+	if(!PropertiesOfType)
+	{
+		return FVisualProperty();
+	}
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
 }

@@ -2,7 +2,6 @@
 
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 
-#include "UtilityModule.h"
 #include "HAL/PlatformFileManager.h"
 #include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
 #include "Developer/DesktopPlatform/Public/DesktopPlatformModule.h"

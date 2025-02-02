@@ -11,11 +11,11 @@ USTRUCT(BlueprintType)
 struct FMapDetails
 {
 	GENERATED_BODY()
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=100000))
 	int NumberOfTiles = 10;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int Seed = 10;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=20))
 	int LloydIteration = 10;
 };
 
@@ -26,19 +26,19 @@ struct FNoiseDetails
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int Seed = 12002943;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere,meta=(ClampMin=0, ClampMax=16))
 	int Octaves = 4;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=1))
 	float Frequency = 0.05f;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0.5, ClampMax=3))
 	float Scale = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	float Lacunarity = 2.0f;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=7))
 	float LineThickness = 1.0f;
 };
 
@@ -50,7 +50,7 @@ struct FModuleDefinition
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UTexture2D* HeightMapTexture;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=(ClampMin=0, ClampMax=1))
 	float CutoffHeight = 0.001f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Land Settings")
@@ -83,7 +83,7 @@ public:
 	UMaterial* Material =nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* TileDataStructType;
+	UScriptStruct* TileDataStructType = nullptr;;
 
 	UMapEditorPreset();
 	
@@ -105,9 +105,9 @@ public:
 
 	MapGenerator::LookupMapData GetLookupMapData() const
 	{
-		const uint32 width = MapEditorDetails.HeightMapTexture->GetSizeX();
-		const uint32 height = MapEditorDetails.HeightMapTexture->GetSizeY();
+		const uint32 Width = MapEditorDetails.HeightMapTexture->GetSizeX();
+		const uint32 Height = MapEditorDetails.HeightMapTexture->GetSizeY();
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
-											width, height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
+											Width, Height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
 	}
 };

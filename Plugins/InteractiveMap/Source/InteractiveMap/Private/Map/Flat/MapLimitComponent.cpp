@@ -76,7 +76,7 @@ void UMapLimitComponent::Attach(USceneComponent* root)
 	//MapVisualComponent->AttachMeshes(Box);
 }
 
-void UMapLimitComponent::CreateVisualComponent(TSubclassOf<UMapVisualComponent> mapVisualClass)
+void UMapLimitComponent::CreateVisualComponent(const TSubclassOf<UMapVisualComponent>& mapVisualClass)
 {
 	if (mapVisualClass)
 	{

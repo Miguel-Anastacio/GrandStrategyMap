@@ -1,15 +1,58 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "GameFramework/Actor.h"
 #include "MapUtils.h"
 #include "MapEnums.h"
 #include "ClickableMap.generated.h"
 
+struct FArrayOfVisualProperties;
+class UDynamicTexture;
+class UMapObject;
 class UTextureRenderTarget2D;
 class UDynamicTextureComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapDataChangedSignature, MapMode, mode);
+USTRUCT(BlueprintType)
+struct FTilePair
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	int ID = -1;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FInstancedStruct Data;
+};
+
+struct FColorPair
+{
+	FColor Color;
+	FColor OldColor;
+	FColorPair(const FColor& Color, const FColor& OldColor) : Color(Color), OldColor(OldColor) {}
+	FColorPair(): Color(FColor::White), OldColor(FColor::White) {}
+
+	bool operator == (const FColorPair& Other) const
+	{
+		return Other.Color == Color && Other.OldColor == OldColor;
+	}
+	friend  uint32 GetTypeHash (const FColorPair& Other)
+	{
+		return GetTypeHash(Other.Color) + GetTypeHash(Other.OldColor);
+	}
+};
+
+USTRUCT()
+struct FPositions
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	TArray<FVector2D> PosArray;
+	// UPROPERTY()
+	// FColor PixelColor;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapTileChangedSignature, const TArray<int>&, IDs);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMapInitializedSignature, AClickableMap*, map);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMapModeChangedSignature, MapMode, oldMode, MapMode, newMode);
 UCLASS(Abstract, NotBlueprintable)
@@ -20,32 +63,29 @@ class INTERACTIVEMAP_API AClickableMap : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AClickableMap(const FObjectInitializer& ObjectInitializer);
-
-
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	
 	UFUNCTION(BlueprintNativeEvent, Category = "Map")
 	void InitializeMap();
 	virtual void InitializeMap_Implementation();
 
 	virtual void Tick(float DeltaTime) override;
+
 	//------------------------------- Data -----------------------------------------
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	TMap<FVector, FName> GetLookUpTable() const;
+	TMap<FColor, int> GetLookUpTable() const;
 
-	TMap<FName, FProvinceData>* GetProvinceDataMap();
-	TMap<FName, FCountryData>* GetCountryDataMap();
+	TMap<int, FInstancedStruct>* GetProvinceDataMap() const;
+	TMap<FName, FCountryData>* GetCountryDataMap(); 
 	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	FName GetProvinceID(const FVector& color, bool& out_result) const;
+	int GetProvinceID(const FColor& Color, bool& bOutResult) const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-	void GetProvinceData(FName name, FProvinceData& out_data) const;
-	FProvinceData* GetProvinceData(FName name);
-
-
-	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateProvinceData(const FProvinceData& data, FName id);
-	UFUNCTION(BlueprintCallable, Category = "Map Data")
-	bool UpdateCountryData(const FCountryData& data, FName id);
+	void GetProvinceData(int ID, FInstancedStruct& OutData) const;
+	
+	FInstancedStruct* GetProvinceData(int ID);
+	
 
 	// Get data from tag/id
 	template<class T>
@@ -61,14 +101,10 @@ public:
 	FColor GetColorFromLookUpTexture(FVector2D uv) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
-	void SetMapMode(MapMode mode);
-	virtual void SetMapMode_Implementation(MapMode mode);
+	void SetMapMode(const FName& Mode);
+	virtual void SetMapMode_Implementation(const FName& Mode);
 
-	void SetMeshMaterial(MapMode mode, UStaticMeshComponent* mesh);
-
-	// Update Visual Data
-	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
-	bool UpdateCountryColor(const FLinearColor& color, FName id);
+	void SetMeshMaterial(const FName& Mode, UStaticMeshComponent* Mesh);
 
 	UFUNCTION(BlueprintCallable, Category = "Map Border")
 	void UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget);
@@ -88,13 +124,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
 
-
+	UFUNCTION(CallInEditor, Category="Map")
+	void FillPixelMap();
 
 public:
-	// Delegate triggered when map data changes impacts the visual representation of the map
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
-	FMapDataChangedSignature MapDataChangedDelegate;
-
 	// Delegate triggered when map initialization is finished
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapInitializedSignature MapInitializationDelegate;
@@ -102,55 +135,42 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
 	FMapModeChangedSignature MapModeChangedDelegate;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")  
+	FMapTileChangedSignature MapTileChangedDelegate;
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
-	UFUNCTION(BlueprintCallable, Category = "Map")
-	FColor GetColorFromUV(UTexture2D* texture, FVector2D uv) const;
+	UFUNCTION(BlueprintCallable)
+	void SetMapTiles(const TArray<FTilePair>& NewData);
+
+	UFUNCTION()
+	void UpdateDynamicTextures(const TArray<int>& IDs);
 	
-	/** Reads the look up texture and populates the dynamic textures data with the right pixel colors based on the ProvinceDataMap (MapDataComponent)*/
-	void SaveMapTextureData();
-	void CreateMapTexture(UDynamicTextureComponent* textureCompoment);
+	void LoadMapAsset(UMapObject* MapObject);
+	
 
+	void CreateMapModes();
 
-	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
-	void RefreshDynamicTextureDataBuffer(UDynamicTextureComponent* textureCompoment, MapMode mode);
-	/**
-	* Update map texture per province.
-	*
-	* @param mode The map mode.
-	* @param provinceID The ID of the province.
-	* @param newColor The new color.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Map Visual")
-	void UpdateMapTexturePerProvince(MapMode mode, FName provinceID, const FColor& newColor);
+	UFUNCTION(BlueprintCallable)
+	void UpdateTileData(const FInstancedStruct& Data, int ID);
+	
+// #if WITH_EDITOR
+	
+	void CreateDynamicTextures(const TArray<FVisualPropertyType>& VisualPropertyTypes);
+	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData);
 
-	/**
-	* Update map texture completely
-	* reads the look up texture data buffer
-	* and updates the data buffer of one of the texture dynamic components
-	* @param mode The map mode.
-	*/
-	UFUNCTION(BlueprintCallable, Category = "Map Visual")
-	void UpdateMapTexture(MapMode mode);
-	/**
-	* Update the array that holds the pixel data of a texture.
-	*
-	* @param pixelArray The array of pixels to update.
-	* @param oldColor The old color to replace.
-	* @param newColor The new color to set.
-	* @param texture The texture that the array corresponds to, only passed to get its dimensions
-	* @param provinceIDs The array of province IDs that should change color
-	*/
-	void UpdatePixelArray(TArray<uint8>& pixelArray, const FColor& oldColor, const FColor& newColor, const UTexture2D* texture, const TArray<FName>& provinceIDs);
-	void SetPixelColorInt(int index, TArray<uint8>& pixelArray, const FColor& color);
-
+	TArray<uint8> GetPixelsToEditMarked(UDynamicTexture* Texture, const TArray<int>& IDs, uint8 MarkerValue);
+	void MarkPixelsToEdit(TArray<uint8>& PixelBuffer,const TArray<int>& IDs, uint8 MarkerValue) const;
+// #endif
 protected:
 	// The root of the map.
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UStaticMeshComponent> MapRoot;
-
+	
+	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	TObjectPtr<class UMapObject> MapAsset;
+	
 	// The visual representation of the map 
 	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
@@ -172,15 +192,7 @@ protected:
 
 	// The political map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> PoliticalMapTextureComponent;
-
-	// The religious map texture component.
-	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> ReligiousMapTextureComponent;
-
-	// The culture map texture component.
-	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
-	TObjectPtr<UDynamicTextureComponent> CultureMapTextureComponent;
+	TObjectPtr<UDynamicTextureComponent> DynamicTextureComponent;
 
 	// Material that shows the current gameplay map.
 	// Political, religious, or terrain.
@@ -210,8 +222,17 @@ protected:
 
 	// The current map mode.
 	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
-	MapMode CurrentMapMode = MapMode::POLITICAL;
+	FName CurrentMapMode = "Country";
 
+	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
+	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
+	// void CreateDynamicTextureComponents();
+	UPROPERTY()
+	TMap<FName, UDynamicTexture*> MapModeDynamicTextures;
+	
+	UPROPERTY()
+	TMap<FColor, FPositions> PixelMap;
+	
 
 
 };

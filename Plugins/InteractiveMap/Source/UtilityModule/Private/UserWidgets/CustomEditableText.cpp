@@ -1,6 +1,8 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "UserWidgets/CustomEditableText.h"
+
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/EditableTextBox.h"
 #include "Components/RichTextBlock.h"
 void UCustomEditableText::NativeOnInitialized()
@@ -12,7 +14,6 @@ void UCustomEditableText::NativeOnInitialized()
 void UCustomEditableText::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	ID->SetText(IDText);
 }
 
 void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)
@@ -20,13 +21,23 @@ void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type Comm
 	TextCommitDelegate.Broadcast(this, Text, CommitMethod);
 }
 
-void UCustomEditableText::SetValues(const FText& current, const FText& input)
+void UCustomEditableText::SetValues(const FText& Current, const FText& Input) const
 {
-	CurrentValue->SetText(current);
-	InputValue->SetText(input);
+	CurrentValue->SetText(Current);
+	InputValue->SetText(Input);
 }
 
-void UCustomEditableText::SetIDText(const FText& text)
+void UCustomEditableText::SetIDText(const FText& text) const
 {
-	ID->SetText(IDText);
+	ID->SetText(text);
+}
+
+void UCustomEditableText::PerformAction_Implementation(const FName& PropertyName,
+	const FInstancedStruct& InstancedStruct) const
+{
+	IGenericUserWidgetInterface::PerformAction_Implementation(PropertyName, InstancedStruct);
+	SetIDText(FText::FromName(PropertyName));
+	bool bResult = false;
+	const FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), bResult);
+	SetValues(FText::FromString(Text), FText::FromString(Text));
 }

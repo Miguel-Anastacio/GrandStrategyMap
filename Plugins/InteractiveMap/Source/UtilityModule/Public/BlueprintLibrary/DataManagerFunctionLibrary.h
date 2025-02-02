@@ -20,6 +20,7 @@ class UTILITYMODULE_API UDataManagerFunctionLibrary : public UBlueprintFunctionL
 
 public:
     
+    
     /**
      * Reads data from a data table into a map.
      *
@@ -34,16 +35,34 @@ public:
         {
             return false;
         }
-        TArray<FName> RowNames = dataTable->GetRowNames();
-        for (auto& name : RowNames)
+        for (auto& RowName : dataTable->GetRowNames())
         {
-            Data* Item = dataTable->FindRow<Data>(name, "");
+            Data* Item = dataTable->FindRow<Data>(RowName, "");
             if (Item)
             {
-                mapToUpdate.Emplace(name, (*Item));
+                mapToUpdate.Emplace(RowName, (*Item));
             }
         }
         return true;
+    }
+    
+    /**
+   * Reads data from a data table into a map.
+   *
+   * @param DataTable The data table to read from.
+   * @param ArrayToUpdate The map to update with the data.
+   * @return True if successful, false otherwise.
+   */
+    template<class T>
+    static bool ReadDataTableToArray(const UDataTable* DataTable, TArray<T>& ArrayToUpdate)
+    {
+        if (!DataTable)
+        {
+            return false;
+        }
+        ArrayToUpdate.Empty();
+        DataTable->GetAllRows("", ArrayToUpdate);
+        return !ArrayToUpdate.IsEmpty();
     }
 
     /**

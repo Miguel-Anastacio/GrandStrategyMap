@@ -39,6 +39,7 @@ namespace MapGenerator
                 // Mark tile as visited and set its color
                 tile.color = newColor;
                 tile.visited = true;
+                tile.centroid = mygal::Vector2<int>(x, y);
 
                 // Push neighboring tiles onto the stack
                 stack.push({cx + 1, cy});
@@ -140,7 +141,7 @@ namespace MapGenerator
                 if (fill(x, y, tileMap, color, width, height))
                 {
                     colorsInUse.insert(color);
-                    markCentroids(x, y, tileMap, color, width, height);
+                    //markCentroids(x, y, tileMap, color, width, height);
                 }
             }
         }

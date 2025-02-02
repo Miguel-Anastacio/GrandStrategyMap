@@ -14,6 +14,6 @@ protected:
 	AGlobeInteractiveLayeredMap(const FObjectInitializer& ObjectInitializer);
 
 public:
-	void SetMapMode_Implementation(MapMode mode) override;
+	void SetMapMode_Implementation(const FName& mode) override;
 	virtual void InitializeMap_Implementation() override;
 };

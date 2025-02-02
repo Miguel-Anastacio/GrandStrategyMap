@@ -19,33 +19,34 @@ public:
 
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
-	
-	template<typename T>
-	void InitializeFromStructEditable(const T& structInstance, UClass* classPtr)
-	{
-		// Iterate over the struct's properties
-		for (TFieldIterator<FProperty> It(T::StaticStruct()); It; ++It)
-		{
-			FProperty* Property = *It;
-			FName PropertyName = Property->GetFName();
-			bool bResult = false;
-			FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, &structInstance, bResult);
-			if(bResult)
-			{
-				CreateEditableFieldWidget(PropertyName, PropertyValue, classPtr);
-			}
-		}
-	}
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostLoad() override;
 
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Custom Struct Display")
-	UVerticalBox* StructHolder;
+	UFUNCTION(BlueprintCallable)
+	void InitFromStruct(const FInstancedStruct& InstancedStruct);
 
-	TArray<UCustomEditableText*> Fields;
+	UPROPERTY(EditAnywhere)
+	int Columns = 1;
 	
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
+	class UGridPanel* MainPanel;
+
+	// Widget used by defaulr
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
+	TSubclassOf<UUserWidget> DefaultWidgetType;
+	// Specify which widget to use for each Property
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widgets")
+	TMap<FName, TSubclassOf<UUserWidget>> WidgetTypesMap;
+
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
+	UScriptStruct* StructType;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TMap<FName, UUserWidget*> WidgetFields;
+
 protected:
-	// To be implemented in Blueprint or C++
-	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	void CreateEditableFieldWidget(const FName& FieldName, const FString& FieldValue, UClass* classPtr);
-	// UFUNCTION(BlueprintNativeEvent, Category = "Struct Viewer")
-	void CreateFieldWidget(const FName& FieldName, const FString& FieldValue);
+	void InitializeWidgetTypesMap();
+	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widgets")
+	void CreatePanelSlots();
 };

@@ -1,13 +1,14 @@
 #include "Editor/MapEditorMenu.h"
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
+#include "BlueprintLibrary/SlowTaskProgressBarFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
 #include "Materials/MaterialInstanceConstant.h"
 
@@ -90,7 +91,7 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 {
 	MapEditorPreset = NewObject<UMapEditorPreset>();
 	TextureViewer = MakeShared<STextureViewer>();
-	MapEditorPreset->OnObjectChanged.AddRaw(this, &RMapEditorMenu::GenerateMap);
+	// MapEditorPreset->OnObjectChanged.AddRaw(this, &RMapEditorMenu::GenerateMap);
 	return SNew(SDockTab)
 	[
 		SNew(SOverlay)
@@ -110,23 +111,27 @@ void RMapEditorMenu::GenerateMap()
 		UE_LOG(LogTemp, Error, TEXT("Failed to read Height Map texture"));
 		return;
 	}
-	
-	// temp just to test
+	 
 	// TODO - improve this, adjust MapGeneratorLib
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
 	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
-	Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData());
-	LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
-	LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
-	LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
+	USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(
+		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
+		{
+			// Call GenerateMap and pass the progress callback
+			Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), ProgressCallback);
+			LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
+			LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
+			LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
+			// UpdateDisplayTexture
+			if(TextureViewer && MapEditorPreset)
+			{
+				TextureViewer->OnTextureChanged(LookupTexture.Get());
+				TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
+			}
 
-	// UpdateDisplayTexture
-	if(TextureViewer && MapEditorPreset)
-	{
-		TextureViewer->OnTextureChanged(LookupTexture.Get());
-		TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
-	}
+		});
 }
 
 void RMapEditorMenu::SaveMap() const
@@ -174,6 +179,14 @@ void RMapEditorMenu::SaveMap() const
 	
 	FString Message;
 	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+}
+
+void RMapEditorMenu::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	if(MapEditorPreset)
+	{
+		Collector.AddReferencedObject(MapEditorPreset);
+	}
 }
 
 TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)

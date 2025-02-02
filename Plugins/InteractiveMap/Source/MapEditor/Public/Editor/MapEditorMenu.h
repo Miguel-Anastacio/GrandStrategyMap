@@ -36,7 +36,7 @@ struct FTileIdData
 class STextureViewer;
 class FAdvancedPreviewScene;
 class UTexture2D;
-class MAPEDITOR_API RMapEditorMenu
+class MAPEDITOR_API RMapEditorMenu :  public FGCObject 
 {
 public:
 	RMapEditorMenu();
@@ -49,8 +49,15 @@ public:
 	// UFUNCTION()
 	void GenerateMap();
 	void SaveMap() const;
+
+	/** FGCObject interface */
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+	virtual FString GetReferencerName() const override
+	{
+		return TEXT("RMapEditorMenu");
+	}
 private:
-	UMapEditorPreset* MapEditorPreset = nullptr;
+	TObjectPtr<UMapEditorPreset> MapEditorPreset = nullptr;
 	TSharedPtr<STextureViewer> TextureViewer;
 	MapGenerator::Map Map;
 

@@ -64,9 +64,9 @@ void AFlatInteractiveMap::InitializeMap_Implementation()
 }
 
 UE_ENABLE_OPTIMIZATION
-void AFlatInteractiveMap::SetMapMode_Implementation(MapMode mode)
+void AFlatInteractiveMap::SetMapMode_Implementation(const FName& Mode )
 {
-	Super::SetMapMode_Implementation(mode);
+	Super::SetMapMode_Implementation(Mode);
 }
 
 void AFlatInteractiveMap::UpdateLimits()

@@ -2,7 +2,7 @@
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
-#include "UtilityModule.h"
+#include "UtilityModuleEditor.h"
 #include "Factories/TextureFromBufferFactory.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
@@ -55,7 +55,7 @@ UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FSt
 	if(Data.IsEmpty())
 	{
 		bOutSuccess = false;
-		UE_LOG(LogUtilityModule, Error, TEXT("Create Texture Asset From Array Failed: Array is empty"));
+		UE_LOG(LogUtilityModuleEditor, Error, TEXT("Create Texture Asset From Array Failed: Array is empty"));
 		return nullptr;
 	}
 	
@@ -69,7 +69,7 @@ UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FSt
 	if(!Data)
 	{
 		bOutSuccess = false;
-		UE_LOG(LogUtilityModule, Error, TEXT("Create Texture Asset From Buffer Failed: Buffer is NULL"));
+		UE_LOG(LogUtilityModuleEditor, Error, TEXT("Create Texture Asset From Buffer Failed: Buffer is NULL"));
 		return nullptr;
 	}
 	UTexture2DFromBufferFactory* Factory = NewObject<UTexture2DFromBufferFactory>();
@@ -110,13 +110,13 @@ bool UAssetCreatorFunctionLibrary::SaveAsset(const FString& AssetPath, FString& 
 
 TArray<UObject*> UAssetCreatorFunctionLibrary::GetModifiedAssets(bool& OutResult, FString& OutInfoMessage)
 {
-	TArray<UPackage*> modifiedPackages = TArray<UPackage*>();
-	FEditorFileUtils::GetDirtyPackages(modifiedPackages);
+	TArray<UPackage*> ModifiedPackages = TArray<UPackage*>();
+	FEditorFileUtils::GetDirtyPackages(ModifiedPackages);
 
 	TArray<UObject*> assets = TArray<UObject*>();
 	OutResult = true;
 	OutInfoMessage = ("Get Modified Assets Succeeded");
-	for(const UPackage* package : modifiedPackages)
+	for(const UPackage* package : ModifiedPackages)
 	{
 		UObject* asset = package->FindAssetInPackage();
 		if(asset)

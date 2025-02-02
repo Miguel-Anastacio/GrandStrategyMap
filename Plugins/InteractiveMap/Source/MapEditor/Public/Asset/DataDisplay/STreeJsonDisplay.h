@@ -6,7 +6,7 @@
 #include "IDetailsView.h"
 #include "InstancedStruct.h"
 #include "PropertyEditorModule.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "Misc/Optional.h"
 #include "Framework/Docking/TabManager.h"
 

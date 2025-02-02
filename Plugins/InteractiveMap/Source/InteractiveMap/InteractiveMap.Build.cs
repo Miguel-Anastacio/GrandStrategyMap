@@ -30,7 +30,13 @@ public class InteractiveMap : ModuleRules
 				"RHI",
 				"RenderCore",
 				"VictoryBPLibrary",
-				"UtilityModule"
+				"UtilityModule",
+				"SharedModule",
+				"StructUtils",
+				"UMGEditor",
+				"UMG", 
+				"UnrealEd",
+				"ShadersModule"
              
 				// ... add other public dependencies that you statically link with here ...
 			}
@@ -47,7 +53,7 @@ public class InteractiveMap : ModuleRules
 				"SlateCore",
                 "UMG",
 				"Json",
-				"JsonUtilities",
+				"JsonUtilities", "UMGEditor",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

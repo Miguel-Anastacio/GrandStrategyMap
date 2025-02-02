@@ -20,100 +20,71 @@ UDynamicTextureComponent::UDynamicTextureComponent()
 	// ...
 }
 
+void UDynamicTextureComponent::SetDynamicTexture(UDynamicTexture* DynTexture)
+{
+	this->DynamicTextureData = DynTexture;
+	// InitializeTexture(DynTexture->TextureWidth, DynTexture->TextureHeight);
+	// UpdateTexture();
+}
+
+UMaterialInstanceDynamic* UDynamicTextureComponent::GetMaterialInstance() const
+{
+	if(DynamicTextureData)
+	{
+		return DynamicTextureData->DynamicMaterial;
+	}
+	return nullptr;
+}
+
 void UDynamicTextureComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	FMemory::Free(TextureRegion);
-	// if(mapGenerator)
-	// 	delete mapGenerator;
 }
 
-void UDynamicTextureComponent::FillTexture(FLinearColor Color)
+void UDynamicTextureComponent::FillTexture(const FLinearColor& Color) const
 {
-	for (uint32 i = 0; i < TextureTotalPixels; i++)
+	if(DynamicTextureData)
 	{
-		TextureData[i * 4] = Color.B * 255;
-		TextureData[i * 4 + 1] = Color.G * 255;
-		TextureData[i * 4 + 2] = Color.R * 255;
-		TextureData[i * 4 + 3] = Color.A * 255;
+		DynamicTextureData->FillTexture(Color);
 	}
 }
 
-void UDynamicTextureComponent::SetPixelColor(int32 X, int32 Y, FLinearColor Color)
+void UDynamicTextureComponent::SetPixelColor(int32 X, int32 Y, const FLinearColor& Color) const
 {
-	// If Pixel is outside of Texture return
-	if (X < 0 || Y < 0 || X >= TextureWidth || Y >= TextureHeight) {
-		return;
+	if(DynamicTextureData)
+	{
+		DynamicTextureData->SetPixelColor(X, Y, Color);
 	}
-
-	// Get the Start of the Pixel Data
-	uint32 start = ((Y * TextureWidth) + X) * 4;
-
-	// Set Pixel Value by Offsetting from the Start of the Pixel Data
-	TextureData[start] = Color.B;
-	TextureData[start + 1] = Color.G * 255;
-	TextureData[start + 2] = Color.R * 255;
-	TextureData[start + 3] = Color.A * 255;
 }
 
-void UDynamicTextureComponent::SetPixelValue(int32 X, int32 Y, FColor Color)
+void UDynamicTextureComponent::SetPixelValue(int32 X, int32 Y, const FColor& Color) const
 {
-	// If Pixel is outside of Texture return
-	if (X < 0 || Y < 0 || X >= TextureWidth || Y >= TextureHeight) {
-		return;
+	if(DynamicTextureData)
+	{
+		DynamicTextureData->SetPixelValue(X, Y, Color);
 	}
-
-	// Get the Start of the Pixel Data
-	uint32 start = ((Y * TextureWidth) + X) * 4;
-
-	// Set Pixel Value by Offsetting from the Start of the Pixel Data
-	TextureData[start] = Color.B;
-	TextureData[start + 1] = Color.G;
-	TextureData[start + 2] = Color.R;
-	TextureData[start + 3] = Color.A;
 }
 
 
 void UDynamicTextureComponent::DrawFromTexture(int32 StartX, int32 StartY, UTexture2D* Texture, FLinearColor Filter /*= FLinearColor::White*/)
 {
-	if (!Texture) {
-		return;
-	}
-
-	int32 width = Texture->GetSizeX();
-	int32 height = Texture->GetSizeY();
-	uint32 texDataSize = width * height * 4;
-	uint8* texData = new uint8[texDataSize];
-
-	FTexture2DMipMap& readMip = Texture->GetPlatformData()->Mips[0];
-	readMip.BulkData.GetCopy((void**)&texData);
-
-
-	for (int32 y = 0; y < height; y++)
+	if(DynamicTextureData)
 	{
-		for (int32 x = 0; x < width; x++) {
-			uint32 start = ((y * width) + x) * 4;
-
-			SetPixelValue(StartX + x, StartY + y, FColor((texData[start + 2] * Filter.R), texData[start + 1] * Filter.G, texData[start] * Filter.B, texData[start + 3] * Filter.A));
-		}
+		DynamicTextureData->DrawFromTexture(StartX, StartY, Texture, Filter);
 	}
-
-	FMemory::Free(texData);
 }
 
 void UDynamicTextureComponent::InitializeTexture()
 {
-	// Get Total Pixels in Texture
-	TextureTotalPixels = TextureWidth * TextureHeight;
-
-	// Get Total Bytes of Texture - Each pixel has 4 bytes for RGBA
-	TextureDataSize = TextureTotalPixels * 4;
-	TextureDataSqrtSize = TextureWidth * 4;
-
-	// Initialize Texture Data Array
-	//TextureData = new uint8[TextureDataSize];
-	TextureData.AddDefaulted(TextureDataSize);
+	if(!DynamicTextureData)
+	{
+		//log
+		return;
+	}
 	// Create Dynamic Texture Object
+	const uint32 TextureWidth = DynamicTextureData->TextureWidth;
+	const uint32 TextureHeight = DynamicTextureData->TextureHeight;
 	DynamicTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
 	DynamicTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 	DynamicTexture->SRGB = 0;
@@ -127,12 +98,18 @@ void UDynamicTextureComponent::InitializeTexture()
 	//Create Update Region Struct Instance
 	TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, TextureWidth, TextureHeight);
 
-	FillTexture(FLinearColor::Green);
+	// FillTexture(FLinearColor::Red);
 	UpdateTexture();
 }
 
 void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 {
+	if(!DynamicTextureData)
+	{
+		UE_LOG(LogInteractiveMap, Warning, TEXT("Dynamic Texture tried to Update Texture but Data is Null"));
+		return;
+	}
+	
 	if (DynamicTexture == nullptr)
 	{
 		UE_LOG(LogInteractiveMap, Warning, TEXT("Dynamic Texture tried to Update Texture but it hasn't been initialized!"));
@@ -150,8 +127,7 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 		uint32 SrcBpp;
 		uint8* SrcData;
 	};
-
-
+	
 	FUpdateTextureRegionsData* RegionData = new FUpdateTextureRegionsData;
 
 	UTexture2D* Texture = DynamicTexture;
@@ -161,9 +137,9 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	RegionData->MipIndex = 0;
 	RegionData->NumRegions = 1;
 	RegionData->Regions = TextureRegion;
-	RegionData->SrcPitch = TextureDataSqrtSize;
+	RegionData->SrcPitch = DynamicTextureData->GetTextureDataSqrtSize();
 	RegionData->SrcBpp = 4;
-	RegionData->SrcData = TextureData.GetData();
+	RegionData->SrcData = DynamicTextureData->GetTextureData()->GetData();
 
 	ENQUEUE_RENDER_COMMAND(UpdateTextureRegionsData)
 	(
@@ -197,61 +173,38 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 
 void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height)
 {
-	TextureWidth = width;
-	TextureHeight = height;
-	InitializeTexture();
+	// Create Dynamic Texture Object
+	const uint32 TextureWidth = width;
+	const uint32 TextureHeight = height;
+	DynamicTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight);
+	DynamicTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
+	DynamicTexture->SRGB = 0;
+#if WITH_EDITORONLY_DATA
+	DynamicTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+#endif
+	DynamicTexture->Filter = TextureFilter::TF_Nearest;
+	DynamicTexture->AddToRoot();
+	DynamicTexture->UpdateResource();
+
+	//Create Update Region Struct Instance
+	TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, TextureWidth, TextureHeight);
+
+	// FillTexture(FLinearColor::Red);
+	UpdateTexture();
 }
 void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter)
 {
-	if (!texture)
-		return;
-	int32 width = texture->GetSizeX();
-	int32 height = texture->GetSizeX();
-
-
-	for (int32 y = 0; y < height; y++)
+	if(DynamicTextureData)
 	{
-		for (int32 x = 0; x < width; x++) 
-		{
-			uint32 start = ((y * width) + x) * 4;
-
-			// SetPixelValue takes FColor, SetPixel
-			SetPixelValue(startX + x, 
-						startY + y, 
-						FColor(dataBuffer[start] * filter.R, 
-							dataBuffer[start + 1] * filter.G, 
-							dataBuffer[start + 2] * filter.B, 
-							dataBuffer[start + 3] * filter.A)
-						);
-		}
+		DynamicTextureData->DrawFromDataBuffer(startX, startY, texture, dataBuffer, filter);
 	}
-
 }
 
 void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, const TArray<float> dataBuffer, FLinearColor filter)
 {
-	if (!texture)
-		return;
-	int32 width = texture->GetSizeX();
-	int32 height = texture->GetSizeY();
-
-	int max = width * height * 4;
-
-	for (int32 y = 0; y < height; y++)
+	if(DynamicTextureData)
 	{
-		for (int32 x = 0; x < width; x++)
-		{
-			uint32 start = ((y * width) + x) * 4;
-
-			//// SetPixelValue takes FColor, SetPixel
-			SetPixelValue(startX + x, 
-						startY + y, 
-						FColor(dataBuffer[start] * filter.R, 
-							dataBuffer[start + 1] * filter.G, 
-							dataBuffer[start + 2] * filter.B, 
-							dataBuffer[start + 3] * filter.A)
-						);
-		}
+		DynamicTextureData->DrawFromDataBuffer(startX, startY, texture, dataBuffer, filter);
 	}
 }
 UTexture2D* UDynamicTextureComponent::GetTexture() const

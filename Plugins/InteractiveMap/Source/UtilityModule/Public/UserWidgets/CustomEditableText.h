@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericUserWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "CustomEditableText.generated.h"
 
@@ -22,15 +23,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
 class UEditableTextBox;
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class UTILITYMODULE_API UCustomEditableText : public UUserWidget
+class UTILITYMODULE_API UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface
 {
     GENERATED_BODY()
 
 public:
     /** Sets the initial values for the editable text widget. */
-    void SetValues(const FText& text, const FText& input);
-    void SetIDText(const FText& text);
+    void SetValues(const FText& Current, const FText& Input) const;
+    void SetIDText(const FText& text) const;
 
+    virtual void PerformAction_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const override;
 public:
     /** Delegate for editable text commit events. */
     UPROPERTY(BlueprintAssignable, Category = "CustomEditableText")

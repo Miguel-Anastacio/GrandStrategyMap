@@ -16,6 +16,28 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "UtilityModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			]
+		},
+		{
+			"Name": "UtilityModuleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		},
+		{
+			"Name": "SharedModule",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "InteractiveMap",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
@@ -23,16 +45,20 @@
 				"Engine",
 				"UMG"
 			],
-			"PlatformAllowList": [ "Win64" ]
+			"PlatformAllowList": [
+				"Win64"
+			]
 		},
 		{
 			"Name": "MapEditor",
 			"Type": "Editor",
-			"LoadingPhase": "Default",
+			"LoadingPhase": "PostEngineInit",
 			"AdditionalDependencies": [
 				"Engine"
 			],
-			"PlatformAllowList": [ "Win64" ]
+			"PlatformAllowList": [
+				"Win64"
+			]
 		},
 		{
 			"Name": "VictoryBPLibrary",
@@ -42,12 +68,23 @@
 				"Engine",
 				"UMG"
 			],
-			"PlatformAllowList": [ "Win64" ]
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "ShadersModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "EnhancedInput",
+			"Enabled": true
+		},
+		{
+			"Name": "StructUtils",
 			"Enabled": true
 		}
 	]

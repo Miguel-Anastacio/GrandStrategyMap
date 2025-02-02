@@ -1,7 +1,7 @@
 #include "Asset/SMapObjectViewport.h"
 #include "AdvancedPreviewScene.h"
 #include "EngineUtils.h"
-#include "Asset/MapObject.h"
+#include "MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
 #include "Asset/MapObjectToolkit.h"
