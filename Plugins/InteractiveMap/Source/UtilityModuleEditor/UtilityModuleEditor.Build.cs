@@ -2,21 +2,11 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class SharedModule : ModuleRules
+public class UtilityModuleEditor : ModuleRules
 {
-	public SharedModule(ReadOnlyTargetRules Target) : base(Target)
+	public UtilityModuleEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		// if (Target.bBuildEditor)
-		// {
-		// 	Type = ModuleType.CPlusPlus
-		// }
-		// else
-		// {
-		// 	Type = ModuleType.CPlusPlus;
-		// }
-
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
@@ -37,13 +27,9 @@ public class SharedModule : ModuleRules
 			new string[]
 			{
 				"Core",
-				"RenderCore",
-				"StructUtils",
-				"UtilityModule",
-				"UtilityModuleEditor"
 				// ... add other public dependencies that you statically link with here ...
 			}
-		);
+			);
 			
 		
 		PrivateDependencyModuleNames.AddRange(
@@ -52,17 +38,22 @@ public class SharedModule : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"InputCore",
-				"Json",
-				"JsonUtilities",
+				"AssetTools",
+				"ToolMenus",
+				"UnrealEd",
+				"Slate",	
+				"SlateCore",
+				"UMG", 
+				"UMGEditor", 
 				// ... add private dependencies that you statically link with here ...	
 			}
-		);
+			);
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
 			}
-		);
+			);
 	}
 }

@@ -13,3 +13,5 @@ void FSharedModule::ShutdownModule()
 {
 	// UE_LOG(LogUtilityModule, Log, TEXT("Utility module has been unloaded"));
 }
+
+IMPLEMENT_MODULE(FSharedModule, SharedModule)

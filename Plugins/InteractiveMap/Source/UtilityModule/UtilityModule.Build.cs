@@ -43,13 +43,9 @@ public class UtilityModule : ModuleRules
 				"InputCore",
 				"Json",
 				"JsonUtilities",
-				"AssetTools",
-				"ToolMenus",
-				"UnrealEd",
 				"Slate",	
 				"SlateCore",
 				"UMG", 
-				"UMGEditor", 
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

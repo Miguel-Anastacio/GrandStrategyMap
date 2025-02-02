@@ -31,6 +31,7 @@ public class MapEditor : ModuleRules
 				"RHI",
 				"RenderCore",
 				"UtilityModule",
+				"UtilityModuleEditor",
 				"StructUtils",
 				"SharedModule", "Engine"
 				// ... add other public dependencies that you statically link with here ...

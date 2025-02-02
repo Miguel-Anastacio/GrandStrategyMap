@@ -1,7 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
-
 #include "AssetCreatorFunctionLibrary.generated.h"
 
 /**
@@ -9,7 +8,7 @@
  */
 class UObject;
 UCLASS()
-class UTILITYMODULE_API UAssetCreatorFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULEEDITOR_API UAssetCreatorFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

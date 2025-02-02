@@ -12,7 +12,6 @@ public class ShadersModule: ModuleRules
 		
 		PrivateIncludePaths.AddRange(new string[] 
 		{
-			"Runtime/Renderer/Private",
 			"ShadersModule/Private"
 		});
 		if (Target.bBuildEditor == true)
@@ -41,12 +40,7 @@ public class ShadersModule: ModuleRules
 					"UnrealEd",
 					"MaterialUtilities",
 					"SlateCore",
-					"Slate"
-				}
-			);
-
-			CircularlyReferencedDependentModules.AddRange(
-				new string[] {
+					"Slate",
 					"UnrealEd",
 					"MaterialUtilities",
 				}
