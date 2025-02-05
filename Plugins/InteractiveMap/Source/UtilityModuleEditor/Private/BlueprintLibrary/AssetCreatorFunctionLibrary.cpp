@@ -4,7 +4,7 @@
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
 #include "UtilityModuleEditor.h"
-//#include "WidgetBlueprint.h"
+#include "WidgetBlueprint.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Blueprint/WidgetTree.h"
@@ -160,61 +160,59 @@ bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& Out
 
 void UAssetCreatorFunctionLibrary::MarkWidgetAsModified(const UObject* Object)
 {
-	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
-	// if (!WidgetBlueprintGeneratedClass)
-	// 	return;
-	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	// if (!Package)
-	// 	return;
-	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	// if (!MainAsset)
-	// 	return;
-	// MainAsset->Modify();
+	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
+	if (!WidgetBlueprintGeneratedClass)
+		return;
+	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	if (!Package)
+		return;
+	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	if (!MainAsset)
+		return;
+	MainAsset->Modify();
 }
 
 UGridPanel* UAssetCreatorFunctionLibrary::GetGridPanel(const UUserWidget* Widget, const FName& Name)
 {
-	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
-	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	// if (!MainAsset)
-	// {
-	// 	return nullptr;
-	// }
-	// if(!MainAsset->WidgetTree)
-	// {
-	// 	return nullptr;
-	// }
-	// UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
-	// return  AssetGridPanel;
-	return nullptr;
+	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
+	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	if (!MainAsset)
+	{
+		return nullptr;
+	}
+	if(!MainAsset->WidgetTree)
+	{
+		return nullptr;
+	}
+	UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
+	return  AssetGridPanel;
 }
 
 void UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(const UObject* Object)
 {
-	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
-	// if (!WidgetBlueprintGeneratedClass)
-	// 	return;
-	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	// if (!Package)
-	// 	return;
-	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	// if (!MainAsset)
-	// 	return;
-	// MainAsset->Modify();
-	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
+	if (!WidgetBlueprintGeneratedClass)
+		return;
+	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	if (!Package)
+		return;
+	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	if (!MainAsset)
+		return;
+	MainAsset->Modify();
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
 }
 
 class UWidgetTree* UAssetCreatorFunctionLibrary::GetWidgetTree(const UUserWidget* Widget)
 {
-	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
-	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	// if (!MainAsset)
-	// {
-	// 	return nullptr;
-	// }
-	// return MainAsset->WidgetTree;
-	return nullptr;
+	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
+	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	if (!MainAsset)
+	{
+		return nullptr;
+	}
+	return MainAsset->WidgetTree;
 }
 #endif

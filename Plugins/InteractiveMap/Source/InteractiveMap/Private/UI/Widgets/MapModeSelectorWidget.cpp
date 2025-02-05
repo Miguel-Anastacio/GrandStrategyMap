@@ -3,15 +3,14 @@
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
 #include "MapObject.h"
-#if WITH_EDITOR
-#include "WidgetBlueprint.h"
-#endif
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
 #include "UI/Widgets/CustomButtonWidget.h"
+
 #if WITH_EDITOR
+#include "WidgetBlueprint.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #endif
 
@@ -31,12 +30,11 @@ void UMapModeSelectorWidget::NativeOnInitialized()
 			UserWidget->Text = FText::FromString(Widget->GetName());
 		}
 	}
-		
 }
 
+#if WITH_EDITOR
 void UMapModeSelectorWidget::CreatePanelSlots()
 {
-#if WITH_EDITOR
 	if (!GridPanel)
 		return;
 
@@ -49,7 +47,7 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("GridPanel"));
 	if(!AssetGridPanel)
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Missing Main Panel"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Missing Grid Panel"));
 		return;
 	}
 	if(!MapObject)
@@ -59,6 +57,8 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	}
 	
 	AssetGridPanel->ClearChildren();
+	// AssetGridPanel->Modify();
+	// UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 	TArray<FVisualPropertyType*> PropTypes;
 	if(UDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->VisualPropertyTypesDT, PropTypes))
 	{
@@ -89,9 +89,8 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	}
 	
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-#endif
-	
 }
+#endif
 
 void UMapModeSelectorWidget::SetMapMode(UCustomButtonWidget* ButtonWidget)
 {

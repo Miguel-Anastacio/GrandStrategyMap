@@ -16,14 +16,12 @@ class UTILITYMODULE_API UGenericStructWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
-	virtual void PostLoad() override;
 
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
 	void InitFromStruct(const FInstancedStruct& InstancedStruct);
@@ -48,7 +46,10 @@ public:
 	TMap<FName, UUserWidget*> WidgetFields;
 
 protected:
+#if WITH_EDITOR
 	void InitializeWidgetTypesMap();
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreatePanelSlots();
+#endif
+	
 };

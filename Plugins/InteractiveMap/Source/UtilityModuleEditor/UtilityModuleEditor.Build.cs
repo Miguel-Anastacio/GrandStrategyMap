@@ -39,7 +39,7 @@ public class UtilityModuleEditor : ModuleRules
 					"UnrealEd",
 					"AssetTools",
 					"ToolMenus",
-					// "UMGEditor", 
+					"UMGEditor", 
 					// ... add private dependencies that you statically link with here ...	
 				}
 			);

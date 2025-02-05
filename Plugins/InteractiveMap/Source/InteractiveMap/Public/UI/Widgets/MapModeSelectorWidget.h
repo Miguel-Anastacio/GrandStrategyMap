@@ -22,10 +22,10 @@ public:
     void SetInteractiveMapReference(class AClickableMap* Map);
 protected:
     virtual void NativeOnInitialized() override;
-
+#if WITH_EDITOR
     UFUNCTION(CallInEditor, BlueprintCallable, Category = "Custom Struct Display")
     void CreatePanelSlots();
-
+#endif
     UFUNCTION()
     void SetMapMode(UCustomButtonWidget* ButtonWidget);
 protected:
