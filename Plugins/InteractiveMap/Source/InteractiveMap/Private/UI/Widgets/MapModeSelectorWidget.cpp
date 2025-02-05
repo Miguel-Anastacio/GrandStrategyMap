@@ -3,13 +3,17 @@
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
 #include "MapObject.h"
+#if WITH_EDITOR
 #include "WidgetBlueprint.h"
+#endif
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "UI/Widgets/CustomButtonWidget.h"
+#if WITH_EDITOR
+#include "Kismet2/BlueprintEditorUtils.h"
+#endif
 
 void UMapModeSelectorWidget::SetInteractiveMapReference(class AClickableMap* Map)
 {

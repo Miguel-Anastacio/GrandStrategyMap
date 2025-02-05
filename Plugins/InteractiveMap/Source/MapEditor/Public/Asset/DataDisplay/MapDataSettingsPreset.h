@@ -12,10 +12,10 @@ struct FMapDataSettingsDefinition
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Map Data Settings")
 	UScriptStruct* StructType;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Map Data Settings")
 	FString FilePath;
 
 };
@@ -30,7 +30,7 @@ class MAPEDITOR_API UMapDataSettings : public UObject
 #endif
 
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Map Data Settings")
 	FMapDataSettingsDefinition MapDataSettings;
 	
 	FOnAssetChanged OnObjectChanged;

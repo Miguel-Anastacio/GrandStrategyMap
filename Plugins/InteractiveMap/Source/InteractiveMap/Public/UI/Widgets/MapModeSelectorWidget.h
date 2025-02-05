@@ -18,7 +18,7 @@ class INTERACTIVEMAP_API UMapModeSelectorWidget : public UUserWidget
 
 public:
     /** Sets the reference to the interactive map. */
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "MapModeSelectorWidget")
     void SetInteractiveMapReference(class AClickableMap* Map);
 protected:
     virtual void NativeOnInitialized() override;
@@ -31,10 +31,10 @@ protected:
 protected:
     // UPROPERTY(EditAnywhere)
     // uint8 Rows = 10;
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
     uint8 Columns = 5;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
     TSubclassOf<UUserWidget> MapModeSelectButton;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")

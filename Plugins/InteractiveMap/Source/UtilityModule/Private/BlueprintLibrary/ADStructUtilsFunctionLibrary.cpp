@@ -2,7 +2,8 @@
 #pragma once
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "UtilityModule.h"
-
+#include "UObject/Field.h"
+#include "UObject/TextProperty.h"
 FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult)
 {
 	OutResult = true;
@@ -161,7 +162,7 @@ UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetCon
 			continue;
 		}
 		
-		if(PropertyName == Property->GetDisplayNameText().ToString())
+		if(PropertyName == Property->GetAuthoredName())
 		{
 			return FStructProp(StructType, StructMemory, Property);
 		}

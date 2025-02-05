@@ -10,12 +10,13 @@ UMapDataComponent::UMapDataComponent()
 {
 
 }
-
+#if WITH_EDITOR
 void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	// ReadDataTables();
 }
+#endif
 
 const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
 {

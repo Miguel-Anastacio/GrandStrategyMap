@@ -7,25 +7,14 @@
 
 //// TEST FILE WITH EXAMPLE STRUCTS
 
-/**
- *  Struct that can hold any data of that type 
- */
-USTRUCT(BlueprintType)
-struct FVariantData : public FTableRowBase
-{
-    GENERATED_BODY()
-
-    TMap<FString, TVariant<int, float, FString, bool, FLinearColor>> Properties;
-};
-
 USTRUCT(BlueprintType)
 struct FTestBasic
 {
     GENERATED_BODY()
     
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
     int32 ID = -1;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
     FString Name;
 
     FString ToString() const
@@ -38,14 +27,14 @@ USTRUCT(Blueprintable)
 struct FTestAdvanced
 {
     GENERATED_BODY()
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,  Category = "Data")
     int32 ID = -1;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,  Category = "Data")
     int32 Population = 0;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,  Category = "Data")
     FString Name = "Name";
     // bool Type = false;
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite,  Category = "Data")
     FLinearColor Color = FLinearColor::Black;
     FString ToString() const
     {

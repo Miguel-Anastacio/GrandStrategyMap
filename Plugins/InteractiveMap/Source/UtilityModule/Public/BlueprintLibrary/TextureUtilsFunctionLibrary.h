@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TextureUtilsFunctionLibrary.generated.h"
-
+class UTexture2D;
 UCLASS()
 class UTILITYMODULE_API UTextureUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {

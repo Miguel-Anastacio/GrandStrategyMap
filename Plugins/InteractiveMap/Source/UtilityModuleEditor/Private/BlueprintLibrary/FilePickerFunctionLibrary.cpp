@@ -1,5 +1,5 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-
+#if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 
 #include "HAL/PlatformFileManager.h"
@@ -67,3 +67,4 @@ void UFilePickerFunctionLibrary::OpenDirectoryDialog(const FString& DialogTitle,
 		}
 	}
 }
+#endif

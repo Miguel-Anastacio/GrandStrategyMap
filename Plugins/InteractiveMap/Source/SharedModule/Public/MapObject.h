@@ -6,6 +6,7 @@
 #include "InstancedStruct.h"
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
+#include "Misc/Paths.h"
 #include "MapObject.generated.h"
 
 USTRUCT(BlueprintType)
@@ -13,9 +14,9 @@ struct FLookupEntry
 {
 	GENERATED_BODY()
     
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Color;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Name;
 
 	FString ToString() const
@@ -29,16 +30,16 @@ struct FExampleStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ID = -1;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Name = "ProvinceName";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Owner = "ProvinceOwner";
 	
 	FString ToString() const
@@ -52,22 +53,22 @@ struct FMapDataStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data" )
 	int32 ID = -1;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Name = "ProvinceName";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
 	
 	FString ToString() const
@@ -96,7 +97,7 @@ public:
 
 	/** Data table for visual properties */
 	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
-	UDataTable* VisualPropertiesDT;
+	class UDataTable* VisualPropertiesDT;
 #endif
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
@@ -104,13 +105,13 @@ public:
 	FOnAssetChanged OnObjectChanged;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	UTexture2D* LookupTexture;
+	class UTexture2D* LookupTexture;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	UMaterialInterface* MaterialOverride;
+	class UMaterialInterface* MaterialOverride;
 
 	// TODO - MAYBE REMOVE THIS
 	UPROPERTY()
-	UStaticMesh* Mesh;
+	class UStaticMesh* Mesh;
 public:
 	
 	void UpdateTile(int Index, const FInstancedStruct& NewData);

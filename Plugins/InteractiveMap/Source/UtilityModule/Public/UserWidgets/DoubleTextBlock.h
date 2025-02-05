@@ -16,7 +16,7 @@ class UTILITYMODULE_API UDoubleTextBlock : public UUserWidget, public IGenericUs
 
 public:
     /** Sets the initial values for the editable text widget. */
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "Double Text Block")
     void SetValues(const FText& LabelText, const FText& ValueText) const;
 
     virtual void PerformAction_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const override;

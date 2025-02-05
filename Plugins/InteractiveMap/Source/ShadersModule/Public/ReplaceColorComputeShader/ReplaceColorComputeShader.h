@@ -40,51 +40,17 @@ public:
 		FReplaceColorComputeShaderDispatchParams Params,
 		TFunction<void(TArray<uint32> OutputVal)> AsyncCallback
 	);
-
-	// FRDGBufferRef FReplaceColorComputeShaderInterface::CreateStructuredBuffer(
-	// FRDGBuilder& GraphBuilder,
-	// const TCHAR* DebugName,
-	// const TArray<uint8>& InputData)
-	// {
-	// 	const uint32 BufferSize = InputData.Num() * sizeof(uint8);
-	// 	FRDGBufferRef Buffer = GraphBuilder.CreateBuffer(
-	// 		FRDGBufferDesc::CreateStructuredDesc(sizeof(uint8), InputData.Num()),
-	// 		DebugName
-	// 	);
-	//
-	// 	uint8* BufferData = static_cast<uint8*>(GraphBuilder.allo(BufferSize));
-	// 	FMemory::Memcpy(BufferData, InputData.GetData(), BufferSize);
-	//
-	// 	AddBufferUploadPass(GraphBuilder, Buffer, BufferData, BufferSize);
-	//
-	// 	return Buffer;
-	// }
-
+	
 	// Executes this shader on the render thread from the game thread via EnqueueRenderThreadCommand
 	static void DispatchGameThread(
 		FReplaceColorComputeShaderDispatchParams& Params,
 		const TFunction<void(TArray<uint32> OutputVal)>& AsyncCallback
-	)
-	{
-		ENQUEUE_RENDER_COMMAND(SceneDrawCompletion)(
-		[Params, AsyncCallback](FRHICommandListImmediate& RHICmdList)
-		{
-			DispatchRenderThread(RHICmdList, Params, AsyncCallback);
-		});
-	}
-
+	);
 	// Dispatches this shader. Can be called from any thread
 	static void Dispatch(
 		FReplaceColorComputeShaderDispatchParams Params,
 		const TFunction<void(TArray<uint32> OutputVal)>& AsyncCallback
-	)
-	{
-		if (IsInRenderingThread()) {
-			DispatchRenderThread(GetImmediateCommandList_ForRenderCommand(), Params, AsyncCallback);
-		}else{
-			DispatchGameThread(Params, AsyncCallback);
-		}
-	}
+	);
 };
 
 

@@ -5,7 +5,9 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
+#endif
 
 #if WITH_EDITOR
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -32,7 +34,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	LoadLookupMap(LookupFilePath);
 	OnObjectChanged.Broadcast();
 }
-
+#endif
 
 void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
 {
@@ -82,6 +84,7 @@ void UMapObject::SaveData() const
 
 void UMapObject::LoadDataFromFile()
 {
+#if WITH_EDITOR
 	TArray<FString> FilesNames;
 	UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
 	if(FilesNames.IsEmpty())
@@ -96,6 +99,7 @@ void UMapObject::LoadDataFromFile()
 	}
 	
 	SetMapDataFilePath(FilesNames[0]);
+#endif
 }
 
 void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
@@ -167,4 +171,3 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
 	}
 }
-#endif

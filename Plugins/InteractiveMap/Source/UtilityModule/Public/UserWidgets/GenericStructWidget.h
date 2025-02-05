@@ -20,33 +20,35 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	virtual void PostLoad() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
 	void InitFromStruct(const FInstancedStruct& InstancedStruct);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Generic Struct Widget")
 	int Columns = 1;
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
 	class UGridPanel* MainPanel;
 
 	// Widget used by defaulr
-	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widget")
 	TSubclassOf<UUserWidget> DefaultWidgetType;
 	// Specify which widget to use for each Property
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widgets")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
 	TMap<FName, TSubclassOf<UUserWidget>> WidgetTypesMap;
 
-	UPROPERTY(EditAnywhere, Category="Generic Struct Widgets")
+	UPROPERTY(EditAnywhere, Category="Generic Struct Widget")
 	UScriptStruct* StructType;
 	
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
 	TMap<FName, UUserWidget*> WidgetFields;
 
 protected:
 	void InitializeWidgetTypesMap();
-	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widgets")
+	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreatePanelSlots();
 };

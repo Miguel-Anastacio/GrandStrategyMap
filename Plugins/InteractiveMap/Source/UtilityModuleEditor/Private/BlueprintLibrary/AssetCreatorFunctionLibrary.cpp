@@ -1,9 +1,16 @@
 // Copyright 2024 An@stacioDev All rights reserved.
+#if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
 #include "UtilityModuleEditor.h"
+//#include "WidgetBlueprint.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintGeneratedClass.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/GridPanel.h"
 #include "Factories/TextureFromBufferFactory.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
                                                    bool& bOutSuccess, FString& OutInfoMessage)
@@ -150,3 +157,64 @@ bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& Out
 	}
 	return result;
 }
+
+void UAssetCreatorFunctionLibrary::MarkWidgetAsModified(const UObject* Object)
+{
+	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
+	// if (!WidgetBlueprintGeneratedClass)
+	// 	return;
+	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	// if (!Package)
+	// 	return;
+	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	// if (!MainAsset)
+	// 	return;
+	// MainAsset->Modify();
+}
+
+UGridPanel* UAssetCreatorFunctionLibrary::GetGridPanel(const UUserWidget* Widget, const FName& Name)
+{
+	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
+	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	// if (!MainAsset)
+	// {
+	// 	return nullptr;
+	// }
+	// if(!MainAsset->WidgetTree)
+	// {
+	// 	return nullptr;
+	// }
+	// UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
+	// return  AssetGridPanel;
+	return nullptr;
+}
+
+void UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(const UObject* Object)
+{
+	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
+	// if (!WidgetBlueprintGeneratedClass)
+	// 	return;
+	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	// if (!Package)
+	// 	return;
+	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	// if (!MainAsset)
+	// 	return;
+	// MainAsset->Modify();
+	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+}
+
+class UWidgetTree* UAssetCreatorFunctionLibrary::GetWidgetTree(const UUserWidget* Widget)
+{
+	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
+	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
+	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	// if (!MainAsset)
+	// {
+	// 	return nullptr;
+	// }
+	// return MainAsset->WidgetTree;
+	return nullptr;
+}
+#endif

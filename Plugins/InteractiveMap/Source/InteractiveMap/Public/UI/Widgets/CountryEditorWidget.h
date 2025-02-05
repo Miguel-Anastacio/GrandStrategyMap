@@ -18,9 +18,9 @@ class INTERACTIVEMAP_API UCountryEditorWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-    /** Sets the country data for this widget. */
-    UFUNCTION(BlueprintCallable, Category = "Country Editor")
-    void SetCountryData(const FCountryData& data, FName id);
+    // /** Sets the country data for this widget. */
+    // UFUNCTION(BlueprintCallable, Category = "Country Editor")
+    // void SetCountryData(const FCountryData& data, FName id);
 
     /** Sets the reference to the interactive map. */
     UFUNCTION(BlueprintCallable, Category = "Country Editor")
@@ -49,7 +49,7 @@ protected:
     FName CountryTag;
 
     /** The data of the country being edited. */
-    FCountryData CountryData;
+    // FCountryData CountryData;
 
     /** Reference to the interactive map. */
     class AClickableMap* GameMapReference;

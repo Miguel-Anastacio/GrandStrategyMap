@@ -8,17 +8,17 @@
 void UEditCountriesContainerWidget::SetInteractiveMapReference(AClickableMap* map)
 {
 	GameMapReference = map;
-	AddCountriesToBox(*map->GetCountryDataMap());
+	// AddCountriesToBox(*map->GetCountryDataMap());
 }
-void UEditCountriesContainerWidget::AddCountriesToBox(const TMap<FName, FCountryData>& countryData)
-{
-	for (auto& country : countryData)
-	{
-		UCountryEditorWidget* widget = CreateWidget<UCountryEditorWidget>(GetOwningPlayer(), CountryEditorClass);
-		widget->AddToViewport();
-		widget->SetCountryData(country.Value, country.Key);
-		widget->SetInteractiveMapReference(GameMapReference);
-		CountriesHolder->AddChild(widget);
-	}
-}
+// void UEditCountriesContainerWidget::AddCountriesToBox(const TMap<FName, FCountryData>& countryData)
+// {
+// 	for (auto& country : countryData)
+// 	{
+// 		UCountryEditorWidget* widget = CreateWidget<UCountryEditorWidget>(GetOwningPlayer(), CountryEditorClass);
+// 		widget->AddToViewport();
+// 		widget->SetCountryData(country.Value, country.Key);
+// 		widget->SetInteractiveMapReference(GameMapReference);
+// 		CountriesHolder->AddChild(widget);
+// 	}
+// }
 

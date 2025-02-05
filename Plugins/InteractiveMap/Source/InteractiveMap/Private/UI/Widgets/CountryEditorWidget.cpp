@@ -5,13 +5,13 @@
 #include "Map/ClickableMap.h"
 #include "RamaColorPicker.h"
 
-void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
-{
-	CountryData = data;
-	CountryTag = id;
-	NameCustomInput->SetValues(FText::FromString(data.CountryName), FText::FromString(FString("______")));
-	ColorPicker->JoyColor = data.Color;
-}
+// void UCountryEditorWidget::SetCountryData(const FCountryData& data, FName id)
+// {
+// 	CountryData = data;
+// 	CountryTag = id;
+// 	NameCustomInput->SetValues(FText::FromString(data.CountryName), FText::FromString(FString("______")));
+// 	ColorPicker->JoyColor = data.Color;
+// }
 
 void UCountryEditorWidget::SetInteractiveMapReference(AClickableMap* map)
 {
@@ -42,7 +42,7 @@ void UCountryEditorWidget::UpdateData(UCustomEditableText* editedText, const FTe
 			if (GameMapReference)
 			{
 				FString dummy = Text.ToString();
-				CountryData.CountryName = dummy;
+				// CountryData.CountryName = dummy;
 				// if (GameMapReference->UpdateCountryData(CountryData, CountryTag))
 				// {
 				// 	editedText->SetValues(Text, FText::FromString(FString("______")));

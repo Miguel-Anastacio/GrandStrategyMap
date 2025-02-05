@@ -155,15 +155,14 @@ struct FCountryData : public FTableRowBase
     }
 };
 
-
 USTRUCT(BlueprintType)
 struct FVisualPropertyType : public FTableRowBase
 {
     GENERATED_BODY()
-    UPROPERTY(EditAnywhere)
-    UMaterialInterface* MaterialInstance = nullptr;
+    UPROPERTY(EditAnywhere,  Category = "Visual Property Type")
+    class UMaterialInterface* MaterialInstance = nullptr;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Visual Property Type")
     FName Type;
 
     bool operator == (const FVisualPropertyType& Other) const
@@ -184,10 +183,10 @@ USTRUCT(BlueprintType)
 struct FVisualProperty : public FTableRowBase
 {
     GENERATED_BODY()
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Visual Property")
     FName Type = "Null";
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Visual Property")
     FName Tag;
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Visual Property")
     FColor Color = FColor::Black;
 };

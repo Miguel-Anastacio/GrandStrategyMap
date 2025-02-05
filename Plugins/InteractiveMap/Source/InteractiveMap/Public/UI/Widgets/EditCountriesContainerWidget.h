@@ -19,9 +19,9 @@ class INTERACTIVEMAP_API UEditCountriesContainerWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	/** Adds countries to the scroll box. */
-	UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")
-	void AddCountriesToBox(const TMap<FName, FCountryData>& countryData);
+	// /** Adds countries to the scroll box. */
+	// UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")
+	// void AddCountriesToBox(const TMap<FName, FCountryData>& countryData);
 
 	/** Sets the reference to the interactive map. */
 	UFUNCTION(BlueprintCallable, Category = "CountryContainerEditorWidget")

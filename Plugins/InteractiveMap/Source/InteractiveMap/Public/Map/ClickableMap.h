@@ -18,10 +18,10 @@ struct FTilePair
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,  Category = "Data")
 	int ID = -1;
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,  Category = "Data")
 	FInstancedStruct Data;
 };
 
@@ -63,7 +63,9 @@ class INTERACTIVEMAP_API AClickableMap : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AClickableMap(const FObjectInitializer& ObjectInitializer);
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	
 	UFUNCTION(BlueprintNativeEvent, Category = "Map")
 	void InitializeMap();
@@ -141,7 +143,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,  Category = "Map Data")
 	void SetMapTiles(const TArray<FTilePair>& NewData);
 
 	UFUNCTION()
@@ -152,7 +154,7 @@ protected:
 
 	void CreateMapModes();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,  Category = "Map Data")
 	void UpdateTileData(const FInstancedStruct& Data, int ID);
 	
 // #if WITH_EDITOR

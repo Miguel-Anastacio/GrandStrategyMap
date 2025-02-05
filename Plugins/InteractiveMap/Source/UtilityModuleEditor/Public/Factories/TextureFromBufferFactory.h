@@ -1,4 +1,5 @@
 #pragma once
+#if WITH_EDITOR
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Factories/Factory.h"
@@ -26,3 +27,4 @@ class UTexture2DFromBufferFactory : public UFactory
 		Buffer = buffer;
 	};
 };
+#endif

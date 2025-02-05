@@ -32,7 +32,7 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 
 	DynamicTextureComponent = CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Dynamic Texture"));
 }
-
+#if WITH_EDITOR
 void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -41,6 +41,7 @@ void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& Propert
 		MapDataComponent->ReadDataTables(MapAsset->VisualPropertiesDT, MapAsset->VisualPropertyTypesDT);
 	}
 }
+#endif
 
 void AClickableMap::PostInitializeComponents()
 {

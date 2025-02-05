@@ -8,16 +8,6 @@ public class SharedModule : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
-		// if (Target.bBuildEditor)
-		// {
-		// 	Type = ModuleType.CPlusPlus
-		// }
-		// else
-		// {
-		// 	Type = ModuleType.CPlusPlus;
-		// }
-
-		
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
@@ -31,7 +21,6 @@ public class SharedModule : ModuleRules
 			
             }
 			);
-			
 		
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -40,11 +29,20 @@ public class SharedModule : ModuleRules
 				"RenderCore",
 				"StructUtils",
 				"UtilityModule",
-				"UtilityModuleEditor"
 				// ... add other public dependencies that you statically link with here ...
 			}
 		);
 			
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UtilityModuleEditor"
+					// ... add private dependencies that you statically link with here ...	
+				}
+			);
+		}
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]

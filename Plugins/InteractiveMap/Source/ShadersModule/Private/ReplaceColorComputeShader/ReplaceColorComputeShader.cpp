@@ -12,7 +12,8 @@
 #include "RHIGPUReadback.h"
 #include "MeshPassUtils.h"
 #include "MaterialShader.h"
-
+#include "Async/Async.h"
+#include "RenderingThread.h"
 DECLARE_STATS_GROUP(TEXT("ReplaceColorComputeShader"), STATGROUP_ReplaceColorComputeShader, STATCAT_Advanced);
 DECLARE_CYCLE_STAT(TEXT("ReplaceColorComputeShader Execute"), STAT_ReplaceColorComputeShader_Execute, STATGROUP_ReplaceColorComputeShader);
 
@@ -216,4 +217,27 @@ void FReplaceColorComputeShaderInterface::DispatchRenderThread(FRHICommandListIm
 		}
 	}
 	GraphBuilder.Execute();
+}
+
+void FReplaceColorComputeShaderInterface::DispatchGameThread(FReplaceColorComputeShaderDispatchParams& Params,
+	const TFunction<void(TArray<uint32> OutputVal)>& AsyncCallback)
+{
+	{
+		ENQUEUE_RENDER_COMMAND(SceneDrawCompletion)(
+		[Params, AsyncCallback](FRHICommandListImmediate& RHICmdList)
+		{
+			DispatchRenderThread(RHICmdList, Params, AsyncCallback);
+		});
+	}
+
+}
+
+void FReplaceColorComputeShaderInterface::Dispatch(FReplaceColorComputeShaderDispatchParams Params,
+	const TFunction<void(TArray<uint32> OutputVal)>& AsyncCallback)
+{
+	if (IsInRenderingThread()) {
+		DispatchRenderThread(GetImmediateCommandList_ForRenderCommand(), Params, AsyncCallback);
+	}else{
+		DispatchGameThread(Params, AsyncCallback);
+	}
 }

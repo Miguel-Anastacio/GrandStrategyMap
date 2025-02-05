@@ -30,21 +30,30 @@ public class UtilityModuleEditor : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
+		
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UnrealEd",
+					"AssetTools",
+					"ToolMenus",
+					// "UMGEditor", 
+					// ... add private dependencies that you statically link with here ...	
+				}
+			);
+		}
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Slate",
+				"SlateCore",
 				"CoreUObject",
 				"Engine",
 				"InputCore",
-				"AssetTools",
-				"ToolMenus",
-				"UnrealEd",
-				"Slate",	
-				"SlateCore",
 				"UMG", 
-				"UMGEditor", 
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -53,7 +62,6 @@ public class UtilityModuleEditor : ModuleRules
 			new string[]
 			{
 				// ... add any modules that your module loads dynamically here ...
-			}
-			);
+			});
 	}
 }
