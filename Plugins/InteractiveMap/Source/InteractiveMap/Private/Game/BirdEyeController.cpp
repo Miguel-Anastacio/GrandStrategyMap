@@ -103,8 +103,6 @@ void ABirdEyeController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
-		
-		EnhancedInputComponent->BindAction(OpenCountryEditorAction, ETriggerEvent::Started, this, &ABirdEyeController::ToggleCountryEditor);
 	}
 	else
 	{
@@ -114,37 +112,37 @@ void ABirdEyeController::SetupInputComponent()
 
 void ABirdEyeController::MouseClick()
 {
-	FHitResult hit;
+	FHitResult OutHit;
 	bProvinceSelected = false;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, hit))
+	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, OutHit))
 	{
-		FVector start = hit.ImpactPoint;
-		FVector end = hit.ImpactPoint;
-		start.Z = hit.ImpactPoint.Z + zOffset;
-		end.Z = hit.ImpactPoint.Z - zOffset;
+		FVector start = OutHit.ImpactPoint;
+		FVector end = OutHit.ImpactPoint;
+		start.Z = OutHit.ImpactPoint.Z + zOffset;
+		end.Z = OutHit.ImpactPoint.Z - zOffset;
 		FCollisionQueryParams params;
 		params.AddIgnoredActor(this);
 		params.bTraceComplex = true;
 		params.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(hit, start, end, MouseTraceChannel, params))
+		if (!GetWorld()->LineTraceSingleByChannel(OutHit, start, end, MouseTraceChannel, params))
 			return;
-		if (!IsValid(hit.GetActor()))
+		if (!IsValid(OutHit.GetActor()))
 			return;
 
 		if (!Map)
-			Map = Cast<AClickableMap>(hit.GetActor());
+			Map = Cast<AClickableMap>(OutHit.GetActor());
 
 		if (Map)
 		{
-			FVector2D uvs = FVector2D(0, 0);
-			UGameplayStatics::FindCollisionUV(hit, 0, uvs);
-			FColor Color = Map->GetColorFromLookUpTexture(uvs);
+			FVector2D Uvs = FVector2D(0, 0);
+			UGameplayStatics::FindCollisionUV(OutHit, 0, Uvs);
+			FColor Color = Map->GetColorFromLookUpTexture(Uvs);
 				
 			bool bOutResult;
 			int ID = Map->GetProvinceID(Color, bOutResult);
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Clicked on province ID: %d"),ID);
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Color searched: %s"), *Color.ToString());
-			UE_LOG(LogInteractiveMap, Warning, TEXT("UVs: %s"), *uvs.ToString());
+			UE_LOG(LogInteractiveMap, Warning, TEXT("UVs: %s"), *Uvs.ToString());
 			
 			FInstancedStruct* Data = Map->GetProvinceData(ID);
 			if (Data)
@@ -171,62 +169,40 @@ void ABirdEyeController::MouseClick()
 	}
 }
 
-void ABirdEyeController::CameraMovement(const FInputActionInstance& instance)
+void ABirdEyeController::CameraMovement(const FInputActionInstance& Instance)
 {
-	FVector2D input = instance.GetValue().Get<FVector2D>();
+	FVector2D input = Instance.GetValue().Get<FVector2D>();
 	input.Y *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->MoveCamera(input);
 
 }
 
-void ABirdEyeController::CameraZoom(const FInputActionInstance& instance)
+void ABirdEyeController::CameraZoom(const FInputActionInstance& Instance)
 {
-	float input = instance.GetValue().Get<float>();
+	float input = Instance.GetValue().Get<float>();
 	input *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->ZoomCamera(input);
 }
 
-void ABirdEyeController::StartMovement(const FVector2D& mousePos)
+void ABirdEyeController::StartMovement(const FVector2D& MousePos)
 {
 	bMoveCamera = true;
 	FVector2D ViewportSize = FVector2D(GEngine->GameUserSettings->GetLastConfirmedScreenResolution());
 	ViewportCenter = ViewportSize * 0.5f;
 
-	MoveInput = mousePos - ViewportCenter; 
+	MoveInput = MousePos - ViewportCenter; 
 	MoveInput.Normalize();
 
 }
 
-void ABirdEyeController::ToggleCountryEditor()
-{
-	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-
-	if (hud)
-	{
-		if (!Map)
-		{
-			TArray<AActor*> FoundActors;
-			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AClickableMap::StaticClass(), FoundActors);
-			if (FoundActors.Num() > 0)
-			{
-				Map = Cast<AClickableMap>(FoundActors[0]);
-				hud->SetInteractiveMapReference(Map);
-			}
-		}
-		
-		hud->SetInteractiveMapReference(Map);
-		hud->ToggleCountryEditorVisibility();
-	}
-}
-
 void ABirdEyeController::HideHUD()
 {
-	AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-	if (hud)
+	AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
+	if (ManagerHUD)
 	{
-		hud->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+		ManagerHUD->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
