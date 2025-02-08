@@ -123,6 +123,69 @@ bool STreeJsonDisplay::FillDocuments(const UScriptStruct* StructType,
     return true;
 }
 
+bool STreeJsonDisplay::FillDocuments(TArray<TSharedPtr<FDocumentInfo>>& Documents,
+	const TArray<FInstancedStruct>& StructInstances)
+{
+    for (const FInstancedStruct& StructInstance : StructInstances)
+    {
+        if (!StructInstance.IsValid())
+        {
+            UE_LOG(LogInteractiveMapEditor, Error, TEXT("Invalid struct instance."));
+            continue;
+        }
+
+        const void* StructData = StructInstance.GetMemory();
+        if (!StructData)
+        {
+            UE_LOG(LogInteractiveMapEditor, Error, TEXT("StructData is null."));
+            continue;
+        }
+
+        // Process the properties of the struct
+    	const UScriptStruct* StructType = StructInstance.GetScriptStruct();
+        TSharedPtr<FDocumentInfo> RootDocument = MakeShareable(new FDocumentInfo(FText::FromName(StructType->GetFName()), FText::GetEmpty()));
+
+        for (TFieldIterator<FProperty> It(StructType); It; ++It)
+        {
+            FProperty* Property = *It;
+            if (!Property)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Encountered null property in struct '%s'."), *StructType->GetName());
+                continue;
+            }
+
+            bool bResult = false;
+            FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(Property, StructData, bResult);
+
+        	UE_LOG(LogInteractiveMapEditor, Display, TEXT("Property Name: %s"), *Property->GetFName().ToString());
+            if (bResult)
+            {
+                FName PropertyName = Property->GetFName();
+
+                // If the property name is "ID", create a root document
+                if (PropertyName == FName("ID"))
+                {
+                    RootDocument->DisplayName = FText::FromString(PropertyValue);
+                }
+                else
+                {
+                    // Add sub-documents for other properties
+                    RootDocument->AddSubDocument(MakeShareable(new FDocumentInfo(FText::FromName(PropertyName), FText::FromString(PropertyValue))));
+                }
+            }
+        }
+
+        // Add the populated root document to the documents array
+        if (RootDocument.IsValid())
+        {
+        	RootDocument->DocumentIndex = Documents.Num();
+            Documents.Add(RootDocument);
+        }
+    }
+
+    return true;
+}
+
 bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr<FDocumentInfo>>& Documents)
 {
 	if (!MapObject)
@@ -140,7 +203,7 @@ bool STreeJsonDisplay::FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr
 
     for (const FInstancedStruct& StructInstance : MapObject->GetMapData())
     {
-        if (!StructInstance.IsValid() || StructInstance.GetScriptStruct() != StructType)
+        if (!StructInstance.IsValid() || (StructInstance.GetScriptStruct() != StructType && StructInstance.GetScriptStruct() != MapObject->OceanStructType))
         {
             UE_LOG(LogInteractiveMapEditor, Error, TEXT("Invalid or mismatched struct instance."));
             continue;
@@ -199,7 +262,7 @@ FReply STreeJsonDisplay::SummonDocumentButtonClicked( TSharedRef<FDocumentInfo> 
 void STreeJsonDisplay::RebuildTree(const UScriptStruct* StructType, const TArray<FInstancedStruct>& StructInstances)
 {
 	Documents.Empty();
-	bool bResult = FillDocuments(StructType, Documents, StructInstances);
+	bool bResult = FillDocuments(Documents, StructInstances);
 	if( TreeView.IsValid() )
 	{
 		TreeView->RequestTreeRefresh();

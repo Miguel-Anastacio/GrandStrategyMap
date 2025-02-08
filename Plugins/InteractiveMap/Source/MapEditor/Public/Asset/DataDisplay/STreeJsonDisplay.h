@@ -105,6 +105,7 @@ public:
 
 	static bool FillDocuments(const UScriptStruct* StructType, TArray<TSharedPtr<FDocumentInfo>>& Documents,
 											 const TArray<FInstancedStruct>& StructInstances);
+	static bool FillDocuments(TArray<TSharedPtr<FDocumentInfo>>& Documents, const TArray<FInstancedStruct>& StructInstances);
 
 	static bool FillMapDocuments(UMapObject* MapObject, TArray<TSharedPtr<FDocumentInfo>>& Documents);
 

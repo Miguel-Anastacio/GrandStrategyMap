@@ -221,7 +221,7 @@ private:
 
     static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
     static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
-    static void ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
+    static bool ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };
 

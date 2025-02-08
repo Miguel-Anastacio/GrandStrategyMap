@@ -43,6 +43,27 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 }
 #endif
 
+
+
+void UMapObject::LogMapData() const
+{
+	for(const auto& Data : MapData)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Struct Name %s"), *Data.GetScriptStruct()->GetName());
+		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
+		{
+			const FString PropertyName = Property->GetAuthoredName();
+			bool bOutResult = false;
+			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
+				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
+		});
+	}
+}
+
+void UMapObject::LogLookupTable() const
+{
+}
+
 void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
 {
 	if(Index < 0 || Index > MapData.Num() - 1)

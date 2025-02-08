@@ -117,6 +117,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
 	class UMaterialInterface* MaterialOverride;
 
+
+	void LogLookupTable() const ;
+	void LogMapData() const;
+
 	// TODO - MAYBE REMOVE THIS
 	UPROPERTY()
 	class UStaticMesh* Mesh;

@@ -11,8 +11,8 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
 
-FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport)
-		: FEditorViewportClient(nullptr, InPreviewScene, InViewport)
+FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject)
+		: FEditorViewportClient(nullptr, InPreviewScene, InViewport), MapObject(InMapObject)
 {
 	
 }
@@ -27,6 +27,19 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 	
 	// Optionally, pass unhandled clicks to the base class
 	FEditorViewportClient::ProcessClick(View, HitProxy, Key, Event, HitX, HitY);
+}
+
+bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
+{
+	if(EventArgs.Key == EKeys::L && EventArgs.Event == EInputEvent::IE_Released)
+	{
+		if(MapObject)
+		{
+			MapObject->LogMapData();
+		}
+	}
+	
+	return FEditorViewportClient::InputKey(EventArgs);
 }
 
 void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 ScreenY)
@@ -113,7 +126,7 @@ void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double In
 
 TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 {
-	LevelViewportClient = MakeShareable(new FMapObjectViewportClient(AdvancedPreviewScene.Get(), SharedThis(this)));
+	LevelViewportClient = MakeShareable(new FMapObjectViewportClient(AdvancedPreviewScene.Get(), SharedThis(this), CustomObject.Get()));
 	
 	LevelViewportClient->ViewportType = LVT_OrthoXY;
 	LevelViewportClient->bSetListenerPosition = false;

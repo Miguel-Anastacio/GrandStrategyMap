@@ -72,7 +72,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 		FInstancedStruct NewInstancedStruct;
 		if (DeserializeJsonToFInstancedStruct(JsonObject, structType, NewInstancedStruct))
 		{
-			ObjectHasMissingFields(JsonObject, index, FilePath, structType);
+			// ObjectHasMissingFields(JsonObject, index, FilePath, structType);
 			OutArray.Add(MoveTemp(NewInstancedStruct));
 		}
 
@@ -100,9 +100,9 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 		FInstancedStruct NewInstancedStruct;
 		for(const auto& StructType : StructTypes)
 		{
-			if (DeserializeJsonToFInstancedStruct(JsonObject, StructType, NewInstancedStruct))
+			const bool bResult = DeserializeJsonToFInstancedStruct(JsonObject, StructType, NewInstancedStruct);
+			if (bResult && !ObjectHasMissingFields(JsonObject, Index, FilePath, StructType))
 			{
-				ObjectHasMissingFields(JsonObject, Index, FilePath, StructType);
 				OutArray.Add(MoveTemp(NewInstancedStruct));
 				Index++;
 				break;
@@ -292,8 +292,9 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
+bool UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
+	bool bResult = false;
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
@@ -305,9 +306,10 @@ void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonO
 			UE_LOG(LogUtilityModule, Warning, 
 				TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
 				*PropertyName, Index, *FilePath);
-			return;
+			bResult = true;
 		}
 	}
+	return bResult;
 }
 
 void UDataManagerFunctionLibrary::LogReadJsonFailed(const FString& FilePath)
