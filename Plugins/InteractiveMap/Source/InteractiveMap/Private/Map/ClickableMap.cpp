@@ -8,15 +8,14 @@
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
-#include "Map/Visual/LayeredMapVisualComponent.h"
 #include "Map/MapDataComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
 #include "InteractiveMap.h"
 #include "MapObject.h"
-#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
+#include "Map/MapVisualComponent.h"
 #include "ShadersModule/Public/ReplaceColorComputeShader/ReplaceColorComputeShader.h"
 
 AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
@@ -285,8 +284,8 @@ FInstancedStruct* AClickableMap::GetProvinceData(int ID)
 
 void AClickableMap::SetBorderVisibility(bool status)
 {
-	if(bUseBorderMesh)
-		MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
+	// if(bUseBorderMesh)
+		// MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
 }
 
 void AClickableMap::FillPixelMap()
