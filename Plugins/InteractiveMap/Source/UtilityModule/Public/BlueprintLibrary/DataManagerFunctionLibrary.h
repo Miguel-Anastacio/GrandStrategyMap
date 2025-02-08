@@ -5,7 +5,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JsonObjectConverter.h"
 #include "Engine/DataTable.h"
-#include "DataStructs.h"
 #include "InstancedStruct.h"
 #include "DataManagerFunctionLibrary.generated.h"
 
@@ -145,13 +144,6 @@ public:
         WriteJson(jsonFilePath, JsonValues, outSuccess, outInfoMessage);
     }
     
-    ///// ONLY FOR TESTING PURPOSES -> TODO: Remove
-    UFUNCTION(BlueprintCallable, Category = "Data Loader")
-    static  TArray<FTestBasic> LoadTestBasic(const FString& FilePath);
-    UFUNCTION(BlueprintCallable, Category = "Data Loader")
-    static  TArray<FTestAdvanced> LoadTestAdvanced(const FString& FilePath);
-    ////////////////////////////////////////////////////////////////
-
     template<class T>
     static TArray<T> LoadCustomDataFromJson(const FString& FilePath)
     {

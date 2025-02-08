@@ -230,17 +230,6 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-// FInstanced Struct method is more versatile
-TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
-{
-	return LoadCustomDataFromJson<FTestBasic>(FilePath);
-}
-
-TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FString& FilePath)
-{
-	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
-}
-
 void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)

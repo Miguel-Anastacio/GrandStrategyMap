@@ -6,6 +6,7 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
+#include "MapEditor.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
@@ -27,23 +28,6 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 			->SetSizeCoefficient(.5f)
 			->AddTab(MapViewportTab, ETabState::OpenedTab)
 			->SetHideTabWell(true)
-			// FTabManager::NewSplitter()
-			// ->SetOrientation(Orient_Vertical)
-			// ->SetSizeCoefficient(.65f)
-			// ->Split
-			// (
-			// 	FTabManager::NewStack()
-			// 	->SetSizeCoefficient(.5f)
-			// 	->AddTab(MapViewportTab, ETabState::OpenedTab)
-			// 	->SetHideTabWell(true)
-			// )
-			// ->Split
-			// (
-			// 	FTabManager::NewStack()
-			// 	->SetSizeCoefficient(.5f)
-			// 	->AddTab(MapStatsTab, ETabState::OpenedTab)
-			// 	->SetHideTabWell(true)
-			// )
 		)
 		->Split
 		(

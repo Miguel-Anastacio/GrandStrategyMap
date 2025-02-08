@@ -25,7 +25,6 @@ void ABirdEyeController::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-	//Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -113,10 +112,10 @@ void ABirdEyeController::MouseClick()
 		{
 			FVector2D Uvs = FVector2D(0, 0);
 			UGameplayStatics::FindCollisionUV(OutHit, 0, Uvs);
-			FColor Color = Map->GetColorFromLookUpTexture(Uvs);
+			const FColor Color = Map->GetColorFromLookUpTexture(Uvs);
 				
 			bool bOutResult;
-			int ID = Map->GetProvinceID(Color, bOutResult);
+			const int ID = Map->GetProvinceID(Color, bOutResult);
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Clicked on province ID: %d"),ID);
 			UE_LOG(LogInteractiveMap, Warning, TEXT("Color searched: %s"), *Color.ToString());
 			UE_LOG(LogInteractiveMap, Warning, TEXT("UVs: %s"), *Uvs.ToString());
@@ -127,10 +126,10 @@ void ABirdEyeController::MouseClick()
 				ProvinceHoveredDelegate.Broadcast(Color, ID);
 
 				ProvinceClickedDelegate.Broadcast(ID, *Data);
-				AManagerHUD* hud = Cast<AManagerHUD>(GetHUD());
-				if (hud)
+				AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
+				if (ManagerHUD)
 				{
-					hud->SetInteractiveMapReference(Map);
+					ManagerHUD->SetInteractiveMapReference(Map);
 				}
 			}
 			else
@@ -166,7 +165,7 @@ void ABirdEyeController::CameraZoom(const FInputActionInstance& Instance)
 void ABirdEyeController::StartMovement(const FVector2D& MousePos)
 {
 	bMoveCamera = true;
-	FVector2D ViewportSize = FVector2D(GEngine->GameUserSettings->GetLastConfirmedScreenResolution());
+	const FVector2D ViewportSize = FVector2D(GEngine->GameUserSettings->GetLastConfirmedScreenResolution());
 	ViewportCenter = ViewportSize * 0.5f;
 
 	MoveInput = MousePos - ViewportCenter; 
