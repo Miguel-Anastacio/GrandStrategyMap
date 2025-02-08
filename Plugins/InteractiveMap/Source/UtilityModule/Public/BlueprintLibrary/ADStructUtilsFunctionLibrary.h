@@ -91,8 +91,16 @@ public:
     }
     
     static FString GetPropertyValueAsString(const FProperty* Property, const void* StructObject, bool& OutResult);
-    UFUNCTION(BlueprintCallable, BlueprintPure)
+    /**
+     * Get the value of a property of a InstancedStruct as a string
+     * @param InstancedStruct 
+     * @param PropertyName 
+     * @param OutResult 
+     * @return 
+     */
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category= "Instanced Struct Utils")
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
+
     /// TODO - Add Specializations and expose them to Blueprints
     template<typename T>
     static T GetPropertyValueFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)

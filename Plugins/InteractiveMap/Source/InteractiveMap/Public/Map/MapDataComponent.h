@@ -27,8 +27,9 @@ class INTERACTIVEMAP_API UMapDataComponent : public UActorComponent
 public:
     /** Default constructor. */
     UMapDataComponent();
-
+#if WITH_EDITOR
     virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
     const TMap<FVisualPropertyType, FArrayOfVisualProperties>& GetVisualPropertiesMap() const;
     TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;

@@ -34,14 +34,12 @@ public class ShadersModule: ModuleRules
 		
 		if (Target.bBuildEditor == true)
 		{
-
 			PrivateDependencyModuleNames.AddRange(
 				new string[] {
 					"UnrealEd",
 					"MaterialUtilities",
 					"SlateCore",
 					"Slate",
-					"UnrealEd",
 					"MaterialUtilities",
 				}
 			);

@@ -1,20 +1,24 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "UserWidgets/GenericStructWidget.h"
-
+#include "UObject/Field.h"
 #include "UtilityModule.h"
-//#include "WidgetBlueprint.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "Kismet2/BlueprintEditorUtils.h"
-#include "UserWidgets/CustomEditableText.h"
 #include "UserWidgets/GenericUserWidgetInterface.h"
-
+#include "UserWidgets/GenericWidgetDataMap.h"
+#if WITH_EDITOR
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#endif
 void UGenericStructWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+}
+
+void UGenericStructWidget::NativePreConstruct()
+{
+	// Initialize Widget Fields
 	WidgetFields.Empty();
-	
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
@@ -23,7 +27,7 @@ void UGenericStructWidget::NativeOnInitialized()
 			continue;
 		}
 		
-		FName FieldName(*Property->GetDisplayNameText().ToString());
+		FName FieldName(*Property->GetAuthoredName());
 		for(const auto& Widget : MainPanel->GetAllChildren())
 		{
 			if(FieldName == Widget->GetName())
@@ -36,10 +40,9 @@ void UGenericStructWidget::NativeOnInitialized()
 			}
 		}
 	}
-}
-
-void UGenericStructWidget::NativePreConstruct()
-{
+	FInstancedStruct Struct;
+	Struct.InitializeAs(StructType);
+	InitFromStruct(Struct);
 	Super::NativePreConstruct();
 }
 
@@ -52,26 +55,12 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 	}
 }
 
+#if WITH_EDITOR
 void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-#if WITH_EDITOR
-	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UGenericStructWidget, StructType))
-	{
-		InitializeWidgetTypesMap();
-	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	// when struct changes populate WidgetTypesMap with Names and default Widget 
-	// if(PropertyChangedEvent.GetPropertyName() == FName("StructType"))
-#endif
 }
-
-void UGenericStructWidget::PostLoad()
-{
-	Super::PostLoad();
-#if WITH_EDITOR
-	InitializeWidgetTypesMap();
 #endif
-}
 
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
@@ -87,89 +76,65 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 	}
 }
 
-void UGenericStructWidget::InitializeWidgetTypesMap()
-{
-	if(StructType)
-	{
-		WidgetTypesMap.Empty();
-		for (TFieldIterator<FProperty> It(StructType); It; ++It)
-		{
-			const FProperty* Property = *It;
-			if (!Property)
-			{
-				continue;
-			}
-			WidgetTypesMap.Emplace(FName(*Property->GetDisplayNameText().ToString()), DefaultWidgetType);
-		}
-		//
-		// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
-		// if (!WidgetBlueprintGeneratedClass)
-		// 	return;
-		// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-		// if (!Package)
-		// 	return;
-		// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-		// if (!MainAsset)
-		// 	return;
-		// MainAsset->Modify();
-		// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-	}
-}
-
+#if WITH_EDITOR
 void UGenericStructWidget::CreatePanelSlots()
 {
-#if WITH_EDITOR
 	if (!MainPanel)
 		return;
-
-	// const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
-	// const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	// UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	//
-	// // We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
-	// // However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	// UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
-	// if(!AssetGridPanel)
-	// {
-	// 	UE_LOG(LogUtilityModule, Error, TEXT("Missing Main Panel"));
-	// 	return;
-	// }
-	// if(!StructType)
-	// {
-	// 	UE_LOG(LogUtilityModule, Error, TEXT("Please Set a StructType"));
-	// 	return;
-	// }
-	//
-	// AssetGridPanel->ClearChildren();
-	// AssetGridPanel->Modify();
-	// MainAsset->Modify();
-	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-	//
-	// int RowIndex = 0;
-	// UADStructUtilsFunctionLibrary::ForEachProperty(StructType, [this, AssetGridPanel, &RowIndex, MainAsset](const FProperty* Property)
-	// {
-	// 	const FName PropertyName = FName(*Property->GetDisplayNameText().ToString());
-	// 	const TSubclassOf<UUserWidget>* WidgetTypeFromMap = WidgetTypesMap.Find(PropertyName);
-	// 	TSubclassOf<UUserWidget> WidgetType = DefaultWidgetType;
-	// 	if(WidgetTypeFromMap && *WidgetTypeFromMap)
-	// 	{
-	// 		WidgetType = *WidgetTypeFromMap;
-	// 	}
-	// 	if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*WidgetType))
-	// 	{
-	// 		NewWidget->Rename(*PropertyName.ToString());
-	// 		AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
-	// 		RowIndex++;
-	// 	}
-	// });
 	
-	// AssetGridPanel->Modify();
-	// MainAsset->Modify();
-	// if(AssetGridPanel->GetChildrenCount() == 0)
-	// {
-	// 	UE_LOG(LogUtilityModule, Error, TEXT("Widget Type is not of type UUserWidget"));
-	// }
-	//
-	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-#endif
+	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
+	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
+	UGridPanel* AssetGridPanel = UAssetCreatorFunctionLibrary::GetGridPanel(this, FName("MainPanel"));
+	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	if(!AssetGridPanel)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Missing Main Panel"));
+		return;
+	}
+	if(!DataAssetWidgetMap)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a DataAssetWidgetMap"));
+	}
+	if(!DataAssetWidgetMap->StructType)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a StructType"));
+		return;
+	}
+	if(!WidgetTree)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Widget Tree is Null"));
+		return;
+	}
+
+	StructType = DataAssetWidgetMap->StructType;
+	
+	AssetGridPanel->ClearChildren();
+	AssetGridPanel->Modify();
+	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	
+	uint8 RowIndex = 0;
+	uint8 ColumnIndex = 0;
+	for(const auto& [PropertyName, WidgetType] : DataAssetWidgetMap->PropertyWidgetMap)
+	{
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType))
+		{
+			NewWidget->Rename(*PropertyName.ToString());
+			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
+		}
+		ColumnIndex++;
+		if(ColumnIndex >= Columns)
+		{
+			ColumnIndex = 0;
+			RowIndex++;
+		}
+	}
+	
+	if(AssetGridPanel->GetChildrenCount() == 0)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Widget Type is not of type UUserWidget"));
+	}
+	
+	AssetGridPanel->Modify();
+	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 }
+#endif

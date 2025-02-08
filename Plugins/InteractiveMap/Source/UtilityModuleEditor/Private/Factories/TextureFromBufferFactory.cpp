@@ -1,3 +1,4 @@
+#if WITH_EDITOR
 #include "Factories/TextureFromBufferFactory.h"
 UTexture2DFromBufferFactory::UTexture2DFromBufferFactory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -44,3 +45,4 @@ UObject* UTexture2DFromBufferFactory::FactoryCreateNew( UClass* InClass, UObject
 	}
 	return Object;
 }
+#endif

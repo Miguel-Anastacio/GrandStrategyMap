@@ -32,32 +32,20 @@ public:
 	void DisplayProvinceEditorWidget(const FInstancedStruct& ProvinceData, int Id);
 
 	/**
-	 * Displays the country container editor widget.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void DisplayCountryContainerEditorWidget();
-
-	/**
 	 * Sets the visibility of the province editor widget.
 	 *
-	 * @param visibility The visibility state to set.
+	 * @param Visibility The visibility state to set.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetProvinceEditorVisibility(ESlateVisibility visibility);
-
-	/**
-	 * Toggles the visibility of the country editor widget.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void ToggleCountryEditorVisibility();
-
+	void SetProvinceEditorVisibility(ESlateVisibility Visibility);
+	
 	/**
 	 * Sets the reference to the interactive map.
 	 *
-	 * @param map Reference to the interactive map.
+	 * @param Map Reference to the interactive map.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetInteractiveMapReference(class AClickableMap* map);
+	void SetInteractiveMapReference(class AClickableMap* Map);
 
 protected:
 	void BeginPlay() override;
@@ -70,10 +58,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UProvinceEditorWidget> ProvincedEditorWidgetClass;
 
-	/** Class of the country container editor widget. */
-	UPROPERTY(EditAnywhere, Category = "Widgets")
-	TSubclassOf<UEditCountriesContainerWidget> CountryContainerEditorWidgetClass;
-
 	/** Reference to the HUD widget. */
 	UPROPERTY(BlueprintReadOnly, Category = "Widgets")
 	TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
@@ -81,10 +65,6 @@ protected:
 	/** Reference to the province editor widget. */
 	UPROPERTY(BlueprintReadOnly, Category = "Widgets")
 	TObjectPtr<UProvinceEditorWidget> ProvinceEditorWidget;
-
-	/** Reference to the country container editor widget. */
-	UPROPERTY(BlueprintReadOnly, Category = "Widgets")
-	TObjectPtr<UEditCountriesContainerWidget> CountryContainerEditorWidget;
 
 	/** Reference to the interactive map. */
 	UPROPERTY(Transient)

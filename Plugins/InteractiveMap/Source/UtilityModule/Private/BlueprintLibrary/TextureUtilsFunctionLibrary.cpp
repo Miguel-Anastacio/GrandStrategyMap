@@ -1,9 +1,11 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
-
+#include "Engine/Texture2D.h"
+#include "Engine/Texture.h"
 #include "TextureCompiler.h"
 #include "UtilityModule.h"
+#include "TextureResource.h"
 TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Texture)
 {
 	// Initialize an empty TArray to hold the texture data
@@ -13,8 +15,9 @@ TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Textu
 		UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Array not Valid Texture"));
 		return DataArray;
 	}
+#if WITH_EDITOR
 	FTextureCompilingManager::Get().FinishCompilation({Texture});
-
+#endif
 	// Lock the texture for reading
 	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
 	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
@@ -25,7 +28,6 @@ TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Textu
 
 	// Unlock the texture
 	Mip.BulkData.Unlock();
-
 	return DataArray;
 }
 
@@ -36,7 +38,9 @@ const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Textu
 		UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Buffer not Valid Texture"));
 		return nullptr;
 	}
+#if WITH_EDITOR
 	FTextureCompilingManager::Get().FinishCompilation({Texture});
+#endif
 	
 	// Lock the texture for reading
 	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
@@ -44,7 +48,6 @@ const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Textu
 	const uint8* Data = static_cast<const uint8*>(TextureData);
 	// Unlock the texture
 	Mip.BulkData.Unlock();
-
 	return  Data;
 }
 
@@ -233,11 +236,13 @@ bool UTextureUtilsFunctionLibrary::IsTextureValid(const UTexture2D* Texture)
 		UE_LOG(LogUtilityModule, Error, TEXT("%s has wrong compression settings, please use UserInterface"), *Texture->GetName());
 		return false;
 	}
+	// in editor check mip map settings
+#if WITH_EDITOR
 	if(Texture->MipGenSettings != TMGS_NoMipmaps)
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("%s has wrong Mipmap settings, please use NoMipmaps"), *Texture->GetName());
 		return false;
 	}
-
+#endif
 	return true;
 }

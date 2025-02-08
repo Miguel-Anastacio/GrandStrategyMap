@@ -61,18 +61,6 @@
 			]
 		},
 		{
-			"Name": "VictoryBPLibrary",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
-			],
-			"PlatformAllowList": [
-				"Win64"
-			]
-		},
-		{
 			"Name": "ShadersModule",
 			"Type": "Runtime",
 			"LoadingPhase": "PostConfigInit"

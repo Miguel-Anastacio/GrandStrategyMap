@@ -29,20 +29,27 @@ public class InteractiveMap : ModuleRules
 				"Core",
 				"RHI",
 				"RenderCore",
-				"VictoryBPLibrary",
 				"UtilityModule",
 				"SharedModule",
 				"StructUtils",
-				"UMGEditor",
 				"UMG", 
-				"UnrealEd",
 				"ShadersModule"
              
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
-			
-		
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UMGEditor",
+					"UnrealEd"
+					// ... add private dependencies that you statically link with here ...	
+				}
+			);
+		}
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -53,11 +60,10 @@ public class InteractiveMap : ModuleRules
 				"SlateCore",
                 "UMG",
 				"Json",
-				"JsonUtilities", "UMGEditor",
+				"JsonUtilities",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		// PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]

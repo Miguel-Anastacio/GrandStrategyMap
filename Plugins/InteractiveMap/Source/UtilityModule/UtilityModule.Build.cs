@@ -34,6 +34,16 @@ public class UtilityModule : ModuleRules
 			}
 			);
 			
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UtilityModuleEditor"
+					// ... add private dependencies that you statically link with here ...	
+				}
+			);
+		}
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
@@ -45,7 +55,7 @@ public class UtilityModule : ModuleRules
 				"JsonUtilities",
 				"Slate",	
 				"SlateCore",
-				"UMG", 
+				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

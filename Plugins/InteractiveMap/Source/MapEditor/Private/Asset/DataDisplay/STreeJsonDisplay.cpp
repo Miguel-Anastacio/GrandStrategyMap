@@ -281,7 +281,7 @@ void STreeJsonDisplay::StructPropertiesToDocument(const FInstancedStruct& Struct
 			continue;
 		}
 
-		const FName PropertyName(*Property->GetDisplayNameText().ToString());
+		const FName PropertyName(*Property->GetAuthoredName());
 		if(PropertyName == TEXT("ID"))
 			continue;
 		

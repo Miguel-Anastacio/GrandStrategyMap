@@ -1,8 +1,4 @@
 #pragma once
-#include "MapEditor.h"
-#include "DataDisplay/MapDataSettingsPreset.h"
-#include "BlueprintLibrary/DataStructs.h"
-
 class SMapObjectViewport;
 class STreeJsonDisplay;
 class UMapDataSettings;

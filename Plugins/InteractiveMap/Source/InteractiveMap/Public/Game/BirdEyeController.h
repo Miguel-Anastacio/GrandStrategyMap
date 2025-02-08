@@ -76,20 +76,16 @@ protected:
 
     /** Handles camera movement events. */
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void CameraMovement(const FInputActionInstance& instance);
+    void CameraMovement(const FInputActionInstance& Instance);
 
     /** Handles camera zoom events. */
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void CameraZoom(const FInputActionInstance& instance);
+    void CameraZoom(const FInputActionInstance& Instance);
 
     /** Starts movement based on mouse position. */
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void StartMovement(const FVector2D& mousePos);
-
-    /** Toggles the country editor UI. */
-    UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void ToggleCountryEditor();
-
+    void StartMovement(const FVector2D& MousePos);
+    
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HideHUD();
 
@@ -99,6 +95,8 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HighlightProvince(const FColor& Color);
 
+    class AClickableMap* PerformLineTraceToFindMap(FHitResult& OutHit, bool& OutResultUnderCursor) const;
+    
 protected:
     /** Offset for mouse click on Z-axis. */
     UPROPERTY(EditAnywhere, Category = "Mouse Click")

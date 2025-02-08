@@ -2,9 +2,7 @@
 #include "Map/Flat/MapLimitComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Map/Visual/LayeredMapVisualComponent.h"
 #include "Map/MapVisualComponent.h"
-#include "Map/ClickableMap.h"
 #include "Game/MapPawn.h"
 #include "InteractiveMap.h"
 
@@ -13,16 +11,7 @@ UMapLimitComponent::UMapLimitComponent()
 	: USceneComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-
 	Box = CreateDefaultSubobject<UBoxComponent>("Box Limit");
-	//Box->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-
-
-
-
-	//MapVisualComponent->SetupAttachment(Box);
-	// 	//MapVisualComponent->AttachMeshes(Box);
 }
 
 void UMapLimitComponent::BeginPlay()
@@ -72,8 +61,6 @@ UMapVisualComponent* UMapLimitComponent::GetVisualComponent()
 void UMapLimitComponent::Attach(USceneComponent* root)
 {
 	Box->SetupAttachment(root);
-	//MapVisualComponent->SetupAttachment(Box);
-	//MapVisualComponent->AttachMeshes(Box);
 }
 
 void UMapLimitComponent::CreateVisualComponent(const TSubclassOf<UMapVisualComponent>& mapVisualClass)
@@ -81,11 +68,9 @@ void UMapLimitComponent::CreateVisualComponent(const TSubclassOf<UMapVisualCompo
 	if (mapVisualClass)
 	{
 		MapVisualComponent = NewObject<UMapVisualComponent>(this, mapVisualClass, TEXT("Limit Visual"));
-		//MapVisualComponent = NewObject<ULayeredMapVisualComponent>(this);
 		MapVisualComponent->SetupAttachment(Box);
 		MapVisualComponent->RegisterComponent();
 		MapVisualComponent->AttachMeshesOutsideConstructor(Box);
-		//MapVisualComponent->Attacg(Box);
 	}
 }
 

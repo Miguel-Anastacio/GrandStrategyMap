@@ -230,36 +230,12 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::PopulateDataTableWithArray(UDataTable* DataTable, const TArray<FVariantData>& Provinces)
-{
-	if (!DataTable) return;
-
-	for (int32 Index = 0; Index < Provinces.Num(); ++Index)
-	{
-		FString RowName = FString::Printf(TEXT("Province_%d"), Index);
-		DataTable->AddRow(FName(*RowName), Provinces[Index]);
-	}
-}
-
-// FInstanced Struct method is more versatile
-TArray<FTestBasic> UDataManagerFunctionLibrary::LoadTestBasic(const FString& FilePath)
-{
-	return LoadCustomDataFromJson<FTestBasic>(FilePath);
-}
-
-TArray<FTestAdvanced> UDataManagerFunctionLibrary::LoadTestAdvanced(const FString& FilePath)
-{
-	return LoadCustomDataFromJson<FTestAdvanced>(FilePath);
-}
-
 void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
-
-		// Get property name
-		FString PropertyName = Property->GetDisplayNameText().ToString();
+		const FString PropertyName = Property->GetAuthoredName();
 
 		// Check if the JSON object contains the field
 		if (!Object->HasField(PropertyName))
