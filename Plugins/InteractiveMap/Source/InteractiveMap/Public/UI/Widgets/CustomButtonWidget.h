@@ -30,9 +30,8 @@ public:
     virtual void NativePreConstruct() override;
     virtual void NativeOnInitialized() override;
 
-    /** The text displayed on the button. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Text")
-    FText Text;
+    UFUNCTION(BlueprintCallable, Category = "Button")
+	void SetButtonText(const FText& NewText) const;
 
     /** Delegate for custom button clicked events. */
     UPROPERTY(BlueprintAssignable)

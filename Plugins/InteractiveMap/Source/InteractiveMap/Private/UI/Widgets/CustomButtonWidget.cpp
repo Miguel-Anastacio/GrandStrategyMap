@@ -6,10 +6,6 @@
 void UCustomButtonWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	if (IsValid(ButtonText))
-	{
-		ButtonText->SetText(Text);
-	}
 }
 
 void UCustomButtonWidget::NativeOnInitialized()
@@ -18,6 +14,14 @@ void UCustomButtonWidget::NativeOnInitialized()
 	if (Button)
 	{
 		Button->OnClicked.AddDynamic(this, &UCustomButtonWidget::OnButtonClicked);
+	}
+}
+
+void UCustomButtonWidget::SetButtonText(const FText& NewText) const
+{
+	if (IsValid(ButtonText))
+	{
+		ButtonText->SetText(NewText);
 	}
 }
 

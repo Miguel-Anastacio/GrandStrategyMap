@@ -6,14 +6,19 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
 #include "UserWidgets/GenericUserWidgetInterface.h"
+#include "UserWidgets/GenericWidgetDataMap.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #endif
 void UGenericStructWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+}
+
+void UGenericStructWidget::NativePreConstruct()
+{
+	// Initialize Widget Fields
 	WidgetFields.Empty();
-	
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
@@ -35,10 +40,9 @@ void UGenericStructWidget::NativeOnInitialized()
 			}
 		}
 	}
-}
-
-void UGenericStructWidget::NativePreConstruct()
-{
+	FInstancedStruct Struct;
+	Struct.InitializeAs(StructType);
+	InitFromStruct(Struct);
 	Super::NativePreConstruct();
 }
 
@@ -54,10 +58,6 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 #if WITH_EDITOR
 void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UGenericStructWidget, StructType))
-	{
-		InitializeWidgetTypesMap();
-	}
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 #endif
@@ -77,22 +77,6 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 }
 
 #if WITH_EDITOR
-void UGenericStructWidget::InitializeWidgetTypesMap()
-{
-	if(StructType)
-	{
-		WidgetTypesMap.Empty();
-		for (TFieldIterator<FProperty> It(StructType); It; ++It)
-		{
-			const FProperty* Property = *It;
-			if (!Property)
-			{
-				continue;
-			}
-			WidgetTypesMap.Emplace(FName(*Property->GetAuthoredName()), DefaultWidgetType);
-		}
-	}
-}
 void UGenericStructWidget::CreatePanelSlots()
 {
 	if (!MainPanel)
@@ -107,7 +91,11 @@ void UGenericStructWidget::CreatePanelSlots()
 		UE_LOG(LogUtilityModule, Error, TEXT("Missing Main Panel"));
 		return;
 	}
-	if(!StructType)
+	if(!DataAssetWidgetMap)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a DataAssetWidgetMap"));
+	}
+	if(!DataAssetWidgetMap->StructType)
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a StructType"));
 		return;
@@ -117,28 +105,30 @@ void UGenericStructWidget::CreatePanelSlots()
 		UE_LOG(LogUtilityModule, Error, TEXT("Widget Tree is Null"));
 		return;
 	}
+
+	StructType = DataAssetWidgetMap->StructType;
 	
 	AssetGridPanel->ClearChildren();
 	AssetGridPanel->Modify();
 	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 	
-	int RowIndex = 0;
-	UADStructUtilsFunctionLibrary::ForEachProperty(StructType, [this, AssetGridPanel, &RowIndex, MainAssetWidgetTree](const FProperty* Property)
+	uint8 RowIndex = 0;
+	uint8 ColumnIndex = 0;
+	for(const auto& [PropertyName, WidgetType] : DataAssetWidgetMap->PropertyWidgetMap)
 	{
-		const FName PropertyName = FName(*Property->GetDisplayNameText().ToString());
-		const TSubclassOf<UUserWidget>* WidgetTypeFromMap = WidgetTypesMap.Find(PropertyName);
-		TSubclassOf<UUserWidget> WidgetType = DefaultWidgetType;
-		if(WidgetTypeFromMap && *WidgetTypeFromMap)
-		{
-			WidgetType = *WidgetTypeFromMap;
-		}
-		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(*WidgetType))
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType))
 		{
 			NewWidget->Rename(*PropertyName.ToString());
-			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex);
+			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
+		}
+		ColumnIndex++;
+		if(ColumnIndex >= Columns)
+		{
+			ColumnIndex = 0;
 			RowIndex++;
 		}
-	});
+	}
+	
 	if(AssetGridPanel->GetChildrenCount() == 0)
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Widget Type is not of type UUserWidget"));

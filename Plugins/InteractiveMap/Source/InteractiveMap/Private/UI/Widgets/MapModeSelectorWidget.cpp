@@ -10,7 +10,6 @@
 
 #if WITH_EDITOR
 #include "WidgetBlueprint.h"
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #endif
 
@@ -22,14 +21,20 @@ void UMapModeSelectorWidget::SetInteractiveMapReference(class AClickableMap* Map
 void UMapModeSelectorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+}
+
+void UMapModeSelectorWidget::NativePreConstruct()
+{
+	// Set text of Widgets
 	for(const auto& Widget : GridPanel->GetAllChildren())
 	{
 		if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
 		{
 			UserWidget->OnClickedDelegate.AddDynamic(this, &UMapModeSelectorWidget::SetMapMode);
-			UserWidget->Text = FText::FromString(Widget->GetName());
+			UserWidget->SetButtonText(FText::FromString(Widget->GetName()));
 		}
 	}
+	Super::NativePreConstruct();
 }
 
 #if WITH_EDITOR
@@ -57,8 +62,8 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	}
 	
 	AssetGridPanel->ClearChildren();
-	// AssetGridPanel->Modify();
-	// UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	AssetGridPanel->Modify();
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
 	TArray<FVisualPropertyType*> PropTypes;
 	if(UDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->VisualPropertyTypesDT, PropTypes))
 	{
@@ -71,14 +76,18 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 				NewWidget->Rename(*(Type->Type.ToString()));
 				AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
 				ColumnIndex++;
-				if(ColumnIndex > Columns)
+				if(ColumnIndex >= Columns)
 				{
 					ColumnIndex = 0;
 					RowIndex++;
 				}
 			}
-			
 		}
+	}
+	else
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("Map Object Visual Property Types are Null"));
+		return;
 	}
 
 	AssetGridPanel->Modify();

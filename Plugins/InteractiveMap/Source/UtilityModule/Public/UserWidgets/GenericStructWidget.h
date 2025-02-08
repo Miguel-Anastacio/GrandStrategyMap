@@ -32,22 +32,18 @@ public:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
 	class UGridPanel* MainPanel;
 
-	// Widget used by defaulr
-	UPROPERTY(EditAnywhere, Category="Generic Struct Widget")
-	TSubclassOf<UUserWidget> DefaultWidgetType;
-	// Specify which widget to use for each Property
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
-	TMap<FName, TSubclassOf<UUserWidget>> WidgetTypesMap;
-
-	UPROPERTY(EditAnywhere, Category="Generic Struct Widget")
-	UScriptStruct* StructType;
+	class UStructWidgetMapDataAsset* DataAssetWidgetMap;
+#endif
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
 	TMap<FName, UUserWidget*> WidgetFields;
+	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
+	UScriptStruct* StructType;
 
 protected:
 #if WITH_EDITOR
-	void InitializeWidgetTypesMap();
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreatePanelSlots();
 #endif

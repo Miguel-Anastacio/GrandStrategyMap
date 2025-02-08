@@ -22,8 +22,9 @@ public:
     void SetInteractiveMapReference(class AClickableMap* Map);
 protected:
     virtual void NativeOnInitialized() override;
+    virtual void NativePreConstruct() override;
 #if WITH_EDITOR
-    UFUNCTION(CallInEditor, BlueprintCallable, Category = "Custom Struct Display")
+    UFUNCTION(CallInEditor, BlueprintCallable, Category = "MapModeSelectorWidget")
     void CreatePanelSlots();
 #endif
     UFUNCTION()
@@ -38,7 +39,7 @@ protected:
     TSubclassOf<UUserWidget> MapModeSelectButton;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
-    UMapObject* MapObject;
+    TSoftObjectPtr<UMapObject> MapObject;
     
     UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Grid Panel")
     class UGridPanel* GridPanel;
