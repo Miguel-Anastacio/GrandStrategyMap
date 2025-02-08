@@ -29,7 +29,6 @@ public class InteractiveMap : ModuleRules
 				"Core",
 				"RHI",
 				"RenderCore",
-				"VictoryBPLibrary",
 				"UtilityModule",
 				"SharedModule",
 				"StructUtils",
