@@ -95,6 +95,8 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HighlightProvince(const FColor& Color);
 
+    class AClickableMap* PerformLineTraceToFindMap(FHitResult& OutHit, bool& OutResultUnderCursor) const;
+    
 protected:
     /** Offset for mouse click on Z-axis. */
     UPROPERTY(EditAnywhere, Category = "Mouse Click")

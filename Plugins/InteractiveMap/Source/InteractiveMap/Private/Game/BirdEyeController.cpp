@@ -38,29 +38,17 @@ void ABirdEyeController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FHitResult Hit;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, Hit))
+	bool OutResultUnderCursor = false;
+	AClickableMap* TempMap = PerformLineTraceToFindMap(Hit, OutResultUnderCursor);
+	if (OutResultUnderCursor)
 	{
-		FVector Start = Hit.ImpactPoint;
-		FVector End = Hit.ImpactPoint;
-		Start.Z = Hit.ImpactPoint.Z + zOffset;
-		End.Z = Hit.ImpactPoint.Z - zOffset;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(this);
-		QueryParams.bTraceComplex = true;
-		QueryParams.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, End, MouseTraceChannel, QueryParams))
-			return;
-		if (!IsValid(Hit.GetActor()))
-			return;
-
 		if(!Map)
-			Map = Cast<AClickableMap>(Hit.GetActor());
-
+			Map = TempMap;
 		if (Map)
 		{
-			FVector2D uvs = FVector2D(0, 0);
-			UGameplayStatics::FindCollisionUV(Hit, 0, uvs);
-			const FColor Color = Map->GetColorFromLookUpTexture(uvs);
+			FVector2D Uvs = FVector2D(0, 0);
+			UGameplayStatics::FindCollisionUV(Hit, 0, Uvs);
+			const FColor Color = Map->GetColorFromLookUpTexture(Uvs);
 
 			bool bResult;
 			const int ID = Map->GetProvinceID(Color, bResult);
@@ -112,25 +100,14 @@ void ABirdEyeController::SetupInputComponent()
 
 void ABirdEyeController::MouseClick()
 {
-	FHitResult OutHit;
 	bProvinceSelected = false;
-	if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, OutHit))
+	FHitResult OutHit;
+	bool OutResultUnderCursor = false;
+	AClickableMap* TempMap = PerformLineTraceToFindMap(OutHit, OutResultUnderCursor);
+	if (OutResultUnderCursor)
 	{
-		FVector start = OutHit.ImpactPoint;
-		FVector end = OutHit.ImpactPoint;
-		start.Z = OutHit.ImpactPoint.Z + zOffset;
-		end.Z = OutHit.ImpactPoint.Z - zOffset;
-		FCollisionQueryParams params;
-		params.AddIgnoredActor(this);
-		params.bTraceComplex = true;
-		params.bReturnFaceIndex = true;
-		if (!GetWorld()->LineTraceSingleByChannel(OutHit, start, end, MouseTraceChannel, params))
-			return;
-		if (!IsValid(OutHit.GetActor()))
-			return;
-
 		if (!Map)
-			Map = Cast<AClickableMap>(OutHit.GetActor());
+			Map = TempMap;
 
 		if (Map)
 		{
@@ -171,19 +148,19 @@ void ABirdEyeController::MouseClick()
 
 void ABirdEyeController::CameraMovement(const FInputActionInstance& Instance)
 {
-	FVector2D input = Instance.GetValue().Get<FVector2D>();
-	input.Y *= -1;
+	FVector2D Input = Instance.GetValue().Get<FVector2D>();
+	Input.Y *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
-	pawn->MoveCamera(input);
+	pawn->MoveCamera(Input);
 
 }
 
 void ABirdEyeController::CameraZoom(const FInputActionInstance& Instance)
 {
-	float input = Instance.GetValue().Get<float>();
-	input *= -1;
+	float Input = Instance.GetValue().Get<float>();
+	Input *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
-	pawn->ZoomCamera(input);
+	pawn->ZoomCamera(Input);
 }
 
 void ABirdEyeController::StartMovement(const FVector2D& MousePos)
@@ -220,5 +197,28 @@ void ABirdEyeController::ShowProvinceInfo(int Id, const FInstancedStruct& Data)
 void ABirdEyeController::HighlightProvince(const FColor& Color)
 {
 	Map->UpdateProvinceHovered(Color);
+}
+
+AClickableMap* ABirdEyeController::PerformLineTraceToFindMap(FHitResult& OutHit, bool& OutResultUnderCursor) const
+{
+	OutResultUnderCursor = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(MouseTraceChannel), true, OutHit);
+	if(OutResultUnderCursor)
+	{
+		FVector Start = OutHit.ImpactPoint;
+		FVector End = OutHit.ImpactPoint;
+		Start.Z = OutHit.ImpactPoint.Z + zOffset;
+		End.Z = OutHit.ImpactPoint.Z - zOffset;
+		FCollisionQueryParams params;
+		params.AddIgnoredActor(this);
+		params.bTraceComplex = true;
+		params.bReturnFaceIndex = true;
+		if (!GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, MouseTraceChannel, params))
+			return nullptr;
+		if (!IsValid(OutHit.GetActor()))
+			return nullptr;
+		return Cast<AClickableMap>(OutHit.GetActor());
+	}
+	
+	return  nullptr;
 }
 
