@@ -131,6 +131,9 @@ void RMapEditorMenu::GenerateMap()
 				TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
 			}
 
+			const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
+
 		});
 }
 
@@ -306,6 +309,7 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTe
 	if(MapEditorPreset && MapEditorPreset->TileDataStructType)
 	{
 		MapObject->StructType = MapEditorPreset->TileDataStructType;
+		MapObject->OceanStructType = MapEditorPreset->OceanTileDataType;
 		MapObject->SetMapDataFilePath(MapDataFilePath);
 	}
 	
@@ -343,10 +347,27 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 	TArray<FInstancedStruct> Output;
 	const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
 	Output.Reserve(Size);
-	for (uint32 i = 0; i < Size; i++)
+	uint32 Index = 0;
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size %d"), Size);
+	for (const auto& [Position, Color] : Map.GetLookupTileMap().GetCellMap())
 	{
-		FInstancedStruct Struct (MapEditorPreset->TileDataStructType);
-		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", i))
+		FInstancedStruct Struct;
+		// Create a struct dependent on the type of tile
+		if(Map.GetLookupTileMap().IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+		{
+			Struct.InitializeAs(MapEditorPreset->TileDataStructType);
+		}
+		else if(Map.GetLookupTileMap().IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+		{
+			Struct.InitializeAs(MapEditorPreset->OceanTileDataType);
+		}
+		else
+		{
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Tile in LookupTileMap is undefined!!"));
+			return;
+		}
+		
+		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
 		{
 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
 					*MapEditorPreset->TileDataStructType->GetName());
@@ -354,7 +375,8 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 		}
 		
 		Output.Emplace(Struct);
+		Index++;
 	}
 
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, MapEditorPreset->TileDataStructType, Output);
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
 }

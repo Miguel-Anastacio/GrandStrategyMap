@@ -8,6 +8,28 @@
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
 #include "MapObject.generated.h"
+USTRUCT(BlueprintType)
+struct FBaseMapStruct
+{
+	GENERATED_BODY()
+
+	virtual ~FBaseMapStruct(){};
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	int32 ID = -1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Name;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Area = "NO AREA";
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Region = "NO REGION";
+
+	virtual  FString ToString() const
+	{
+		return FString::Printf(TEXT("ID: %d - Name: %s - Area: %s - Region - %s"), ID, *Name, *Area, *Region);
+	}
+};
+
 
 USTRUCT(BlueprintType)
 struct FLookupEntry
@@ -26,38 +48,21 @@ struct FLookupEntry
 };
 
 USTRUCT(BlueprintType)
-struct FExampleStruct
+struct FExampleStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
-	int32 ID = -1;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
-	FString Name = "ProvinceName";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Owner = "ProvinceOwner";
-	
-	FString ToString() const
-	{
-		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Owner);
-	}
 };
 
 USTRUCT(BlueprintType)
-struct FMapDataStruct
+struct FMapDataStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data" )
-	int32 ID = -1;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
-	FString Name = "ProvinceName";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
@@ -71,7 +76,7 @@ struct FMapDataStruct
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
 	
-	FString ToString() const
+	virtual FString ToString() const override
 	{
 		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
 	}
@@ -102,6 +107,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* StructType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* OceanStructType;
+	
 	FOnAssetChanged OnObjectChanged;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")

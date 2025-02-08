@@ -13,25 +13,32 @@
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	// PropertyChangedEvent.Property
-	// TODO - CHECK WHICH PROPERTY CHANGED
-	if(LookupTexture)
+
+	if(!PropertyChangedEvent.Property)
+		return;
+	
+	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
+	
+	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
 	{
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 	}
 	
-	if(StructType)
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
-		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(StructType, FName("ID")))
+		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
 		{
 			// THROW ERROR AT USER  FACE
-			// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct has no property with type ID"));
+			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
 			StructType = nullptr;
 			this->PostEditChange();
 		}
 	}
-	
-	LoadLookupMap(LookupFilePath);
+
+	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupFilePath))
+	{
+		LoadLookupMap(LookupFilePath);
+	}
 	OnObjectChanged.Broadcast();
 }
 #endif
@@ -120,7 +127,7 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
 	if(LoadFromFile)
 	{
-		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, StructType);
+		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
 }
 

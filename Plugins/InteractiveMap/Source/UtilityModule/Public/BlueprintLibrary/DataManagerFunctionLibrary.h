@@ -175,10 +175,13 @@ public:
     }
 
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
+    static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const TArray<UScriptStruct*>& StructTypes);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
+    static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
     
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
+    static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance);
 
     // --------------------------------------------------------------------
     // COLOR STUFF -> Move somewhere else

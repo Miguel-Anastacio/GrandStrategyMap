@@ -7,7 +7,6 @@
 #include "MapObject.h"
 #include "Components/ActorComponent.h"
 #include "Map/MapUtils.h"
-#include "Map/MapEnums.h"
 #include "MapDataComponent.generated.h"
 USTRUCT(BlueprintType)
 struct FArrayOfVisualProperties
@@ -50,9 +49,6 @@ protected:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
     bool GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
     
-    // UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    // FInstancedStruct GetProvinceDataBP(int ID, bool& OutResult);
-
     FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, bool& OutResult) const;
 
     /** Gets province data by name. */

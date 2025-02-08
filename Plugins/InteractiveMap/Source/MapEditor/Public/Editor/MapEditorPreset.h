@@ -6,6 +6,7 @@
 #include "MapEditor/MapGenerator/source/map/components/HeightMap.h"
 #include "MapEditorPreset.generated.h"
 
+struct FBaseMapStruct;
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 USTRUCT(BlueprintType)
 struct FMapDetails
@@ -68,13 +69,13 @@ UCLASS()
 class MAPEDITOR_API UMapEditorPreset : public UObject
 {
 	GENERATED_BODY()
+	
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 public:
-	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Lookup Settings")
 	FModuleDefinition MapEditorDetails;
 	
@@ -84,6 +85,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* TileDataStructType = nullptr;;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* OceanTileDataType;
 
 	UMapEditorPreset();
 	

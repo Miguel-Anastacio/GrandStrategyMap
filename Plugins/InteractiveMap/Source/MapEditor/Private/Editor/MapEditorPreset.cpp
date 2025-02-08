@@ -2,7 +2,7 @@
 #include "Editor/MapEditorPreset.h"
 
 #include "MapEditor.h"
-#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "MapObject.h"
 
 #if WITH_EDITOR
 UMapEditorPreset::UMapEditorPreset()
@@ -12,19 +12,18 @@ UMapEditorPreset::UMapEditorPreset()
 	{
 		Material = MaterialFinder.Object;
 	}
+	OceanTileDataType = FBaseMapStruct::StaticStruct();
 }
 
 void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	bool bFound = false;
 	if(TileDataStructType)
 	{
-		FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(TileDataStructType, FName("ID"));
-		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(TileDataStructType, FName("ID")))
+		if(!TileDataStructType->IsChildOf(FBaseMapStruct::StaticStruct()))
 		{
 			// THROW ERROR AT USER  FACE
-            UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must have property with type ID"));
+            UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
             TileDataStructType = nullptr;
             this->PostEditChange();
 		}
