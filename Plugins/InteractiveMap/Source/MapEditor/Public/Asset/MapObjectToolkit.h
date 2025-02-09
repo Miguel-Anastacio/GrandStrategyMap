@@ -2,7 +2,6 @@
 #include "MapObject.h"
 class SInstancedStructList;
 class SMapObjectViewport;
-class STreeJsonDisplay;
 class UMapDataSettings;
 class UMapObject;
 class FTabManager;

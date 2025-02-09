@@ -5,7 +5,6 @@
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
 #include "Asset/MapObjectToolkit.h"
-#include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"

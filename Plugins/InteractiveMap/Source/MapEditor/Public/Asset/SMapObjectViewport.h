@@ -3,7 +3,6 @@
 #include "SEditorViewport.h"
 
 class FMapObjectToolkit;
-class STreeJsonDisplay;
 class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;

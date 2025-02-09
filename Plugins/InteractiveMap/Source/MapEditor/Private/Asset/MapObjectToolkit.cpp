@@ -1,7 +1,6 @@
 #include "Asset/MapObjectToolkit.h"
 #include "MapObject.h"
 #include "Asset/SMapObjectViewport.h"
-#include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Internationalization/Text.h"
@@ -164,8 +163,6 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
 		[
-			// SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
-			// .MapObject(this->CustomObject.Get())
 			SAssignNew(EditableStructListDisplay, SInstancedStructList).ListSource(&MyListItems).StructTypes(&StructTypes)
 				.OnItemChanged_Lambda([this](const FInstancedStruct& Item)
 				{
