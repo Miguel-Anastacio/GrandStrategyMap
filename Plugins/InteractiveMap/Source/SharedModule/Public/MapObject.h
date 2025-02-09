@@ -18,7 +18,7 @@ struct FBaseMapStruct
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ID = -1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
-	FString Name;
+	FString Name = "NO NAME";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Area = "NO AREA";
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
@@ -131,6 +131,10 @@ public:
 	void SaveData() const;
 	void LoadDataFromFile();
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
+
+#if WITH_EDITOR
+	void SetLookupTexture(UTexture2D* Texture2D);
+#endif
 	
 	TArray<FInstancedStruct>& GetMapData()
 	{
@@ -149,6 +153,7 @@ public:
 	void SetLookupFilePath(const FString& FilePath)
 	{
 		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
+		LoadLookupMap(FilePath);
 	}
 	void SetMapDataFilePath(const FString& FilePath, bool LoadFromFile = true);
 	
@@ -179,6 +184,8 @@ public:
 		return LookupTextureData;
 	}
 
+	void UpdateData(const FInstancedStruct& NewData);
+	
 private:
 	UPROPERTY()
 	TArray<FInstancedStruct> MapData;

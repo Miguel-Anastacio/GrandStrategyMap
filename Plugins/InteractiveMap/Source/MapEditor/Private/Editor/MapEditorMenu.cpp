@@ -299,7 +299,7 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTe
 		return nullptr;
 	}
 	UMapObject* MapObject = Cast<UMapObject>(Asset);
-	MapObject->LookupTexture = Texture;
+	MapObject->SetLookupTexture(Texture);
 	MapObject->SetLookupFilePath(LookupFilePath);
 	if(Material)
 	{

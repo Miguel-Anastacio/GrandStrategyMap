@@ -7,6 +7,7 @@
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
 #include "MapEditor.h"
+#include "SlateWidgets/InstancedStructList.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
 FName MapStatsTab = FName(TEXT("MapStatsTab"));
@@ -150,14 +151,26 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	}))
 	.SetDisplayName(INVTEXT("Data Source"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
+	// Setup List refernces
+	for(auto& Data : CustomObject.Get()->GetMapData())
+	{
+		MyListItems.Emplace(MakeShared<FInstancedStruct>(Data));
+	}
+	StructTypes.Emplace(CustomObject.Get()->StructType);
+	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
 
 	InTabManager->RegisterTabSpawner(DataListTab, FOnSpawnTab::CreateLambda([this, InTabManager](const FSpawnTabArgs&)
 	{
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
 		[
-			SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
-			.MapObject(this->CustomObject.Get())
+			// SAssignNew(TreeDisplay, STreeJsonDisplay, InTabManager.ToSharedPtr().Get())
+			// .MapObject(this->CustomObject.Get())
+			SAssignNew(EditableStructListDisplay, SInstancedStructList).ListSource(&MyListItems).StructTypes(&StructTypes)
+				.OnItemChanged_Lambda([this](const FInstancedStruct& Item)
+				{
+					CustomObject.Get()->UpdateData(Item);
+				})
 		];
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
@@ -176,9 +189,9 @@ void FMapObjectToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& Tab
 
 void FMapObjectToolkit::UpdateTreeSelection(int32 Index) const
 {
-	if(TreeDisplay)
+	if(EditableStructListDisplay)
 	{
-		TreeDisplay->SelectDocument(Index);
+		EditableStructListDisplay->SetSelection(Index);
 	}
 }
 
@@ -191,10 +204,10 @@ void FMapObjectToolkit::OnLoadFile() const
 	}
 	
 	CustomObject->LoadDataFromFile();
-	if(TreeDisplay)
-	{
-		TreeDisplay->RebuildTreeFromMap(CustomObject.Get());
-	}
+	// if(TreeDisplay)
+	// {
+	// 	TreeDisplay->RebuildTreeFromMap(CustomObject.Get());
+	// }
 }
 
 

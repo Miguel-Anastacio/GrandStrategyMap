@@ -1,4 +1,6 @@
 #pragma once
+#include "MapObject.h"
+class SInstancedStructList;
 class SMapObjectViewport;
 class STreeJsonDisplay;
 class UMapDataSettings;
@@ -24,6 +26,8 @@ private:
 	void OnLoadFile() const;
 	
 	TWeakObjectPtr<UMapObject> CustomObject = nullptr;
-	TSharedPtr<STreeJsonDisplay> TreeDisplay = nullptr;
+	TSharedPtr<SInstancedStructList> EditableStructListDisplay = nullptr;
 	TSharedPtr<SMapObjectViewport> MapViewport = nullptr;
+	TArray<TSharedPtr<FInstancedStruct>> MyListItems;
+	TArray<UScriptStruct*> StructTypes;
 };

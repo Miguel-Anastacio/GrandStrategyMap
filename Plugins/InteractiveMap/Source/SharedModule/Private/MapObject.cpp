@@ -22,6 +22,8 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
 	{
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+		// temp
+		LoadLookupMap(LookupFilePath);
 	}
 	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
@@ -84,30 +86,7 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 
 void UMapObject::SaveData() const
 {
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, StructType, MapData);
-	// for(auto& Data : MapData)
-	// {
-	// 	FProperty* Property = Data.GetScriptStruct()->FindPropertyByName("ID");
-	// 	if(Property)
-	// 	{
-	// 		bool bResult = false;
-	// 		int32 value = UADStructUtilsFunctionLibrary::GetPropertyValue<int32>(Property, Data.GetMemory(), bResult);
-	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST ID: %d"), value);
-	// 	}
-	// 	
-	// 	FProperty* PropertyName = Data.GetScriptStruct()->FindPropertyByName("Name");
-	// 	if(PropertyName)
-	// 	{
-	// 		bool bResult = false;
-	// 		FString name = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(PropertyName, Data.GetMemory(), bResult);
-	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST Name: %s"), *name);
-	// 		FTestBasic test = UADStructUtilsFunctionLibrary::GetPropertyValue<FTestBasic>(PropertyName, Data.GetMemory(), bResult);
-	// 		if(!bResult)
-	// 		{
-	// 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Property is not of type requested"));
-	// 		}
-	// 	}
-	// }
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, MapData);
 }
 
 void UMapObject::LoadDataFromFile()
@@ -142,6 +121,17 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 		MapData = NewData;
 	}
 }
+
+#if WITH_EDITOR
+void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
+{
+	if(!Texture2D)
+		return;
+
+	LookupTexture = Texture2D;
+	LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+}
+#endif
 
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 {
@@ -197,5 +187,20 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 	for(const auto& Entry : Lookup)
 	{
 		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+	}
+}
+
+void UMapObject::UpdateData(const FInstancedStruct& NewData)
+{
+	if(NewData.GetScriptStruct()->IsChildOf(FBaseMapStruct::StaticStruct()))
+	{
+		bool bResult = false;
+		const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
+		if(bResult && ID < MapData.Num())
+		{
+			MapData[ID] = NewData;
+			MarkPackageDirty();
+			SaveData();
+		}
 	}
 }
