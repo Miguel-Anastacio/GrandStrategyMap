@@ -241,21 +241,11 @@ TMap<int, FInstancedStruct>* AClickableMap::GetProvinceDataMap() const
 {
 	return MapDataComponent->GetProvinceDataMap();
 }
-TMap<FName, FCountryData>* AClickableMap::GetCountryDataMap()
-{
-	return  nullptr;
-}
-
-TMap<FName, FColoredData>* AClickableMap::GetVisualPropertiesDataMap()
-{
-	return nullptr;
-}
 
 int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
 {
 	return MapDataComponent->GetProvinceID(Color, bOutResult);
 }
-
 
 void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 {

@@ -98,12 +98,12 @@ class SHAREDMODULE_API UMapObject : public UObject
 	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
 	// ======================================================
+public:	
 	void LogLookupTable() const ;
 	void LogMapData() const;
 
 	bool IsTileWater(int ID) const;
 	bool IsTileLand(int ID) const;
-	
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
 	void SaveData() const;

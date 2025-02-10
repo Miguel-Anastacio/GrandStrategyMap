@@ -8,7 +8,6 @@
 #include "ManagerHUD.generated.h"
 
 
-struct FProvinceData;
 class UGrandStrategyHUDWidget; 
 class UProvinceEditorWidget; 
 class UEditCountriesContainerWidget; 

@@ -15,7 +15,7 @@ void UGrandStrategyHUDWidget::SetGameMapReference()
 	if (actor)
 	{
 		GameMap = Cast<AClickableMap>(actor);
-		if(UMapModeSelectorWidget)
+		if(UMapModeSelectorWidget && GameMap)
 		{
 			UMapModeSelectorWidget->SetInteractiveMapReference(GameMap);
 		}
@@ -26,22 +26,6 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	SetGameMapReference();
-	// if (PoliticalMapButton)
-	// {
-	// 	PoliticalMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	// }
-	// if (ReligiousMapButton)
-	// {
-	// 	ReligiousMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	// }
-	// if (CultureMapButton)
-	// {
-	// 	CultureMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	// }
-	// if (TerrainMapButton)
-	// {
-	// 	TerrainMapButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SetMapMode);
-	// }
 
 	if (SaveDataButton)
 	{
@@ -60,70 +44,45 @@ void UGrandStrategyHUDWidget::SetMapMode(UCustomButtonWidget* button)
 		UE_LOG(LogInteractiveMap, Warning, TEXT("Map Variable not set in hud widget"));
 		return;
 	}
-	// if (button == PoliticalMapButton)
-	// {
-	// 	GameMap->SetMapMode(MapMode::POLITICAL);
-	// 	return;
-	// }
-	// if (button == ReligiousMapButton)
-	// {
-	// 	GameMap->SetMapMode(MapMode::RELIGIOUS);
-	// 	return;
-	// }
-	// if (button == CultureMapButton)
-	// {
-	// 	GameMap->SetMapMode(MapMode::CULTURAL);
-	// 	return;
-	// }
-	// if (button == TerrainMapButton)
-	// {
-	// 	GameMap->SetMapMode(MapMode::TERRAIN);
-	// 	return;
-	// }
 }
 
 void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
 {
 	if (button == SaveDataButton)
 	{
-		TMap<int, FInstancedStruct>* provinceMapData = GameMap->GetProvinceDataMap();
-		if (!provinceMapData)
-			return;
-
-		bool result = false;
-		FString outMessageInfo;
-		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
-
-		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
-
-		// UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
-		if (!result)
-		{
-			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
-		}
-
-		return;
+		// TMap<int, FInstancedStruct>* provinceMapData = GameMap->GetProvinceDataMap();
+		// if (!provinceMapData)
+		// 	return;
+		//
+		// bool result = false;
+		// FString outMessageInfo;
+		// FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
+		//
+		// const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
+		//
+		// // UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
+		// if (!result)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
+		// }
+		//
+		// return;
 	}
 
 	if (button == SaveCountryButton)
 	{
-		TMap<FName, FCountryData>* countryDataMap = GameMap->GetCountryDataMap();
-		if (!countryDataMap)
-			return;
-
-		bool result;
-		FString outMessageInfo;
-		FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
-
-		const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
-
-		UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileNameCountry, *countryDataMap, result, outMessageInfo);
-		if (!result)
-		{
-			GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
-		}
-
-		return;
+		// bool result;
+		// FString outMessageInfo;
+		// FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
+		//
+		// const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
+		//
+		// if (!result)
+		// {
+		// 	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
+		// }
+		//
+		// return;
 	}
 
 
