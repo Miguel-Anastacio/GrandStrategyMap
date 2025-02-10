@@ -271,7 +271,7 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const T
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 

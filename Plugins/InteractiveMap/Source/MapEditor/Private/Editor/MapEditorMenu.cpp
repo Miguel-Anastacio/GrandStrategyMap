@@ -177,6 +177,9 @@ void RMapEditorMenu::SaveMap() const
 	
 	const FString StubMapDataFilePath = CompleteDirPath + "/MapDataStub.json";
 	OutputStubMapDataJson(StubMapDataFilePath);
+	// Outputs the params and the results of the Map Lookup Created
+	const FString LookupGenResultsFilePath = CompleteDirPath + "/MapGenParamsResults.json";
+	OutputLookupGenFile(LookupGenResultsFilePath);
 	
 	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
 	
@@ -349,15 +352,16 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 	Output.Reserve(Size);
 	uint32 Index = 0;
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size %d"), Size);
-	for (const auto& [Position, Color] : Map.GetLookupTileMap().GetCellMap())
+	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	for (const auto& [Position, Color] : TileMap.GetCellMap())
 	{
 		FInstancedStruct Struct;
 		// Create a struct dependent on the type of tile
-		if(Map.GetLookupTileMap().IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
 		{
 			Struct.InitializeAs(MapEditorPreset->TileDataStructType);
 		}
-		else if(Map.GetLookupTileMap().IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
 		{
 			Struct.InitializeAs(MapEditorPreset->OceanTileDataType);
 		}
@@ -379,4 +383,30 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 	}
 
 	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
+}
+
+void RMapEditorMenu::OutputLookupGenFile(const FString& FilePath) const
+{
+	int32 OceanTiles = 0;
+	int32 LandTiles = 0;
+	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	for (const auto& [Position, Color] : TileMap.GetCellMap())
+	{
+		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+		{
+			LandTiles++;
+		}
+		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+		{
+			OceanTiles++;
+		}
+	}
+	const FMapLookupGenFeedback GenInputsResults(MapEditorPreset->MapEditorDetails, LandTiles, OceanTiles);
+	bool bResult = false;
+	FString Message;
+	UDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
+	if(!bResult)
+	{
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to Save map gen results %s"), *Message);
+	}
 }

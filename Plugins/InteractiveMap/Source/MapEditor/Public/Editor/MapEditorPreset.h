@@ -65,11 +65,42 @@ struct FModuleDefinition
 	
 };
 
+USTRUCT(NotBlueprintType)
+struct FMapLookupGenFeedback
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FMapDetails LandDetails;
+	UPROPERTY()
+	FMapDetails OceanDetails;
+	UPROPERTY()
+	FNoiseDetails NoiseDetails;
+	UPROPERTY()
+	float CutoffHeight = 0.001f;
+	UPROPERTY()
+	uint32 LandTiles = 0;
+	UPROPERTY()
+	uint32 OceanTiles = 0;
+	
+	FMapLookupGenFeedback(const FModuleDefinition& MapParams, uint32 LTiles, uint32 OTiles) :
+		LandDetails(MapParams.LandDetails),
+		OceanDetails(MapParams.OceanDetails),
+		NoiseDetails(MapParams.NoiseDetails),
+		CutoffHeight(MapParams.CutoffHeight),
+		LandTiles(LTiles),
+		OceanTiles(OTiles)
+	{
+		
+	}
+	FMapLookupGenFeedback(){};
+	
+};
+
+
 UCLASS()
 class MAPEDITOR_API UMapEditorPreset : public UObject
 {
 	GENERATED_BODY()
-	
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
