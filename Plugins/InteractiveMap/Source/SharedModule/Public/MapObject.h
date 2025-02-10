@@ -7,6 +7,7 @@
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
+
 #include "MapObject.generated.h"
 USTRUCT(BlueprintType)
 struct FBaseMapStruct
@@ -89,42 +90,19 @@ class SHAREDMODULE_API UMapObject : public UObject
 {
 	GENERATED_BODY()
 
+	// UObject Interface
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
-	
-public:
-	
-#if WITH_EDITORONLY_DATA
-	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types")
-	UDataTable* VisualPropertyTypesDT;
-
-	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
-	class UDataTable* VisualPropertiesDT;
-#endif
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* StructType;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* OceanStructType;
-	
-	FOnAssetChanged OnObjectChanged;
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UTexture2D* LookupTexture;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UMaterialInterface* MaterialOverride;
-
-
+	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+	virtual void PostInitProperties() override;
+	virtual void PostLoad() override;
+	// ======================================================
 	void LogLookupTable() const ;
 	void LogMapData() const;
 
-	// TODO - MAYBE REMOVE THIS
-	UPROPERTY()
-	class UStaticMesh* Mesh;
-public:
+	bool IsTileWater(int ID) const;
+	bool IsTileLand(int ID) const;
 	
 	void UpdateTile(int Index, const FInstancedStruct& NewData);
 	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
@@ -166,6 +144,7 @@ public:
 	{
 		MapData.Empty();
 		StructType = nullptr;
+		OceanStructType = nullptr;
 	}
 
 	int GetIndexOfTileSelected(const FColor& Color);
@@ -186,7 +165,37 @@ public:
 
 	void UpdateData(const FInstancedStruct& NewData);
 	
+public:
+	
+#if WITH_EDITORONLY_DATA
+	/** Data table for visual property types */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types")
+	UDataTable* VisualPropertyTypesDT;
+
+	/** Data table for visual properties */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
+	class UDataTable* VisualPropertiesDT;
+#endif
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* StructType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* OceanStructType;
+	
+	FOnAssetChanged OnObjectChanged;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	class UTexture2D* LookupTexture;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	class UMaterialInterface* MaterialOverride;
+	
+	// TODO - MAYBE REMOVE THIS
+	UPROPERTY()
+	class UStaticMesh* Mesh;
+	
 private:
+	bool IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const;
+	
 	UPROPERTY()
 	TArray<FInstancedStruct> MapData;
 

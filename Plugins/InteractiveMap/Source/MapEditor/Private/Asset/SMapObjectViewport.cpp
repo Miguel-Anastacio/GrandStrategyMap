@@ -30,12 +30,20 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 
 bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 {
-	if(EventArgs.Key == EKeys::L && EventArgs.Event == EInputEvent::IE_Released)
+	if(EventArgs.Key == EKeys::M && EventArgs.Event == EInputEvent::IE_Released)
 	{
 		if(MapObject)
 		{
 			MapObject->LogMapData();
 		}
+	}
+	if(EventArgs.Key == EKeys::L && EventArgs.Event == EInputEvent::IE_Released)
+	{
+		if(MapObject)
+		{
+			MapObject->LogLookupTable();
+		}
+		
 	}
 	
 	return FEditorViewportClient::InputKey(EventArgs);
@@ -95,12 +103,12 @@ void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 Scree
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
 {
+	CustomObject = InArgs._EditingObject;
 	// We need to create a new Scene before constructing this viewport. Otherwise, it will default to grabbing the one from the main World in the Editor
 	AdvancedPreviewScene = MakeShareable(new FAdvancedPreviewScene(FPreviewScene::ConstructionValues()));
 	
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
-	CustomObject = InArgs._EditingObject;
 	MapObjectToolKit = InArgs._Toolkit;
 	if (!CustomObject.IsValid())
 	{

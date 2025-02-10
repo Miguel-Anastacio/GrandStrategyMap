@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MapObject.h"
-// #include "MapEditor.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
+#include "UObject/ObjectSaveContext.h"
+#include "AssetToolsModule.h"
 #endif
 
 #if WITH_EDITOR
@@ -22,10 +23,8 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
 	{
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
-		// temp
 		LoadLookupMap(LookupFilePath);
 	}
-	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
 		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
@@ -43,15 +42,38 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	}
 	OnObjectChanged.Broadcast();
 }
+
 #endif
+void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
+{
+	UObject::PreSave(SaveContext);
+#if WITH_EDITOR
+	SaveData();
+#endif
+}
 
+void UMapObject::PostInitProperties()
+{
+	UObject::PostInitProperties();
+	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+}
 
+void UMapObject::PostLoad()
+{
+	UObject::PostLoad();
+#if WITH_EDITOR
+	LoadLookupMap(LookupFilePath);
+	SetMapDataFilePath(FilePathMapData);
+#endif
+}
 
 void UMapObject::LogMapData() const
 {
+	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
+	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
 	for(const auto& Data : MapData)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Struct Name %s"), *Data.GetScriptStruct()->GetName());
+		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
 		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
 		{
 			const FString PropertyName = Property->GetAuthoredName();
@@ -62,8 +84,39 @@ void UMapObject::LogMapData() const
 	}
 }
 
+bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
+{
+	for(const auto& Data : MapData)
+	{
+		bool bOutResult = false;
+		const int LocalID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(Data, "ID", bOutResult);
+		if(bOutResult && ID == LocalID && ScriptStruct == Data.GetScriptStruct())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UMapObject::IsTileWater(int ID) const
+{
+	return IsTileOfType(ID, StructType);
+}
+
+bool UMapObject::IsTileLand(int ID) const
+{
+	return IsTileOfType(ID, OceanStructType);
+}
+
 void UMapObject::LogLookupTable() const
 {
+	UE_LOG(LogTemp, Display, TEXT("Logging %s LookupTable"), *GetName());
+	UE_LOG(LogTemp, Display, TEXT("LookupTable Entries %d"), LookupTable.Num());
+	for(const auto& [Color, ID]: LookupTable)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Key: %s ; ID: %d"), *Color.ToString(), ID);
+	}
 }
 
 void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
@@ -200,7 +253,7 @@ void UMapObject::UpdateData(const FInstancedStruct& NewData)
 		{
 			MapData[ID] = NewData;
 			MarkPackageDirty();
-			SaveData();
+			// SaveData();
 		}
 	}
 }
