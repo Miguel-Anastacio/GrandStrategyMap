@@ -72,7 +72,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 		FInstancedStruct NewInstancedStruct;
 		if (DeserializeJsonToFInstancedStruct(JsonObject, structType, NewInstancedStruct))
 		{
-			ObjectHasMissingFields(JsonObject, index, FilePath, structType);
+			// ObjectHasMissingFields(JsonObject, index, FilePath, structType);
 			OutArray.Add(MoveTemp(NewInstancedStruct));
 		}
 
@@ -81,13 +81,63 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 	return OutArray;
 }
 
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath,
+	const TArray<UScriptStruct*>& StructTypes)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
+	TArray<FInstancedStruct> OutArray;
+	int32 Index = 0;
+	for(const auto& JsonValue : JsonArray)
+	{
+		TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
+		if (!JsonObject.IsValid())
+		{
+			UE_LOG(LogUtilityModule, Error, TEXT("Invalid JSON object in array."));
+			continue;
+		}
+
+		// Deserialize the object into an FInstancedStruct
+		FInstancedStruct NewInstancedStruct;
+		for(const auto& StructType : StructTypes)
+		{
+			const bool bResult = DeserializeJsonToFInstancedStruct(JsonObject, StructType, NewInstancedStruct);
+			if (bResult && !ObjectHasMissingFields(JsonObject, Index, FilePath, StructType))
+			{
+				OutArray.Add(MoveTemp(NewInstancedStruct));
+				Index++;
+				break;
+			}
+		}
+	}
+	return OutArray;
+}
+
 void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
-	const TArray<FInstancedStruct>& Array)
+                                                                  const TArray<FInstancedStruct>& Array)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
 	for (const auto& Value : Array)
 	{
 		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, StructType);
+		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
+	}
+
+	bool bResult = false;
+	FString OutInfoMessage;
+	WriteJson(FilePath, JsonValueArray, bResult, OutInfoMessage);
+	if(!bResult)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array: %s"), *OutInfoMessage);
+	}
+}
+
+void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath,
+	const TArray<FInstancedStruct>& Array)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
+	for (const auto& Value : Array)
+	{
+		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, Value.GetScriptStruct());
 		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
 	}
 
@@ -122,6 +172,18 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJ
 	}
 
 	UE_LOG(LogUtilityModule, Error, TEXT("Failed to serialize instanced struct of type %s"), *StructType->GetName());
+	return nullptr;
+}
+
+TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance)
+{
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+	if(FJsonObjectConverter::UStructToJsonObject(Instance.GetScriptStruct(), Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
+	{
+		return JsonObject;
+	}
+
+	UE_LOG(LogUtilityModule, Error, TEXT("Failed to serialize instanced struct of type %s"), *Instance.GetScriptStruct()->GetName());
 	return nullptr;
 }
 
@@ -209,7 +271,7 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const T
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
 	FString jsonString;
 
@@ -230,8 +292,9 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, TArray<
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
+bool UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
+	bool bResult = false;
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
 	{
 		const FProperty* Property = *It;
@@ -243,9 +306,10 @@ void UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonO
 			UE_LOG(LogUtilityModule, Warning, 
 				TEXT("Missing field '%s' in JSON object at index %d in file '%s'"), 
 				*PropertyName, Index, *FilePath);
-			return;
+			bResult = true;
 		}
 	}
+	return bResult;
 }
 
 void UDataManagerFunctionLibrary::LogReadJsonFailed(const FString& FilePath)

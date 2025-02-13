@@ -149,7 +149,11 @@ public:
     static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
 
     static FProperty* FindPropertyByDisplayName(const UScriptStruct* Struct, const FName& DisplayName);
+    
+    static bool IsStructOfType(const FInstancedStruct& InstancedStruct, const TArray<UScriptStruct*>& StructTypes);
 
+    static TArray<const FProperty*> GetOrderedProperties(const FInstancedStruct& InstancedStruct);
+    static TArray<const FProperty*> GetOrderedProperties(const UScriptStruct* ScriptStruct);
     
     template<typename T, typename V>
     static T GetPropertyValue(const FProperty* Property, const V* Object, bool& bOutResult)

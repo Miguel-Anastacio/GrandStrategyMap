@@ -9,7 +9,7 @@ namespace MapGenerator
     namespace algo
     {
 
-        bool fill(int x, int y, std::vector<Tile> &tileMap, const data::Color &newColor, unsigned width, unsigned height);
+        bool fill(int x, int y, std::vector<Tile> &tileMap, const data::Color &newColor, unsigned width, unsigned height, bool markCentroid =false);
 
         mygal::Vector2<int> fillGetCentroidOfPoints(int x, int y, std::vector<Tile> &tileMap,
                                                     const data::Color &newColor, unsigned width, unsigned height);

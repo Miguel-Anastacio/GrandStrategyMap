@@ -4,7 +4,7 @@ namespace MapGenerator
 {
     namespace algo
     {
-        bool fill(int x, int y, std::vector<Tile> &tileMap, const data::Color &newColor, unsigned width, unsigned height)
+        bool fill(int x, int y, std::vector<Tile> &tileMap, const data::Color &newColor, unsigned width, unsigned height, bool markCentroid)
         {
             const int index = y * width + x;
             const auto tileType = tileMap[index].type;
@@ -39,7 +39,8 @@ namespace MapGenerator
                 // Mark tile as visited and set its color
                 tile.color = newColor;
                 tile.visited = true;
-                tile.centroid = mygal::Vector2<int>(x, y);
+                if(markCentroid)
+                    tile.centroid = mygal::Vector2(x, y);
 
                 // Push neighboring tiles onto the stack
                 stack.push({cx + 1, cy});
@@ -133,15 +134,15 @@ namespace MapGenerator
             {
                 auto x = static_cast<int>(center.x * width);
                 auto y = static_cast<int>(center.y * height);
-                data::Color color = data::GetRandomColorNotInSet(colorsInUse);
+                const data::Color color = data::GetRandomColorNotInSet(colorsInUse);
 
                 x = std::clamp(x, 0, width - 1);
                 y = std::clamp(y, 0, height - 1);
 
-                if (fill(x, y, tileMap, color, width, height))
+                if (fill(x, y, tileMap, color, width, height, true))
                 {
                     colorsInUse.insert(color);
-                    //markCentroids(x, y, tileMap, color, width, height);
+                    // markCentroids(x, y, tileMap, color, width, height);
                 }
             }
         }

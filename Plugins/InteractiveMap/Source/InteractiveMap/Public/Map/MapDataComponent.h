@@ -7,7 +7,6 @@
 #include "MapObject.h"
 #include "Components/ActorComponent.h"
 #include "Map/MapUtils.h"
-#include "Map/MapEnums.h"
 #include "MapDataComponent.generated.h"
 USTRUCT(BlueprintType)
 struct FArrayOfVisualProperties
@@ -50,21 +49,10 @@ protected:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
     bool GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
     
-    // UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    // FInstancedStruct GetProvinceDataBP(int ID, bool& OutResult);
-
     FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, bool& OutResult) const;
 
-    /** Gets province data by name. */
+    /** Gets province data by id. */
     FInstancedStruct* GetProvinceData(int ID);
-
-    /** Gets data from ID/tag. */
-    template<class T>
-    const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
-    {
-        const T* data = mapToSearch.Find(tag);
-        return data;
-    }
 
     /** Reads data tables. */
     void ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable);
@@ -97,9 +85,9 @@ protected:
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<int, FInstancedStruct> ProvinceDataMap;
     
-    friend class AClickableMap;
-    //// ------------------------------------------------------------------------
     /** New Lookup table. */
     UPROPERTY(BlueprintReadOnly, Category = "Map Data")
     TMap<FColor, int> NewLookupTable;
+    
+    friend class AClickableMap;
 };

@@ -15,16 +15,16 @@ void USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(TFuncti
 	SlowTask.MakeDialog();
 	auto ProgressCallback = [&](float Progress, std::string_view message)
 	{
-		CurrentProgress += Progress;
-		// Update the progress bar
-		SlowTask.EnterProgressFrame(
-			CurrentProgress,
-			FText::Format(
-				NSLOCTEXT("SlowTask", "Processing", "({1})"),
-				FText::AsNumber(FMath::RoundToInt(CurrentProgress)), // First parameter: Progress as a percentage
-				FText::FromString(FString(message.data()))    // Second parameter: Convert std::string_view
-			)
-		);
+		// CurrentProgress += Progress;
+		// // Update the progress bar
+		// SlowTask.EnterProgressFrame(
+		// 	CurrentProgress,
+		// 	FText::Format(
+		// 		NSLOCTEXT("SlowTask", "Processing", "({1})"),
+		// 		FText::AsNumber(FMath::RoundToInt(CurrentProgress)), // First parameter: Progress as a percentage
+		// 		FText::FromString(FString(message.data()))    // Second parameter: Convert std::string_view
+		// 	)
+		// );
 	};
 
 	// execute slow task and pass progress callback

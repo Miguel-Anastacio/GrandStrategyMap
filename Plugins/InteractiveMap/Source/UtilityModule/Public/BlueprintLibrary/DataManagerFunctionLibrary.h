@@ -175,10 +175,13 @@ public:
     }
 
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
+    static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const TArray<UScriptStruct*>& StructTypes);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
+    static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
     
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
+    static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance);
 
     // --------------------------------------------------------------------
     // COLOR STUFF -> Move somewhere else
@@ -214,11 +217,11 @@ private:
      * @param outSuccess Whether the operation was successful.
      * @param outInfoMessage Information message about the operation.
      */
-    static void WriteJson(const FString& jsonFilePath, TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
+    static void WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
 
     static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
     static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
-    static void ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
+    static bool ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };
 

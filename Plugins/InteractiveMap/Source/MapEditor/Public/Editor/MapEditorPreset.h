@@ -6,6 +6,7 @@
 #include "MapEditor/MapGenerator/source/map/components/HeightMap.h"
 #include "MapEditorPreset.generated.h"
 
+struct FBaseMapStruct;
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 USTRUCT(BlueprintType)
 struct FMapDetails
@@ -64,6 +65,38 @@ struct FModuleDefinition
 	
 };
 
+USTRUCT(NotBlueprintType)
+struct FMapLookupGenFeedback
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FMapDetails LandDetails;
+	UPROPERTY()
+	FMapDetails OceanDetails;
+	UPROPERTY()
+	FNoiseDetails NoiseDetails;
+	UPROPERTY()
+	float CutoffHeight = 0.001f;
+	UPROPERTY()
+	uint32 LandTiles = 0;
+	UPROPERTY()
+	uint32 OceanTiles = 0;
+	
+	FMapLookupGenFeedback(const FModuleDefinition& MapParams, uint32 LTiles, uint32 OTiles) :
+		LandDetails(MapParams.LandDetails),
+		OceanDetails(MapParams.OceanDetails),
+		NoiseDetails(MapParams.NoiseDetails),
+		CutoffHeight(MapParams.CutoffHeight),
+		LandTiles(LTiles),
+		OceanTiles(OTiles)
+	{
+		
+	}
+	FMapLookupGenFeedback(){};
+	
+};
+
+
 UCLASS()
 class MAPEDITOR_API UMapEditorPreset : public UObject
 {
@@ -74,7 +107,6 @@ class MAPEDITOR_API UMapEditorPreset : public UObject
 #endif
 
 public:
-	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Lookup Settings")
 	FModuleDefinition MapEditorDetails;
 	
@@ -84,6 +116,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* TileDataStructType = nullptr;;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct* OceanTileDataType;
 
 	UMapEditorPreset();
 	

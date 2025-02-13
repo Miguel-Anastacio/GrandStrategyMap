@@ -5,14 +5,13 @@
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
 #include "Asset/MapObjectToolkit.h"
-#include "Asset/DataDisplay/STreeJsonDisplay.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
 
-FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport)
-		: FEditorViewportClient(nullptr, InPreviewScene, InViewport)
+FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject)
+		: FEditorViewportClient(nullptr, InPreviewScene, InViewport), MapObject(InMapObject)
 {
 	
 }
@@ -27,6 +26,27 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 	
 	// Optionally, pass unhandled clicks to the base class
 	FEditorViewportClient::ProcessClick(View, HitProxy, Key, Event, HitX, HitY);
+}
+
+bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
+{
+	if(EventArgs.Key == EKeys::M && EventArgs.Event == EInputEvent::IE_Released)
+	{
+		if(MapObject)
+		{
+			MapObject->LogMapData();
+		}
+	}
+	if(EventArgs.Key == EKeys::L && EventArgs.Event == EInputEvent::IE_Released)
+	{
+		if(MapObject)
+		{
+			MapObject->LogLookupTable();
+		}
+		
+	}
+	
+	return FEditorViewportClient::InputKey(EventArgs);
 }
 
 void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 ScreenY)
@@ -83,12 +103,12 @@ void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 Scree
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
 {
+	CustomObject = InArgs._EditingObject;
 	// We need to create a new Scene before constructing this viewport. Otherwise, it will default to grabbing the one from the main World in the Editor
 	AdvancedPreviewScene = MakeShareable(new FAdvancedPreviewScene(FPreviewScene::ConstructionValues()));
 	
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
-	CustomObject = InArgs._EditingObject;
 	MapObjectToolKit = InArgs._Toolkit;
 	if (!CustomObject.IsValid())
 	{
@@ -113,7 +133,7 @@ void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double In
 
 TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 {
-	LevelViewportClient = MakeShareable(new FMapObjectViewportClient(AdvancedPreviewScene.Get(), SharedThis(this)));
+	LevelViewportClient = MakeShareable(new FMapObjectViewportClient(AdvancedPreviewScene.Get(), SharedThis(this), CustomObject.Get()));
 	
 	LevelViewportClient->ViewportType = LVT_OrthoXY;
 	LevelViewportClient->bSetListenerPosition = false;

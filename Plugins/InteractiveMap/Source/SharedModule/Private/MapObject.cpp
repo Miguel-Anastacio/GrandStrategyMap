@@ -1,40 +1,123 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MapObject.h"
-// #include "MapEditor.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
+#include "UObject/ObjectSaveContext.h"
+#include "AssetToolsModule.h"
 #endif
 
 #if WITH_EDITOR
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	// PropertyChangedEvent.Property
-	// TODO - CHECK WHICH PROPERTY CHANGED
-	if(LookupTexture)
+
+	if(!PropertyChangedEvent.Property)
+		return;
+	
+	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
+	
+	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
 	{
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+		LoadLookupMap(LookupFilePath);
 	}
-	
-	if(StructType)
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
-		if(!UADStructUtilsFunctionLibrary::StructHasPropertyWithTypeCompatible<int32>(StructType, FName("ID")))
+		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
 		{
 			// THROW ERROR AT USER  FACE
-			// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct has no property with type ID"));
+			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
 			StructType = nullptr;
 			this->PostEditChange();
 		}
 	}
-	
-	LoadLookupMap(LookupFilePath);
+
+	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupFilePath))
+	{
+		LoadLookupMap(LookupFilePath);
+	}
 	OnObjectChanged.Broadcast();
 }
+
 #endif
+void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
+{
+	UObject::PreSave(SaveContext);
+#if WITH_EDITOR
+	SaveData();
+#endif
+}
+
+void UMapObject::PostInitProperties()
+{
+	UObject::PostInitProperties();
+	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+}
+
+void UMapObject::PostLoad()
+{
+	UObject::PostLoad();
+#if WITH_EDITOR
+	LoadLookupMap(LookupFilePath);
+	SetMapDataFilePath(FilePathMapData);
+#endif
+}
+
+void UMapObject::LogMapData() const
+{
+	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
+	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
+	for(const auto& Data : MapData)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
+		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
+		{
+			const FString PropertyName = Property->GetAuthoredName();
+			bool bOutResult = false;
+			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
+				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
+		});
+	}
+}
+
+bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
+{
+	for(const auto& Data : MapData)
+	{
+		bool bOutResult = false;
+		const int LocalID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(Data, "ID", bOutResult);
+		if(bOutResult && ID == LocalID && ScriptStruct == Data.GetScriptStruct())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UMapObject::IsTileWater(int ID) const
+{
+	return IsTileOfType(ID, StructType);
+}
+
+bool UMapObject::IsTileLand(int ID) const
+{
+	return IsTileOfType(ID, OceanStructType);
+}
+
+void UMapObject::LogLookupTable() const
+{
+	UE_LOG(LogTemp, Display, TEXT("Logging %s LookupTable"), *GetName());
+	UE_LOG(LogTemp, Display, TEXT("LookupTable Entries %d"), LookupTable.Num());
+	for(const auto& [Color, ID]: LookupTable)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Key: %s ; ID: %d"), *Color.ToString(), ID);
+	}
+}
 
 void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
 {
@@ -56,30 +139,7 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 
 void UMapObject::SaveData() const
 {
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, StructType, MapData);
-	// for(auto& Data : MapData)
-	// {
-	// 	FProperty* Property = Data.GetScriptStruct()->FindPropertyByName("ID");
-	// 	if(Property)
-	// 	{
-	// 		bool bResult = false;
-	// 		int32 value = UADStructUtilsFunctionLibrary::GetPropertyValue<int32>(Property, Data.GetMemory(), bResult);
-	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST ID: %d"), value);
-	// 	}
-	// 	
-	// 	FProperty* PropertyName = Data.GetScriptStruct()->FindPropertyByName("Name");
-	// 	if(PropertyName)
-	// 	{
-	// 		bool bResult = false;
-	// 		FString name = UADStructUtilsFunctionLibrary::GetPropertyValue<FString>(PropertyName, Data.GetMemory(), bResult);
-	// 		UE_LOG(LogInteractiveMapEditor, Log, TEXT("TEST Name: %s"), *name);
-	// 		FTestBasic test = UADStructUtilsFunctionLibrary::GetPropertyValue<FTestBasic>(PropertyName, Data.GetMemory(), bResult);
-	// 		if(!bResult)
-	// 		{
-	// 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Property is not of type requested"));
-	// 		}
-	// 	}
-	// }
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, MapData);
 }
 
 void UMapObject::LoadDataFromFile()
@@ -115,12 +175,23 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 	}
 }
 
+#if WITH_EDITOR
+void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
+{
+	if(!Texture2D)
+		return;
+
+	LookupTexture = Texture2D;
+	LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+}
+#endif
+
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 {
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
 	if(LoadFromFile)
 	{
-		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, StructType);
+		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
 }
 
@@ -169,5 +240,20 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 	for(const auto& Entry : Lookup)
 	{
 		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+	}
+}
+
+void UMapObject::UpdateData(const FInstancedStruct& NewData)
+{
+	if(NewData.GetScriptStruct()->IsChildOf(FBaseMapStruct::StaticStruct()))
+	{
+		bool bResult = false;
+		const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
+		if(bResult && ID < MapData.Num())
+		{
+			MapData[ID] = NewData;
+			MarkPackageDirty();
+			// SaveData();
+		}
 	}
 }

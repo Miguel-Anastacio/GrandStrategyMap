@@ -78,8 +78,6 @@ public:
 	TMap<FColor, int> GetLookUpTable() const;
 
 	TMap<int, FInstancedStruct>* GetProvinceDataMap() const;
-	TMap<FName, FCountryData>* GetCountryDataMap(); 
-	TMap<FName, FColoredData>* GetVisualPropertiesDataMap();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
 	int GetProvinceID(const FColor& Color, bool& bOutResult) const;

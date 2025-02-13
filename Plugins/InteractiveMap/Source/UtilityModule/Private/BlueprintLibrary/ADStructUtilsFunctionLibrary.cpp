@@ -119,12 +119,9 @@ FInstancedStruct UADStructUtilsFunctionLibrary::GetStructFromProperty(const FPro
 FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScriptStruct* Struct,const FName& DisplayName )
 {
 	 // return  Struct->FindPropertyByName(DisplayName);
+	// if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
+	// 	return Property;
 	
-	if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
-		return Property;
-
-	
-	// TERRIBLE PERFORMANCE !!!!!!!p!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	for (FProperty* DisplayProperty = Struct->PropertyLink; DisplayProperty != nullptr; DisplayProperty = DisplayProperty->PropertyLinkNext)
 	{
 		const FString StaticPropertyName = DisplayProperty->GetName();
@@ -134,16 +131,51 @@ FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScrip
 		}
 	}
 	return nullptr;
+}
 
-	
-	// for (TFieldIterator<FProperty> It(Struct); It; ++It)
-	// {
-	// 	const FProperty* DisplayProperty = *It;
-	// 	if(FName(*DisplayProperty->GetDisplayNameText().ToString()) == DisplayName)
-	// 	{
-	// 		return *It;
-	// 	}
-	// }
+bool UADStructUtilsFunctionLibrary::IsStructOfType(const FInstancedStruct& InstancedStruct,
+	const TArray<UScriptStruct*>& StructTypes)
+{
+	for(const auto& Type : StructTypes)
+	{
+		if(InstancedStruct.GetScriptStruct() == Type)
+			return true;
+	}
+	return false;
+}
+
+TArray<const FProperty*> UADStructUtilsFunctionLibrary::GetOrderedProperties(const FInstancedStruct& InstancedStruct)
+{
+	return GetOrderedProperties(InstancedStruct.GetScriptStruct());
+}
+
+TArray<const FProperty*> UADStructUtilsFunctionLibrary::GetOrderedProperties(const UScriptStruct* ScriptStruct)
+{
+	TArray<const FProperty*> ParentProperties;
+	TArray<const FProperty*> ChildProperties;
+	if(!ScriptStruct)
+		return ParentProperties;
+	// Iterate through the properties in the struct
+	for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
+	{
+		const FProperty* Property = *It;
+		// Check if the property is from the base struct (parent) or derived struct (child)
+		if (Property->GetOwnerStruct()->GetInheritanceSuper())
+		{
+			// This is a child property
+			ChildProperties.Add(Property);
+		}
+		else
+		{
+			// This is a parent property
+			ParentProperties.Add(Property);
+		}
+	}
+
+	TArray<const FProperty*> OrderedProperties;
+	OrderedProperties.Append(ParentProperties);
+	OrderedProperties.Append(ChildProperties);
+	return OrderedProperties;
 }
 
 UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory,

@@ -3,7 +3,6 @@
 #include "SEditorViewport.h"
 
 class FMapObjectToolkit;
-class STreeJsonDisplay;
 class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;
@@ -12,11 +11,16 @@ DECLARE_DELEGATE_OneParam(FOnClickedOnMapSignature, uint32);
 class FMapObjectViewportClient : public FEditorViewportClient
 {
 public:
-	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport);
+	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject);
 	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
+	virtual bool InputKey(const FInputKeyEventArgs& EventArgs) override;
 	void GetHitLocationInEditor(int32 ScreenX, int32 ScreenY);
 	FOnClickedOnMapSignature OnClickedOnMapDelegate;
+
+private:
+	UMapObject* MapObject;
 };
+
 
 
 class SMapObjectViewport: public SEditorViewport, public ICommonEditorViewportToolbarInfoProvider

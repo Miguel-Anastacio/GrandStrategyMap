@@ -32,8 +32,8 @@ namespace MapGenerator
 
 	void TileMap::FloodFillTileMap(const std::vector<mygal::Vector2<double>> &centroids, std::unordered_set<data::Color> &colorsUnavailable)
 	{
-		auto width = Width();
-		auto height = Height();
+		const auto width = Width();
+		const auto height = Height();
 		algo::floodFill(m_tiles, centroids, colorsUnavailable, width, height);
 		m_colors = colorsUnavailable;
 	}
@@ -147,14 +147,14 @@ namespace MapGenerator
 	TileMap TileMap::BlendTileMap(const TileMap &tileMap1, TileType type1, const TileMap &tileMap2, TileType type2)
 	{
 
-		auto height = tileMap1.Height();
-		auto width = tileMap1.Width();
+		const auto height = tileMap1.Height();
+		const auto width = tileMap1.Width();
 
 		TileMap newTileMap(width, height);
 		auto &newTiles = newTileMap.GetTilesRef();
 
-		auto tiles1 = tileMap1.GetTiles();
-		auto tiles2 = tileMap2.GetTiles();
+		const auto tiles1 = tileMap1.GetTiles();
+		const auto tiles2 = tileMap2.GetTiles();
 
 		for (unsigned y = 0; y < height; y++)
 		{

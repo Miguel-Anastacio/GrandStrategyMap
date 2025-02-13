@@ -115,7 +115,7 @@ namespace MapGenerator
 		geomt::lloydRelaxation(*diagram.get(), data.lloyd, mask->GetMask());
 		if(ProgressCallback)
 		{
-			ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");
+			// ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");
 		}
 
 	}

@@ -33,6 +33,23 @@ struct FTileIdData
 	}
 };
 
+USTRUCT(NotBlueprintType)
+struct FLookupGen 
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FString ColorString = "";
+	UPROPERTY()
+	int32 Name = -1;
+
+	// Serialize to JSON
+	void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
+	{
+		OutJsonObject->SetStringField(TEXT("Name"), FString::FromInt(Name));
+		OutJsonObject->SetStringField(TEXT("Color"), ColorString);
+	}
+};
+
 class STextureViewer;
 class FAdvancedPreviewScene;
 class UTexture2D;
@@ -71,6 +88,7 @@ private:
 		UMaterialInstanceConstant* Material) const;
 	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
 	void OutputStubMapDataJson(const FString& FilePath) const;
+	void OutputLookupGenFile(const FString& FilePath) const;
 
 	
 	TObjectPtr<UTexture2D> LookupTexture;

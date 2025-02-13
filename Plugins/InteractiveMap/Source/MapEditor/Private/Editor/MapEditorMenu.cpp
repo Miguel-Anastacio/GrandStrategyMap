@@ -131,6 +131,9 @@ void RMapEditorMenu::GenerateMap()
 				TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
 			}
 
+			const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
+
 		});
 }
 
@@ -174,6 +177,9 @@ void RMapEditorMenu::SaveMap() const
 	
 	const FString StubMapDataFilePath = CompleteDirPath + "/MapDataStub.json";
 	OutputStubMapDataJson(StubMapDataFilePath);
+	// Outputs the params and the results of the Map Lookup Created
+	const FString LookupGenResultsFilePath = CompleteDirPath + "/MapGenParamsResults.json";
+	OutputLookupGenFile(LookupGenResultsFilePath);
 	
 	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
 	
@@ -296,7 +302,7 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTe
 		return nullptr;
 	}
 	UMapObject* MapObject = Cast<UMapObject>(Asset);
-	MapObject->LookupTexture = Texture;
+	MapObject->SetLookupTexture(Texture);
 	MapObject->SetLookupFilePath(LookupFilePath);
 	if(Material)
 	{
@@ -306,6 +312,7 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTe
 	if(MapEditorPreset && MapEditorPreset->TileDataStructType)
 	{
 		MapObject->StructType = MapEditorPreset->TileDataStructType;
+		MapObject->OceanStructType = MapEditorPreset->OceanTileDataType;
 		MapObject->SetMapDataFilePath(MapDataFilePath);
 	}
 	
@@ -343,10 +350,28 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 	TArray<FInstancedStruct> Output;
 	const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
 	Output.Reserve(Size);
-	for (uint32 i = 0; i < Size; i++)
+	uint32 Index = 0;
+	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size %d"), Size);
+	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	for (const auto& [Position, Color] : TileMap.GetCellMap())
 	{
-		FInstancedStruct Struct (MapEditorPreset->TileDataStructType);
-		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", i))
+		FInstancedStruct Struct;
+		// Create a struct dependent on the type of tile
+		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+		{
+			Struct.InitializeAs(MapEditorPreset->TileDataStructType);
+		}
+		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+		{
+			Struct.InitializeAs(MapEditorPreset->OceanTileDataType);
+		}
+		else
+		{
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Tile in LookupTileMap is undefined!!"));
+			return;
+		}
+		
+		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
 		{
 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
 					*MapEditorPreset->TileDataStructType->GetName());
@@ -354,7 +379,34 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 		}
 		
 		Output.Emplace(Struct);
+		Index++;
 	}
 
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, MapEditorPreset->TileDataStructType, Output);
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
+}
+
+void RMapEditorMenu::OutputLookupGenFile(const FString& FilePath) const
+{
+	int32 OceanTiles = 0;
+	int32 LandTiles = 0;
+	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	for (const auto& [Position, Color] : TileMap.GetCellMap())
+	{
+		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+		{
+			LandTiles++;
+		}
+		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+		{
+			OceanTiles++;
+		}
+	}
+	const FMapLookupGenFeedback GenInputsResults(MapEditorPreset->MapEditorDetails, LandTiles, OceanTiles);
+	bool bResult = false;
+	FString Message;
+	UDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
+	if(!bResult)
+	{
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to Save map gen results %s"), *Message);
+	}
 }
