@@ -151,7 +151,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	.SetDisplayName(INVTEXT("Data Source"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
 	// Setup List refernces
-	for(auto& Data : CustomObject.Get()->GetMapData())
+	for(const auto& Data : CustomObject.Get()->GetMapDataValue())
 	{
 		MyListItems.Emplace(MakeShared<FInstancedStruct>(Data));
 	}

@@ -114,19 +114,21 @@ public:
 	void SetLookupTexture(UTexture2D* Texture2D);
 #endif
 	
-	TArray<FInstancedStruct>& GetMapData()
+	TMap<int32, FInstancedStruct>& GetMapData()
 	{
 		return MapData;
 	}
 	
 	TArray<FInstancedStruct> GetMapDataValue() const
 	{
-		return MapData;
+		TArray<FInstancedStruct> OutArray;
+		MapData.GenerateValueArray(OutArray);
+        return OutArray;
 	}
 	
-	void SetFilePath(const FString& filePath)
+	void SetFilePath(const FString& FilePath)
 	{
-		this->FilePathMapData = filePath;
+		this->FilePathMapData = FilePath;
 	}
 	void SetLookupFilePath(const FString& FilePath)
 	{
@@ -197,7 +199,8 @@ private:
 	bool IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const;
 	
 	UPROPERTY()
-	TArray<FInstancedStruct> MapData;
+	TMap<int32, FInstancedStruct> MapData;
+	// TArray<FInstancedStruct> MapData;
 
 	UPROPERTY()
 	TMap<FColor, int> LookupTable;

@@ -72,7 +72,7 @@ void UMapObject::LogMapData() const
 {
 	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
 	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
-	for(const auto& Data : MapData)
+	for(const auto& [ID, Data] : MapData)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
 		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
@@ -87,11 +87,11 @@ void UMapObject::LogMapData() const
 
 bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
 {
-	for(const auto& Data : MapData)
+	for(const auto& [ItemID, Data] : MapData)
 	{
 		bool bOutResult = false;
-		const int LocalID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(Data, "ID", bOutResult);
-		if(bOutResult && ID == LocalID && ScriptStruct == Data.GetScriptStruct())
+		// const int LocalID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(Data, "ID", bOutResult);
+		if(bOutResult && ID == ItemID && ScriptStruct == Data.GetScriptStruct())
 		{
 			return true;
 		}
@@ -140,7 +140,9 @@ void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const
 
 void UMapObject::SaveData() const
 {
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, MapData);
+	TArray<FInstancedStruct> Values;
+	MapData.GenerateValueArray(Values);
+	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, Values);
 }
 
 void UMapObject::LoadDataFromFile()
@@ -172,7 +174,7 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 			// UE_LOG(LogInteractiveMapEditor, Error, TEXT("New data type is not of the same as StructType"));
 			return;
 		}
-		MapData = NewData;
+		// MapData = NewData;
 	}
 }
 
@@ -190,9 +192,22 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 {
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
+	TArray<FInstancedStruct> StructData;
 	if(LoadFromFile)
 	{
-		MapData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
+		StructData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
+	}
+	for(const auto& Data: StructData)
+	{
+		if(Data.IsValid())
+		{
+			bool bOutResult = false;
+			int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
+			if(bOutResult)
+			{
+				MapData.Emplace(ID, Data);
+			}
+		}
 	}
 }
 
@@ -204,27 +219,11 @@ int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 	{
 		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("ID: %d"), *ID);
 		int32 Index = -1;
-		for(const auto& Data : MapData)
+		if(FInstancedStruct* Data = MapData.Find(*ID))
 		{
-			Index++;
-			bool bOutResult = false;
-			const int32 StructId = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
-			if(!bOutResult)
-			{
-				continue;
-			}
-			if(StructId == *ID)
-			{
-				return Index;
-			}
+			return *ID;
 		}
 	}
-	else
-	{
-		// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color not in LookupTable"));
-		return -1;
-	}
-	
 	// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color in LookupTable but ID not in Map Data"));
 	return -1;
 }
