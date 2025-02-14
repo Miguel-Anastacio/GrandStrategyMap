@@ -19,7 +19,7 @@ void UGenericStructWidget::NativePreConstruct()
 {
 	// Initialize Widget Fields
 	WidgetFields.Empty();
-	for (TFieldIterator<FProperty> It(StructType); It; ++It)
+	for (TFieldIterator<FProperty> It(GetStruct()); It; ++It)
 	{
 		const FProperty* Property = *It;
 		if(!Property)
@@ -41,7 +41,7 @@ void UGenericStructWidget::NativePreConstruct()
 		}
 	}
 	FInstancedStruct Struct;
-	Struct.InitializeAs(StructType);
+	Struct.InitializeAs(GetStruct());
 	InitFromStruct(Struct);
 	Super::NativePreConstruct();
 }
@@ -75,8 +75,12 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 		}
 	}
 }
-
+const UScriptStruct* UGenericStructWidget::GetStruct() const
+{
+	return DataAssetWidgetMap->StructType;
+}
 #if WITH_EDITOR
+
 void UGenericStructWidget::CreatePanelSlots()
 {
 	if (!MainPanel)
@@ -105,9 +109,6 @@ void UGenericStructWidget::CreatePanelSlots()
 		UE_LOG(LogUtilityModule, Error, TEXT("Widget Tree is Null"));
 		return;
 	}
-
-	StructType = DataAssetWidgetMap->StructType;
-	
 	AssetGridPanel->ClearChildren();
 	AssetGridPanel->Modify();
 	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);

@@ -77,7 +77,7 @@ void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
 			{
 				const FColor Color = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 				if(!bResult)
-					break;
+					continue;
 				
 				if(TArray<int>* IdsToEdit = BatchesOfProvinces.Find(Color))
 				{

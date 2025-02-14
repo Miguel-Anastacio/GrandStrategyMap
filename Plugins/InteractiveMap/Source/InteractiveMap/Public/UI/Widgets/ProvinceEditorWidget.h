@@ -41,20 +41,14 @@ protected:
 	 * Overrides the initialization method to perform custom initialization tasks.
 	 */
 	virtual void NativeOnInitialized() override;
-
-	/**
-	 * Handles updates to province data when an editable text is modified.
-	 *
-	 * @param editedText The editable text widget being modified.
-	 * @param Text The updated text.
-	 * @param CommitMethod The type of text commit event.
-	 */
-	UFUNCTION(Category = "Province Editor")
-	void UpdateProvinceData(UCustomEditableText* editedText, const FText& Text, ETextCommit::Type CommitMethod);
 	
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
 	class UGenericStructWidget* ProvinceDataWidget;
+
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
+	class UGenericStructWidget* OceanTileDataWidget;
+	
 	// The unique identifier of the currently selected province.
 	int ProvinceSelectedID; 
 	// Data structure containing information about the currently selected province.

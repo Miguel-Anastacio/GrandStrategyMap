@@ -118,9 +118,8 @@ FInstancedStruct UADStructUtilsFunctionLibrary::GetStructFromProperty(const FPro
 
 FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScriptStruct* Struct,const FName& DisplayName )
 {
-	 // return  Struct->FindPropertyByName(DisplayName);
-	// if(FProperty* Property = Struct->FindPropertyByName(DisplayName))
-	// 	return Property;
+	if(!Struct)
+		return nullptr;
 	
 	for (FProperty* DisplayProperty = Struct->PropertyLink; DisplayProperty != nullptr; DisplayProperty = DisplayProperty->PropertyLinkNext)
 	{

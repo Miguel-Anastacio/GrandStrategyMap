@@ -41,6 +41,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		LoadLookupMap(LookupFilePath);
 	}
 	OnObjectChanged.Broadcast();
+	SetMapDataFilePath(FilePathMapData);	
 }
 
 #endif
