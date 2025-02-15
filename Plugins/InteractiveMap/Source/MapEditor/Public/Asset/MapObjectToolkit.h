@@ -1,5 +1,6 @@
 #pragma once
 #include "MapObject.h"
+class SCustomInstancedStructList;
 class SInstancedStructList;
 class SMapObjectViewport;
 class UMapDataSettings;
@@ -25,8 +26,9 @@ private:
 	void OnLoadFile() const;
 	
 	TWeakObjectPtr<UMapObject> CustomObject = nullptr;
-	TSharedPtr<SInstancedStructList> EditableStructListDisplay = nullptr;
+	TSharedPtr<SCustomInstancedStructList> EditableStructListDisplay = nullptr;
 	TSharedPtr<SMapObjectViewport> MapViewport = nullptr;
 	TArray<TSharedPtr<FInstancedStruct>> MyListItems;
 	TArray<UScriptStruct*> StructTypes;
+	TSet<FName> PropertyNamesNotEditable;
 };

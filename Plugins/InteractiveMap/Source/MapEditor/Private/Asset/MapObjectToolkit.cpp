@@ -6,6 +6,7 @@
 #include "Internationalization/Text.h"
 #include "Framework/Docking/TabManager.h"
 #include "MapEditor.h"
+#include "Asset/SCustomInstancedStructList.h"
 #include "SlateWidgets/InstancedStructList.h"
 
 FName MapViewportTab = FName(TEXT("MapViewportTab"));
@@ -33,21 +34,22 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 		(
 			FTabManager::NewSplitter()
 			->SetOrientation(Orient_Vertical)
-			->SetSizeCoefficient(.65f)
+			->SetSizeCoefficient(.45f)
 			->Split
 			(
 				FTabManager::NewStack()
 				->SetSizeCoefficient(0.35f)
 				->AddTab(DataSourceTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
-			)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(.65f)
 				->AddTab(DataListTab, ETabState::OpenedTab)
-				->SetHideTabWell(true)
+				->SetHideTabWell(false)
 			)
+			// ->Split
+			// (
+			// 	FTabManager::NewStack()
+			// 	->SetSizeCoefficient(.65f)
+			// 	->AddTab(DataListTab, ETabState::OpenedTab)
+			// 	->SetHideTabWell(true)
+			// )
 		)	
 	);
 	
@@ -157,13 +159,17 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	}
 	StructTypes.Emplace(CustomObject.Get()->StructType);
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
+	PropertyNamesNotEditable.Emplace("ID");
 
 	InTabManager->RegisterTabSpawner(DataListTab, FOnSpawnTab::CreateLambda([this, InTabManager](const FSpawnTabArgs&)
 	{
 		return SNew(SDockTab)
 		.TabRole(PanelTab)
 		[
-			SAssignNew(EditableStructListDisplay, SInstancedStructList).ListSource(&MyListItems).StructTypes(&StructTypes)
+			SAssignNew(EditableStructListDisplay, SCustomInstancedStructList)
+				.ListSource(&MyListItems)
+				.StructTypes(&StructTypes)
+				.NotEditableProperties(&PropertyNamesNotEditable)
 				.OnItemChanged_Lambda([this](const FInstancedStruct& Item)
 				{
 					CustomObject.Get()->UpdateData(Item);
