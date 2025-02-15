@@ -6,7 +6,6 @@
 #include "InstancedStruct.h"
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
-#include "Map/MapUtils.h"
 #include "BirdEyeController.generated.h"
 
 /** Forward declaration to improve compiling times */

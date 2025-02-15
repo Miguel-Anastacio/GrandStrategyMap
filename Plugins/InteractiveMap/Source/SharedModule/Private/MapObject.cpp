@@ -4,6 +4,7 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#include "VisualProperties.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
@@ -25,9 +26,20 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 		LoadLookupMap(LookupFilePath);
 	}
+	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
 		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		{
+			// THROW ERROR AT USER  FACE
+			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
+			StructType = nullptr;
+			this->PostEditChange();
+		}
+	}
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
+	{
+		if(!OceanStructType->IsChildOf(FBaseMapStruct::StaticStruct()))
 		{
 			// THROW ERROR AT USER  FACE
 			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
@@ -40,8 +52,24 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	{
 		LoadLookupMap(LookupFilePath);
 	}
+
+	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertiesDT))
+	{
+		if(VisualPropertyTypesDT)
+		{
+			ReadDataTables();
+		}
+	}
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertyTypesDT))
+	{
+		if(VisualPropertiesDT)
+		{
+			ReadDataTables();
+		}
+	}
+	
 	OnObjectChanged.Broadcast();
-	SetMapDataFilePath(FilePathMapData);	
+	// SetMapDataFilePath(FilePathMapData);	
 }
 
 #endif
@@ -53,12 +81,6 @@ void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 #endif
 }
 
-void UMapObject::PostInitProperties()
-{
-	UObject::PostInitProperties();
-	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-}
-
 void UMapObject::PostLoad()
 {
 	UObject::PostLoad();
@@ -68,35 +90,110 @@ void UMapObject::PostLoad()
 #endif
 }
 
-void UMapObject::LogMapData() const
+const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapObject::GetVisualPropertiesMap() const
 {
-	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
-	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
-	for(const auto& [ID, Data] : MapData)
+	return VisualPropertiesMap;
+}
+
+TMap<FName, FArrayOfVisualProperties> UMapObject::GetVisualPropertyNameMap() const
+{
+	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
+	for(auto& VpType : VisualPropertiesMap)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
-		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
-		{
-			const FString PropertyName = Property->GetAuthoredName();
-			bool bOutResult = false;
-			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
-				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
-		});
+		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
 	}
+	return VisualPropertiesNameMap;
+}
+
+FColor UMapObject::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct,
+                                                       const FName& PropertyName, bool& OutResult) const
+{
+	const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
+
+	if (!OutResult)
+		return FColor::Black;
+		
+	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
+}
+
+void UMapObject::ReadDataTables()
+{
+	if(!VisualPropertiesDT|| !VisualPropertyTypesDT)
+	{
+		// UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
+		return;
+	}
+	
+	VisualPropertiesMap.Empty();	
+	TArray<FVisualPropertyType*> AllTypes;
+	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
+	{
+	}
+	TArray<FVisualProperty*> VisualProperties;
+	UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
+	
+	for(const auto& Type : AllTypes)
+	{
+		FArrayOfVisualProperties ArrayOf;
+		for(const auto& Property : VisualProperties)
+		{
+			if(Type->Type == Property->Type)
+			{
+				ArrayOf.VisualProperties.Emplace(*Property);
+			}
+		}
+		VisualPropertiesMap.Emplace(*Type, ArrayOf);
+	}
+}
+
+FVisualProperty UMapObject::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
+{
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
+	if(!PropertiesOfType)
+	{
+		return FVisualProperty();
+	}
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
+}
+
+FVisualProperty UMapObject::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
+{
+	OutResult = false;
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
+	if(!PropertiesOfType)
+	{
+		return FVisualProperty();
+	}
+	
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		if(VisualProperty.Tag == Tag)
+		{
+			OutResult = true;
+			return VisualProperty;
+		}
+	}
+
+	return FVisualProperty();
 }
 
 bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
 {
-	for(const auto& [ItemID, Data] : MapData)
+	if(const FInstancedStruct* Data = MapData.Find(ID))
 	{
-		bool bOutResult = false;
-		// const int LocalID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(Data, "ID", bOutResult);
-		if(bOutResult && ID == ItemID && ScriptStruct == Data.GetScriptStruct())
-		{
-			return true;
-		}
+		return ScriptStruct == Data->GetScriptStruct();
 	}
-
 	return false;
 }
 
@@ -117,6 +214,35 @@ void UMapObject::LogLookupTable() const
 	for(const auto& [Color, ID]: LookupTable)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Key: %s ; ID: %d"), *Color.ToString(), ID);
+	}
+}
+
+void UMapObject::LogMapData() const
+{
+	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
+	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
+	for(const auto& [ID, Data] : MapData)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
+		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
+		{
+			const FString PropertyName = Property->GetAuthoredName();
+			bool bOutResult = false;
+			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
+				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
+		});
+	}
+}
+
+void UMapObject::LogVisualProperties() const
+{
+	for(const auto& [PropertyType, Properties] : VisualPropertiesMap)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Property Type %s"), *PropertyType.Type.ToString());
+		for(const auto& Property : Properties.VisualProperties)
+		{
+			UE_LOG(LogTemp, Display, TEXT("%s"), *Property.Tag.ToString());
+		}
 	}
 }
 
@@ -165,19 +291,6 @@ void UMapObject::LoadDataFromFile()
 #endif
 }
 
-void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
-{
-	if(NewData.Num() > 0)
-	{
-		if(NewData[0].GetScriptStruct() != StructType)
-		{
-			// UE_LOG(LogInteractiveMapEditor, Error, TEXT("New data type is not of the same as StructType"));
-			return;
-		}
-		// MapData = NewData;
-	}
-}
-
 #if WITH_EDITOR
 void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 {
@@ -187,7 +300,6 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 	LookupTexture = Texture2D;
 	LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 }
-#endif
 
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 {
@@ -210,19 +322,14 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 		}
 	}
 }
+#endif
 
 int UMapObject::GetIndexOfTileSelected(const FColor& Color)
 {
-	// UE_LOG(LogInteractiveMapEditor, Log, TEXT("FColor: %s"), *Color.ToString());
-	// UE_LOG(LogInteractiveMapEditor, Log, TEXT("Lookup Table size: %d"), LookupTable.Num());
 	if(const int32* ID = LookupTable.Find(Color))
 	{
 		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("ID: %d"), *ID);
-		int32 Index = -1;
-		if(FInstancedStruct* Data = MapData.Find(*ID))
-		{
-			return *ID;
-		}
+		return *ID;
 	}
 	// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color in LookupTable but ID not in Map Data"));
 	return -1;
@@ -243,7 +350,8 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 	}
 }
 
-void UMapObject::UpdateData(const FInstancedStruct& NewData)
+#if WITH_EDITOR
+void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
 {
 	if(NewData.GetScriptStruct()->IsChildOf(FBaseMapStruct::StaticStruct()))
 	{
@@ -257,3 +365,4 @@ void UMapObject::UpdateData(const FInstancedStruct& NewData)
 		}
 	}
 }
+#endif

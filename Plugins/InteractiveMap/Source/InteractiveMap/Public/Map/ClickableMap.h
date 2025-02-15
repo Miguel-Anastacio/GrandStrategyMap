@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 #include "InstancedStruct.h"
 #include "GameFramework/Actor.h"
-#include "MapUtils.h"
 #include "MapEnums.h"
+#include "VisualProperties.h"
 #include "ClickableMap.generated.h"
 
 struct FArrayOfVisualProperties;
@@ -223,10 +223,7 @@ protected:
 	// The current map mode.
 	UPROPERTY(BlueprintReadWrite, Category = "Map Mode")
 	FName CurrentMapMode = "Country";
-
-	// TODO: Create Map Modes and Dynamic Texture Components based on the visual properties available
-	// TMap<FName, UDynamicTextureComponent> DynamicTextureComponents;
-	// void CreateDynamicTextureComponents();
+	
 	UPROPERTY()
 	TMap<FName, UDynamicTexture*> MapModeDynamicTextures;
 	

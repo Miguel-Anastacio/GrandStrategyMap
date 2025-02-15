@@ -15,6 +15,7 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 
 DECLARE_DELEGATE_TwoParams(FPropertyEditedSignature, const FName&, const FText&);
+// Custom Editable text with an identifier so that we know which property was changed
 class SEditableTextCustom : public SEditableText
 {
 public:
@@ -27,13 +28,12 @@ public:
         SLATE_EVENT(FPropertyEditedSignature, OnPropertyEdited) // Custom delegate
     SLATE_END_ARGS()
     
-    FName Name = NAME_None;
-    FPropertyEditedSignature PropertyEditedSignature;
+    FPropertyEditedSignature PropertyEdited;
 
     void Construct (const FArguments& InArgs)
     {
         Name = InArgs._Name;
-        PropertyEditedSignature = InArgs._OnPropertyEdited;
+        PropertyEdited = InArgs._OnPropertyEdited;
         SEditableText::Construct(
            SEditableText::FArguments()
            .Text(InArgs._Text)
@@ -43,28 +43,21 @@ public:
     }
 
 protected:
-    void HandleTextChanged(const FText& NewText)
-    {
-        // // Call the custom delegate when text is changed
-        // if (PropertyEditedSignature.IsBound())
-        // {
-        //     PropertyEditedSignature.Execute(Name, NewText);
-        // }
-    }
-
+    virtual void HandleTextChanged(const FText& NewText){};
     virtual void HandleTextCommitted(const FText& NewText, ETextCommit::Type CommitType)
     {
-        if (PropertyEditedSignature.IsBound() && CommitType == ETextCommit::Type::OnEnter)
+        if (PropertyEdited.IsBound() && CommitType == ETextCommit::Type::OnEnter)
         {
-            PropertyEditedSignature.Execute(Name, NewText);
+            PropertyEdited.Execute(Name, NewText);
         }
     }
+    
+    FName Name = NAME_None;
 };
-
 
 DECLARE_DELEGATE_OneParam(FItemChangedSignature, const FInstancedStruct&);
 /**
- * Generic row for a generic list. Pass in structure type.
+ * Generic row for a Generic List. Usable for instancedStructs. 
  */
 class SInstancedStructListRow : public SMultiColumnTableRow<TSharedPtr<FString>>
 {
@@ -80,7 +73,7 @@ public:
     void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
     {
         Item = InArgs._Item;
-        ItemUpdateDelegate = InArgs._OnItemChanged;
+        ItemChanged = InArgs._OnItemChanged;
         SMultiColumnTableRow<TSharedPtr<FString>>::Construct(FSuperRowType::FArguments(), InOwnerTableView);
     }
 
@@ -96,9 +89,39 @@ public:
         return FText::FromString(PropertyValueStr);
     }
 
+    virtual TSharedRef<SWidget> DisplayEditableProperty(const FProperty* Property)
+    {
+        return SNew(SBox)
+           .Padding(FMargin(4.0f, 0.0f))
+           .VAlign(VAlign_Center)
+           [
+               SNew(SEditableTextCustom)
+               .OnPropertyEdited_Lambda([this](const FName& Name, const FText& Text)
+               {
+                   if(UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
+                   {
+                       ItemChanged.ExecuteIfBound(*Item);
+                   }
+               })
+               .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
+               .Name(Property->GetFName())
+                
+           ];
+    }
+
+    virtual TSharedRef<SWidget> DisplayNotEditableProperty(const FProperty* Property)
+    {
+        return SNew(SBox)
+       .Padding(FMargin(4.0f, 0.0f))
+       .VAlign(VAlign_Center)
+       [
+           SNew(STextBlock)
+           .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
+       ];
+    }
+
     /**
      * Generate a widget for the column name. 
-     * Will try to convert a property to a string and return STextBlock within an SBox.
      * Override if you want to special case some columns or overhaul the widgets returned.
      */
     virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override
@@ -110,33 +133,14 @@ public:
             const FName PropertyName = Property->GetFName();
             if (ColumnName == PropertyName)
             {
-                return SNew(SBox)
-                    .Padding(FMargin(4.0f, 0.0f))
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SEditableTextCustom)
-                        .OnPropertyEdited_Lambda([this](const FName& Name, const FText& Text)
-                        {
-                            if(UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
-                            {
-                                ItemUpdateDelegate.ExecuteIfBound(*Item);
-                            }
-                        })
-                        .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-                        .Name(PropertyName)
-                        
-                    ];
+               return DisplayEditableProperty(Property);
             }
         }
-
         // default to null widget if property cannot be found
         return SNullWidget::NullWidget;
     }
 
-public:
-    FPropertyEditedSignature PropertyEditedDelegate;
-    FItemChangedSignature ItemUpdateDelegate;
-    
+    FItemChangedSignature ItemChanged;
 protected:
     TSharedPtr<FInstancedStruct> Item;
 };
@@ -222,7 +226,6 @@ public:
     virtual TSharedPtr<SWidget> HandleContextMenuOpening()
     {
         // NO OP
-
         return SNullWidget::NullWidget;
     }
 

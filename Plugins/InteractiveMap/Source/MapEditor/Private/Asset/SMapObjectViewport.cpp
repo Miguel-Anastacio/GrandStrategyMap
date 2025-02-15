@@ -45,6 +45,14 @@ bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 		}
 		
 	}
+	if(EventArgs.Key == EKeys::V && EventArgs.Event == EInputEvent::IE_Released)
+	{
+		if(MapObject)
+		{
+			MapObject->LogVisualProperties();
+		}
+		
+	}
 	
 	return FEditorViewportClient::InputKey(EventArgs);
 }

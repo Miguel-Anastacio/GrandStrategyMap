@@ -14,24 +14,8 @@ UMapDataComponent::UMapDataComponent()
 void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	// ReadDataTables();
 }
 #endif
-
-const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
-{
-	return VisualPropertiesMap;
-}
-
-TMap<FName, FArrayOfVisualProperties> UMapDataComponent::GetVisualPropertyNameMap() const
-{
-	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
-	for(auto& VpType : VisualPropertiesMap)
-	{
-		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
-	}
-	return VisualPropertiesNameMap;
-}
 
 TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
 {
@@ -61,29 +45,6 @@ bool UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) cons
 	return false;
 }
 
-FColor UMapDataComponent::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName,
-	bool& OutResult) const
-{
-	const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
-
-	if (!OutResult)
-		return FColor::Black;
-		
-	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
-}
-
-// FInstancedStruct UMapDataComponent::GetProvinceData(int ID, bool& OutResult)
-// {
-// 	FInstancedStruct* Data = ProvinceDataMap.Find(ID);
-// 	if (Data)
-// 	{
-// 		OutResult = true;
-// 		return *Data;
-// 	}
-// 	OutResult = false;
-// 	return FInstancedStruct();
-// }
-
 FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
 {
 	FInstancedStruct* data = ProvinceDataMap.Find(ID);
@@ -93,38 +54,6 @@ FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
 	}
 	return nullptr;
 }
-
-#if WITH_EDITOR
-void UMapDataComponent::ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable)
-{
-	if(!VpDataTable|| !VpTypeDataTable)
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
-		return;
-	}
-	
-	VisualPropertiesMap.Empty();	
-	TArray<FVisualPropertyType*> AllTypes;
-	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VpTypeDataTable, AllTypes))
-	{
-	}
-	TArray<FVisualProperty*> VisualProperties;
-	UDataManagerFunctionLibrary::ReadDataTableToArray(VpDataTable, VisualProperties);
-	
-	for(const auto& Type : AllTypes)
-	{
-		FArrayOfVisualProperties ArrayOf;
-		for(const auto& Property : VisualProperties)
-		{
-			if(Type->Type == Property->Type)
-			{
-				ArrayOf.VisualProperties.Emplace(*Property);
-			}
-		}
-		VisualPropertiesMap.Emplace(*Type, ArrayOf.VisualProperties);
-	}
-}
-#endif
 
 void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
 {
@@ -181,46 +110,4 @@ FColor UMapDataComponent::GetColor(int ID) const
     	}
     }
 	return FColor(0, 0, 0, 0);
-}
-
-FVisualProperty UMapDataComponent::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
-}
-
-FVisualProperty UMapDataComponent::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
 }

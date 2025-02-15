@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Map/MapUtils.h"
 #include "MapModeSelectorWidget.generated.h"
 class UCustomButtonWidget;
 class UMapObject;

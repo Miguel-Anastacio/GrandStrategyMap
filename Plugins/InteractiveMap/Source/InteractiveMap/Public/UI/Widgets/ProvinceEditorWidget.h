@@ -4,9 +4,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-//#include "../../Map/MapEnums.h"
 #include "InstancedStruct.h"
-#include "Map/MapUtils.h"
 #include "ProvinceEditorWidget.generated.h"
 
 class UCustomButtonWidget;

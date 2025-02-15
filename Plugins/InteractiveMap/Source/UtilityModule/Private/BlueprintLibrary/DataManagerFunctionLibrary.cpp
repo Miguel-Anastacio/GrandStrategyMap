@@ -187,48 +187,46 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJ
 	return nullptr;
 }
 
-int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap)
+int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& Hex)
 {
-	FString temp = hex.Reverse();
-	auto chars = temp.GetCharArray();
-	temp = temp.ToUpper();
-	int32 total = 0;
-	for (int i = 0; i < temp.Len(); i++)
+	static const TMap<TCHAR, int32> HexMap
 	{
-		const int32* value = HexMap.Find(temp[i]);
-		if (value)
+		TPair<TCHAR, int32>('0', 0),
+		TPair<TCHAR, int32>('1', 1),
+		TPair<TCHAR, int32>('2', 2),
+		TPair<TCHAR, int32>('3', 3),
+		TPair<TCHAR, int32>('4', 4),
+		TPair<TCHAR, int32>('5', 5),
+		TPair<TCHAR, int32>('6', 6),
+		TPair<TCHAR, int32>('7', 7),
+		TPair<TCHAR, int32>('8', 8),
+		TPair<TCHAR, int32>('9', 9),
+		TPair<TCHAR, int32>('A', 10),
+		TPair<TCHAR, int32>('B', 11),
+		TPair<TCHAR, int32>('C', 12),
+		TPair<TCHAR, int32>('D', 13),
+		TPair<TCHAR, int32>('E', 14),
+		TPair<TCHAR, int32>('F', 15),
+   };
+	const FString Temp = Hex.Reverse().ToUpper();
+	int32 Total = 0;
+	for (int i = 0; i < Temp.Len(); i++)
+	{
+		const int32* Value = HexMap.Find(Temp[i]);
+		if (Value)
 		{
-			total += FMath::Pow(16.f, i) * (*value);
+			Total += FMath::Pow(16.f, i) * (*Value);
 		}
 		else
 		{
 			UE_LOG(LogUtilityModule, Warning, TEXT("Invalid Hex value"));
 		}
 	}
-	return total;
+	return Total;
 }
 
 FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
 {
-	TMap<TCHAR, int32> HexMap;
-	HexMap.Reserve(16);
-	HexMap.Add('0', 0);
-	HexMap.Add('1', 1);
-	HexMap.Add('2', 2);
-	HexMap.Add('3', 3);
-	HexMap.Add('4', 4);
-	HexMap.Add('5', 5);
-	HexMap.Add('6', 6);
-	HexMap.Add('7', 7);
-	HexMap.Add('8', 8);
-	HexMap.Add('9', 9);
-	HexMap.Add('A', 10);
-	HexMap.Add('B', 11);
-	HexMap.Add('C', 12);
-	HexMap.Add('D', 13);
-	HexMap.Add('E', 14);
-	HexMap.Add('F', 15);
-
 	if (Color.StartsWith(FString("#")))
 	{
 		const FString noPrefix = Color.RightChop(1);
@@ -238,10 +236,10 @@ FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
 		const FString alpha = noPrefix.RightChop(6);
 
 		FColor ColorValue;
-		ColorValue.R = HexToDecimal(r, HexMap);
-		ColorValue.G = HexToDecimal(g, HexMap);
-		ColorValue.B = HexToDecimal(b, HexMap);
-		ColorValue.A = HexToDecimal(alpha, HexMap);
+		ColorValue.R = HexToDecimal(r);
+		ColorValue.G = HexToDecimal(g);
+		ColorValue.B = HexToDecimal(b);
+		ColorValue.A = HexToDecimal(alpha);
 
 		return ColorValue;
 	}
@@ -252,16 +250,16 @@ FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
 
 void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
-	FString jsonString;
+	FString JSONString;
 
-	if (!FJsonSerializer::Serialize(jsonObject.ToSharedRef(), TJsonWriterFactory<>::Create(&jsonString, 0)))
+	if (!FJsonSerializer::Serialize(jsonObject.ToSharedRef(), TJsonWriterFactory<>::Create(&JSONString, 0)))
 	{
 		outSuccess = false;
 		outInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
 		return;
 	}
 
-	WriteStringToFile(jsonFilePath, jsonString, outSuccess, outInfoMessage);
+	WriteStringToFile(jsonFilePath, JSONString, outSuccess, outInfoMessage);
 	if (!outSuccess)
 	{
 		return;
@@ -273,16 +271,16 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const T
 
 void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
-	FString jsonString;
+	FString JSONString;
 
-	if (!FJsonSerializer::Serialize(jsonValueArray, TJsonWriterFactory<>::Create(&jsonString, 0)))
+	if (!FJsonSerializer::Serialize(jsonValueArray, TJsonWriterFactory<>::Create(&JSONString, 0)))
 	{
 		outSuccess = false;
 		outInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
 		return;
 	}
 
-	WriteStringToFile(jsonFilePath, jsonString, outSuccess, outInfoMessage);
+	WriteStringToFile(jsonFilePath, JSONString, outSuccess, outInfoMessage);
 	if (!outSuccess)
 	{
 		return;

@@ -172,7 +172,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 				.NotEditableProperties(&PropertyNamesNotEditable)
 				.OnItemChanged_Lambda([this](const FInstancedStruct& Item)
 				{
-					CustomObject.Get()->UpdateData(Item);
+					CustomObject.Get()->UpdateDataInEditor(Item);
 				})
 		];
 	}))

@@ -1,7 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/ClickableMap.h"
-#include "Map/MapUtils.h"
+#include "VisualProperties.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Map/DynamicTextureComponent.h"
@@ -35,10 +35,6 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	if(MapDataComponent && MapAsset)
-	{
-		MapDataComponent->ReadDataTables(MapAsset->VisualPropertiesDT, MapAsset->VisualPropertyTypesDT);
-	}
 }
 #endif
 
@@ -75,7 +71,7 @@ void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
 		{
 			if(const FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
 			{
-				const FColor Color = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
+				const FColor Color = MapAsset->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 				if(!bResult)
 					continue;
 				
@@ -155,9 +151,9 @@ void AClickableMap::BeginPlay()
 void AClickableMap::CreateMapModes()
 {
 	TArray<FVisualPropertyType> Types;
-	MapDataComponent->GetVisualPropertiesMap().GetKeys(Types);
+	MapAsset->GetVisualPropertiesMap().GetKeys(Types);
 	CreateDynamicTextures(Types);
-	FillDynamicTextures(MapDataComponent->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
+	FillDynamicTextures(MapAsset->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
 }
 
 void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)

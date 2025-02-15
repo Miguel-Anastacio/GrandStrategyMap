@@ -27,23 +27,23 @@ public:
      * @param mapToUpdate The map to update with the data.
      * @return True if successful, false otherwise.
      */
-    template<class Data, class ID>
-    static bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
-    {
-        if (!dataTable)
-        {
-            return false;
-        }
-        for (auto& RowName : dataTable->GetRowNames())
-        {
-            Data* Item = dataTable->FindRow<Data>(RowName, "");
-            if (Item)
-            {
-                mapToUpdate.Emplace(RowName, (*Item));
-            }
-        }
-        return true;
-    }
+    // template<class Data, class ID>
+    // static bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
+    // {
+    //     if (!dataTable)
+    //     {
+    //         return false;
+    //     }
+    //     for (auto& RowName : dataTable->GetRowNames())
+    //     {
+    //         Data* Item = dataTable->FindRow<Data>(RowName, "");
+    //         if (Item)
+    //         {
+    //             mapToUpdate.Emplace(RowName, (*Item));
+    //         }
+    //     }
+    //     return true;
+    // }
     
     /**
    * Reads data from a data table into a map.
@@ -93,27 +93,27 @@ public:
      * @param outSuccess Whether the operation was successful.
      * @param outInfoMessage Information message about the operation.
      */
-    template<class T>
-    static void WriteMapToJsonFile(const FString& jsonFilePath, const TMap<FName, T>& mapStructure, bool& outSuccess, FString& outInfoMessage)
-    {
-        TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
-        if (!jsonObject)
-        {
-            outSuccess = false;
-            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
-            return;
-        }
-
-        TArray<TSharedPtr<FJsonValue>> jsonValueArray;
-        for (const auto& pair : mapStructure)
-        {
-            TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
-            pair.Value.SerializeToJson(structObject, pair.Key);
-            jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
-        }
-
-        WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
-    }
+    // template<class T>
+    // static void WriteMapToJsonFile(const FString& jsonFilePath, const TMap<FName, T>& mapStructure, bool& outSuccess, FString& outInfoMessage)
+    // {
+    //     TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
+    //     if (!jsonObject)
+    //     {
+    //         outSuccess = false;
+    //         outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
+    //         return;
+    //     }
+    //
+    //     TArray<TSharedPtr<FJsonValue>> jsonValueArray;
+    //     for (const auto& pair : mapStructure)
+    //     {
+    //         TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
+    //         pair.Value.SerializeToJson(structObject, pair.Key);
+    //         jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
+    //     }
+    //
+    //     WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
+    // }
      /**
      * Writes an array to a JSON file.
      *
@@ -187,7 +187,7 @@ public:
     // COLOR STUFF -> Move somewhere else
     static FColor ConvertHexStringToRGB(const FString& Color);
 private:
-    static auto HexToDecimal(const FString& hex, const TMap<TCHAR, int32>& HexMap) -> int32;
+    static auto HexToDecimal(const FString& Hex) -> int32;
 
     /**
      * Writes a string to a file.

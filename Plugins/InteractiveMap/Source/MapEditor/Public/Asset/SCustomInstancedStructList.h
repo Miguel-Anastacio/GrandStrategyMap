@@ -23,7 +23,7 @@ class SCustomInstancedStructListRow : public SInstancedStructListRow
 public:
 
     SLATE_BEGIN_ARGS(SCustomInstancedStructListRow) {}
-    SLATE_ARGUMENT(TSet<FName>, PropertiesNotEditable)
+    SLATE_ARGUMENT(const TSet<FName>*, PropertiesNotEditable)
     SLATE_ARGUMENT(TSharedPtr<FInstancedStruct>, Item)
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
     SLATE_END_ARGS()
@@ -32,17 +32,12 @@ public:
 
     void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
     {
-        NotEditableProperties = InArgs._PropertiesNotEditable;
+        NotEditableProperties = (*InArgs._PropertiesNotEditable);
         SInstancedStructListRow::Construct(
             SInstancedStructListRow::FArguments().Item(InArgs._Item).OnItemChanged(InArgs._OnItemChanged),
             InOwnerTableView);
     }
 
-    /**
-     * Generate a widget for the column name. 
-     * Will try to convert a property to a string and return STextBlock within an SBox.
-     * Override if you want to special case some columns or overhaul the widgets returned.
-     */
     virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override
     {
         // iterate struct properties and generate a widget for it
@@ -54,32 +49,11 @@ public:
                 continue;
             else if(IsPropertyEditable(PropertyName))
             {
-                return SNew(SBox)
-                    .Padding(FMargin(4.0f, 0.0f))
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(SEditableTextCustom)
-                        .OnPropertyEdited_Lambda([this](const FName& Name, const FText& Text)
-                        {
-                            if(UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
-                            {
-                                ItemUpdateDelegate.ExecuteIfBound(*Item);
-                            }
-                        })
-                        .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-                        .Name(PropertyName)
-                        
-                    ];
+                return DisplayEditableProperty(Property);
             }
             else
             {
-                return SNew(SBox)
-                    .Padding(FMargin(4.0f, 0.0f))
-                    .VAlign(VAlign_Center)
-                    [
-                        SNew(STextBlock)
-                        .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-                    ];
+               return DisplayNotEditableProperty(Property);
             }
         }
 
@@ -130,13 +104,13 @@ public:
             .StructTypes(InArgs._StructTypes)
             .OnItemChanged(InArgs._OnItemChanged));
     }
-
+    // override if you wish to change the SWidget used for the Row
     virtual TSharedRef<class ITableRow> OnGenerateRow(TSharedPtr<FInstancedStruct> Item, const TSharedRef<STableViewBase >& OwnerTable) override
     {
         return SNew(SCustomInstancedStructListRow, OwnerTable)
             .Item(Item)
             .OnItemChanged(ItemUpdateDelegate)
-            .PropertiesNotEditable(NotEditableProperties);
+            .PropertiesNotEditable(&NotEditableProperties);
     }
 
 protected:
