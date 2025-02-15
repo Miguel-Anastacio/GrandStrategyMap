@@ -6,73 +6,54 @@
 #include "InteractiveMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 
-UMapDataComponent::UMapDataComponent()
-{
 
-}
-#if WITH_EDITOR
-void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+TMap<FColor, int32> UMapDataComponent::GetLookUpTable() const
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-}
-#endif
-
-TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
-{
-	return NewLookupTable;
+	return MapObjectRef->GetLookupTable();
 }
 
-int UMapDataComponent::GetProvinceID(const FColor& Color, bool& bOutResult) const
+TMap<int32, FInstancedStruct>* UMapDataComponent::GetProvinceDataMap() const
 {
-	if (const int* ID = NewLookupTable.Find(Color))
+	return &MapObjectRef->GetMapData();
+}
+
+int UMapDataComponent::GetTileID(const FColor& Color, bool& bOutResult) const
+{
+	bOutResult = false;
+	const int32* ID = MapObjectRef->FindIDPtr(Color);
+	if(ID)
 	{
 		bOutResult = true;
-		return (*ID);
+		return *ID;
 	}
-
-	bOutResult = false;
-	return -1;
+	else
+	{
+		bOutResult = false;
+		return -1;
+	}
 }
 
-bool UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
+bool UMapDataComponent::GetTileData(int32 ID, FInstancedStruct& Out_Data) const
 {
-	const FInstancedStruct* data = ProvinceDataMap.Find(ID);
-	if (data)
+	if (const FInstancedStruct* Data = MapObjectRef->GetTileData(ID))
 	{
-		Out_Data = (*data);
+		Out_Data = (*Data);
 		return true;
 	}
 	return false;
 }
 
-FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
+FInstancedStruct* UMapDataComponent::GetTileData(int32 ID) const
 {
-	FInstancedStruct* data = ProvinceDataMap.Find(ID);
-	if (data)
+	if (FInstancedStruct* Data = MapObjectRef->GetTileData(ID))
 	{
-		return data;
+		return Data;
 	}
 	return nullptr;
 }
-
-void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
+bool UMapDataComponent::SetTileData(const FInstancedStruct& NewData, int32 ID) const
 {
-	ProvinceDataMap.Empty();
-	ProvinceDataMap.Reserve(Data.Num());
-	for(const auto& StructInstanced : Data)
-	{
-		bool bResult = false;
-		int ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(StructInstanced, "ID", bResult);
-		if(bResult)
-		{
-			ProvinceDataMap.Emplace(ID, StructInstanced);
-		}
-	}
-}
-
-bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
-{
-	FInstancedStruct* CurrentData = GetProvinceData(ID);
+	FInstancedStruct* CurrentData = GetTileData(ID);
 	if(!CurrentData)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("ID does not exist in Map Data"))
@@ -88,19 +69,17 @@ bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
 	return true;
 }
 
-void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)
+void UMapDataComponent::SetMapObject(UMapObject* MapObject)
 {
-	NewLookupTable = MapObject->GetLookupTable();
-	SetProvinceDataMap(MapObject->GetMapDataValue());
-	// TODO: Load Visual Properties and Countries
+	MapObjectRef = MapObject;
 }
 
-int* UMapDataComponent::FindId(const FColor& Color)
+int* UMapDataComponent::FindId(const FColor& Color) const
 {
-	return NewLookupTable.Find(Color);
+	return MapObjectRef->FindIDPtr(Color);
 }
 
-FColor UMapDataComponent::GetColor(int ID) const
+FColor UMapDataComponent::GetColor(int32 ID) const
 {
 	for(const auto& [Color, Id] : GetLookUpTable())
     {

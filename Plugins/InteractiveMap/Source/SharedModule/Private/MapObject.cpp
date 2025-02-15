@@ -4,7 +4,7 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-#include "VisualProperties.h"
+#include "VisualProperties.cpp"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
@@ -188,7 +188,60 @@ FVisualProperty UMapObject::GetVisualProperty(const FVisualPropertyType& Type, c
 	return FVisualProperty();
 }
 
-bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
+TArray<FName> UMapObject::GetVisualPropertiesNamesOfType(const FName& Type) const
+{
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
+	if(!PropertiesOfType)
+	{
+		return TArray<FName>();
+	}
+	
+	TArray<FName> Names;
+	Names.Reserve(PropertiesOfType->VisualProperties.Num());
+	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
+	{
+		Names.Emplace(VisualProperty.Tag);	
+	}
+	return Names;
+}
+
+TSet<FName> UMapObject::GetNamesOfVisualPropertiesInMapData() const
+{
+	TSet<FName> Names;
+	Names.Reserve(VisualPropertiesMap.Num());
+	for(const auto& [VpType, Properties] : VisualPropertiesMap)
+	{
+		if(const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName({OceanStructType, StructType}, VpType.Type))
+		{
+			// check if property is not numeric
+			if(!Property->IsA(FNumericProperty::StaticClass()))
+			{
+				Names.Emplace(VpType.Type);
+			}
+		}
+	}
+	return Names;
+}
+
+// TMap<FName, TSet<FName>> UMapObject::VpMappedByType() const
+// {
+// 	TMap<FName, TSet<FName>> Map;
+// 	Map.Reserve(VisualPropertiesMap.Num());
+// 	for(const auto& [VpType, Property] : VisualPropertiesMap)
+// 	{
+// 		TSet<FName> Names;
+// 		Names.Reserve(Property.VisualProperties.Num());
+// 		for(const FVisualProperty& VisualProperty : Property.VisualProperties)
+// 		{
+// 			Names.Emplace(VisualProperty.Type);
+// 		}
+// 		Map.Emplace(VpType, Names);
+// 	}
+//
+// 	return Map;
+// }
+
+bool UMapObject::IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const
 {
 	if(const FInstancedStruct* Data = MapData.Find(ID))
 	{
@@ -197,12 +250,12 @@ bool UMapObject::IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const
 	return false;
 }
 
-bool UMapObject::IsTileWater(int ID) const
+bool UMapObject::IsTileWater(int32 ID) const
 {
 	return IsTileOfType(ID, StructType);
 }
 
-bool UMapObject::IsTileLand(int ID) const
+bool UMapObject::IsTileLand(int32 ID) const
 {
 	return IsTileOfType(ID, OceanStructType);
 }
@@ -246,24 +299,8 @@ void UMapObject::LogVisualProperties() const
 	}
 }
 
-void UMapObject::UpdateTile(int Index, const FInstancedStruct& NewData)
-{
-	if(Index < 0 || Index > MapData.Num() - 1)
-		return;
-	MapData[Index] = NewData;
-}
 
-void UMapObject::UpdateTileProperty(int Index, const FString& PropertyName,const FString& NewValue)
-{
-	if(Index < 0 || Index > MapData.Num() - 1)
-	{
-		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("Invalid Index on Update Tile Property '%s'"), *PropertyName);
-		return;
-	}
-
-	UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(MapData[Index], PropertyName, NewValue);
-}
-
+#if WITH_EDITOR
 void UMapObject::SaveData() const
 {
 	TArray<FInstancedStruct> Values;
@@ -273,7 +310,6 @@ void UMapObject::SaveData() const
 
 void UMapObject::LoadDataFromFile()
 {
-#if WITH_EDITOR
 	TArray<FString> FilesNames;
 	UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
 	if(FilesNames.IsEmpty())
@@ -288,10 +324,7 @@ void UMapObject::LoadDataFromFile()
 	}
 	
 	SetMapDataFilePath(FilesNames[0]);
-#endif
 }
-
-#if WITH_EDITOR
 void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 {
 	if(!Texture2D)
@@ -324,15 +357,46 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 }
 #endif
 
-int UMapObject::GetIndexOfTileSelected(const FColor& Color)
+int32 UMapObject::FindID(const FColor& Color)
 {
-	if(const int32* ID = LookupTable.Find(Color))
+	if(const int32* ID = FindIDPtr(Color))
 	{
-		// UE_LOG(LogInteractiveMapEditor, Log, TEXT("ID: %d"), *ID);
 		return *ID;
 	}
-	// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Color in LookupTable but ID not in Map Data"));
 	return -1;
+}
+
+int32* UMapObject::FindIDPtr(const FColor& Color)
+{
+	return LookupTable.Find(Color);
+}
+
+FColor UMapObject::GetColor(int32 ID) const
+{
+	for(const auto& [Color, Id] : LookupTable)
+	{
+		if(ID == Id)
+		{
+			return Color;
+		}
+	}
+	return FColor(0, 0, 0, 0);
+}
+
+bool UMapObject::SetTileData(const FInstancedStruct& NewData, int32 ID)
+{
+	if(FInstancedStruct* Data = GetTileData(ID))
+	{
+		*Data = NewData;
+		return true;
+	}
+	return false;
+}
+
+
+FInstancedStruct* UMapObject::GetTileData(int32 ID)
+{
+	return  MapData.Find(ID);
 }
 
 FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
@@ -357,11 +421,10 @@ void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
 	{
 		bool bResult = false;
 		const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
-		if(bResult && ID < MapData.Num())
+		if(bResult)
 		{
 			MapData[ID] = NewData;
 			MarkPackageDirty();
-			// SaveData();
 		}
 	}
 }

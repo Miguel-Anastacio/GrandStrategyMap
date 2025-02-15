@@ -92,7 +92,7 @@ void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 Scree
 					return;
 				FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
 				
-				const int Index = MapAsset->MapObject->GetIndexOfTileSelected(Color);
+				const int Index = MapAsset->MapObject->FindID(Color);
 				// bool Executed = OnClickedOnMapDelegate.ExecuteIfBound(Index);
 
 				if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))

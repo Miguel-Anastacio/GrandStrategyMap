@@ -132,8 +132,21 @@ FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScrip
 	return nullptr;
 }
 
+FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(TArray<const UScriptStruct*> Structs,
+	const FName& DisplayName)
+{
+	for(const UScriptStruct* Struct : Structs)
+	{
+		if(FProperty* Property = FindPropertyByDisplayName(Struct, DisplayName))
+		{
+			return Property;
+		}
+	}
+	return nullptr;
+}
+
 bool UADStructUtilsFunctionLibrary::IsStructOfType(const FInstancedStruct& InstancedStruct,
-	const TArray<UScriptStruct*>& StructTypes)
+                                                   const TArray<UScriptStruct*>& StructTypes)
 {
 	for(const auto& Type : StructTypes)
 	{

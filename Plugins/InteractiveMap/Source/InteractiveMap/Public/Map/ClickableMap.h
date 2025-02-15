@@ -98,7 +98,7 @@ public:
 	//------------------------------- Visual Data -----------------------------------
 
 	UFUNCTION(BlueprintCallable, Category = "Map Visual Data")
-	FColor GetColorFromLookUpTexture(FVector2D uv) const;
+	FColor GetColorFromLookUpTexture(const FVector2D& Uv) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
 	void SetMapMode(const FName& Mode);

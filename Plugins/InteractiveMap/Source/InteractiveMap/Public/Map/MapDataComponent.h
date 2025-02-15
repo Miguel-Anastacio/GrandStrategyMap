@@ -16,48 +16,30 @@ class INTERACTIVEMAP_API UMapDataComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
-    /** Default constructor. */
-    UMapDataComponent();
-#if WITH_EDITOR
-    virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
-protected:
     /** Gets the lookup table. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    TMap<FColor, int> GetLookUpTable() const;
+    TMap<FColor, int32> GetLookUpTable() const;
 
     /** Gets the province data map. */
-    FORCEINLINE TMap<int, FInstancedStruct>* GetProvinceDataMap() { return &ProvinceDataMap; };
+    FORCEINLINE TMap<int32, FInstancedStruct>* GetProvinceDataMap() const;
 
     /** Gets the province ID. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    int GetProvinceID(const FColor& Color, bool& bOutResult) const;
+    int32 GetTileID(const FColor& Color, bool& bOutResult) const;
 
     /** Gets province data by name. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    bool GetProvinceData(int Name, FInstancedStruct& Out_Data) const;
+    bool GetTileData(int32 ID, FInstancedStruct& Out_Data) const;
     
-
     /** Gets province data by id. */
-    FInstancedStruct* GetProvinceData(int ID);
+    FInstancedStruct* GetTileData(int32 ID) const;
 
-    void SetProvinceDataMap(const TArray<FInstancedStruct>& Data);
-    bool SetProvinceData(const FInstancedStruct& NewData, int ID);
+    bool SetTileData(const FInstancedStruct& NewData, int32 ID) const;
 
-    void LoadFromMapObject(const UMapObject* MapObject);
-
-    int* FindId(const FColor& Color);
-    FColor GetColor(int ID) const;
+    void SetMapObject(UMapObject* MapObject);
+    int* FindId(const FColor& Color) const;
+    FColor GetColor(int32 ID) const;
     
 protected:
-
-    /** Province data map. */
-    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<int, FInstancedStruct> ProvinceDataMap;
-    
-    /** New Lookup table. */
-    UPROPERTY(BlueprintReadOnly, Category = "Map Data")
-    TMap<FColor, int> NewLookupTable;
-    
-    friend class AClickableMap;
+    TWeakObjectPtr<class UMapObject> MapObjectRef;
 };

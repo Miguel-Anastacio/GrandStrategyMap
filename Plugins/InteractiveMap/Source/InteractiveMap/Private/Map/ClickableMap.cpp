@@ -50,7 +50,7 @@ void AClickableMap::SetMapTiles(const TArray<FTilePair>& NewData)
 	IDs.Reserve(NewData.Num());
 	for(const auto& [ID, Data] : NewData)
 	{
-		if(MapDataComponent->SetProvinceData(Data, ID))
+		if(MapDataComponent->SetTileData(Data, ID))
 		{
 			IDs.Emplace(ID);
 		}
@@ -69,7 +69,7 @@ void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
 		TMap<FColor, TArray<int>> BatchesOfProvinces;
 		for(const auto& ID : IDs)
 		{
-			if(const FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+			if(const FInstancedStruct* CurrentData = MapDataComponent->GetTileData(ID))
 			{
 				const FColor Color = MapAsset->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 				if(!bResult)
@@ -158,7 +158,7 @@ void AClickableMap::CreateMapModes()
 
 void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)
 {
-	MapDataComponent->SetProvinceData(Data, ID);
+	MapDataComponent->SetTileData(Data, ID);
 	MapTileChangedDelegate.Broadcast({ID});
 }
 
@@ -240,7 +240,7 @@ TMap<int, FInstancedStruct>* AClickableMap::GetProvinceDataMap() const
 
 int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
 {
-	return MapDataComponent->GetProvinceID(Color, bOutResult);
+	return MapDataComponent->GetTileID(Color, bOutResult);
 }
 
 void AClickableMap::SetMapMode_Implementation(const FName& Mode)
@@ -260,12 +260,12 @@ void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 // to be able to use in BP
 void AClickableMap::GetProvinceData(int ID, FInstancedStruct& OutData) const 
 {
-	MapDataComponent->GetProvinceData(ID, OutData);
+	MapDataComponent->GetTileData(ID, OutData);
 }
 
 FInstancedStruct* AClickableMap::GetProvinceData(int ID) 
 {
-	return MapDataComponent->GetProvinceData(ID);
+	return MapDataComponent->GetTileData(ID);
 }
 
 void AClickableMap::SetBorderVisibility(bool status)
@@ -318,10 +318,9 @@ void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRen
 	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 }
 
-FColor AClickableMap::GetColorFromLookUpTexture(FVector2D uv) const
+FColor AClickableMap::GetColorFromLookUpTexture(const FVector2D& Uv) const
 {
-	// return GetColorFromUV(MapLookUpTexture, uv);
-	return UTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, uv, MapColorCodeTextureData);
+	return UTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, Uv, MapColorCodeTextureData);
 }
 
 void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, UDynamicTextureComponent* textureComponent)
@@ -357,6 +356,6 @@ void AClickableMap::LoadMapAsset(UMapObject* MapObject)
 	MapColorCodeTextureData = MapObject->GetLookupTextureData();
 	
 	// Load Data
-	MapDataComponent->LoadFromMapObject(MapObject);
+	MapDataComponent->SetMapObject(MapObject);
 	
 }

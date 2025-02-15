@@ -31,4 +31,5 @@ private:
 	TArray<TSharedPtr<FInstancedStruct>> MyListItems;
 	TArray<UScriptStruct*> StructTypes;
 	TSet<FName> PropertyNamesNotEditable;
+	TSet<FName> PropertiesWithDropDown;
 };

@@ -98,19 +98,19 @@ class SHAREDMODULE_API UMapObject : public UObject
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
 	// ======================================================
-public:	
+public:
+	// Logging
 	void LogLookupTable() const ;
 	void LogMapData() const;
 	void LogVisualProperties() const;
 
-	bool IsTileWater(int ID) const;
-	bool IsTileLand(int ID) const;
-	void UpdateTile(int Index, const FInstancedStruct& NewData);
-	void UpdateTileProperty(int Index, const FString& PropertyName, const FString& NewValue);
-	void SaveData() const;
-	void LoadDataFromFile();
+	// Get type of tiles, checks DataStruct used
+	bool IsTileWater(int32 ID) const;
+	bool IsTileLand(int32 ID) const;
 
 #if WITH_EDITOR
+	void SaveData() const;
+	void LoadDataFromFile();
 	void SetLookupTexture(UTexture2D* Texture2D);
 	void SetMapDataFilePath(const FString& FilePath, bool LoadFromFile = true);
 	void SetLookupFilePath(const FString& FilePath)
@@ -121,39 +121,43 @@ public:
 #endif
 	void LoadLookupMap(const FString& FilePath);
 	
-	TMap<int32, FInstancedStruct>& GetMapData()
-	{
-		return MapData;
-	}
 	
+	FString GetFilePath() const
+	{
+		return this->FilePathMapData;
+	}
+
+	// Getters MapData
+	TMap<int32, FInstancedStruct>& GetMapData(){ return MapData; }
 	TArray<FInstancedStruct> GetMapDataValue() const
 	{
 		TArray<FInstancedStruct> OutArray;
 		MapData.GenerateValueArray(OutArray);
         return OutArray;
 	}
+	int32 FindID(const FColor& Color);
+	int32* FindIDPtr(const FColor& Color);
+	FColor GetColor(int32 ID) const;
+	FInstancedStruct* GetTileData(int32 ID);
 	
-	FString GetFilePath() const
-	{
-		return this->FilePathMapData;
-	}
-	int GetIndexOfTileSelected(const FColor& Color);
-
-	FColor GetColorFromUv(const FVector2D& Uv) const;
+	// Setter Map Data
+	bool SetTileData(const FInstancedStruct& NewData, int32 ID);
 	
-	TMap<FColor, int> GetLookupTable() const
+	// Get Lookup
+	TMap<FColor, int32> GetLookupTable() const
 	{
 		return LookupTable;
 	};
-
 	const TArray<uint8>& GetLookupTextureData() const
 	{
 		return LookupTextureData;
 	}
+	// Update In Editor only, used in Map Object Display
 #if WITH_EDITOR
 	void UpdateDataInEditor(const FInstancedStruct& NewData);
 #endif
 	
+	FColor GetColorFromUv(const FVector2D& Uv) const;
 public:
 	
 #if WITH_EDITORONLY_DATA
@@ -164,6 +168,9 @@ public:
 	/** Data table for visual properties */
 	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
 	class UDataTable* VisualPropertiesDT;
+	// Material used to apply to MapAsset in preview
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	class UMaterialInterface* MaterialOverride;
 #endif
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
@@ -175,8 +182,6 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
 	class UTexture2D* LookupTexture;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UMaterialInterface* MaterialOverride;
 
 	const TMap<FVisualPropertyType, FArrayOfVisualProperties>& GetVisualPropertiesMap() const;
 	TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
@@ -185,15 +190,12 @@ public:
 	void ReadDataTables();
 	FVisualProperty GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const;
 	FVisualProperty GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const;
-    
-protected:
 
-	// TODO - MAYBE REMOVE THIS
-	UPROPERTY()
-	class UStaticMesh* Mesh;
-	
+	TArray<FName> GetVisualPropertiesNamesOfType(const FName& Type) const;
+	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
+	// TMap<FName, TSet<FName>> VpMappedByType() const;
 private:
-	bool IsTileOfType(int ID, const UScriptStruct* ScriptStruct) const;
+	bool IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const;
 	
 	UPROPERTY()
 	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
@@ -202,7 +204,7 @@ private:
 	TMap<int32, FInstancedStruct> MapData;
 
 	UPROPERTY()
-	TMap<FColor, int> LookupTable;
+	TMap<FColor, int32> LookupTable;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Lookup")
 	FString LookupFilePath;

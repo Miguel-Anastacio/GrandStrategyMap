@@ -160,6 +160,7 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 	StructTypes.Emplace(CustomObject.Get()->StructType);
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
 	PropertyNamesNotEditable.Emplace("ID");
+	PropertiesWithDropDown = CustomObject->GetNamesOfVisualPropertiesInMapData();
 
 	InTabManager->RegisterTabSpawner(DataListTab, FOnSpawnTab::CreateLambda([this, InTabManager](const FSpawnTabArgs&)
 	{
@@ -170,6 +171,8 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 				.ListSource(&MyListItems)
 				.StructTypes(&StructTypes)
 				.NotEditableProperties(&PropertyNamesNotEditable)
+				.PropertiesWithDropdown(&PropertiesWithDropDown)
+				.MapObject(CustomObject)
 				.OnItemChanged_Lambda([this](const FInstancedStruct& Item)
 				{
 					CustomObject.Get()->UpdateDataInEditor(Item);
