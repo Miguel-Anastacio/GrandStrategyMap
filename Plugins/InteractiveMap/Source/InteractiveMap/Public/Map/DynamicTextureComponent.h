@@ -29,6 +29,9 @@ public:
 	{
 		return DynamicTextureData;
 	};
+
+	void InitFromTexture(UTexture2D* DynTexture);
+	
 	/**
 	 * Fill the entire texture with a specified color.
 	 * @param Color The color to fill the texture with.

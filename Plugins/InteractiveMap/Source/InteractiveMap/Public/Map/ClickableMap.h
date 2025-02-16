@@ -85,15 +85,6 @@ public:
 	void GetProvinceData(int ID, FInstancedStruct& OutData) const;
 	
 	FInstancedStruct* GetProvinceData(int ID);
-	
-
-	// Get data from tag/id
-	template<class T>
-	const T* GetDataFromID(FName tag, const TMap<FName, T>& mapToSearch)
-	{
-		const T* data = mapToSearch.Find(tag);
-		return data;
-	}
 
 	//------------------------------- Visual Data -----------------------------------
 
@@ -103,8 +94,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Map Mode")
 	void SetMapMode(const FName& Mode);
 	virtual void SetMapMode_Implementation(const FName& Mode);
-
-	void SetMeshMaterial(const FName& Mode, UStaticMeshComponent* Mesh);
 
 	UFUNCTION(BlueprintCallable, Category = "Map Border")
 	void UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget);
@@ -117,6 +106,7 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Map Border")
 	void SetBorderLookUpTexture(UMaterialInstanceDynamic* bordeMat, UDynamicTextureComponent* textureComponent = nullptr);
+
 
 	//------------------------------- Visual ----------------------------------------
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
@@ -149,13 +139,11 @@ protected:
 	
 	void LoadMapAsset(UMapObject* MapObject);
 	
-
 	void CreateMapModes();
 
 	UFUNCTION(BlueprintCallable,  Category = "Map Data")
 	void UpdateTileData(const FInstancedStruct& Data, int ID);
 	
-// #if WITH_EDITOR
 	
 	void CreateDynamicTextures(const TArray<FVisualPropertyType>& VisualPropertyTypes);
 	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData);
@@ -187,8 +175,10 @@ protected:
 
 	// -------------------------VISUAL DATA--------------------------------------
 	// The lookup texture.
-	UPROPERTY(EditAnywhere, Category = "Map|LookupTexture")
+	UPROPERTY(VisibleAnywhere, Category = "Map|LookupTexture")
 	TObjectPtr<UTexture2D> MapLookUpTexture;
+	UPROPERTY(EditAnywhere, Category = "Map|LookupTexture")
+	FName StartMapMode = "Landscape";
 
 	// The political map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
@@ -205,8 +195,6 @@ protected:
 	// Border Material 
 	UPROPERTY(EditAnywhere, Category = "Map|Border")
 	UMaterialInterface* BorderMaterial;
-	//UPROPERTY(EditAnywhere, Category = "Border|Materials")
-	//UMaterialInterface* HQXFilterMaterial;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Map|Border|Material")
 	UMaterialInstanceDynamic* BorderDynamicMaterial;

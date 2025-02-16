@@ -4,7 +4,6 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-#include "VisualProperties.cpp"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
@@ -260,6 +259,17 @@ bool UMapObject::IsTileLand(int32 ID) const
 	return IsTileOfType(ID, OceanStructType);
 }
 
+bool UMapObject::IsStructValid(const FInstancedStruct& Struct) const
+{
+	return IsStructValid(Struct.GetScriptStruct());
+}
+bool UMapObject::IsStructValid(const UScriptStruct* Struct) const
+{
+	if(!Struct)
+		return false;
+	return Struct == StructType || Struct == OceanStructType;
+}
+
 void UMapObject::LogLookupTable() const
 {
 	UE_LOG(LogTemp, Display, TEXT("Logging %s LookupTable"), *GetName());
@@ -301,6 +311,7 @@ void UMapObject::LogVisualProperties() const
 
 
 #if WITH_EDITOR
+
 void UMapObject::SaveData() const
 {
 	TArray<FInstancedStruct> Values;

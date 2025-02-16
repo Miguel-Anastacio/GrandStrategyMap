@@ -121,6 +121,7 @@ void UDynamicTexture::InitializeDynamicTexture(uint32 width, uint32 height)
 	TextureHeight = height;
 	InitializeDynamicTexture();
 }
+
 void UDynamicTexture::DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter)
 {
 	if (!texture)

@@ -127,18 +127,20 @@ void AClickableMap::InitializeMap_Implementation()
 	CreateMapModes();
 	
 	// set Current texture in Component
-	UDynamicTexture* DynamicTextureTest = *MapModeDynamicTextures.Find("Landscape");
-	DynamicTextureComponent->SetDynamicTexture(DynamicTextureTest);
-	DynamicTextureComponent->UpdateTexture();
-	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
-
-	SetMapMode_Implementation(FName("Landscape"));
-	
-	// set referene in player class
-	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if (player)
+	if(UDynamicTexture** DynamicTextureTest = MapModeDynamicTextures.Find(StartMapMode))
 	{
-		player->SetInteractiveMap(this);
+		DynamicTextureComponent->SetDynamicTexture(*DynamicTextureTest);
+		DynamicTextureComponent->UpdateTexture();
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
+	}
+
+	SetMapMode_Implementation(StartMapMode);
+	
+	// set reference in player class
+	AMapPawn* Player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if (Player)
+	{
+		Player->SetInteractiveMap(this);
 	}
 }
 // Called when the game starts or when spawned
@@ -167,9 +169,10 @@ void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& Vi
 	MapLookUpTexture = MapAsset->LookupTexture;
 	if(!MapLookUpTexture)
 		return;
-	
 	const int32 Width = MapLookUpTexture->GetSizeX();
 	const int32 Height = MapLookUpTexture->GetSizeY();
+	
+	
 	for(const auto& VisualPropertyType : VisualPropertyTypes)
 	{
 		UDynamicTexture* DynamicTexture = NewObject<UDynamicTexture>();
@@ -225,7 +228,6 @@ void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<in
 void AClickableMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 TMap<FColor, int> AClickableMap::GetLookUpTable() const
@@ -245,6 +247,19 @@ int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
 
 void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 {
+#if WITH_EDITOR
+	if(Mode == "Debug")
+	{
+		// DynamicTextureComponent->UpdateTexture(MapLookUpTexture,);
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", MapLookUpTexture);
+		if(UStaticMeshComponent* StaticMeshComponent = MapVisualComponent->GetMapGameplayMeshComponent())
+		{
+			StaticMeshComponent->SetMaterial(0, DynamicTextureComponent->GetMaterialInstance());
+		}
+		return;
+	}
+#endif
+	
 	if(UDynamicTexture** CurrentDyntTexture = MapModeDynamicTextures.Find(Mode))
 	{
 		DynamicTextureComponent->SetDynamicTexture(*CurrentDyntTexture);
@@ -312,9 +327,6 @@ void AClickableMap::FillPixelMap()
 void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
 {
 	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), renderTarget, material);
-	// PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	// ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	// CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 }
 

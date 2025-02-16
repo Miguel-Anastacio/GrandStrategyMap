@@ -83,6 +83,43 @@ struct FMapDataStruct : public FBaseMapStruct
 		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
 	}
 };
+USTRUCT(BlueprintType)
+struct FPopulation : public FBaseMapStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	int Size = 0;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FName Profession;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FName Culture = "BRA";
+};
+
+USTRUCT(BlueprintType)
+struct FComplexMapDataStruct : public FBaseMapStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FPopulation Population;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Country = "POR";
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Religion = "CAT";
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	FString Culture = "BAS";
+	
+	// virtual FString ToString() const override
+	// {
+	// 	return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
+	// }
+};
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 
@@ -107,6 +144,8 @@ public:
 	// Get type of tiles, checks DataStruct used
 	bool IsTileWater(int32 ID) const;
 	bool IsTileLand(int32 ID) const;
+	bool IsStructValid(const FInstancedStruct& Struct) const;
+	bool IsStructValid(const UScriptStruct* Struct) const;
 
 #if WITH_EDITOR
 	void SaveData() const;
@@ -162,11 +201,11 @@ public:
 	
 #if WITH_EDITORONLY_DATA
 	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types")
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types", meta = (AllowedStructTypes = "FVisualPropertyType"))
 	UDataTable* VisualPropertyTypesDT;
 
 	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties")
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties", meta = (AllowedStructTypes = "FVisualProperty"))
 	class UDataTable* VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
