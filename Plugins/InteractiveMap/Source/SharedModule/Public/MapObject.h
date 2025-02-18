@@ -195,17 +195,16 @@ public:
 #if WITH_EDITOR
 	void UpdateDataInEditor(const FInstancedStruct& NewData);
 #endif
-	
 	FColor GetColorFromUv(const FVector2D& Uv) const;
 public:
 	
 #if WITH_EDITORONLY_DATA
 	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types", meta = (AllowedStructTypes = "FVisualPropertyType"))
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types",  meta=(RequiredAssetDataTags="RowStructure=/Script/SharedModule.VisualPropertyType"))
 	UDataTable* VisualPropertyTypesDT;
 
 	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties", meta = (AllowedStructTypes = "FVisualProperty"))
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties", meta=(RequiredAssetDataTags="RowStructure=/Script/SharedModule.VisualProperty"))
 	class UDataTable* VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")

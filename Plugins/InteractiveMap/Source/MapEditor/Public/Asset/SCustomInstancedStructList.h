@@ -120,6 +120,7 @@ protected:
  * Display a collection of InstancedStructs as a list a structure to view.
  * Allows the structs to be edited, and some properties can be marked as not editable
  */
+DECLARE_DELEGATE_OneParam(FSelectionChanged, const int32);
 class SCustomInstancedStructList : public SInstancedStructList
 {
 public:
@@ -138,6 +139,7 @@ public:
         
     // called when a struct is edited by the user
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
+    SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
     SLATE_END_ARGS()
 
     SCustomInstancedStructList() : SInstancedStructList()
@@ -148,6 +150,7 @@ public:
         NotEditableProperties = *(InArgs._NotEditableProperties);
         PropertiesWithDropDown = *(InArgs._PropertiesWithDropdown);
         MapObject = InArgs._MapObject;
+        OnSelectionChanged = InArgs._OnSelectionChanged;
         SInstancedStructList::Construct(
             SInstancedStructList::FArguments()
             .ItemHeight(InArgs._ItemHeight)
@@ -166,8 +169,20 @@ public:
             .MapObject(MapObject);
     }
 
+    virtual void HandleSelectionChanged(TSharedPtr<FInstancedStruct> Selection, ESelectInfo::Type SelectInfo) override
+    {
+        SInstancedStructList::HandleSelectionChanged(Selection, SelectInfo);
+        if(!Selection.IsValid())
+            return;
+        bool bOutResult;
+        const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*Selection, "ID", bOutResult);
+        if(bOutResult)
+            OnSelectionChanged.ExecuteIfBound(ID);
+    }
+
 protected:
     TSet<FName> NotEditableProperties;
     TSet<FName> PropertiesWithDropDown;
     TWeakObjectPtr<UMapObject> MapObject;
+    FSelectionChanged OnSelectionChanged;
 };

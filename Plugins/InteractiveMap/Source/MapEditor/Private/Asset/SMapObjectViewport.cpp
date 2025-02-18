@@ -21,7 +21,19 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 {
 	if (Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released)
 	{
-		GetHitLocationInEditor(HitX, HitY);
+		const int32 Index = GetIndexOfTileSelected(HitX, HitY);
+		if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
+		{
+			if(ViewportWidget->MapObjectToolKit.IsValid())
+			{
+				ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
+			}
+			bTileSelected = true;
+		}
+		if(Index == -1)
+		{
+			bTileSelected = false;
+		}
 	}
 	
 	// Optionally, pass unhandled clicks to the base class
@@ -57,56 +69,66 @@ bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 	return FEditorViewportClient::InputKey(EventArgs);
 }
 
-void FMapObjectViewportClient::GetHitLocationInEditor(int32 ScreenX, int32 ScreenY)
+void FMapObjectViewportClient::Tick(float DeltaSeconds)
 {
-	if (Viewport)
+	FIntPoint MousePos;
+	Viewport->GetMousePos(MousePos);
+	if(!bTileSelected)
 	{
-		// Create a scene view to perform the deprojection
-		FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
-			Viewport,
-			this->GetWorld()->Scene,
-			this->EngineShowFlags));
-         
-		FSceneView* SceneView = this->CalcSceneView(&ViewFamily);
-		if (SceneView)
-		{
-			// Deproject screen coordinates into world space
-			FVector WorldOrigin, WorldDirection;
-			SceneView->DeprojectFVector2D(FVector2D(ScreenX, ScreenY), WorldOrigin, WorldDirection);
-
-			// Define a trace end point (far along the direction vector)
-			FVector TraceEnd = WorldOrigin + (WorldDirection * 100000.0f);
-
-			// Perform a line trace
-			FHitResult HitResult;
-			FCollisionQueryParams CollisionParams;
-			CollisionParams.bTraceComplex = true; // Enable complex collision
-			CollisionParams.bReturnFaceIndex = true;
-
-			if (this->GetWorld()->LineTraceSingleByChannel(HitResult, WorldOrigin, TraceEnd, ECC_Visibility, CollisionParams))
-			{
-				FVector2D Uvs;
-				UGameplayStatics::FindCollisionUV(HitResult, 0, Uvs);
-				const AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
-				if(!MapAsset)
-					return;
-				FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
-				
-				const int Index = MapAsset->MapObject->FindID(Color);
-				// bool Executed = OnClickedOnMapDelegate.ExecuteIfBound(Index);
-
-				if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
-				{
-					if(ViewportWidget->MapObjectToolKit.IsValid())
-					{
-						ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
-					}
-				}
-				
-			}
-				
-		}
+		// int32 Index = GetIndexOfTileSelected(MousePos.X, MousePos.Y);
 	}
+	
+	FEditorViewportClient::Tick(DeltaSeconds);
+}
+
+int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 ScreenY)
+{
+	if (!Viewport)
+	{
+		return -1;
+	}
+	// Create a scene view to perform the deprojection
+	FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+		Viewport,
+		this->GetWorld()->Scene,
+		this->EngineShowFlags));
+     
+	FSceneView* SceneView = this->CalcSceneView(&ViewFamily);
+	if (!SceneView)
+	{
+		return -1;
+	}
+	// Deproject screen coordinates into world space
+	FVector WorldOrigin, WorldDirection;
+	SceneView->DeprojectFVector2D(FVector2D(ScreenX, ScreenY), WorldOrigin, WorldDirection);
+
+	// Define a trace end point (far along the direction vector)
+	const FVector TraceEnd = WorldOrigin + (WorldDirection * 100000.0f);
+
+	// Perform a line trace
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.bTraceComplex = true; // Enable complex collision
+	CollisionParams.bReturnFaceIndex = true;
+
+	if (this->GetWorld()->LineTraceSingleByChannel(HitResult, WorldOrigin, TraceEnd, ECC_Visibility, CollisionParams))
+	{
+		FVector2D Uvs;
+		UGameplayStatics::FindCollisionUV(HitResult, 0, Uvs);
+		AMapAsset* MapAsset = Cast<AMapAsset>(HitResult.GetActor());
+		if(!MapAsset)
+			return -1;
+		if(!MapAssetRef.IsValid())
+		{
+			MapAssetRef = MapAsset;
+		}
+		const FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
+		
+		MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
+		return MapAsset->MapObject->FindID(Color);
+
+	}
+	return -1;
 }
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
@@ -124,14 +146,15 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 		return;
 	}
 
-	AMapAsset* PreviewMapAsset = GetWorld()->SpawnActor<AMapAsset>();
-	PreviewMapAsset->MapObject = CustomObject.Get();
-	PreviewMapAsset->RerunConstructionScripts();
+	MapAsset = GetWorld()->SpawnActor<AMapAsset>();
+	MapAsset->MapObject = CustomObject.Get();
+	MapAsset->RerunConstructionScripts();
 }
 
-void SMapObjectViewport::UpdatePreviewActor()
+void SMapObjectViewport::UpdatePreviewActor(int32 ID) const 
 {
-	
+	const FColor Color = MapAsset->MapObject->GetColor(ID);
+	MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
 }
 
 void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)

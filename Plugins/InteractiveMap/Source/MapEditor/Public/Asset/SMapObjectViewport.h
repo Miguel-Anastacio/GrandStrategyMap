@@ -14,11 +14,14 @@ public:
 	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject);
 	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
 	virtual bool InputKey(const FInputKeyEventArgs& EventArgs) override;
-	void GetHitLocationInEditor(int32 ScreenX, int32 ScreenY);
+	virtual void Tick(float DeltaSeconds) override;
+	int32 GetIndexOfTileSelected(int32 ScreenX, int32 ScreenY);
 	FOnClickedOnMapSignature OnClickedOnMapDelegate;
 
 private:
 	UMapObject* MapObject;
+	TWeakObjectPtr<AMapAsset> MapAssetRef;
+	bool bTileSelected = false;
 };
 
 
@@ -34,7 +37,7 @@ public:
 SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
-	void UpdatePreviewActor();
+	void UpdatePreviewActor(int32 ID) const;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	
@@ -52,5 +55,6 @@ protected:
 private:
 	TSharedPtr<FAdvancedPreviewScene> AdvancedPreviewScene = nullptr;
 	TSharedPtr<FEditorViewportClient> LevelViewportClient;
+	TWeakObjectPtr<AMapAsset> MapAsset;
 	
 };

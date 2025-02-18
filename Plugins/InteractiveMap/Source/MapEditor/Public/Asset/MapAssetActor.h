@@ -17,9 +17,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapAsset")
 	UMapObject* MapObject;
 
+	UPROPERTY()
+	UMaterialInstanceDynamic* Material;
 protected:
 	AMapAsset();
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Destroyed() override;
+
 };

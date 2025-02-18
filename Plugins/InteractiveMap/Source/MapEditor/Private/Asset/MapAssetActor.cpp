@@ -36,7 +36,8 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 	// }
 	if(MapObject->MaterialOverride)
 	{
-		MapMesh->SetMaterial(0, MapObject->MaterialOverride);
+		Material = UMaterialInstanceDynamic::Create(MapObject->MaterialOverride, this);
+		MapMesh->SetMaterial(0, Material);
 	}
 	
 	if (!MapObject->OnObjectChanged.IsBoundToObject(this))

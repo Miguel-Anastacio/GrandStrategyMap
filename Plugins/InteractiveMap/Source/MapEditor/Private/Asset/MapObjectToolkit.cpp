@@ -177,6 +177,11 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 				{
 					CustomObject.Get()->UpdateDataInEditor(Item);
 				})
+				.OnSelectionChanged_Lambda([this](const int32 ID)
+				{
+					MapViewport->UpdatePreviewActor(ID);
+				})
+				
 		];
 	}))
 	.SetDisplayName(INVTEXT("DataList"))
