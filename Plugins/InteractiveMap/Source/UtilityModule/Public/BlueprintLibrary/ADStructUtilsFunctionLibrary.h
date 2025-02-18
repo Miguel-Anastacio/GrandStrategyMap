@@ -149,6 +149,7 @@ public:
     static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
 
     static FProperty* FindPropertyByDisplayName(const UScriptStruct* Struct, const FName& DisplayName);
+    static FProperty* FindPropertyByDisplayName(TArray<const UScriptStruct*> Structs, const FName& DisplayName);
     
     static bool IsStructOfType(const FInstancedStruct& InstancedStruct, const TArray<UScriptStruct*>& StructTypes);
 

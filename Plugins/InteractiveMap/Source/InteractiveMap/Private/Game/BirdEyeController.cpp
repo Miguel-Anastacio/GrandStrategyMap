@@ -90,6 +90,10 @@ void ABirdEyeController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
+#if WITH_EDITOR
+		EnhancedInputComponent->BindAction(DisplayLookupTextureAction, ETriggerEvent::Started, this, &ABirdEyeController::SetLookupTextureActive);
+#endif
+		
 	}
 	else
 	{
@@ -197,6 +201,12 @@ void ABirdEyeController::HighlightProvince(const FColor& Color)
 {
 	Map->UpdateProvinceHovered(Color);
 }
+#if WITH_EDITOR
+void ABirdEyeController::SetLookupTextureActive()
+{
+	Map->SetMapMode("Debug");
+}
+#endif
 
 AClickableMap* ABirdEyeController::PerformLineTraceToFindMap(FHitResult& OutHit, bool& OutResultUnderCursor) const
 {

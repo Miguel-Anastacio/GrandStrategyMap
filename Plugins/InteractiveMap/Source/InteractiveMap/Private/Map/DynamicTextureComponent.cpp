@@ -170,7 +170,6 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	);
 }
 
-
 void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height)
 {
 	// Create Dynamic Texture Object

@@ -39,9 +39,10 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
 	TMap<FName, UUserWidget*> WidgetFields;
-	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
-	UScriptStruct* StructType;
+	// UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
+	// UScriptStruct* StructType;
 
+	const UScriptStruct* GetStruct() const;
 protected:
 #if WITH_EDITOR
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")

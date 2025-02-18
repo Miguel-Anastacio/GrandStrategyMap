@@ -6,7 +6,6 @@
 #include "InstancedStruct.h"
 #include "Templates/SubclassOf.h"
 #include "GameFramework/PlayerController.h"
-#include "Map/MapUtils.h"
 #include "BirdEyeController.generated.h"
 
 /** Forward declaration to improve compiling times */
@@ -52,6 +51,11 @@ public:
     /** Action for opening the country editor UI. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction* OpenCountryEditorAction;
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UInputAction* DisplayLookupTextureAction;
+#endif
+    
 
     UPROPERTY(BlueprintAssignable)
     FOnProvinceClickedSignature ProvinceClickedDelegate;
@@ -94,6 +98,10 @@ protected:
 
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HighlightProvince(const FColor& Color);
+#if WITH_EDITOR
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions")
+    void SetLookupTextureActive();
+#endif
 
     class AClickableMap* PerformLineTraceToFindMap(FHitResult& OutHit, bool& OutResultUnderCursor) const;
     

@@ -30,13 +30,14 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 		return;
 
 #if WITH_EDITOR
-	if(MapObject->Mesh)
-	{
-		MapMesh->SetStaticMesh(MapObject->Mesh);
-	}
+	// if(MapObject->Mesh)
+	// {
+	// 	MapMesh->SetStaticMesh(MapObject->Mesh);
+	// }
 	if(MapObject->MaterialOverride)
 	{
-		MapMesh->SetMaterial(0, MapObject->MaterialOverride);
+		Material = UMaterialInstanceDynamic::Create(MapObject->MaterialOverride, this);
+		MapMesh->SetMaterial(0, Material);
 	}
 	
 	if (!MapObject->OnObjectChanged.IsBoundToObject(this))

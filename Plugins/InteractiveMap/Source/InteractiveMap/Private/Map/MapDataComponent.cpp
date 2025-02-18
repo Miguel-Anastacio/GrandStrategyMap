@@ -6,144 +6,54 @@
 #include "InteractiveMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 
-UMapDataComponent::UMapDataComponent()
-{
 
-}
-#if WITH_EDITOR
-void UMapDataComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+TMap<FColor, int32> UMapDataComponent::GetLookUpTable() const
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	// ReadDataTables();
-}
-#endif
-
-const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapDataComponent::GetVisualPropertiesMap() const
-{
-	return VisualPropertiesMap;
+	return MapObjectRef->GetLookupTable();
 }
 
-TMap<FName, FArrayOfVisualProperties> UMapDataComponent::GetVisualPropertyNameMap() const
+TMap<int32, FInstancedStruct>* UMapDataComponent::GetProvinceDataMap() const
 {
-	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
-	for(auto& VpType : VisualPropertiesMap)
-	{
-		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
-	}
-	return VisualPropertiesNameMap;
+	return &MapObjectRef->GetMapData();
 }
 
-TMap<FColor, int> UMapDataComponent::GetLookUpTable() const
+int UMapDataComponent::GetTileID(const FColor& Color, bool& bOutResult) const
 {
-	return NewLookupTable;
-}
-
-int UMapDataComponent::GetProvinceID(const FColor& Color, bool& bOutResult) const
-{
-	if (const int* ID = NewLookupTable.Find(Color))
+	bOutResult = false;
+	const int32* ID = MapObjectRef->FindIDPtr(Color);
+	if(ID)
 	{
 		bOutResult = true;
-		return (*ID);
+		return *ID;
 	}
-
-	bOutResult = false;
-	return -1;
+	else
+	{
+		bOutResult = false;
+		return -1;
+	}
 }
 
-bool UMapDataComponent::GetProvinceData(int ID, FInstancedStruct& Out_Data) const
+bool UMapDataComponent::GetTileData(int32 ID, FInstancedStruct& Out_Data) const
 {
-	const FInstancedStruct* data = ProvinceDataMap.Find(ID);
-	if (data)
+	if (const FInstancedStruct* Data = MapObjectRef->GetTileData(ID))
 	{
-		Out_Data = (*data);
+		Out_Data = (*Data);
 		return true;
 	}
 	return false;
 }
 
-FColor UMapDataComponent::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName,
-	bool& OutResult) const
+FInstancedStruct* UMapDataComponent::GetTileData(int32 ID) const
 {
-	const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
-
-	if (!OutResult)
-		return FColor::Black;
-		
-	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
-}
-
-// FInstancedStruct UMapDataComponent::GetProvinceData(int ID, bool& OutResult)
-// {
-// 	FInstancedStruct* Data = ProvinceDataMap.Find(ID);
-// 	if (Data)
-// 	{
-// 		OutResult = true;
-// 		return *Data;
-// 	}
-// 	OutResult = false;
-// 	return FInstancedStruct();
-// }
-
-FInstancedStruct* UMapDataComponent::GetProvinceData(int ID)
-{
-	FInstancedStruct* data = ProvinceDataMap.Find(ID);
-	if (data)
+	if (FInstancedStruct* Data = MapObjectRef->GetTileData(ID))
 	{
-		return data;
+		return Data;
 	}
 	return nullptr;
 }
-
-#if WITH_EDITOR
-void UMapDataComponent::ReadDataTables(const UDataTable* VpDataTable, const UDataTable* VpTypeDataTable)
+bool UMapDataComponent::SetTileData(const FInstancedStruct& NewData, int32 ID) const
 {
-	if(!VpDataTable|| !VpTypeDataTable)
-	{
-		UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
-		return;
-	}
-	
-	VisualPropertiesMap.Empty();	
-	TArray<FVisualPropertyType*> AllTypes;
-	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VpTypeDataTable, AllTypes))
-	{
-	}
-	TArray<FVisualProperty*> VisualProperties;
-	UDataManagerFunctionLibrary::ReadDataTableToArray(VpDataTable, VisualProperties);
-	
-	for(const auto& Type : AllTypes)
-	{
-		FArrayOfVisualProperties ArrayOf;
-		for(const auto& Property : VisualProperties)
-		{
-			if(Type->Type == Property->Type)
-			{
-				ArrayOf.VisualProperties.Emplace(*Property);
-			}
-		}
-		VisualPropertiesMap.Emplace(*Type, ArrayOf.VisualProperties);
-	}
-}
-#endif
-
-void UMapDataComponent::SetProvinceDataMap(const TArray<FInstancedStruct>& Data)
-{
-	ProvinceDataMap.Empty();
-	ProvinceDataMap.Reserve(Data.Num());
-	for(const auto& StructInstanced : Data)
-	{
-		bool bResult = false;
-		int ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int>(StructInstanced, "ID", bResult);
-		if(bResult)
-		{
-			ProvinceDataMap.Emplace(ID, StructInstanced);
-		}
-	}
-}
-
-bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
-{
-	FInstancedStruct* CurrentData = GetProvinceData(ID);
+	FInstancedStruct* CurrentData = GetTileData(ID);
 	if(!CurrentData)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("ID does not exist in Map Data"))
@@ -159,19 +69,17 @@ bool UMapDataComponent::SetProvinceData(const FInstancedStruct& NewData, int ID)
 	return true;
 }
 
-void UMapDataComponent::LoadFromMapObject(const UMapObject* MapObject)
+void UMapDataComponent::SetMapObject(UMapObject* MapObject)
 {
-	NewLookupTable = MapObject->GetLookupTable();
-	SetProvinceDataMap(MapObject->GetMapDataValue());
-	// TODO: Load Visual Properties and Countries
+	MapObjectRef = MapObject;
 }
 
-int* UMapDataComponent::FindId(const FColor& Color)
+int* UMapDataComponent::FindId(const FColor& Color) const
 {
-	return NewLookupTable.Find(Color);
+	return MapObjectRef->FindIDPtr(Color);
 }
 
-FColor UMapDataComponent::GetColor(int ID) const
+FColor UMapDataComponent::GetColor(int32 ID) const
 {
 	for(const auto& [Color, Id] : GetLookUpTable())
     {
@@ -181,46 +89,4 @@ FColor UMapDataComponent::GetColor(int ID) const
     	}
     }
 	return FColor(0, 0, 0, 0);
-}
-
-FVisualProperty UMapDataComponent::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
-}
-
-FVisualProperty UMapDataComponent::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
 }

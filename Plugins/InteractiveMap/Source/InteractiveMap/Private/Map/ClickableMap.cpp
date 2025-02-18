@@ -1,7 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "Map/ClickableMap.h"
-#include "Map/MapUtils.h"
+#include "VisualProperties.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "Map/DynamicTextureComponent.h"
@@ -35,10 +35,6 @@ AClickableMap::AClickableMap(const FObjectInitializer& ObjectInitializer)
 void AClickableMap::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	if(MapDataComponent && MapAsset)
-	{
-		MapDataComponent->ReadDataTables(MapAsset->VisualPropertiesDT, MapAsset->VisualPropertyTypesDT);
-	}
 }
 #endif
 
@@ -54,7 +50,7 @@ void AClickableMap::SetMapTiles(const TArray<FTilePair>& NewData)
 	IDs.Reserve(NewData.Num());
 	for(const auto& [ID, Data] : NewData)
 	{
-		if(MapDataComponent->SetProvinceData(Data, ID))
+		if(MapDataComponent->SetTileData(Data, ID))
 		{
 			IDs.Emplace(ID);
 		}
@@ -73,11 +69,11 @@ void AClickableMap::UpdateDynamicTextures(const TArray<int>& IDs)
 		TMap<FColor, TArray<int>> BatchesOfProvinces;
 		for(const auto& ID : IDs)
 		{
-			if(const FInstancedStruct* CurrentData = MapDataComponent->GetProvinceData(ID))
+			if(const FInstancedStruct* CurrentData = MapDataComponent->GetTileData(ID))
 			{
-				const FColor Color = MapDataComponent->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
+				const FColor Color = MapAsset->GetPropertyColorFromInstancedStruct(*CurrentData, PropertyName, bResult);
 				if(!bResult)
-					break;
+					continue;
 				
 				if(TArray<int>* IdsToEdit = BatchesOfProvinces.Find(Color))
 				{
@@ -131,18 +127,20 @@ void AClickableMap::InitializeMap_Implementation()
 	CreateMapModes();
 	
 	// set Current texture in Component
-	UDynamicTexture* DynamicTextureTest = *MapModeDynamicTextures.Find("Landscape");
-	DynamicTextureComponent->SetDynamicTexture(DynamicTextureTest);
-	DynamicTextureComponent->UpdateTexture();
-	DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
-
-	SetMapMode_Implementation(FName("Landscape"));
-	
-	// set referene in player class
-	AMapPawn* player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if (player)
+	if(UDynamicTexture** DynamicTextureTest = MapModeDynamicTextures.Find(StartMapMode))
 	{
-		player->SetInteractiveMap(this);
+		DynamicTextureComponent->SetDynamicTexture(*DynamicTextureTest);
+		DynamicTextureComponent->UpdateTexture();
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
+	}
+
+	SetMapMode_Implementation(StartMapMode);
+	
+	// set reference in player class
+	AMapPawn* Player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	if (Player)
+	{
+		Player->SetInteractiveMap(this);
 	}
 }
 // Called when the game starts or when spawned
@@ -155,14 +153,14 @@ void AClickableMap::BeginPlay()
 void AClickableMap::CreateMapModes()
 {
 	TArray<FVisualPropertyType> Types;
-	MapDataComponent->GetVisualPropertiesMap().GetKeys(Types);
+	MapAsset->GetVisualPropertiesMap().GetKeys(Types);
 	CreateDynamicTextures(Types);
-	FillDynamicTextures(MapDataComponent->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
+	FillDynamicTextures(MapAsset->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
 }
 
 void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)
 {
-	MapDataComponent->SetProvinceData(Data, ID);
+	MapDataComponent->SetTileData(Data, ID);
 	MapTileChangedDelegate.Broadcast({ID});
 }
 
@@ -171,9 +169,10 @@ void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& Vi
 	MapLookUpTexture = MapAsset->LookupTexture;
 	if(!MapLookUpTexture)
 		return;
-	
 	const int32 Width = MapLookUpTexture->GetSizeX();
 	const int32 Height = MapLookUpTexture->GetSizeY();
+	
+	
 	for(const auto& VisualPropertyType : VisualPropertyTypes)
 	{
 		UDynamicTexture* DynamicTexture = NewObject<UDynamicTexture>();
@@ -229,7 +228,6 @@ void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<in
 void AClickableMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 TMap<FColor, int> AClickableMap::GetLookUpTable() const
@@ -244,11 +242,24 @@ TMap<int, FInstancedStruct>* AClickableMap::GetProvinceDataMap() const
 
 int AClickableMap::GetProvinceID(const FColor& Color, bool& bOutResult) const
 {
-	return MapDataComponent->GetProvinceID(Color, bOutResult);
+	return MapDataComponent->GetTileID(Color, bOutResult);
 }
 
 void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 {
+#if WITH_EDITOR
+	if(Mode == "Debug")
+	{
+		// DynamicTextureComponent->UpdateTexture(MapLookUpTexture,);
+		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", MapLookUpTexture);
+		if(UStaticMeshComponent* StaticMeshComponent = MapVisualComponent->GetMapGameplayMeshComponent())
+		{
+			StaticMeshComponent->SetMaterial(0, DynamicTextureComponent->GetMaterialInstance());
+		}
+		return;
+	}
+#endif
+	
 	if(UDynamicTexture** CurrentDyntTexture = MapModeDynamicTextures.Find(Mode))
 	{
 		DynamicTextureComponent->SetDynamicTexture(*CurrentDyntTexture);
@@ -264,12 +275,12 @@ void AClickableMap::SetMapMode_Implementation(const FName& Mode)
 // to be able to use in BP
 void AClickableMap::GetProvinceData(int ID, FInstancedStruct& OutData) const 
 {
-	MapDataComponent->GetProvinceData(ID, OutData);
+	MapDataComponent->GetTileData(ID, OutData);
 }
 
 FInstancedStruct* AClickableMap::GetProvinceData(int ID) 
 {
-	return MapDataComponent->GetProvinceData(ID);
+	return MapDataComponent->GetTileData(ID);
 }
 
 void AClickableMap::SetBorderVisibility(bool status)
@@ -316,16 +327,12 @@ void AClickableMap::FillPixelMap()
 void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
 {
 	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), renderTarget, material);
-	// PoliticalMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	// ReligiousMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
-	// CultureMapTextureComponent->DynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 	TerrainDynamicMaterial->SetTextureParameterValue("BorderTexture", renderTarget);
 }
 
-FColor AClickableMap::GetColorFromLookUpTexture(FVector2D uv) const
+FColor AClickableMap::GetColorFromLookUpTexture(const FVector2D& Uv) const
 {
-	// return GetColorFromUV(MapLookUpTexture, uv);
-	return UTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, uv, MapColorCodeTextureData);
+	return UTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, Uv, MapColorCodeTextureData);
 }
 
 void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, UDynamicTextureComponent* textureComponent)
@@ -361,6 +368,6 @@ void AClickableMap::LoadMapAsset(UMapObject* MapObject)
 	MapColorCodeTextureData = MapObject->GetLookupTextureData();
 	
 	// Load Data
-	MapDataComponent->LoadFromMapObject(MapObject);
+	MapDataComponent->SetMapObject(MapObject);
 	
 }
