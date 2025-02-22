@@ -104,7 +104,7 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 
 void RMapEditorMenu::GenerateMap()
 {
-	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.HeightMapTexture;
+	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.OriginTexture;
 	const uint8* Data = UTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
 	if(!Data)
 	{
@@ -120,7 +120,9 @@ void RMapEditorMenu::GenerateMap()
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			// Call GenerateMap and pass the progress callback
-			Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), ProgressCallback);
+			const MapGenerator::MapModeGen GenType = MapEditorPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
+																						: MapGenerator::MapModeGen::FromMask;
+			Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), GenType, ProgressCallback);
 			LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
 			LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
 			LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);

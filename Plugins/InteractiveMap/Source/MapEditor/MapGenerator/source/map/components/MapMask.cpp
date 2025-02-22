@@ -37,10 +37,50 @@ namespace MapGenerator
 		return image;
 	}
 
+	std::vector<uint8_t> MapMask::CreateBuffer(const std::vector<uint8_t>& buffer, bool mode, uint8_t alpha) const
+	{
+		const unsigned width = this->Width();
+		const unsigned height = this->Height();
+		std::vector<uint8_t> image(width * height * 4);
+		assert(buffer.size() == image.size());
+		
+		for (unsigned y = 0; y < height; y++)
+		{
+			for (unsigned x = 0; x < width; x++)
+			{
+				const int index = 4 * width * y + 4 * x;
+				const Color colorInBuffer(buffer[index + 0], buffer[index + 1], buffer[index + 2], buffer[index + 3]);
+
+				// // land as black
+				// const bool condition = mode ? (colorInBuffer == Color(0, 0, 0, 255))
+				// 						: (colorInBuffer == Color(255, 255, 255, 255));
+				// land as white
+				const bool condition = mode ? (colorInBuffer == Color(255, 255, 255, 255))
+										: (colorInBuffer == Color(0, 0, 0, 255));
+				uint8_t pixelValue = condition ? 255 : 0;
+				uint8_t alphaValue = condition ? 255 : alpha;
+
+				image[4 * width * y + 4 * x + 0] = pixelValue; // Red
+				image[4 * width * y + 4 * x + 1] = pixelValue; // Green
+				image[4 * width * y + 4 * x + 2] = pixelValue; // Blue
+				image[4 * width * y + 4 * x + 3] = alphaValue; // Alpha
+			}
+		}
+
+		return image;
+	}
+
 	void MapMask::RegenerateMask(float cutOffHeight, bool mode)
 	{
 		m_maskBuffer = CreateBuffer(m_elevation, cutOffHeight, mode);
 		mask.SetMaskData(m_maskBuffer, data::Color(255, 255, 255, 255));
+	}
+
+	void MapMask::RegenerateMask(const std::vector<uint8_t>& maskBuffer, const bool mode)
+	{
+		m_maskBuffer = CreateBuffer(maskBuffer, mode);
+		mask.SetMaskData(m_maskBuffer, data::Color(255, 255, 255, 255));
+		
 	}
 
 	std::vector<double> MapMask::ExtractHeightMapFromTexture(const std::vector<uint8_t> &buffer, unsigned width, unsigned height) const

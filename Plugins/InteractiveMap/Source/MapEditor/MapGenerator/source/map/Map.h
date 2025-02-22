@@ -15,6 +15,13 @@ namespace MapGenerator
 {
 	class Texture;
 	using namespace data;
+	enum class MapModeGen
+	{
+		FromHeightMap,
+		FromMask
+	};
+
+	
 	class Map : public Dimensions
 	{
 	public:
@@ -93,13 +100,20 @@ namespace MapGenerator
 	void RegenerateLookupBorders(const LookupMapData &data);
 
 	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height);
-	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const LookupMapData& data,
+	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height,
+						const LookupMapData& data, const MapModeGen mode = MapModeGen::FromHeightMap,
 						std::function<void(float, std::string_view)> progressCallback = nullptr);
 
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight);
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data,
 									std::function<void(float, std::string_view)> progressCallback = nullptr);
 
+	void GenerateMapFromMaskTexture(const std::vector<uint8_t> &maskTextureBuffer, float cutOffHeight,
+									const LookupMapData& data,
+									std::function<void(float, std::string_view)> progressCallback = nullptr);
+
+	void RegenerateMasks(const LookupMapData& data);	
+	void RegenerateMasks(const std::vector<uint8_t> &maskTextureBuffer);	
 	// void SaveMap(const char* filePath);
 	void SaveMap(const std::string &filePath) const;
 	void Reset();
