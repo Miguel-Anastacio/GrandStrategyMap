@@ -16,23 +16,6 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "UtilityModule",
-			"Type": "Runtime",
-			"LoadingPhase": "PreDefault",
-			"AdditionalDependencies": [
-				"Engine",
-				"UMG"
-			]
-		},
-		{
-			"Name": "UtilityModuleEditor",
-			"Type": "Editor",
-			"LoadingPhase": "PostEngineInit",
-			"AdditionalDependencies": [
-				"Engine"
-			]
-		},
-		{
 			"Name": "SharedModule",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
@@ -73,6 +56,14 @@
 		},
 		{
 			"Name": "StructUtils",
+			"Enabled": true
+		},
+		{
+			"Name": "UtilityPlugin",
+			"Enabled": true
+		},
+		{
+			"Name": "DataBasedWidget",
 			"Enabled": true
 		}
 	]

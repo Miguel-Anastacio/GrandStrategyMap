@@ -6,17 +6,13 @@
 #include "UObject/Interface.h"
 #include "GenericUserWidgetInterface.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType)
 class UGenericUserWidgetInterface: public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**
- * Interface that defines a contract for interacting with objects.
- */
-class UTILITYMODULE_API IGenericUserWidgetInterface
+class DATABASEDWIDGET_API IGenericUserWidgetInterface
 {
 	GENERATED_BODY()
 

@@ -11,7 +11,7 @@
 class UCustomEditableText;
 class UVerticalBox;
 UCLASS(Abstract, BlueprintType)
-class UTILITYMODULE_API UGenericStructWidget : public UUserWidget
+class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -34,7 +34,7 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
-	class UStructWidgetMapDataAsset* DataAssetWidgetMap;
+	class UWidgetMapDataAsset* DataAssetWidgetMap;
 #endif
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")

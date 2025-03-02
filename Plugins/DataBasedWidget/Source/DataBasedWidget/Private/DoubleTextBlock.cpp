@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "UserWidgets/DoubleTextBlock.h"
+#include "DoubleTextBlock.h"
 #include "Components/RichTextBlock.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 void UDoubleTextBlock::SetValues(const FText& LabelText, const FText& ValueText) const

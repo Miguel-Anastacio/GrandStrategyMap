@@ -1,9 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/ProvinceEditorWidget.h"
-#include "UserWidgets/CustomEditableText.h"
+#include "CustomEditableText.h"
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
-#include "UserWidgets/GenericStructWidget.h"
+#include "GenericStructWidget.h"
 
 void UProvinceEditorWidget::SetProvinceData(const FInstancedStruct& Data, int ProvinceID)
 {

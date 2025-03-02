@@ -10,7 +10,7 @@
  */
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class UTILITYMODULE_API UDoubleTextBlock : public UUserWidget, public IGenericUserWidgetInterface
+class DATABASEDWIDGET_API UDoubleTextBlock : public UUserWidget, public IGenericUserWidgetInterface
 {
     GENERATED_BODY()
 

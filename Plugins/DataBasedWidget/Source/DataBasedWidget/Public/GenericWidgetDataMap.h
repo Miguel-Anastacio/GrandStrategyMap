@@ -6,7 +6,7 @@
 #include "GenericWidgetDataMap.generated.h"
 
 UCLASS(BlueprintType)
-class UTILITYMODULE_API UStructWidgetMapDataAsset : public UDataAsset
+class DATABASEDWIDGET_API UWidgetMapDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:

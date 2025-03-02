@@ -1,12 +1,12 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "UserWidgets/GenericStructWidget.h"
+#include "GenericStructWidget.h"
 #include "UObject/Field.h"
-#include "UtilityModule.h"
+#include "DataBasedWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "UserWidgets/GenericUserWidgetInterface.h"
-#include "UserWidgets/GenericWidgetDataMap.h"
+#include "GenericUserWidgetInterface.h"
+#include "GenericWidgetDataMap.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #endif
@@ -77,6 +77,9 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 }
 const UScriptStruct* UGenericStructWidget::GetStruct() const
 {
+	if(!DataAssetWidgetMap)
+		return nullptr;
+	
 	return DataAssetWidgetMap->StructType;
 }
 #if WITH_EDITOR
@@ -92,21 +95,21 @@ void UGenericStructWidget::CreatePanelSlots()
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetGridPanel)
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Missing Main Panel"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("Missing Main Panel"));
 		return;
 	}
 	if(!DataAssetWidgetMap)
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a DataAssetWidgetMap"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("Please Set a DataAssetWidgetMap"));
 	}
 	if(!DataAssetWidgetMap->StructType)
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Please Set a StructType"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("Please Set a StructType"));
 		return;
 	}
 	if(!WidgetTree)
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Widget Tree is Null"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Tree is Null"));
 		return;
 	}
 	AssetGridPanel->ClearChildren();
@@ -132,7 +135,7 @@ void UGenericStructWidget::CreatePanelSlots()
 	
 	if(AssetGridPanel->GetChildrenCount() == 0)
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Widget Type is not of type UUserWidget"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Type is not of type UUserWidget"));
 	}
 	
 	AssetGridPanel->Modify();

@@ -23,7 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
 class UEditableTextBox;
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class UTILITYMODULE_API UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface
+class DATABASEDWIDGET_API  UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface
 {
     GENERATED_BODY()
 

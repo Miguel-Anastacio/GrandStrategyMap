@@ -1,25 +1,24 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-using System.IO;
+
 using UnrealBuildTool;
 
-public class InteractiveMap : ModuleRules
+public class DataBasedWidget : ModuleRules
 {
-	public InteractiveMap(ReadOnlyTargetRules Target) : base(Target)
+	public DataBasedWidget(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
-            }
+			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
-			
-            }
+			}
 			);
 			
 		
@@ -27,44 +26,26 @@ public class InteractiveMap : ModuleRules
 			new string[]
 			{
 				"Core",
-				"RHI",
-				"RenderCore",
-				"UtilityModule",
-				"SharedModule",
-				"StructUtils",
-				"UMG", 
-				"ShadersModule",
-				"DataBasedWidget"
-             
 				// ... add other public dependencies that you statically link with here ...
+				"UtilityModule",
+				"UtilityModuleEditor",
+				"StructUtils"
 			}
 			);
-		if (Target.bBuildEditor)
-		{
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"UMGEditor",
-					"UnrealEd"
-					// ... add private dependencies that you statically link with here ...	
-				}
-			);
-		}
-
+			
+		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"CoreUObject",
 				"Engine",
-                "EnhancedInput",
-                "Slate",	
+				"Slate",
 				"SlateCore",
-                "UMG",
-				"Json",
-				"JsonUtilities",
+				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
+		
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]

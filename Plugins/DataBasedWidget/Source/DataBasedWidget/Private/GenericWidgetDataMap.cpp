@@ -1,8 +1,8 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "UserWidgets/GenericWidgetDataMap.h"
+#include "GenericWidgetDataMap.h"
 
-void UStructWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	if(!PropertyChangedEvent.Property)
@@ -12,14 +12,14 @@ void UStructWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Pr
 		return;
 
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UStructWidgetMapDataAsset, StructType) ||
-		PropertyName == GET_MEMBER_NAME_CHECKED(UStructWidgetMapDataAsset, DefaultWidgetType))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, StructType) ||
+		PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, DefaultWidgetType))
 	{
 		Reset();
 	}
 }
 
-void UStructWidgetMapDataAsset::Reset()
+void UWidgetMapDataAsset::Reset()
 {
 	if (!StructType)
 		return;
@@ -29,7 +29,7 @@ void UStructWidgetMapDataAsset::Reset()
 	{
 		const FProperty* Property = *It;
 		if (!Property) continue;
-		PropertyWidgetMap.Add(Property->GetFName(), DefaultWidgetType);
+		PropertyWidgetMap.Add(FName(Property->GetAuthoredName()), DefaultWidgetType);
 	}
 	// Mark the asset as modified so it saves properly
 	MarkPackageDirty();
