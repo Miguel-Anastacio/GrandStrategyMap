@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "InstancedStruct.h"
+#include "Serialization/CompactBinary.h"
 #include "ADStructUtilsFunctionLibrary.generated.h"
 
 template<typename T, typename Enable = void>
@@ -202,6 +203,15 @@ public:
         void* ValuePtr = Property->ContainerPtrToValuePtr<void>(Object);
         TPropertyTypeFundamentals<T>::SetPropertyValue(ValuePtr, NewValue);
         return true;
+    }
+    
+    static FString GetPropertyValueAsString(const FProperty* Property, const void* Data);
+    
+    template<typename T>
+    static FString GetPropertyValueAsString(const T* Data, FName PropertyName)
+    {
+        const FProperty* Property = Data->GetClass()->FindPropertyByName(PropertyName);
+        return GetPropertyValueAsString(Property, Data);
     }
     
 private:

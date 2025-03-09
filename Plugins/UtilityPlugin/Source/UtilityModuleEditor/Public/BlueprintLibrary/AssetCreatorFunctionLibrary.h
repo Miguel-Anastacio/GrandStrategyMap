@@ -15,6 +15,10 @@ class UTILITYMODULEEDITOR_API UAssetCreatorFunctionLibrary : public UBlueprintFu
 
 public:
 	UFUNCTION(Blueprintable, Category= "Asset Creation")
+	static UObject* CreateAssetInPackageWithUniqueName(const FString& PackagePath, UClass* AssetClass, const FString& BaseName ,UFactory* Factory = nullptr);
+	
+	
+	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
 	UFUNCTION(Blueprintable, Category= "Asset Creation")

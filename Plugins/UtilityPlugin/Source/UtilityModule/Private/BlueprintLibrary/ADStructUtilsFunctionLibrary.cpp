@@ -190,6 +190,22 @@ TArray<const FProperty*> UADStructUtilsFunctionLibrary::GetOrderedProperties(con
 	return OrderedProperties;
 }
 
+FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(const FProperty* Property, const void* Data)
+{
+	if(!Data || !Property)
+		return FString();
+
+	const uint8* PropertyAddr = Property->ContainerPtrToValuePtr<uint8>(Data);
+	if (!PropertyAddr)
+	{
+		return FString();
+	}
+	
+	FString ValueText;
+	Property->ExportTextItem_Direct(ValueText, PropertyAddr, nullptr, nullptr, PPF_None);
+	return ValueText;
+}
+
 UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory,
                                                                                                         const UScriptStruct* StructType)
 {

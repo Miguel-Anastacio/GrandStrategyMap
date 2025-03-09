@@ -12,6 +12,15 @@
 #include "Factories/TextureFromBufferFactory.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 
+UObject* UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(const FString& PackagePath,
+	UClass* AssetClass, const FString& BaseName, UFactory* Factory)
+{
+	const auto AssetPath = CreateUniqueAssetNameInPackage(PackagePath, BaseName, AssetClass);
+	FString Message;
+	bool bResult = false;
+	return CreateAsset(PackagePath + AssetPath, AssetClass, Factory, bResult, Message);
+}
+
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
                                                    bool& bOutSuccess, FString& OutInfoMessage)
 {
