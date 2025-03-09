@@ -31,12 +31,11 @@ void UCustomEditableText::SetIDText(const FText& text) const
 	ID->SetText(text);
 }
 
-void UCustomEditableText::PerformAction_Implementation(const FName& PropertyName,
-	const FInstancedStruct& InstancedStruct) const
+void UCustomEditableText::InitFromData(const FName& PropertyName, const UClass* ClassType, const void* Data) const
 {
-	IGenericUserWidgetInterface::PerformAction_Implementation(PropertyName, InstancedStruct);
 	SetIDText(FText::FromName(PropertyName));
 	bool bResult = false;
-	const FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), bResult);
+	const FProperty* Property = ClassType->FindPropertyByName(PropertyName);
+	const FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromString(Text), FText::FromString(Text));
 }

@@ -1,18 +1,20 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "DoubleTextBlock.h"
-#include "Components/RichTextBlock.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
+#include "Components/RichTextBlock.h"
+
 void UDoubleTextBlock::SetValues(const FText& LabelText, const FText& ValueText) const
 {
-	Label->SetText(LabelText);
-	Text->SetText(ValueText);
+	if(Label)
+		Label->SetText(LabelText);
+	if(Text)
+		Text->SetText(ValueText);
 }
 
-void UDoubleTextBlock::PerformAction_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const
+void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UClass* ClassType,  const void* Data) const
 {
-	bool bResult = false;
-	const FString ValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), bResult);
+	const FProperty* Property = ClassType->FindPropertyByName(PropertyName);
+	const FString ValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromName(PropertyName), FText::FromString(ValueText));
 }
-

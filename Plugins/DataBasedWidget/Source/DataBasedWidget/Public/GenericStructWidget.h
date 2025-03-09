@@ -3,11 +3,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "Types/SlateEnums.h"
 #include "GenericStructWidget.generated.h"
 
+class UWidgetMapDataAsset;
 class UCustomEditableText;
 class UVerticalBox;
 UCLASS(Abstract, BlueprintType)
@@ -19,12 +19,19 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	const UClass* GetDataClass() const;
+	
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
 #endif
 
+	// wrapper to init from Instanced Struct exposed to BP
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	void InitFromStruct(const FInstancedStruct& InstancedStruct);
+	virtual void InitFromStruct(const FInstancedStruct& InstancedStruct);
+	
+	// wrapper to init from UObject exposed to BP
+	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
+	virtual void InitFromObject(const UObject* Object);
 
 	UPROPERTY(EditAnywhere, Category = "Generic Struct Widget")
 	int Columns = 1;
@@ -39,14 +46,20 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
 	TMap<FName, UUserWidget*> WidgetFields;
-	// UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
-	// UScriptStruct* StructType;
 
-	const UScriptStruct* GetStruct() const;
+	// Should Widget Hold a reference at runtime to the data that is displaying?
+	
 protected:
+	
 #if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreatePanelSlots();
 #endif
+
+	void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
+	void InitFromData(const UClass* ClassType, const void* Data);
+private:	
+	void InitializeWidgetFields();
 	
 };

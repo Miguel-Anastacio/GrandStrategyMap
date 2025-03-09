@@ -11,23 +11,31 @@ class DATABASEDWIDGET_API UWidgetMapDataAsset : public UDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(Category=StructWidgetMap, EditAnywhere)
-	UScriptStruct* StructType;
+	UClass* ClassType;
+	
 	// Widget used by default
 	UPROPERTY(EditAnywhere, Category=StructWidgetMap)
 	TSubclassOf<UUserWidget> DefaultWidgetType;
 	
-	// The sprite to use for an interior region fill
 	UPROPERTY(Category = StructWidgetMap, EditAnywhere)
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
+
+	
+#if WITH_EDITOR
+	UFUNCTION(CallInEditor, BlueprintCallable, Category=StructWidgetMap)
+	void Reset();
+
+	void CreateFromClass(UClass* Class, const TSubclassOf<UUserWidget>& DefaultWidgetType);
+
+	bool IsValid() const;
+	const UClass* GetDataClass() const;
+#endif
 protected:
 #if WITH_EDITOR
 	// UObject interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	// End of UObject interface
 #endif
-#if WITH_EDITOR
-	UFUNCTION(CallInEditor, BlueprintCallable, Category=StructWidgetMap)
-	void Reset();
-#endif
-	
+
+	void FillPropertyWidgetMap(const UClass* Class);
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "AssetToolsModule.h"
 DECLARE_LOG_CATEGORY_EXTERN(LogDataBasedWidget, Log, All);
 class FDataBasedWidgetModule : public IModuleInterface
 {
@@ -12,4 +13,7 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+private:
+	TArray<TSharedPtr<IAssetTypeActions>> RegisteredAssetActions;
+	
 };

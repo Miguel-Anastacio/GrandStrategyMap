@@ -19,8 +19,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Double Text Block")
     void SetValues(const FText& LabelText, const FText& ValueText) const;
 
-    virtual void PerformAction_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const override;
 protected:
+    virtual void InitFromData(const FName& PropertyName, const UClass* ClassType, const void* Data) const override;
+    
     /** The rich text block displaying the identifier. */
     UPROPERTY(meta = (BindWidget))
     URichTextBlock* Label;
