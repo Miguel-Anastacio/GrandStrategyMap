@@ -19,8 +19,14 @@
 			"Name": "DataBasedWidget",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "DataBasedWidgetEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	],
+	
 	"Plugins": [
 		{
 			"Name": "StructUtils",
