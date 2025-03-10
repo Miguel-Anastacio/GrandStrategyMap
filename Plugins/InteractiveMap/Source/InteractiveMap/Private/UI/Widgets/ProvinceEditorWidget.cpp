@@ -9,13 +9,13 @@ void UProvinceEditorWidget::SetProvinceData(const FInstancedStruct& Data, int Pr
 {
 	ProvinceSelectedData = Data;
 	ProvinceSelectedID = ProvinceID;
-	if(Data.GetScriptStruct()->GetClass() == ProvinceDataWidget->GetDataClass())
+	if(Data.GetScriptStruct() == ProvinceDataWidget->GetDataClass())
 	{
 		OceanTileDataWidget->SetVisibility(ESlateVisibility::Collapsed);
 		ProvinceDataWidget->InitFromStruct(Data);
 		ProvinceDataWidget->SetVisibility(ESlateVisibility::Visible);
 	}
-	else if(Data.GetScriptStruct()->GetClass() == OceanTileDataWidget->GetDataClass())
+	else if(Data.GetScriptStruct() == OceanTileDataWidget->GetDataClass())
 	{
 		ProvinceDataWidget->SetVisibility(ESlateVisibility::Collapsed);
 		OceanTileDataWidget->InitFromStruct(Data);
