@@ -19,9 +19,14 @@ void UGenericStructWidget::NativeOnInitialized()
 void UGenericStructWidget::NativePreConstruct()
 {
 	InitializeWidgetFields();
-	if(const UClass* DataClass = GetDataClass())
+	if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
 	{
 		InitFromData(DataClass, DataClass->ClassDefaultObject);
+	}
+	else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
+	{
+		const FInstancedStruct InstanceStruct(ScriptStruct);
+		InitFromData(ScriptStruct, InstanceStruct.GetMemory());
 	}
 	Super::NativePreConstruct();
 }
@@ -51,7 +56,7 @@ void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& 
 
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
-	InitFromData(InstancedStruct.GetScriptStruct()->GetClass(), InstancedStruct.GetMemory());
+	InitFromData(InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
@@ -59,7 +64,7 @@ void UGenericStructWidget::InitFromObject(const UObject* Object)
 	InitFromData(Object->GetClass(), Object);
 }
 
-const UClass* UGenericStructWidget::GetDataClass() const
+const UStruct* UGenericStructWidget::GetDataClass() const
 {
 	if(!DataAssetWidgetMap)
 		return nullptr;
@@ -67,38 +72,65 @@ const UClass* UGenericStructWidget::GetDataClass() const
 	return DataAssetWidgetMap->GetDataClass();
 }
 
+void UGenericStructWidget::InitFromData(const UStruct* ClassType, const void* Data)
+{
+	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
+	{
+		const FName& PropertyName = WidgetPair.Key;
+		const UUserWidget* Widget = WidgetPair.Value;
+		
+		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		{
+			if (const IGenericUserWidgetInterface* InterfaceInstance = Cast<IGenericUserWidgetInterface>(Widget))
+			{
+				InterfaceInstance->InitFromData(PropertyName, ClassType, Data);
+			}
+		}
+	}
+}
+	
+void UGenericStructWidget::InitializeWidgetFields()
+{
+	if(!MainPanel)
+		return;
+	
+	WidgetFields.Empty();
+	for (TFieldIterator<FProperty> It(GetDataClass()); It; ++It)
+	{
+		const FProperty* Property = *It;
+		if(!Property)
+		{
+			continue;
+		}
+		
+		FName FieldName(*Property->GetAuthoredName());
+		for(const auto& Widget : MainPanel->GetAllChildren())
+		{
+			if(FieldName == Widget->GetCategoryName())
+			{
+				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
+				{
+					WidgetFields.Emplace(FieldName, UserWidget);
+					break;
+				}
+			}
+		}
+	}
+}
+
 #if WITH_EDITOR
 void UGenericStructWidget::CreateGenericWidget(UWidgetMapDataAsset* DataWidgetMap)
 {
 	this->DataAssetWidgetMap = DataWidgetMap;
 
-	// The problem lies in creating the mainPanel
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
-	if (!MainAssetWidgetTree)
-	{
-		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
-		return;
-	}
-	
-	// Check if there is already a root widget
-	if (!MainAssetWidgetTree->RootWidget)
-	{
-		MainPanel = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
-		if (MainPanel)
-		{
-			MainAssetWidgetTree->RootWidget = MainPanel	;
-		}
-	}
-	MainAssetWidgetTree->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
-	
+	CreateMainPanel();
 	CreatePanelSlots();
 }
 
 void UGenericStructWidget::CreatePanelSlots()
 {
-	if (!MainPanel)
-		return;
+	// if (!MainPanel)
+	// 	return;
 	
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
@@ -131,9 +163,9 @@ void UGenericStructWidget::CreatePanelSlots()
 	uint8 ColumnIndex = 0;
 	for(const auto& [PropertyName, WidgetType] : DataAssetWidgetMap->PropertyWidgetMap)
 	{
-		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType))
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType, PropertyName))
 		{
-			NewWidget->Rename(*PropertyName.ToString());
+			NewWidget->SetCategoryName(PropertyName.ToString());
 			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
 		}
 		
@@ -149,6 +181,23 @@ void UGenericStructWidget::CreatePanelSlots()
 	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
+void UGenericStructWidget::CreateMainPanel()
+{
+	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	if (!MainAssetWidgetTree)
+	{
+		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
+		return;
+	}
+	
+	if (!MainAssetWidgetTree->RootWidget)
+	{
+		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
+	}
+	MainAssetWidgetTree->Modify();
+	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+}
+
 void UGenericStructWidget::UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const
 {
 	ColumnIndex++;
@@ -158,50 +207,5 @@ void UGenericStructWidget::UpdateGridPosition(uint8& ColumnIndex, uint8& RowInde
 		RowIndex++;
 	}
 }
-
-void UGenericStructWidget::InitFromData(const UClass* ClassType, const void* Data)
-{
-	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
-	{
-		const FName& PropertyName = WidgetPair.Key;
-		const UUserWidget* Widget = WidgetPair.Value;
-		
-		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
-		{
-			if (const IGenericUserWidgetInterface* InterfaceInstance = Cast<IGenericUserWidgetInterface>(Widget))
-			{
-				InterfaceInstance->InitFromData(PropertyName, ClassType, Data);
-			}
-		}
-	}
-}
-
-void UGenericStructWidget::InitializeWidgetFields()
-{
-	if(!MainPanel)
-		return;
-	
-	WidgetFields.Empty();
-	for (TFieldIterator<FProperty> It(GetDataClass()); It; ++It)
-	{
-		const FProperty* Property = *It;
-		if(!Property)
-		{
-			continue;
-		}
-		
-		FName FieldName(*Property->GetAuthoredName());
-		for(const auto& Widget : MainPanel->GetAllChildren())
-		{
-			if(FieldName == Widget->GetName())
-			{
-				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
-				{
-					WidgetFields.Emplace(FieldName, UserWidget);
-					break;
-				}
-			}
-		}
-	}
-}
 #endif
+

@@ -1,7 +1,5 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-
 #include "GenericWidgetDataMap.h"
-#include "UObject/UnrealTypePrivate.h"
 
 void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -9,27 +7,43 @@ void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Property
 	if(!PropertyChangedEvent.Property)
 		return;
 	
-	if (!ClassType)
-		return;
+	// if (!ClassType)
+	// 	return;
 
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, ClassType)
-		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, DefaultWidgetType)))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, Class)
+		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, DefaultWidgetType))
+		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, Struct)))
 	{
+		SetClass();
 		Reset();
 	}
 }
 
-void UWidgetMapDataAsset::FillPropertyWidgetMap(const UClass* Class)
+void UWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
 {
-	if (!Class)
+	if (!BaseClass)
 		return;
 	PropertyWidgetMap.Empty();
-	for (TFieldIterator<FProperty> It(Class); It; ++It)
+	for (TFieldIterator<FProperty> It(BaseClass); It; ++It)
 	{
 		const FProperty* Property = *It;
 		if (!Property) continue;
 		PropertyWidgetMap.Add(FName(Property->GetAuthoredName()), DefaultWidgetType);
+	}
+}
+
+bool UWidgetMapDataAsset::SetClass()
+{
+	if(bUObjectBased)
+	{
+		Struct = nullptr;
+		ClassType = Class;
+	}
+	else if(Struct)
+	{
+		Class = nullptr;
+		ClassType = Struct;
 	}
 }
 
@@ -40,12 +54,25 @@ void UWidgetMapDataAsset::Reset()
 	MarkPackageDirty();
 }
 
-void UWidgetMapDataAsset::CreateFromClass(UClass* Class, const TSubclassOf<UUserWidget>& WidgetType)
+void UWidgetMapDataAsset::CreateFromData(UStruct* BaseStruct, const TSubclassOf<UUserWidget>& WidgetType)
 {
-	if (!Class)
+	if (!BaseStruct)
 		return;
 	
-	ClassType = Class;
+	bUObjectBased = BaseStruct->IsA(UClass::StaticClass());
+	ClassType = BaseStruct;
+	
+	if(bUObjectBased)
+	{
+		Struct = nullptr;
+		Class = Cast<UClass>(BaseStruct);
+	}
+	else
+	{
+		Class = nullptr;
+		Struct = Cast<UScriptStruct>(BaseStruct);
+	}
+	
 	this->DefaultWidgetType = WidgetType;
 	Reset();
 }
@@ -55,7 +82,21 @@ bool UWidgetMapDataAsset::IsValid() const
 	return ClassType != nullptr;
 }
 
-const UClass* UWidgetMapDataAsset::GetDataClass() const
+const UStruct* UWidgetMapDataAsset::GetDataClass() const
 {
 	return ClassType;
+}
+
+const UScriptStruct* UWidgetMapDataAsset::GetClassAsScriptStruct() const
+{
+	if(bUObjectBased)
+		return nullptr;
+	return Cast<UScriptStruct>(ClassType);
+}
+
+const UClass* UWidgetMapDataAsset::GetClassAsUClass() const
+{
+	if(!bUObjectBased)
+		return nullptr;
+	return Cast<UClass>(ClassType);
 }

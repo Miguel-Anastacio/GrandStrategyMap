@@ -50,7 +50,7 @@ void UMyAssetAction::CreateWidgetFromObject() const
 		// create widget map
 		UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName());
 		if(WidgetMapDataAsset)
-			WidgetMapDataAsset->CreateFromClass(AssetClass, DefaultWidgetForFields);
+			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
 		
 		// create WBP_widget
 		UBlueprint* GenericWidget = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
@@ -124,8 +124,6 @@ UBlueprint* UMyAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const 
 			if (UGenericStructWidget* DefaultObject = Cast<UGenericStructWidget>(BPGeneratedClass->GetDefaultObject()))
 			{
 				DefaultObject->CreateGenericWidget(MapDataAsset);
-
-				// Mark the Blueprint as structurally modified so the changes persist
 				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(NewBlueprint);
 			}
 		}

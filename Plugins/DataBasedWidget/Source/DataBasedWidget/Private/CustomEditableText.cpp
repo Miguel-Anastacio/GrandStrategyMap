@@ -31,7 +31,7 @@ void UCustomEditableText::SetIDText(const FText& text) const
 	ID->SetText(text);
 }
 
-void UCustomEditableText::InitFromData(const FName& PropertyName, const UClass* ClassType, const void* Data) const
+void UCustomEditableText::InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const
 {
 	SetIDText(FText::FromName(PropertyName));
 	bool bResult = false;

@@ -19,7 +19,7 @@ public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
 	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
-	const UClass* GetDataClass() const;
+	const UStruct* GetDataClass() const;
 	
 #if WITH_EDITOR
 	void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
@@ -55,10 +55,12 @@ protected:
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreatePanelSlots();
+	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
+	void CreateMainPanel();
 #endif
 
 	void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
-	void InitFromData(const UClass* ClassType, const void* Data);
+	void InitFromData(const UStruct* ClassType, const void* Data);
 private:	
 	void InitializeWidgetFields();
 	

@@ -34,7 +34,7 @@ public:
 		InitFromData(PropertyName, Object->GetClass(), Object);
 	};
 	
-	virtual void InitFromData(const FName& PropertyName, const UClass* ClassType, const void* Data) const = 0;
+	virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const = 0;
 protected:
 };
 

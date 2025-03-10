@@ -32,7 +32,7 @@ public:
     void SetValues(const FText& Current, const FText& Input) const;
     void SetIDText(const FText& text) const;
 
-    virtual void InitFromData(const FName& PropertyName, const UClass* ClassType, const void* Data) const override;
+    virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const override;
 public:
     /** Delegate for editable text commit events. */
     UPROPERTY(BlueprintAssignable, Category = "CustomEditableText")

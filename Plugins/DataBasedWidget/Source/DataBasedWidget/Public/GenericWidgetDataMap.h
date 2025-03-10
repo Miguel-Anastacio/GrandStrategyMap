@@ -10,8 +10,16 @@ class DATABASEDWIDGET_API UWidgetMapDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(Category=StructWidgetMap, EditAnywhere)
-	UClass* ClassType;
+#if WITH_EDITOR
+	UFUNCTION(CallInEditor, BlueprintCallable, Category=StructWidgetMap)
+	void Reset();
+
+	void CreateFromData(UStruct* BaseStruct, const TSubclassOf<UUserWidget>& DefaultWidgetType);
+	bool IsValid() const;
+	const UStruct* GetDataClass() const;
+	const UScriptStruct* GetClassAsScriptStruct() const;
+	const UClass* GetClassAsUClass() const;
+#endif
 	
 	// Widget used by default
 	UPROPERTY(EditAnywhere, Category=StructWidgetMap)
@@ -20,22 +28,24 @@ public:
 	UPROPERTY(Category = StructWidgetMap, EditAnywhere)
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
 
-	
-#if WITH_EDITOR
-	UFUNCTION(CallInEditor, BlueprintCallable, Category=StructWidgetMap)
-	void Reset();
-
-	void CreateFromClass(UClass* Class, const TSubclassOf<UUserWidget>& DefaultWidgetType);
-
-	bool IsValid() const;
-	const UClass* GetDataClass() const;
-#endif
 protected:
 #if WITH_EDITOR
 	// UObject interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	// End of UObject interface
 #endif
+	void FillPropertyWidgetMap(const UStruct* BaseClass);
+	bool SetClass();
 
-	void FillPropertyWidgetMap(const UClass* Class);
+	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(InlineEditConditionToggle))
+    bool bUObjectBased = true;
+
+	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(EditCondition="bUObjectBased"))
+	UClass* Class = nullptr;
+	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(EditCondition="!bUObjectBased"))
+	UScriptStruct* Struct = nullptr;
+
+	UPROPERTY()
+	UStruct* ClassType = nullptr;
+	
 };

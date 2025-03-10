@@ -35,10 +35,12 @@ public class DataBasedWidgetEditor : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+				"InputCore",
 				"Slate",
 				"SlateCore",
 				"UMG", 
-				"DataBasedWidget", "UMGEditor",
+				"UMGEditor",
+				"DataBasedWidget", 
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -48,6 +50,7 @@ public class DataBasedWidgetEditor : ModuleRules
 			PrivateDependencyModuleNames.AddRange(
 				new string[]
 				{
+					"PropertyEditor",
 					"Blutility",
 					"UnrealEd",
 					"EditorStyle",

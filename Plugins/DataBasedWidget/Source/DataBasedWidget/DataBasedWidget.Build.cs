@@ -60,6 +60,7 @@ public class DataBasedWidget : ModuleRules
 				new string[]
 				{
 					"UtilityModuleEditor",
+					"UMGEditor",
 				}
 			);
 		}
