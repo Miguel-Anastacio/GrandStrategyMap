@@ -33,7 +33,7 @@ void UWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
 	}
 }
 
-bool UWidgetMapDataAsset::SetClass()
+void UWidgetMapDataAsset::SetClass()
 {
 	if(bUObjectBased)
 	{
@@ -47,6 +47,11 @@ bool UWidgetMapDataAsset::SetClass()
 	}
 }
 
+// bool UWidgetMapDataAsset::IsScriptStruct(const UStruct* Struct) const
+// {
+// 	return false;
+// }
+
 void UWidgetMapDataAsset::Reset()
 {
 	FillPropertyWidgetMap(ClassType);
@@ -58,7 +63,7 @@ void UWidgetMapDataAsset::CreateFromData(UStruct* BaseStruct, const TSubclassOf<
 {
 	if (!BaseStruct)
 		return;
-	
+
 	bUObjectBased = BaseStruct->IsA(UClass::StaticClass());
 	ClassType = BaseStruct;
 	

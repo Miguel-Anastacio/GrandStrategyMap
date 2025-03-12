@@ -14,6 +14,7 @@
 #include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Editor/UMGEditor/Public/WidgetBlueprint.h"
+#include "Engine/UserDefinedStruct.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
@@ -28,24 +29,13 @@ UMyAssetAction::UMyAssetAction()
 void UMyAssetAction::CreateWidgetFromObject() const 
 {
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
-
 	for (const UObject* Asset : SelectedAssets)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Custom Action executed on: %s"), *Asset->GetName());
 		FString PackagePath = FPaths::GetPath(Asset->GetPathName());
 
 		// Get Asset Class
-		UClass* AssetClass = nullptr;
-		if (const UBlueprint* BlueprintAsset = Cast<UBlueprint>(Asset))
-		{
-			// Get the generated class from the blueprint
-			AssetClass = BlueprintAsset->GeneratedClass;
-		}
-		else
-		{
-			// Directly get the class for non-blueprint assets
-			AssetClass = Asset->GetClass();
-		}
+		UStruct* AssetClass = GetAssetStruct(Asset);
 		
 		// create widget map
 		UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName());
@@ -54,9 +44,6 @@ void UMyAssetAction::CreateWidgetFromObject() const
 		
 		// create WBP_widget
 		UBlueprint* GenericWidget = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
-		// SetupBlueprintAfterCreation(GenericWidget, WidgetMapDataAsset);
-		// if(GenericWidget)
-			// GenericWidget->CreateGenericWidget(WidgetMapDataAsset);
 		
 		FString Message;
 		UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
@@ -93,7 +80,7 @@ UBlueprint* UMyAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const 
 	FString OutPackageName = AssetName;
 	FString UniqueAssetName = AssetName;
 	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
-	AssetToolsModule.Get().CreateUniqueAssetName(PackagePath + TEXT("/") + AssetName, TEXT(""), OutPackageName, UniqueAssetName);
+	AssetToolsModule.Get().CreateUniqueAssetName(PackagePath + TEXT("/WBP_GenericWidget_") + AssetName, TEXT(""), OutPackageName, UniqueAssetName);
 
 	// Create package
 	UPackage* Package = CreatePackage(*OutPackageName);
@@ -132,36 +119,30 @@ UBlueprint* UMyAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const 
 	return NewBlueprint;
 }
 
-void UMyAssetAction::SetupBlueprintAfterCreation(UBlueprint* CreatedBlueprint, UWidgetMapDataAsset* WidgetMap)
+UStruct* UMyAssetAction::GetAssetStruct(const UObject* Asset)
 {
-	if (!CreatedBlueprint)
+	// Handle different asset types
+	if (const UBlueprint* BlueprintAsset = Cast<UBlueprint>(Asset))
 	{
-		return;
+		// Get the generated class from the blueprint
+		return BlueprintAsset->GeneratedClass;
 	}
-    
-	// Open the Blueprint in the editor
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-	AssetEditorSubsystem->OpenEditorForAsset(CreatedBlueprint);
-    
-	// Cast to the widget blueprint editor
-	IAssetEditorInstance* EditorInstance = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset(CreatedBlueprint, true);
-	FWidgetBlueprintEditor* WidgetEditor = static_cast<FWidgetBlueprintEditor*>(EditorInstance);
-	if (!WidgetEditor)
+	else if (const UUserDefinedStruct* UserStruct = Cast<UUserDefinedStruct>(Asset))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to open widget editor"));
-		return;
-	}
-    
-	// Get the preview widget (this is the actual UGenericStructWidget instance in the editor)
-	UUserWidget* PreviewWidget = WidgetEditor->GetPreview();
-	if (UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(PreviewWidget))
-	{
-		GenericStructWidget->CreateGenericWidget(WidgetMap);
-		// Make sure changes are saved
-		// WidgetEditor->();
+		// For user-defined structs, get the actual struct
+		return const_cast<UUserDefinedStruct*>(UserStruct);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to get GenericStructWidget from preview"));
+		// For other assets, check if it's already a UScriptStruct
+		// const UStruct* AssetStruct = Cast<UScriptStruct>(Asset);
+  //       if(const UStruct* AssetStruct = Cast<UScriptStruct>(Asset))
+  //       {
+  //       	return AssetStruct;
+  //       }
+  //       else
+  //       {
+		return Asset->GetClass();
+        // }
 	}
 }

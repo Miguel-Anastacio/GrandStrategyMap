@@ -18,3 +18,8 @@ void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* Cla
 	const FString ValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromName(PropertyName), FText::FromString(ValueText));
 }
+
+void UDoubleTextBlock::NativeOnListItemObjectSet(UObject* ListItemObject)
+{
+	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
+}

@@ -20,12 +20,11 @@ public:
 	const UScriptStruct* GetClassAsScriptStruct() const;
 	const UClass* GetClassAsUClass() const;
 #endif
-	
 	// Widget used by default
-	UPROPERTY(EditAnywhere, Category=StructWidgetMap)
+	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="GenericUserWidgetInterface"))
 	TSubclassOf<UUserWidget> DefaultWidgetType;
 	
-	UPROPERTY(Category = StructWidgetMap, EditAnywhere)
+	UPROPERTY(Category = StructWidgetMap, EditAnywhere, meta=(AllowedClasses="UUserWidget", MustImplement="GenericUserWidgetInterface"))
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
 
 protected:
@@ -35,7 +34,8 @@ protected:
 	// End of UObject interface
 #endif
 	void FillPropertyWidgetMap(const UStruct* BaseClass);
-	bool SetClass();
+	void SetClass();
+	// bool IsScriptStruct(const UStruct* Struct) const;
 
 	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(InlineEditConditionToggle))
     bool bUObjectBased = true;

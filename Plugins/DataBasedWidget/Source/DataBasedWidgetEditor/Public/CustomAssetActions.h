@@ -16,8 +16,12 @@ public:
     UFUNCTION(CallInEditor)
     void CreateWidgetFromObject() const ;
 
+protected:    
     static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
     static class UGenericStructWidget* CreateWidgetFromObject(const FString& PackagePath, const FString& ObjectOriginName);
     static UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset);
-    static void SetupBlueprintAfterCreation(UBlueprint* CreatedBlueprint, UWidgetMapDataAsset* WidgetMap);
+
+    static UStruct* GetAssetStruct(const UObject* Asset);
+    
+    
 };

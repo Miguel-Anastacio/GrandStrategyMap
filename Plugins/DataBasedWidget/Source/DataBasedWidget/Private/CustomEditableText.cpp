@@ -15,6 +15,11 @@ void UCustomEditableText::NativePreConstruct()
 	Super::NativePreConstruct();
 }
 
+void UCustomEditableText::NativeOnListItemObjectSet(UObject* ListItemObject)
+{
+	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
+}
+
 void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)
 {
 	TextCommitDelegate.Broadcast(this, Text, CommitMethod);

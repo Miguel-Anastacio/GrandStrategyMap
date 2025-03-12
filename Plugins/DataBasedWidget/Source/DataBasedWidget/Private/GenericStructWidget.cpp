@@ -198,6 +198,11 @@ void UGenericStructWidget::CreateMainPanel()
 	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
+void UGenericStructWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
+{
+	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
+}
+
 void UGenericStructWidget::UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const
 {
 	ColumnIndex++;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GenericUserWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/IUserObjectListEntry.h"
 #include "CustomEditableText.generated.h"
 
 /**
@@ -23,7 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
 class UEditableTextBox;
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API  UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface
+class DATABASEDWIDGET_API  UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface, public  IUserObjectListEntry
 {
     GENERATED_BODY()
 
@@ -41,6 +42,11 @@ public:
 protected:
     virtual void NativeOnInitialized() override;
     virtual void NativePreConstruct() override;
+
+    // IUserObjectListEntry
+    virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+    // IUserObjectListEntry
+    
 
 protected:
     /** The text displayed as the identifier. */

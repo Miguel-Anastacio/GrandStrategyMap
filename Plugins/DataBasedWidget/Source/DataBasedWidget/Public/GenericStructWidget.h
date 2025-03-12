@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/IUserObjectListEntry.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "Types/SlateEnums.h"
 #include "GenericStructWidget.generated.h"
@@ -11,7 +12,7 @@ class UWidgetMapDataAsset;
 class UCustomEditableText;
 class UVerticalBox;
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget
+class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()
 
@@ -58,6 +59,10 @@ protected:
 	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
 	void CreateMainPanel();
 #endif
+
+	// IUserObjectListEntry
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+	// IUserObjectListEntry
 
 	void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
 	void InitFromData(const UStruct* ClassType, const void* Data);
