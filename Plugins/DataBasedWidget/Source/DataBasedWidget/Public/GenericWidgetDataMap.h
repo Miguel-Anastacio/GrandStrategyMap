@@ -21,16 +21,20 @@ public:
 	const UClass* GetClassAsUClass() const;
 #endif
 	// Widget used by default
-	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="GenericUserWidgetInterface"))
+	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
 	TSubclassOf<UUserWidget> DefaultWidgetType;
 	
-	UPROPERTY(Category = StructWidgetMap, EditAnywhere, meta=(AllowedClasses="UUserWidget", MustImplement="GenericUserWidgetInterface"))
+	UPROPERTY(Category = StructWidgetMap, EditAnywhere, meta=(AllowedClasses="UUserWidget", MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface",
+																GetKeyOptions="GetPropertyNameOptions"))
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
 
 protected:
 #if WITH_EDITOR
 	// UObject interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	
+	UFUNCTION()
+	TArray<FString> GetPropertyNameOptions() const;
 	// End of UObject interface
 #endif
 	void FillPropertyWidgetMap(const UStruct* BaseClass);

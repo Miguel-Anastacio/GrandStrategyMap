@@ -4,42 +4,41 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/EditableTextBox.h"
 #include "Components/RichTextBlock.h"
-void UCustomEditableText::NativeOnInitialized()
+void UWPropGenCustomEditableText::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	InputValue->OnTextCommitted.AddDynamic(this, &UCustomEditableText::TextCommited);
+	InputValue->OnTextCommitted.AddDynamic(this, &UWPropGenCustomEditableText::TextCommited);
 }
 
-void UCustomEditableText::NativePreConstruct()
+void UWPropGenCustomEditableText::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 }
 
-void UCustomEditableText::NativeOnListItemObjectSet(UObject* ListItemObject)
+void UWPropGenCustomEditableText::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 
-void UCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)
+void UWPropGenCustomEditableText::TextCommited(const FText& Text, ETextCommit::Type CommitMethod)
 {
 	TextCommitDelegate.Broadcast(this, Text, CommitMethod);
 }
 
-void UCustomEditableText::SetValues(const FText& Current, const FText& Input) const
+void UWPropGenCustomEditableText::SetValues(const FText& Current, const FText& Input) const
 {
 	CurrentValue->SetText(Current);
 	InputValue->SetText(Input);
 }
 
-void UCustomEditableText::SetIDText(const FText& text) const
+void UWPropGenCustomEditableText::SetIDText(const FText& text) const
 {
 	ID->SetText(text);
 }
 
-void UCustomEditableText::InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const
+void UWPropGenCustomEditableText::InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const
 {
 	SetIDText(FText::FromName(PropertyName));
-	bool bResult = false;
 	const FProperty* Property = ClassType->FindPropertyByName(PropertyName);
 	const FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromString(Text), FText::FromString(Text));

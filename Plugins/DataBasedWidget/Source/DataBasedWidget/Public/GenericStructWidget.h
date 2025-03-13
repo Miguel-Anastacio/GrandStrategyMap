@@ -9,7 +9,7 @@
 #include "GenericStructWidget.generated.h"
 
 class UWidgetMapDataAsset;
-class UCustomEditableText;
+class UWCustomEditableText;
 class UVerticalBox;
 UCLASS(Abstract, BlueprintType)
 class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
@@ -49,15 +49,15 @@ public:
 	TMap<FName, UUserWidget*> WidgetFields;
 
 	// Should Widget Hold a reference at runtime to the data that is displaying?
-	
+
 protected:
 	
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
-	void CreatePanelSlots();
-	UFUNCTION(CallInEditor, BlueprintCallable, Category="Generic Struct Widget")
-	void CreateMainPanel();
+	UFUNCTION(CallInEditor, Category="Generic Struct Widget")
+	void CreatePanelSlots() const;
+	
+	void CreateMainPanel() const;
 #endif
 
 	// IUserObjectListEntry

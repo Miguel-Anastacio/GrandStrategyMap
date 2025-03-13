@@ -10,7 +10,7 @@
 class UCustomButtonWidget;
 class UEditableText;
 class URichTextBlock; 
-class UCustomEditableText;
+class UWCustomEditableText;
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UProvinceEditorWidget : public UUserWidget
 {

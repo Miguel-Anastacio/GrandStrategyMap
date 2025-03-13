@@ -4,21 +4,19 @@
 #include "AssetActionUtility.h"
 #include "CustomAssetActions.generated.h"
 UCLASS()
-class UMyAssetAction  : public UAssetActionUtility
+class UCreateWidgetFromAssetAction  : public UAssetActionUtility
 {
     GENERATED_BODY()
-    UMyAssetAction();
+    UCreateWidgetFromAssetAction();
 public:
-
+    // Widget used by default for each field of UObject/Struct
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> DefaultWidgetForFields;
-    // Specify the asset class you are extending
     UFUNCTION(CallInEditor)
     void CreateWidgetFromObject() const ;
 
 protected:    
     static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
-    static class UGenericStructWidget* CreateWidgetFromObject(const FString& PackagePath, const FString& ObjectOriginName);
     static UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset);
 
     static UStruct* GetAssetStruct(const UObject* Asset);

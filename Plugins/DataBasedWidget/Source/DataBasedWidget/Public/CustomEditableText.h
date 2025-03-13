@@ -15,7 +15,7 @@
  *    - Text: The new text value after editing.
  *    - CommitMethod: The method by which the editing was committed.
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, class UCustomEditableText*, textEdited,
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, class UWPropGenCustomEditableText*, textEdited,
 											                                 const FText&, Text, 
 											                                 ETextCommit::Type, CommitMethod);
 /**
@@ -24,7 +24,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
 class UEditableTextBox;
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API  UCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface, public  IUserObjectListEntry
+class DATABASEDWIDGET_API  UWPropGenCustomEditableText : public UUserWidget, public  IGenericUserWidgetInterface, public  IUserObjectListEntry
 {
     GENERATED_BODY()
 

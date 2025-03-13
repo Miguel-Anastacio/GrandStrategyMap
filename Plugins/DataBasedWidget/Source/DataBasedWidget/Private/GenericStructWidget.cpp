@@ -21,12 +21,12 @@ void UGenericStructWidget::NativePreConstruct()
 	InitializeWidgetFields();
 	if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
 	{
-		InitFromData(DataClass, DataClass->ClassDefaultObject);
+		InitFromObject(DataClass->ClassDefaultObject);
 	}
 	else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
 	{
 		const FInstancedStruct InstanceStruct(ScriptStruct);
-		InitFromData(ScriptStruct, InstanceStruct.GetMemory());
+		InitFromStruct(InstanceStruct);
 	}
 	Super::NativePreConstruct();
 }
@@ -44,24 +44,35 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	// this crashes
-	// const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-	// if (PropertyName == GET_MEMBER_NAME_CHECKED(UGenericStructWidget, DataAssetWidgetMap)
-	// 	|| PropertyName == GET_MEMBER_NAME_CHECKED(UGenericStructWidget, Columns))
-	// {
-	// 	CreatePanelSlots();
-	// }
 }
 #endif
 
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
-	InitFromData(InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
+	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
+	{
+		const FName& PropertyName = WidgetPair.Key;
+		const UUserWidget* Widget = WidgetPair.Value;
+		
+		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		{
+			IGenericUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
+		}
+	}
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
 {
-	InitFromData(Object->GetClass(), Object);
+	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
+	{
+		const FName& PropertyName = WidgetPair.Key;
+		const UUserWidget* Widget = WidgetPair.Value;
+			
+		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		{
+			IGenericUserWidgetInterface::Execute_InitFromUObject(Widget, PropertyName, Object);
+		}
+	}
 }
 
 const UStruct* UGenericStructWidget::GetDataClass() const
@@ -122,15 +133,14 @@ void UGenericStructWidget::InitializeWidgetFields()
 void UGenericStructWidget::CreateGenericWidget(UWidgetMapDataAsset* DataWidgetMap)
 {
 	this->DataAssetWidgetMap = DataWidgetMap;
-
-	CreateMainPanel();
 	CreatePanelSlots();
 }
 
-void UGenericStructWidget::CreatePanelSlots()
+void UGenericStructWidget::CreatePanelSlots() const
 {
 	// if (!MainPanel)
 	// 	return;
+	CreateMainPanel();
 	
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
@@ -181,7 +191,7 @@ void UGenericStructWidget::CreatePanelSlots()
 	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
-void UGenericStructWidget::CreateMainPanel()
+void UGenericStructWidget::CreateMainPanel() const
 {
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
 	if (!MainAssetWidgetTree)
@@ -193,13 +203,14 @@ void UGenericStructWidget::CreateMainPanel()
 	if (!MainAssetWidgetTree->RootWidget)
 	{
 		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
+		MainAssetWidgetTree->Modify();
+		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 	}
-	MainAssetWidgetTree->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
 void UGenericStructWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
+	InitFromObject(ListItemObject);
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 

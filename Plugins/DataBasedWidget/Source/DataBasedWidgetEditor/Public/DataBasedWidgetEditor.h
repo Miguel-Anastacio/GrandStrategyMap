@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "AssetToolsModule.h"
 class FDataBasedWidgetEditorModule : public IModuleInterface
 {
 public:

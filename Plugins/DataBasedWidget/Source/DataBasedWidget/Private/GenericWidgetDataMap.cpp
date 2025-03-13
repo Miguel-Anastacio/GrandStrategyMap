@@ -20,6 +20,18 @@ void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Property
 	}
 }
 
+TArray<FString> UWidgetMapDataAsset::GetPropertyNameOptions() const
+{
+	TArray<FString> PropertyNames;
+	for (TFieldIterator<FProperty> It(ClassType); It; ++It)
+	{
+		const FProperty* Property = *It;
+		if (!Property) continue;
+		PropertyNames.Add(Property->GetAuthoredName());
+	}
+	return PropertyNames;
+}
+
 void UWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
 {
 	if (!BaseClass)

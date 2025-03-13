@@ -17,7 +17,6 @@ class DATABASEDWIDGET_API IGenericUserWidgetInterface
 	GENERATED_BODY()
 
 public:
-	// Example of a function declaration in the interface
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Generic Widget Interface")
 	void InitFromStruct(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const;
 
@@ -34,7 +33,7 @@ public:
 		InitFromData(PropertyName, Object->GetClass(), Object);
 	};
 	
-	virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const = 0;
+	virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const {};
 protected:
 };
 

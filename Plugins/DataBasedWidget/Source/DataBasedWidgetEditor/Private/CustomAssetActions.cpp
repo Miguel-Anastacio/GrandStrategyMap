@@ -20,13 +20,12 @@
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
 
 #undef LOCTEXT_NAMESPACE
-UMyAssetAction::UMyAssetAction()
+UCreateWidgetFromAssetAction::UCreateWidgetFromAssetAction()
 {
 	SupportedClasses.Add(UObject::StaticClass());
-	// SupportedClasses.Add(UMyOtherAsset::StaticClass());
 }
 
-void UMyAssetAction::CreateWidgetFromObject() const 
+void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const 
 {
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
 	for (const UObject* Asset : SelectedAssets)
@@ -44,13 +43,12 @@ void UMyAssetAction::CreateWidgetFromObject() const
 		
 		// create WBP_widget
 		UBlueprint* GenericWidget = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
-		
-		FString Message;
-		UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 	}
+	FString Message;
+	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
-UWidgetMapDataAsset* UMyAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
+UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
 	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath,UWidgetMapDataAsset::StaticClass(),
 														"/DA_WidgetMapDataAsset_"  + ObjectOriginName);
@@ -61,19 +59,7 @@ UWidgetMapDataAsset* UMyAssetAction::CreateWidgetMapDataAsset(const FString& Pac
 	return Cast<UWidgetMapDataAsset>(Asset);
 }
 
-UGenericStructWidget* UMyAssetAction::CreateWidgetFromObject(const FString& PackagePath, const FString& ObjectOriginName)
-{
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UGenericStructWidget::StaticClass(),
-														"/WBP_GenericWidget_");
-	if (!Asset)
-	{
-		return nullptr;
-	}
-	return Cast<UGenericStructWidget>(Asset);
-}
-
-
-UBlueprint* UMyAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
+UBlueprint* UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
 																UWidgetMapDataAsset* MapDataAsset)
 {
 	// Ensure the asset name is unique
@@ -119,7 +105,7 @@ UBlueprint* UMyAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const 
 	return NewBlueprint;
 }
 
-UStruct* UMyAssetAction::GetAssetStruct(const UObject* Asset)
+UStruct* UCreateWidgetFromAssetAction::GetAssetStruct(const UObject* Asset)
 {
 	// Handle different asset types
 	if (const UBlueprint* BlueprintAsset = Cast<UBlueprint>(Asset))
@@ -134,15 +120,6 @@ UStruct* UMyAssetAction::GetAssetStruct(const UObject* Asset)
 	}
 	else
 	{
-		// For other assets, check if it's already a UScriptStruct
-		// const UStruct* AssetStruct = Cast<UScriptStruct>(Asset);
-  //       if(const UStruct* AssetStruct = Cast<UScriptStruct>(Asset))
-  //       {
-  //       	return AssetStruct;
-  //       }
-  //       else
-  //       {
 		return Asset->GetClass();
-        // }
 	}
 }
