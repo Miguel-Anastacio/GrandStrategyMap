@@ -5,10 +5,11 @@
 #include "EditorUtilityLibrary.h"
 #include "GenericStructWidget.h"
 #include "GenericWidgetDataMap.h"
-#include "ListViewWidgets.h"
-#include "ListViewWidgetsDataTable.h"
+#include "CollectionViewWidgets/CollectionViewWidgets.h"
+#include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "CollectionViewWidgets/ListViewWidgetsDataTable.h"
 #include "Engine/UserDefinedStruct.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
@@ -19,7 +20,8 @@ UCreateWidgetListAssetAction::UCreateWidgetListAssetAction()
 	SupportedClasses.Add(UDataTable::StaticClass());
 }
 
-void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems) const 
+void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems,
+																TSubclassOf<UUserWidget> BaseViewWidget) const 
 {
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
 	for (const UObject* Asset : SelectedAssets)
@@ -36,7 +38,7 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 		if(!WidgetForListItems)
 		{
 			// create widget for item
-			UStruct* ItemClass = const_cast<UStruct*>(Cast<UStruct>(DataTable->RowStruct));
+			UStruct* ItemClass = Cast<UStruct>(DataTable->RowStruct);
 			if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, ItemClass->GetName()))
 			{
 				WidgetMapDataAsset->CreateFromData(ItemClass, DefaultWidgetForFields);
@@ -45,7 +47,7 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 				WidgetForListItems = WidgetBlueprint->GeneratedClass;
 			}
 		}
-		UBlueprint* WidgetListBlueprint = CreateWidgetListBlueprint(PackagePath, Asset->GetName(), UWPropGenListViewDataTable::StaticClass(),
+		UBlueprint* WidgetListBlueprint = CreateWidgetListBlueprint(PackagePath, Asset->GetName(), BaseViewWidget,
 																	WidgetForListItems, DataTable);
 		
 	}
@@ -70,12 +72,12 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
                                                                     const UDataTable* ListItems)
 {
 	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, WidgetListBaseClass,
-																						TEXT("/WBP_GenericWidget_") + ObjectOriginName);
+																						TEXT("/WBP_ListView_") + ObjectOriginName);
 	if (Blueprint)
 	{
 		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
 		{
-			if (UWPropGenListViewDataTable* DefaultObject = Cast<UWPropGenListViewDataTable>(BPGeneratedClass->GetDefaultObject()))
+			if (UWPropGenCollectionViewDataTable* DefaultObject = Cast<UWPropGenCollectionViewDataTable>(BPGeneratedClass->GetDefaultObject()))
 			{
 				DefaultObject->CreateListView(WidgetItemClass);
 				DefaultObject->SetDataTable(const_cast<UDataTable*>(ListItems));

@@ -5,23 +5,17 @@
 #include "GenericStructWidget.h"
 #include "CreateWidgetAssetAction.generated.h"
 UCLASS()
-class UCreateWidgetFromAssetAction  : public UAssetActionUtility
+class DATABASEDWIDGETEDITOR_API UCreateWidgetFromAssetAction  : public UAssetActionUtility
 {
     GENERATED_BODY()
     UCreateWidgetFromAssetAction();
 public:
-
     
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
-    void CreateWidgetFromObject() const ;
+    virtual void CreateWidgetFromObject(
+        UPARAM(meta=(MustImplement="UserObjectListEntry")) TSubclassOf<UUserWidget> DefaultWidgetForFields = nullptr) const ;
 
 protected:    
-    // Widget used by default for each field of UObject/Struct
-    UPROPERTY(EditAnywhere, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
-    TSubclassOf<UUserWidget> DefaultWidgetForFields;
-    
-    // UPROPERTY(EditAnywhere)
-    TSubclassOf<UGenericStructWidget> BaseGenericWidget;
     
     static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
     UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset) const;

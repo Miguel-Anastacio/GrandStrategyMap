@@ -11,7 +11,7 @@
 class UWidgetMapDataAsset;
 class UWCustomEditableText;
 class UVerticalBox;
-UCLASS(Abstract, BlueprintType)
+UCLASS(BlueprintType)
 class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
 {
 	GENERATED_BODY()

@@ -1,0 +1,30 @@
+// Copyright 2024 An@stacioDev All rights reserved.
+#pragma once
+
+#include "CoreMinimal.h"
+#include "CollectionViewWidgetsDataTable.h"
+#include "Types/SlateEnums.h"
+#include "Components/TreeView.h"
+#include "TreeViewWidgetsDataTable.generated.h"
+
+UCLASS(Blueprintable,  BlueprintType)
+class DATABASEDWIDGET_API UWPropGenTreeViewDataTable : public UWPropGenCollectionViewDataTable
+{
+	GENERATED_BODY()
+
+public:
+	virtual UListView* GetListView() override
+	{
+		return TreeView;
+	};
+
+	virtual void SetRootWidget(UWidgetTree* Tree) override
+	{
+		TreeView = Tree->ConstructWidget<UTreeView>(UTreeView::StaticClass(), FName("TreeView"));;
+	};
+	
+protected:
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewDataTable)
+	class UTreeView* TreeView;
+
+};

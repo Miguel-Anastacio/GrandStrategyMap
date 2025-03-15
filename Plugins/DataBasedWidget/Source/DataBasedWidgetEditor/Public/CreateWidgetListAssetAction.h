@@ -4,19 +4,22 @@
 #include "AssetActionUtility.h"
 #include "GenericStructWidget.h"
 #include "InstancedStruct.h"
+#include "CollectionViewWidgets/ListViewWidgetsDataTable.h"
 #include "CreateWidgetListAssetAction.generated.h"
 UCLASS()
-class UCreateWidgetListAssetAction  : public UAssetActionUtility
+class DATABASEDWIDGETEDITOR_API UCreateWidgetListAssetAction  : public UAssetActionUtility
 {
     GENERATED_BODY()
     UCreateWidgetListAssetAction();
 public:
 
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
-    void CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems = nullptr) const ;
+    virtual void CreateWidgetListFromDataTable(
+        UPARAM(meta=(MustImplement="UserObjectListEntry")) TSubclassOf<UUserWidget> WidgetForListItems = nullptr,
+        UPARAM(meta=(AllowedClasses="WPropGenCollectionViewDataTable")) TSubclassOf<UUserWidget> BaseViewWidget = UWPropGenListViewDataTable::StaticClass()) const;
 protected:    
     // Widget used by default for each field of UObject/Struct
-    UPROPERTY(EditAnywhere, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
+    UPROPERTY(EditAnywhere, Category=CreateWidgetListFromDataTable, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
     TSubclassOf<UUserWidget> DefaultWidgetForFields;
 
     static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);

@@ -2,36 +2,27 @@
 #pragma once
 #include "CreateWidgetAssetAction.h"
 
-#include "AssetToolsModule.h"
+#include "DoubleTextBlock.h"
 #include "EditorUtilityLibrary.h"
 #include "GenericStructWidget.h"
 #include "GenericWidgetDataMap.h"
-#include "WidgetBlueprintEditor.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "WidgetBlueprintFactory.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Blueprint/UserWidgetBlueprint.h"
-#include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
-#include "Editor/UMGEditor/Public/WidgetBlueprint.h"
 #include "Engine/UserDefinedStruct.h"
 #include "Kismet2/BlueprintEditorUtils.h"
-#include "Kismet2/KismetEditorUtilities.h"
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
 
 #undef LOCTEXT_NAMESPACE
 UCreateWidgetFromAssetAction::UCreateWidgetFromAssetAction()
 {
 	SupportedClasses.Add(UObject::StaticClass());
-	BaseGenericWidget = UGenericStructWidget::StaticClass();
 }
 
-void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const 
+void UCreateWidgetFromAssetAction::CreateWidgetFromObject(TSubclassOf<UUserWidget> DefaultWidgetForFields) const 
 {
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
 	for (const UObject* Asset : SelectedAssets)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Custom Action executed on: %s"), *Asset->GetName());
 		FString PackagePath = FPaths::GetPath(Asset->GetPathName());
 
 		// Get Asset Class
@@ -40,9 +31,15 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const
 		// create widget map
 		if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
 		{
+			if(!DefaultWidgetForFields)
+			{
+				DefaultWidgetForFields = UDoubleTextBlock::StaticClass();
+			}
+			
 			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
 			// create WBP_widget
 			CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+			UE_LOG(LogTemp, Warning, TEXT("Create Widget from Asset succeeded on: %s"), *Asset->GetName());
 		}
 		
 	}
@@ -64,7 +61,7 @@ UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(cons
 UBlueprint* UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
 																UWidgetMapDataAsset* MapDataAsset) const
 {
-	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, BaseGenericWidget,
+	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{

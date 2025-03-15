@@ -2,12 +2,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ListViewWidgets.h"
+#include "CollectionViewWidgets.h"
 #include "Types/SlateEnums.h"
-#include "ListViewWidgetsDataTable.generated.h"
+#include "CollectionViewWidgetsDataTable.generated.h"
 
-UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenListViewDataTable : public UWPropGenListView
+UCLASS(Abstract)
+class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenCollectionView
 {
 	GENERATED_BODY()
 
@@ -15,9 +15,8 @@ public:
 	virtual void NativeConstruct() override;
 	UFUNCTION(BlueprintCallable, Category=ListViewDataTable)
 	virtual void SetDataTable(UDataTable* NewDataTable);
-	
-protected:
 
+protected:
 	UPROPERTY(EditAnywhere, Category=ListViewDataTable, BlueprintReadWrite)
 	TSoftObjectPtr<UDataTable> DataTable;
 	

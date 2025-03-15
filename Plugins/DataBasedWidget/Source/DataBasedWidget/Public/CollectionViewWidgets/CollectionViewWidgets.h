@@ -5,7 +5,7 @@
 #include "InstancedStruct.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-#include "ListViewWidgets.generated.h"
+#include "CollectionViewWidgets.generated.h"
 
 // Wrapper for InstancedStructs so that they can be used as source for ListView
 UCLASS()
@@ -33,9 +33,8 @@ protected:
 #endif
 };
 
-
-UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenListView : public UUserWidget
+UCLASS(Abstract)
+class DATABASEDWIDGET_API UWPropGenCollectionView : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -44,22 +43,24 @@ public:
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
 	virtual void InitFromStructs(const TArray<FInstancedStruct>& Structs);
 	
-	// wrapper to init from UObject exposed to BP
+	// init from UObject exposed to BP
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
 	virtual void InitFromObjects(const TArray<UObject*>& Objects);
+	
+	virtual class UListView* GetListView();
 	
 #if WITH_EDITOR
 	virtual void CreateListView(TSubclassOf<UUserWidget> WidgetClass);
 #endif
+	
 protected:
 	
 #if WITH_EDITOR
+	virtual void SetRootWidget(UWidgetTree* Tree);
 	virtual void SetEntryWidgetClass(TSubclassOf<UUserWidget> WidgetClass);
 #endif
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewWidgets)
-	class UListView* ListView;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleInstanceOnly)
 	TArray<UObject*> SourceObjects;
 	
 };

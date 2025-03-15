@@ -27,7 +27,7 @@ public class DataBasedWidgetEditor : ModuleRules
 			{
 				// ... add other public dependencies that you statically link with here ...
 				"Core",
-				"StructUtils"
+				"StructUtils", 
 			}
 			);
 		

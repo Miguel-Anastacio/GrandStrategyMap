@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "PropertyWithIcon.h"
+#include "UserWidgets/PropertyWithIcon.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/PropertyUtilityFunctionLibrary.h"
 #include "Components/RichTextBlock.h"

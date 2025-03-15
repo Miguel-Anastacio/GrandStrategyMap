@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "CustomEditableText.h"
+#include "UserWidgets/CustomEditableText.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/EditableTextBox.h"
 #include "Components/RichTextBlock.h"

@@ -30,7 +30,7 @@ public:
 
 	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override
 	{
-		static const FAssetCategoryPath Categories[] = {FText::FromString("Map Editor")};
+		static const FAssetCategoryPath Categories[] = {FText::FromString("PropertyWidgetGenerator")};
 		return Categories;
 	}
 

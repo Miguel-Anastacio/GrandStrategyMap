@@ -7,7 +7,7 @@
 #include "Components/GridPanel.h"
 #include "GenericUserWidgetInterface.h"
 #include "GenericWidgetDataMap.h"
-#include "ListViewWidgets.h"
+#include "CollectionViewWidgets/CollectionViewWidgets.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #endif
