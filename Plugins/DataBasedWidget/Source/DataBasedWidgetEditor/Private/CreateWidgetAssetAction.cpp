@@ -23,6 +23,7 @@
 UCreateWidgetFromAssetAction::UCreateWidgetFromAssetAction()
 {
 	SupportedClasses.Add(UObject::StaticClass());
+	BaseGenericWidget = UGenericStructWidget::StaticClass();
 }
 
 void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const 
@@ -37,12 +38,13 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const
 		UStruct* AssetClass = GetAssetStruct(Asset);
 		
 		// create widget map
-		UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName());
-		if(WidgetMapDataAsset)
+		if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
+		{
 			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
+			// create WBP_widget
+			CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+		}
 		
-		// create WBP_widget
-		UBlueprint* GenericWidget = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
 	}
 	FString Message;
 	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
@@ -50,8 +52,8 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject() const
 
 UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath,UWidgetMapDataAsset::StaticClass(),
-														"/DA_WidgetMapDataAsset_"  + ObjectOriginName);
+	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
 	if (!Asset)
 	{
 		return nullptr;
@@ -60,49 +62,24 @@ UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(cons
 }
 
 UBlueprint* UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
-																UWidgetMapDataAsset* MapDataAsset)
+																UWidgetMapDataAsset* MapDataAsset) const
 {
-	// Ensure the asset name is unique
-	FString OutPackageName = AssetName;
-	FString UniqueAssetName = AssetName;
-	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
-	AssetToolsModule.Get().CreateUniqueAssetName(PackagePath + TEXT("/WBP_GenericWidget_") + AssetName, TEXT(""), OutPackageName, UniqueAssetName);
-
-	// Create package
-	UPackage* Package = CreatePackage(*OutPackageName);
-	if (!Package)
+	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, BaseGenericWidget,
+																						TEXT("/WBP_GenericWidget_") + AssetName);
+	if (Blueprint)
 	{
-		return nullptr;
-	}
-
-	// Create the blueprint class derived from UGenericStructWidget
-	UBlueprint* NewBlueprint = FKismetEditorUtilities::CreateBlueprint(
-		UGenericStructWidget::StaticClass(),   // Parent class
-		Package,                              // Asset package
-		*FPaths::GetBaseFilename(UniqueAssetName), // Asset name
-		BPTYPE_Normal,                         // Normal Blueprint
-		UWidgetBlueprint::StaticClass(),             // Base Blueprint class
-		UWidgetBlueprintGeneratedClass::StaticClass(), // Generated class type
-		FName("CreateAsset")                   // Unique transaction name
-	);
-	
-	if (NewBlueprint)
-	{
-		FAssetRegistryModule::AssetCreated(NewBlueprint);
-		Package->MarkPackageDirty();
-
 		// **Modify the default field in UGenericStructWidget**
-		if (UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(NewBlueprint->GeneratedClass))
+		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
 		{
 			if (UGenericStructWidget* DefaultObject = Cast<UGenericStructWidget>(BPGeneratedClass->GetDefaultObject()))
 			{
 				DefaultObject->CreateGenericWidget(MapDataAsset);
-				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(NewBlueprint);
+				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 			}
 		}
 	}
 
-	return NewBlueprint;
+	return Blueprint;
 }
 
 UStruct* UCreateWidgetFromAssetAction::GetAssetStruct(const UObject* Asset)

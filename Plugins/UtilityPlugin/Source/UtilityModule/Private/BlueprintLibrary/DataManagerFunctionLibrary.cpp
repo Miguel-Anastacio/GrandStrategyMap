@@ -52,6 +52,38 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 	return jsonValueArray;
 }
 
+TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArrayFromString(const FString& JsonString)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JsonString), JsonValues))
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing json string: '%s'"), *JsonString);
+	}
+	return JsonValues;
+}
+
+
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs(const UDataTable* DataTable)
+{
+	if(!DataTable)
+	{
+		UE_LOG(LogUtilityModule, Error, TEXT("GetArrayOfInstancedStructs : Data Table is NULL"));
+		return TArray<FInstancedStruct>();
+	}
+	
+	const FString Json = DataTable->GetTableAsJSON();
+	return LoadCustomDataFromJsonString(Json, DataTable->GetRowStruct());
+}
+
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(
+	const TSoftObjectPtr<UDataTable> DataTable)
+{
+	if (const UDataTable* LoadedDataTable = DataTable.LoadSynchronous())
+	{
+		return GetArrayOfInstancedStructs(LoadedDataTable);
+	}
+	return TArray<FInstancedStruct>();
+}
 
 TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)
 {
@@ -81,8 +113,37 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 	return OutArray;
 }
 
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJsonString(const FString& JString,
+	const UScriptStruct* StructType)
+{
+	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArrayFromString(JString); 
+	TArray<FInstancedStruct> OutArray;
+	int32 index = 0;
+	FInstancedStruct InstancedStruct;
+	for(const auto& JsonValue : JsonArray)
+	{
+		TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
+		if (!JsonObject.IsValid())
+		{
+			UE_LOG(LogTemp, Error, TEXT("Invalid JSON object in array."));
+			continue;
+		}
+
+		// Deserialize the object into an FInstancedStruct
+		FInstancedStruct NewInstancedStruct;
+		if (DeserializeJsonToFInstancedStruct(JsonObject, StructType, NewInstancedStruct))
+		{
+			// ObjectHasMissingFields(JsonObject, index, FilePath, structType);
+			OutArray.Add(MoveTemp(NewInstancedStruct));
+		}
+
+		index++;
+	}
+	return OutArray;
+}
+
 TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath,
-	const TArray<UScriptStruct*>& StructTypes)
+                                                                             const TArray<UScriptStruct*>& StructTypes)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
 	TArray<FInstancedStruct> OutArray;

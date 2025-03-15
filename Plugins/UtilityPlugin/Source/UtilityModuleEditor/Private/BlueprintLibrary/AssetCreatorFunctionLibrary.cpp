@@ -1,6 +1,8 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#if WITH_EDITOR
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Kismet2/KismetEditorUtilities.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
 #include "UtilityModuleEditor.h"
@@ -15,17 +17,27 @@
 UObject* UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(const FString& PackagePath,
 	UClass* AssetClass, const FString& BaseName, UFactory* Factory)
 {
-	const auto AssetPath = CreateUniqueAssetNameInPackage(PackagePath, BaseName, AssetClass);
+	// Ensure the asset name is unique
+	FString OutPackageName = BaseName;
+	FString UniqueAssetName = BaseName;
+	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
+	AssetToolsModule.Get().CreateUniqueAssetName(PackagePath + BaseName, TEXT(""), OutPackageName, UniqueAssetName);
+
+	// Create package
+	UPackage* Package = CreatePackage(*OutPackageName);
+	if (!Package)
+	{
+		return nullptr;
+	}
 	FString Message;
 	bool bResult = false;
-	return CreateAsset(PackagePath + AssetPath, AssetClass, Factory, bResult, Message);
+	return CreateAsset(OutPackageName, AssetClass, Factory, bResult, Message);
 }
 
 UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
                                                    bool& bOutSuccess, FString& OutInfoMessage)
 {
 	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
 	UFactory* Factory = factory;
 	if(!Factory)
 	{
@@ -223,5 +235,40 @@ class UWidgetTree* UAssetCreatorFunctionLibrary::GetWidgetTree(const UUserWidget
 		return nullptr;
 	}
 	return MainAsset->WidgetTree;
+}
+
+UBlueprint* UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(const FString& PackagePath, UClass* Class,const FString& AssetName)
+{
+	// Ensure the asset name is unique
+	FString OutPackageName = AssetName;
+	FString UniqueAssetName = AssetName;
+	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
+	AssetToolsModule.Get().CreateUniqueAssetName(PackagePath + AssetName, TEXT(""), OutPackageName, UniqueAssetName);
+
+	// Create package
+	UPackage* Package = CreatePackage(*OutPackageName);
+	if (!Package)
+	{
+		return nullptr;
+	}
+
+	// Create the blueprint class derived from UGenericStructWidget
+	UBlueprint* NewBlueprint = FKismetEditorUtilities::CreateBlueprint(
+		Class,   // Parent class
+		Package,                              // Asset package
+		*FPaths::GetBaseFilename(UniqueAssetName), // Asset name
+		BPTYPE_Normal,                         // Normal Blueprint
+		UWidgetBlueprint::StaticClass(),             // Base Blueprint class
+		UWidgetBlueprintGeneratedClass::StaticClass(), // Generated class type
+		FName("CreateAsset")                   // Unique transaction name
+	);
+	
+	if (NewBlueprint)
+	{
+		FAssetRegistryModule::AssetCreated(NewBlueprint);
+		Package->MarkPackageDirty();
+	}
+
+	return NewBlueprint;
 }
 #endif

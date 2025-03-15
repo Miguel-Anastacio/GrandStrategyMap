@@ -18,40 +18,18 @@ class UTILITYMODULE_API UDataManagerFunctionLibrary : public UBlueprintFunctionL
     GENERATED_BODY()
 
 public:
+    UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
+    static TArray<FInstancedStruct> GetArrayOfInstancedStructs(const UDataTable* DataTable);
     
-    
+    UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
+    static TArray<FInstancedStruct> GetArrayOfInstancedStructsSoft(const TSoftObjectPtr<UDataTable> DataTable);
     /**
      * Reads data from a data table into a map.
      *
-     * @param dataTable The data table to read from.
-     * @param mapToUpdate The map to update with the data.
+     * @param DataTable The data table to read from.
+     * @param ArrayToUpdate The map to update with the data.
      * @return True if successful, false otherwise.
      */
-    // template<class Data, class ID>
-    // static bool ReadDataTable(UDataTable* dataTable, TMap<ID, Data>& mapToUpdate)
-    // {
-    //     if (!dataTable)
-    //     {
-    //         return false;
-    //     }
-    //     for (auto& RowName : dataTable->GetRowNames())
-    //     {
-    //         Data* Item = dataTable->FindRow<Data>(RowName, "");
-    //         if (Item)
-    //         {
-    //             mapToUpdate.Emplace(RowName, (*Item));
-    //         }
-    //     }
-    //     return true;
-    // }
-    
-    /**
-   * Reads data from a data table into a map.
-   *
-   * @param DataTable The data table to read from.
-   * @param ArrayToUpdate The map to update with the data.
-   * @return True if successful, false otherwise.
-   */
     template<class T>
     static bool ReadDataTableToArray(const UDataTable* DataTable, TArray<T>& ArrayToUpdate)
     {
@@ -85,35 +63,6 @@ public:
         WriteJson(jsonFilePath, jsonObject, outSuccess, outInfoMessage);
     }
 
-    /**
-     * Writes a map structure to a JSON file.
-     *
-     * @param jsonFilePath The path to the JSON file.
-     * @param mapStructure The map structure to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
-     */
-    // template<class T>
-    // static void WriteMapToJsonFile(const FString& jsonFilePath, const TMap<FName, T>& mapStructure, bool& outSuccess, FString& outInfoMessage)
-    // {
-    //     TSharedPtr<FJsonObject> jsonObject = MakeShared<FJsonObject>();
-    //     if (!jsonObject)
-    //     {
-    //         outSuccess = false;
-    //         outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
-    //         return;
-    //     }
-    //
-    //     TArray<TSharedPtr<FJsonValue>> jsonValueArray;
-    //     for (const auto& pair : mapStructure)
-    //     {
-    //         TSharedPtr<FJsonObject> structObject = MakeShared<FJsonObject>();
-    //         pair.Value.SerializeToJson(structObject, pair.Key);
-    //         jsonValueArray.Add(MakeShared<FJsonValueObject>(structObject));
-    //     }
-    //
-    //     WriteJson(jsonFilePath, jsonValueArray, outSuccess, outInfoMessage);
-    // }
      /**
      * Writes an array to a JSON file.
      *
@@ -175,6 +124,7 @@ public:
     }
 
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
+    static TArray<FInstancedStruct> LoadCustomDataFromJsonString(const FString& JString, const UScriptStruct* StructType);
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const TArray<UScriptStruct*>& StructTypes);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
@@ -221,6 +171,7 @@ private:
 
     static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
     static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
+    static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArrayFromString(const FString& JsonString);
     static bool ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);
 };

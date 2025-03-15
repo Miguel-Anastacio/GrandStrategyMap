@@ -17,7 +17,6 @@ public:
 	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAssetInPackageWithUniqueName(const FString& PackagePath, UClass* AssetClass, const FString& BaseName ,UFactory* Factory = nullptr);
 	
-	
 	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
@@ -30,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
 	static FString CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
+	static UBlueprint* CreateBlueprintDerivedFromClass(const FString& PackagePath, UClass* Class,const FString& AssetName);
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static bool SaveAsset(const FString& AssetPath, FString& OutInfoMessage);

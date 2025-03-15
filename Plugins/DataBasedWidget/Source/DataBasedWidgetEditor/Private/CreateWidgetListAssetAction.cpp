@@ -1,0 +1,94 @@
+// Copyright 2024 An@stacioDev All rights reserved.
+#pragma once
+#include "CreateWidgetListAssetAction.h"
+
+#include "EditorUtilityLibrary.h"
+#include "GenericStructWidget.h"
+#include "GenericWidgetDataMap.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "Engine/UserDefinedStruct.h"
+#include "Kismet2/BlueprintEditorUtils.h"
+#define LOCTEXT_NAMESPACE "CustomAssetActions"
+
+#undef LOCTEXT_NAMESPACE
+UCreateWidgetListAssetAction::UCreateWidgetListAssetAction()
+{
+	SupportedClasses.Add(UDataTable::StaticClass());
+	BaseGenericWidget = UGenericStructWidget::StaticClass();
+}
+
+void UCreateWidgetListAssetAction::CreateWidgetFromList() const 
+{
+	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
+	for (const UObject* Asset : SelectedAssets)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Custom Action executed on: %s"), *Asset->GetName());
+		FString PackagePath = FPaths::GetPath(Asset->GetPathName());
+
+		// Get Asset Class
+		UStruct* AssetClass = GetAssetStruct(Asset);
+		
+		// create widget map
+		if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
+		{
+			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
+			// create WBP_widget
+			CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+		}
+		
+	}
+	FString Message;
+	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+}
+
+UWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
+{
+	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
+	if (!Asset)
+	{
+		return nullptr;
+	}
+	return Cast<UWidgetMapDataAsset>(Asset);
+}
+
+UBlueprint* UCreateWidgetListAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
+																UWidgetMapDataAsset* MapDataAsset) const
+{
+	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, BaseGenericWidget,
+																						TEXT("/WBP_GenericWidget_") + AssetName);
+	if (Blueprint)
+	{
+		// **Modify the default field in UGenericStructWidget**
+		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
+		{
+			if (UGenericStructWidget* DefaultObject = Cast<UGenericStructWidget>(BPGeneratedClass->GetDefaultObject()))
+			{
+				DefaultObject->CreateGenericWidget(MapDataAsset);
+				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+			}
+		}
+	}
+
+	return Blueprint;
+}
+
+UStruct* UCreateWidgetListAssetAction::GetAssetStruct(const UObject* Asset)
+{
+	// Handle different asset types
+	if (const UBlueprint* BlueprintAsset = Cast<UBlueprint>(Asset))
+	{
+		// Get the generated class from the blueprint
+		return BlueprintAsset->GeneratedClass;
+	}
+	else if (const UUserDefinedStruct* UserStruct = Cast<UUserDefinedStruct>(Asset))
+	{
+		// For user-defined structs, get the actual struct
+		return const_cast<UUserDefinedStruct*>(UserStruct);
+	}
+	else
+	{
+		return Asset->GetClass();
+	}
+}

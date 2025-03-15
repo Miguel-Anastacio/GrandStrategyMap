@@ -15,9 +15,16 @@ inline bool UPropertyUtilityFunctionLibrary::IsPropertyOfType(const FProperty* P
 	return PropertyClass && (PropertyClass == Class || PropertyClass->IsChildOf(Class));
 }
 
-UTexture2D* UPropertyUtilityFunctionLibrary::GetTextureFromProperty(const UObject* Object,
-	const FName& PropertyName)
+UObject* UPropertyUtilityFunctionLibrary::GetObjectFromProperty(const UObject* Container, const FName& PropertyName, TSubclassOf<UObject> ObjClass)
 {
-	const FProperty* Property = Object->GetClass()->FindPropertyByName(PropertyName);
-	return GetPropertyAs<UTexture2D>(Property, UTexture2D::StaticClass(), Object);
+	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(Container->GetClass(), PropertyName);
+	return GetPropertyAs<UObject>(Property, ObjClass, Container);
 }
+
+UObject* UPropertyUtilityFunctionLibrary::GetObjectFromPropertyStruct(const FInstancedStruct& InstancedStruct,
+	const FName& PropertyName, TSubclassOf<class UObject> ObjClass)
+{
+	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(), PropertyName);
+	return GetPropertyAs<UObject>(Property, ObjClass, InstancedStruct.GetMemory());
+}
+

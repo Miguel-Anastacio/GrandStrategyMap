@@ -117,20 +117,7 @@ public:
         }
         return T();
     }
-
-    template<typename T>
-    static bool StructHasPropertyWithTypeCompatible(const UScriptStruct* StructType, const FName& MustHavePropertyName)
-    {
-        if(!StructType)
-            return false;
-        
-        if(const FProperty* Property = FindPropertyByDisplayName(StructType, MustHavePropertyName))
-        {
-            return IsTypeCompatible<T>(Property);
-        }
-        return false;
-    }
-
+    
     template<typename T>
     static bool SetPropertyValueInStruct(FInstancedStruct& InstancedStruct, const FString& PropertyName, const T& NewValue)
     {
@@ -149,8 +136,8 @@ public:
     
     static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
 
-    static FProperty* FindPropertyByDisplayName(const UScriptStruct* Struct, const FName& DisplayName);
-    static FProperty* FindPropertyByDisplayName(TArray<const UScriptStruct*> Structs, const FName& DisplayName);
+    static FProperty* FindPropertyByDisplayName(const UStruct* Struct, const FName& DisplayName);
+    static FProperty* FindPropertyByDisplayName(const TArray<const UStruct*>& Structs, const FName& DisplayName);
     
     static bool IsStructOfType(const FInstancedStruct& InstancedStruct, const TArray<UScriptStruct*>& StructTypes);
 
@@ -210,9 +197,12 @@ public:
     template<typename T>
     static FString GetPropertyValueAsString(const T* Data, FName PropertyName)
     {
-        const FProperty* Property = Data->GetClass()->FindPropertyByName(PropertyName);
+        const FProperty* Property = FindPropertyByDisplayName(Data->GetClass(), PropertyName);
         return GetPropertyValueAsString(Property, Data);
     }
+
+    UFUNCTION(BlueprintCallable, Category=StructUtils)
+    static TArray<FInstancedStruct> CreateInstancedStructArray(int32 Size, const FInstancedStruct& Default);
     
 private:
     struct FStructProp

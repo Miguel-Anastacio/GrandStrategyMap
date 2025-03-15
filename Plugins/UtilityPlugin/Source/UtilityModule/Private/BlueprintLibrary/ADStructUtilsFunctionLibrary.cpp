@@ -58,6 +58,7 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const 
 	{
 		return GetPropertyValueAsString(Property, InstancedStruct.GetMemory(), OutResult);
 	}
+	
 	return FString("Invalid Property or Instance");
 }
 
@@ -116,7 +117,7 @@ FInstancedStruct UADStructUtilsFunctionLibrary::GetStructFromProperty(const FPro
 	return FInstancedStruct();
 }
 
-FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScriptStruct* Struct,const FName& DisplayName )
+FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UStruct* Struct,const FName& DisplayName )
 {
 	if(!Struct)
 		return nullptr;
@@ -132,10 +133,10 @@ FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UScrip
 	return nullptr;
 }
 
-FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(TArray<const UScriptStruct*> Structs,
+FProperty* UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(const TArray<const UStruct*>& Structs,
 	const FName& DisplayName)
 {
-	for(const UScriptStruct* Struct : Structs)
+	for(const UStruct* Struct : Structs)
 	{
 		if(FProperty* Property = FindPropertyByDisplayName(Struct, DisplayName))
 		{
@@ -204,6 +205,14 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsString(const FProperty*
 	FString ValueText;
 	Property->ExportTextItem_Direct(ValueText, PropertyAddr, nullptr, nullptr, PPF_None);
 	return ValueText;
+}
+
+TArray<FInstancedStruct> UADStructUtilsFunctionLibrary::CreateInstancedStructArray(int32 Size,
+	const FInstancedStruct& Default)
+{
+	TArray<FInstancedStruct> Array;
+	Array.Init(Default, Size);
+	return Array;
 }
 
 UADStructUtilsFunctionLibrary::FStructProp UADStructUtilsFunctionLibrary::GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory,
