@@ -7,7 +7,6 @@
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
-#include "AssetToolsModule.h"
 #endif
 
 #if WITH_EDITOR
