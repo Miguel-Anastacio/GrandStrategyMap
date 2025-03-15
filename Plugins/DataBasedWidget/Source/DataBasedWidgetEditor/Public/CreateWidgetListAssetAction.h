@@ -3,27 +3,26 @@
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
 #include "GenericStructWidget.h"
-#include "CreateWidgetAssetAction.generated.h"
+#include "InstancedStruct.h"
+#include "CreateWidgetListAssetAction.generated.h"
 UCLASS()
-class UCreateWildgetListAssetAction  : public UAssetActionUtility
+class UCreateWidgetListAssetAction  : public UAssetActionUtility
 {
     GENERATED_BODY()
-    UCreateWildgetListAssetAction();
+    UCreateWidgetListAssetAction();
 public:
 
-    
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
-    void CreateWidgetFromObject() const ;
-
+    void CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems = nullptr) const ;
 protected:    
     // Widget used by default for each field of UObject/Struct
     UPROPERTY(EditAnywhere, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
     TSubclassOf<UUserWidget> DefaultWidgetForFields;
-    
-    // UPROPERTY(EditAnywhere)
-    TSubclassOf<UGenericStructWidget> BaseGenericWidget;
-    
+
     static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
+    static UBlueprint* CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
+                                                    TSubclassOf<UUserWidget> WidgetListBaseClass, TSubclassOf<UUserWidget> WidgetItemClass,
+                                                   const UDataTable* ListItems);
     UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset) const;
 
     static UStruct* GetAssetStruct(const UObject* Asset);

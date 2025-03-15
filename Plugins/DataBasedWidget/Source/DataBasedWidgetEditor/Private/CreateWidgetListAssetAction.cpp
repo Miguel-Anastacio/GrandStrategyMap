@@ -5,6 +5,8 @@
 #include "EditorUtilityLibrary.h"
 #include "GenericStructWidget.h"
 #include "GenericWidgetDataMap.h"
+#include "ListViewWidgets.h"
+#include "ListViewWidgetsDataTable.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Engine/UserDefinedStruct.h"
@@ -15,27 +17,36 @@
 UCreateWidgetListAssetAction::UCreateWidgetListAssetAction()
 {
 	SupportedClasses.Add(UDataTable::StaticClass());
-	BaseGenericWidget = UGenericStructWidget::StaticClass();
 }
 
-void UCreateWidgetListAssetAction::CreateWidgetFromList() const 
+void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems) const 
 {
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
 	for (const UObject* Asset : SelectedAssets)
 	{
+		const UDataTable* DataTable = Cast<UDataTable>(Asset);
+		if(!DataTable)
+			continue;
+		
 		UE_LOG(LogTemp, Warning, TEXT("Custom Action executed on: %s"), *Asset->GetName());
 		FString PackagePath = FPaths::GetPath(Asset->GetPathName());
 
-		// Get Asset Class
-		UStruct* AssetClass = GetAssetStruct(Asset);
-		
-		// create widget map
-		if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
+		// Get Struct of entries in data table 
+		// User did not give a widget for entries create one
+		if(!WidgetForListItems)
 		{
-			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
-			// create WBP_widget
-			CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+			// create widget for item
+			UStruct* ItemClass = const_cast<UStruct*>(Cast<UStruct>(DataTable->RowStruct));
+			if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, ItemClass->GetName()))
+			{
+				WidgetMapDataAsset->CreateFromData(ItemClass, DefaultWidgetForFields);
+				// create WBP_widget
+				UBlueprint* WidgetBlueprint = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+				WidgetForListItems = WidgetBlueprint->GeneratedClass;
+			}
 		}
+		UBlueprint* WidgetListBlueprint = CreateWidgetListBlueprint(PackagePath, Asset->GetName(), UWPropGenListViewDataTable::StaticClass(),
+																	WidgetForListItems, DataTable);
 		
 	}
 	FString Message;
@@ -53,10 +64,32 @@ UWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(cons
 	return Cast<UWidgetMapDataAsset>(Asset);
 }
 
-UBlueprint* UCreateWidgetListAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
-																UWidgetMapDataAsset* MapDataAsset) const
+UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
+																	TSubclassOf<UUserWidget> WidgetListBaseClass,
+                                                                    TSubclassOf<UUserWidget> WidgetItemClass,
+                                                                    const UDataTable* ListItems)
 {
-	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, BaseGenericWidget,
+	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, WidgetListBaseClass,
+																						TEXT("/WBP_GenericWidget_") + ObjectOriginName);
+	if (Blueprint)
+	{
+		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
+		{
+			if (UWPropGenListViewDataTable* DefaultObject = Cast<UWPropGenListViewDataTable>(BPGeneratedClass->GetDefaultObject()))
+			{
+				DefaultObject->CreateListView(WidgetItemClass);
+				DefaultObject->SetDataTable(const_cast<UDataTable*>(ListItems));
+				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+			}
+		}
+	}
+	return Blueprint;
+}
+
+UBlueprint* UCreateWidgetListAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
+                                                                                        UWidgetMapDataAsset* MapDataAsset) const
+{
+	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{

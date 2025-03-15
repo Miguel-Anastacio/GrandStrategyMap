@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
 #include "GenericStructWidget.h"
-#include "CustomAssetActions.generated.h"
+#include "CreateWidgetAssetAction.generated.h"
 UCLASS()
 class UCreateWidgetFromAssetAction  : public UAssetActionUtility
 {

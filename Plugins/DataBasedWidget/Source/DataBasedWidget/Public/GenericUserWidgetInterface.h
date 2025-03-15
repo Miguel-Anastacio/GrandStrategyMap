@@ -22,7 +22,10 @@ public:
 
 	virtual void InitFromStruct_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const
 	{
-		InitFromData(PropertyName, InstancedStruct.GetScriptStruct()->GetClass(), InstancedStruct.GetMemory());
+		if(InstancedStruct.IsValid())
+		{
+			InitFromData(PropertyName, InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
+		}
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Generic Widget Interface")
@@ -32,7 +35,8 @@ public:
 	{
 		InitFromData(PropertyName, Object->GetClass(), Object);
 	};
-	
+
+	// Low Level Implementation to Init Widget Fields, can apply to InitFromUobject/ Struct if you do not override those methods
 	virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const {};
 protected:
 };

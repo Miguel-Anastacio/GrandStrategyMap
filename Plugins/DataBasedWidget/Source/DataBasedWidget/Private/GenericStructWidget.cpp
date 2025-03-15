@@ -7,6 +7,7 @@
 #include "Components/GridPanel.h"
 #include "GenericUserWidgetInterface.h"
 #include "GenericWidgetDataMap.h"
+#include "ListViewWidgets.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #endif
@@ -63,6 +64,13 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
 {
+	// Handle Instance Struct Wrappers
+	if(const UPropGenStructWrapper* WrapperForStruct = Cast<UPropGenStructWrapper>(Object))
+	{
+		InitFromStruct(WrapperForStruct->GetStructInstance());
+		return;
+	}
+	
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& PropertyName = WidgetPair.Key;
@@ -151,7 +159,7 @@ void UGenericStructWidget::CreatePanelSlots() const
 		UE_LOG(LogDataBasedWidget, Error, TEXT("Missing Main Panel"));
 		return;
 	}
-	if(!DataAssetWidgetMap)
+	if(!IsValid(DataAssetWidgetMap))
 	{
 		UE_LOG(LogDataBasedWidget, Error, TEXT("Please Set a DataAssetWidgetMap"));
 	}

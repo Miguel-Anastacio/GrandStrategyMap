@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
-#include "CustomAssetActions.h"
+#include "CreateWidgetAssetAction.h"
 
 #include "AssetToolsModule.h"
 #include "EditorUtilityLibrary.h"

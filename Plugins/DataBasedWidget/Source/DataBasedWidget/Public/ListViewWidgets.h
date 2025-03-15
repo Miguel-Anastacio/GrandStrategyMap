@@ -2,71 +2,64 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "Blueprint/UserWidget.h"
-#include "Blueprint/IUserObjectListEntry.h"
-#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "Types/SlateEnums.h"
-#include "GenericStructWidget.generated.h"
+#include "ListViewWidgets.generated.h"
 
-class UWidgetMapDataAsset;
-class UWCustomEditableText;
-class UVerticalBox;
+// Wrapper for InstancedStructs so that they can be used as source for ListView
+UCLASS()
+class UPropGenStructWrapper : public UObject
+{
+	GENERATED_BODY()
+public:    
+	void SetStructInstance(FInstancedStruct& InStruct)
+	{
+		InstancePtr = &InStruct;
+		StructInstance = *InstancePtr;
+	}
+	FInstancedStruct GetStructInstance() const
+	{
+		// if (StructInstance == nullptr)
+		return StructInstance;
+	}
+protected:
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
+	FInstancedStruct StructInstance;
+
+	FInstancedStruct* InstancePtr;
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+};
+
+
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
+class DATABASEDWIDGET_API UWPropGenListView : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	virtual void NativeOnInitialized() override;
-	virtual void NativePreConstruct() override;
-	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
-	const UStruct* GetDataClass() const;
-	
-#if WITH_EDITOR
-	void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
-#endif
-
 	// wrapper to init from Instanced Struct exposed to BP
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromStruct(const FInstancedStruct& InstancedStruct);
+	virtual void InitFromStructs(const TArray<FInstancedStruct>& Structs);
 	
 	// wrapper to init from UObject exposed to BP
 	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromObject(const UObject* Object);
-
-	UPROPERTY(EditAnywhere, Category = "Generic Struct Widget")
-	int Columns = 1;
+	virtual void InitFromObjects(const TArray<UObject*>& Objects);
 	
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
-	class UGridPanel* MainPanel;
-
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
-	class UWidgetMapDataAsset* DataAssetWidgetMap;
+#if WITH_EDITOR
+	virtual void CreateListView(TSubclassOf<UUserWidget> WidgetClass);
 #endif
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
-	TMap<FName, UUserWidget*> WidgetFields;
-
-	// Should Widget Hold a reference at runtime to the data that is displaying?
-
 protected:
 	
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	UFUNCTION(CallInEditor, Category="Generic Struct Widget")
-	void CreatePanelSlots() const;
-	
-	void CreateMainPanel() const;
+	virtual void SetEntryWidgetClass(TSubclassOf<UUserWidget> WidgetClass);
 #endif
+	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewWidgets)
+	class UListView* ListView;
 
-	// IUserObjectListEntry
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	// IUserObjectListEntry
-
-	void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
-	void InitFromData(const UStruct* ClassType, const void* Data);
-private:	
-	void InitializeWidgetFields();
+	UPROPERTY(VisibleAnywhere)
+	TArray<UObject*> SourceObjects;
 	
 };
