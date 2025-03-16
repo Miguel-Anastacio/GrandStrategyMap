@@ -23,6 +23,11 @@ UCreateWidgetListAssetAction::UCreateWidgetListAssetAction()
 void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUserWidget> WidgetForListItems,
 																TSubclassOf<UUserWidget> BaseViewWidget) const 
 {
+	// If the user does not specify class then use default PropGenListView
+	if(!BaseViewWidget)
+	{
+		BaseViewWidget = UWPropGenListViewDataTable::StaticClass();
+	}
 	const TArray<UObject*> SelectedAssets = UEditorUtilityLibrary::GetSelectedAssets();
 	for (const UObject* Asset : SelectedAssets)
 	{
@@ -43,7 +48,7 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 			{
 				WidgetMapDataAsset->CreateFromData(ItemClass, DefaultWidgetForFields);
 				// create WBP_widget
-				UBlueprint* WidgetBlueprint = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
+				const UBlueprint* WidgetBlueprint = CreateBlueprintDerivedFromGenericStructWidget(PackagePath, Asset->GetName(), WidgetMapDataAsset);
 				WidgetForListItems = WidgetBlueprint->GeneratedClass;
 			}
 		}
@@ -68,20 +73,30 @@ UWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(cons
 
 UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
 																	TSubclassOf<UUserWidget> WidgetListBaseClass,
-                                                                    TSubclassOf<UUserWidget> WidgetItemClass,
+                                                                     TSubclassOf<UUserWidget> WidgetItemClass,
                                                                     const UDataTable* ListItems)
 {
+	if(!ValidateContainerClassAndMemberWidget(WidgetListBaseClass, WidgetItemClass))
+	{
+		return nullptr;
+	}
+	
 	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, WidgetListBaseClass,
 																						TEXT("/WBP_ListView_") + ObjectOriginName);
 	if (Blueprint)
 	{
 		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
 		{
-			if (UWPropGenCollectionViewDataTable* DefaultObject = Cast<UWPropGenCollectionViewDataTable>(BPGeneratedClass->GetDefaultObject()))
+			if (UObject* DefaultObject = BPGeneratedClass->GetDefaultObject())
 			{
-				DefaultObject->CreateListView(WidgetItemClass);
-				DefaultObject->SetDataTable(const_cast<UDataTable*>(ListItems));
-				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+				// Check if the default object implements our interface
+				if (DefaultObject->GetClass()->ImplementsInterface(UWidgetCollectionInterface::StaticClass()))
+				{
+					IWidgetCollectionInterface::Execute_CreateCollectionContainer(DefaultObject);
+					IWidgetCollectionInterface::Execute_SetWidgetItemClass(DefaultObject, WidgetItemClass);
+					IWidgetCollectionInterface::Execute_SetDataTable(DefaultObject, const_cast<UDataTable*>(ListItems));
+					FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+				}
 			}
 		}
 	}
@@ -126,4 +141,26 @@ UStruct* UCreateWidgetListAssetAction::GetAssetStruct(const UObject* Asset)
 	{
 		return Asset->GetClass();
 	}
+}
+
+bool UCreateWidgetListAssetAction::ValidateContainerClassAndMemberWidget(
+	const TSubclassOf<UUserWidget>& WidgetListBaseClass, const TSubclassOf<UUserWidget>& WidgetItemClass)
+{
+	if(!WidgetListBaseClass || !WidgetItemClass)
+		return false;
+	
+	if(IWidgetCollectionInterface* Interface = Cast<IWidgetCollectionInterface>(WidgetListBaseClass->ClassDefaultObject))
+	{
+		if(Interface->IsCollectionListView())
+		{
+			if(!WidgetItemClass->ImplementsInterface(UUserObjectListEntry::StaticClass()))
+			{
+				UE_LOG(LogTemp, Error, TEXT("Widget List Base Class is based on a List View but Widget for members does"
+								"not implement UUserObjectListEntry"));
+				return false;
+			}
+		}
+	}
+	
+	return true;
 }

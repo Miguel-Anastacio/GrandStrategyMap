@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "InstancedStruct.h"
+#include "WidgetCollectionInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
 #include "CollectionViewWidgets.generated.h"
@@ -28,38 +29,22 @@ protected:
 	FInstancedStruct StructInstance;
 
 	FInstancedStruct* InstancePtr;
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
 };
 
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenCollectionView : public UUserWidget
+class DATABASEDWIDGET_API UWPropGenCollectionView : public UUserWidget, public IWidgetCollectionInterface
 {
 	GENERATED_BODY()
 
 public:
 	// wrapper to init from Instanced Struct exposed to BP
-	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromStructs(const TArray<FInstancedStruct>& Structs);
+	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
 	
 	// init from UObject exposed to BP
-	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromObjects(const TArray<UObject*>& Objects);
+	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
 	
-	virtual class UListView* GetListView();
-	
-#if WITH_EDITOR
-	virtual void CreateListView(TSubclassOf<UUserWidget> WidgetClass);
-#endif
-	
+	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 protected:
-	
-#if WITH_EDITOR
-	virtual void SetRootWidget(UWidgetTree* Tree);
-	virtual void SetEntryWidgetClass(TSubclassOf<UUserWidget> WidgetClass);
-#endif
-
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<UObject*> SourceObjects;
 	

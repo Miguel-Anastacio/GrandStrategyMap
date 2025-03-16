@@ -13,13 +13,12 @@ class DATABASEDWIDGET_API UWPropGenGridViewDataTable : public UWPropGenCollectio
 	GENERATED_BODY()
 
 public:
-	virtual UListView* GetListView() override
+	virtual UWidget* GetCollectionContainer_Implementation() override
 	{
 		return TileView;
 	};
-
 protected:
-	virtual void SetRootWidget(UWidgetTree* Tree) override
+	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
 	{
 		TileView = Tree->ConstructWidget<UTileView>(UTileView::StaticClass(), FName("TileView"));;
 	};

@@ -28,15 +28,6 @@ public class DataBasedWidget : ModuleRules
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
 				"UtilityModule",
-				"StructUtils",
-			}
-			);
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				// ... add other public dependencies that you statically link with here ...
-				"UtilityModule",
 				"StructUtils"
 			}
 		);

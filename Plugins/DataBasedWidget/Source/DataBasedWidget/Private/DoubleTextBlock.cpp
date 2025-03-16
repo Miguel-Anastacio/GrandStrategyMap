@@ -10,6 +10,7 @@ void UDoubleTextBlock::SetValues(const FText& LabelText, const FText& ValueText)
 		Label->SetText(LabelText);
 	if(Text)
 		Text->SetText(ValueText);
+	UE_LOG(LogTemp, Display, TEXT("DTB: %s - %s"), *LabelText.ToString(), *ValueText.ToString());
 }
 
 void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const

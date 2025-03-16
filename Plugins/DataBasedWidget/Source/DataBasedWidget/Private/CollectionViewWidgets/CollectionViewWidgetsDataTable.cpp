@@ -5,11 +5,11 @@
 void UWPropGenCollectionViewDataTable::NativeConstruct()
 {
 	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	InitFromStructs(DataTableItems);
+	Execute_InitFromStructs(this, DataTableItems);
 	Super::NativeConstruct();
 }
 
-void UWPropGenCollectionViewDataTable::SetDataTable(UDataTable* NewDataTable)
+void UWPropGenCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
 	if (DataTable.Get() == NewDataTable)
 	{
@@ -22,11 +22,7 @@ void UWPropGenCollectionViewDataTable::SetDataTable(UDataTable* NewDataTable)
 	return;
 #else
 	// At runtime load data table and re init ListView
-	if (const UDataTable* LoadedDataTable = DataTable.LoadSynchronous())
-	{
-		// UpdateListView Items
-		const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-		InitFromStructs(DataTableItems);
-	}
+	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
+	InitFromStructs(DataTableItems);
 #endif
 }

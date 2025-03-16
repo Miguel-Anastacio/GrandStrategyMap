@@ -13,11 +13,11 @@ class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenCol
 
 public:
 	virtual void NativeConstruct() override;
-	UFUNCTION(BlueprintCallable, Category=ListViewDataTable)
-	virtual void SetDataTable(UDataTable* NewDataTable);
+	UFUNCTION(BlueprintCallable, Category=CollectionViewDataTable)
+	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
 
 protected:
-	UPROPERTY(EditAnywhere, Category=ListViewDataTable, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, Category=CollectionViewDataTable, BlueprintReadWrite)
 	TSoftObjectPtr<UDataTable> DataTable;
 	
 };

@@ -7,6 +7,7 @@
 #include "Components/GridPanel.h"
 #include "GenericUserWidgetInterface.h"
 #include "GenericWidgetDataMap.h"
+#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "CollectionViewWidgets/CollectionViewWidgets.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
@@ -20,15 +21,15 @@ void UGenericStructWidget::NativeOnInitialized()
 void UGenericStructWidget::NativePreConstruct()
 {
 	InitializeWidgetFields();
-	if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
-	{
-		InitFromObject(DataClass->ClassDefaultObject);
-	}
-	else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
-	{
-		const FInstancedStruct InstanceStruct(ScriptStruct);
-		InitFromStruct(InstanceStruct);
-	}
+	// if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
+	// {
+	// 	InitFromObject(DataClass->ClassDefaultObject);
+	// }
+	// else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
+	// {
+	// 	const FInstancedStruct InstanceStruct(ScriptStruct);
+	// 	InitFromStruct(InstanceStruct);
+	// }
 	Super::NativePreConstruct();
 }
 
@@ -50,6 +51,11 @@ void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& 
 
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
+	if(WidgetFields.IsEmpty())
+	{
+		InitializeWidgetFields();
+	}
+	
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& PropertyName = WidgetPair.Key;
@@ -60,6 +66,7 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 			IGenericUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
 		}
 	}
+	UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
@@ -152,7 +159,7 @@ void UGenericStructWidget::CreatePanelSlots() const
 	
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	UGridPanel* AssetGridPanel = UAssetCreatorFunctionLibrary::GetGridPanel(this, FName("MainPanel"));
+	UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("MainPanel")));
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetGridPanel)
 	{

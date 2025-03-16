@@ -1,25 +1,11 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "CollectionViewWidgets/CollectionViewWidgets.h"
-
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Components/ListView.h"
 
-void UPropGenStructWrapper::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+void UWPropGenCollectionView::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
 {
-	UObject::PostEditChangeProperty(PropertyChangedEvent);
-	{
-		Super::PostEditChangeProperty(PropertyChangedEvent);
-		// if(PropertyChangedEvent.Property->GetName() == FName("StructInstance"))
-		// {
-		// 	InstancePtr = &StructInstance;
-		// }
-	}
-}
-
-void UWPropGenCollectionView::InitFromStructs(const TArray<FInstancedStruct>& Structs)
-{
-	if(UListView* View = GetListView())
+	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
 		SourceObjects.Reserve(Structs.Num());
 		for(FInstancedStruct DataStruct: Structs)
@@ -32,23 +18,18 @@ void UWPropGenCollectionView::InitFromStructs(const TArray<FInstancedStruct>& St
 	}
 }
 
-void UWPropGenCollectionView::InitFromObjects(const TArray<UObject*>& Objects)
+void UWPropGenCollectionView::InitFromObjects_Implementation(const TArray<UObject*>& Objects)
 {
-	if(UListView* View = GetListView())
+	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
 		SourceObjects = Objects;
 		View->SetListItems(SourceObjects);
 	}
 }
 
-class UListView* UWPropGenCollectionView::GetListView()
+void UWPropGenCollectionView::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass)
 {
-	return nullptr;
-}
-#if WITH_EDITOR
-void UWPropGenCollectionView::SetEntryWidgetClass(TSubclassOf<UUserWidget> WidgetClass)
-{
-	if(UListView* View = GetListView())
+	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
 		if (const FProperty* EntryWidgetClassProp = UListViewBase::StaticClass()->FindPropertyByName(TEXT("EntryWidgetClass")))
 		{
@@ -59,28 +40,4 @@ void UWPropGenCollectionView::SetEntryWidgetClass(TSubclassOf<UUserWidget> Widge
 	}
 }
 
-void UWPropGenCollectionView::CreateListView(TSubclassOf<UUserWidget> WidgetClass)
-{
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
-	if (!MainAssetWidgetTree)
-	{
-		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
-		return;
-	}
-	
-	if (!MainAssetWidgetTree->RootWidget)
-	{
-		SetRootWidget(MainAssetWidgetTree);
-		SetEntryWidgetClass(WidgetClass);
-		MainAssetWidgetTree->RootWidget = GetListView();
-		
-		MainAssetWidgetTree->Modify();
-		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
-	}
-}
-
-void UWPropGenCollectionView::SetRootWidget(UWidgetTree* Tree)
-{
-}
-#endif
 

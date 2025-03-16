@@ -15,8 +15,8 @@ public:
 
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
     virtual void CreateWidgetListFromDataTable(
-        UPARAM(meta=(MustImplement="UserObjectListEntry")) TSubclassOf<UUserWidget> WidgetForListItems = nullptr,
-        UPARAM(meta=(AllowedClasses="WPropGenCollectionViewDataTable")) TSubclassOf<UUserWidget> BaseViewWidget = UWPropGenListViewDataTable::StaticClass()) const;
+        /* UPARAM(meta=(MustImplement="UserObjectListEntry"))*/ TSubclassOf<UUserWidget> WidgetForListItems = nullptr,
+        UPARAM(meta=(MustImplement="/Script/DataBasedWidget.WidgetCollectionInterface")) TSubclassOf<UUserWidget> BaseViewWidget = nullptr) const;
 protected:    
     // Widget used by default for each field of UObject/Struct
     UPROPERTY(EditAnywhere, Category=CreateWidgetListFromDataTable, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
@@ -29,6 +29,8 @@ protected:
     UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset) const;
 
     static UStruct* GetAssetStruct(const UObject* Asset);
+
+    static bool ValidateContainerClassAndMemberWidget(const TSubclassOf<UUserWidget>& WidgetListBaseClass, const TSubclassOf<UUserWidget>& WidgetItemClass);
     
     
 };

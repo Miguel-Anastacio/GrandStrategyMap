@@ -14,13 +14,14 @@ class DATABASEDWIDGET_API UWPropGenListViewDataTable : public UWPropGenCollectio
 	GENERATED_BODY()
 
 public:
-	virtual class UListView* GetListView() override
+
+	virtual UWidget* GetCollectionContainer_Implementation() override
 	{
 		return ListView;
 	};
 
 protected:
-	virtual void SetRootWidget(UWidgetTree* Tree) override
+	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
 	{
 		ListView = Tree->ConstructWidget<UListView>(UListView::StaticClass(), FName("ListView"));;
 	};

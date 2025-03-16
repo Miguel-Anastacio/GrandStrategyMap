@@ -13,17 +13,18 @@ class DATABASEDWIDGET_API UWPropGenTreeViewDataTable : public UWPropGenCollectio
 	GENERATED_BODY()
 
 public:
-	virtual UListView* GetListView() override
+	virtual UWidget* GetCollectionContainer_Implementation() override
 	{
 		return TreeView;
 	};
 
-	virtual void SetRootWidget(UWidgetTree* Tree) override
+	
+protected:
+	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
 	{
 		TreeView = Tree->ConstructWidget<UTreeView>(UTreeView::StaticClass(), FName("TreeView"));;
 	};
 	
-protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewDataTable)
 	class UTreeView* TreeView;
 
