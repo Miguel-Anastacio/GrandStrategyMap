@@ -21,15 +21,20 @@ void UGenericStructWidget::NativeOnInitialized()
 void UGenericStructWidget::NativePreConstruct()
 {
 	InitializeWidgetFields();
-	// if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
-	// {
-	// 	InitFromObject(DataClass->ClassDefaultObject);
-	// }
-	// else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
-	// {
-	// 	const FInstancedStruct InstanceStruct(ScriptStruct);
-	// 	InitFromStruct(InstanceStruct);
-	// }
+#if WITH_EDITOR
+	if (!GIsPlayInEditorWorld)
+	{
+		if(const UClass* DataClass = DataAssetWidgetMap->GetClassAsUClass())
+		{
+			InitFromObject(DataClass->ClassDefaultObject);
+		}
+		else if(const UScriptStruct* ScriptStruct = DataAssetWidgetMap->GetClassAsScriptStruct())
+		{
+			const FInstancedStruct InstanceStruct(ScriptStruct);
+			InitFromStruct(InstanceStruct);
+		}
+	}
+#endif
 	Super::NativePreConstruct();
 }
 
@@ -66,7 +71,7 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 			IGenericUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
 		}
 	}
-	UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
+	// UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)

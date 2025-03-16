@@ -62,9 +62,24 @@ FString UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const 
 	return FString("Invalid Property or Instance");
 }
 
+void UADStructUtilsFunctionLibrary::LogInstancedStruct(const FInstancedStruct& Struct)
+{
+	if(Struct.IsValid())
+	{
+		UE_LOG(LogUtilityModule, Warning, TEXT("StructType: %s"), *Struct.GetScriptStruct()->GetName())
+		ForEachProperty(Struct, [&](const FProperty* Property)
+		{
+			const FString PropertyName = Property->GetAuthoredName();
+			bool bOutResult = false;
+			UE_LOG(LogUtilityModule, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
+				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Struct, PropertyName, bOutResult));
+		});
+	}
+}
+
 
 FInstancedStruct UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct,
-	const FString& PropertyName, const FString& NewValue, bool& bResult)
+                                                                         const FString& PropertyName, const FString& NewValue, bool& bResult)
 {
 	FInstancedStruct InstancedStructCopy;
 	InstancedStructCopy.InitializeAs(InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());

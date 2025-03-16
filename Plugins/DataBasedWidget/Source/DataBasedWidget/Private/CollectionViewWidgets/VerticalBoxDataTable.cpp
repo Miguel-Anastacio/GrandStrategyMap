@@ -11,6 +11,11 @@ void UWPropGenVerticalBoxDataTable::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UWPropGenVerticalBoxDataTable::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+}
+
 void UWPropGenVerticalBoxDataTable::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
 {
 	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
@@ -59,6 +64,36 @@ void UWPropGenVerticalBoxDataTable::SetDataTable_Implementation(UDataTable* NewD
 	
 	DataTable = NewDataTable;
 
+#if WITH_EDITOR
+	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("Container")));
+	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	if(!AssetVerticalBox)
+	{
+		return;
+	}
+	if(!MainAssetWidgetTree)
+	{
+		return;
+	}
+	AssetVerticalBox->ClearChildren();
+	AssetVerticalBox->Modify();
+	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	for(const FInstancedStruct& Struct : UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable))
+	{
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetClass))
+		{
+			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(NewWidget))
+			{
+				GenericStructWidget->InitFromStruct(Struct);
+			}
+			AssetVerticalBox->AddChildToVerticalBox(NewWidget);
+		}
+	}
+	AssetVerticalBox->Modify();
+	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+#endif
+
+	
 #if WITH_EDITOR
 	return;
 #else

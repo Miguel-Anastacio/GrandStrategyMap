@@ -15,6 +15,7 @@ class DATABASEDWIDGET_API UWPropGenVerticalBoxDataTable : public UUserWidget, pu
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 	
 	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
 	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;

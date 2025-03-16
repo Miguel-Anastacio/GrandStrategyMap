@@ -193,7 +193,7 @@ void UAssetCreatorFunctionLibrary::MarkWidgetAsModified(const UObject* Object)
 	MainAsset->Modify();
 }
 
-UGridPanel* UAssetCreatorFunctionLibrary::GetGridPanel(const UUserWidget* Widget, const FName& Name)
+UPanelWidget* UAssetCreatorFunctionLibrary::GetPanelWidget(const UUserWidget* Widget, const FName& Name)
 {
 	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
 	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
@@ -206,8 +206,7 @@ UGridPanel* UAssetCreatorFunctionLibrary::GetGridPanel(const UUserWidget* Widget
 	{
 		return nullptr;
 	}
-	UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("MainPanel"));
-	return  AssetGridPanel;
+	return Cast<UPanelWidget>(MainAsset->WidgetTree->FindWidget(Name));
 }
 
 void UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(const UObject* Object)
@@ -223,6 +222,32 @@ void UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(const UObject* Object
 		return;
 	MainAsset->Modify();
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+}
+
+void UAssetCreatorFunctionLibrary::AddWidgetsToContainer(UUserWidget* Widget,
+	const TSubclassOf<UUserWidget> WidgetClass, UUserWidget* ContainerWidget, int Amount)
+{
+	if(!ContainerWidget || !Widget)
+		return;
+	
+	UWidgetTree* WidgetTree = GetWidgetTree(Widget);
+	if(!WidgetTree)
+		return;
+	
+	UPanelWidget* PanelWidget = GetPanelWidget(Widget, ContainerWidget->GetFName());
+	if(!PanelWidget)
+		return;
+	
+	for(int i = 0; i < Amount; i++)
+	{
+		if(UUserWidget* NewWidget = WidgetTree->ConstructWidget<UUserWidget>(WidgetClass))
+		{
+			PanelWidget->AddChild(NewWidget);
+		}
+	}
+
+	PanelWidget->Modify();
+	MarkBlueprintAsModified(Widget);
 }
 
 class UWidgetTree* UAssetCreatorFunctionLibrary::GetWidgetTree(const UUserWidget* Widget)

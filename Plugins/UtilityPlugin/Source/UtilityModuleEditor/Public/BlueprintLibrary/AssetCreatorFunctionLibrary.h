@@ -41,13 +41,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static bool SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage);
-
-
+	
 	static void MarkWidgetAsModified(const UObject* Object);
-	static class UGridPanel* GetGridPanel(const UUserWidget* Widget, const FName& Name);
+	static class UPanelWidget* GetPanelWidget(const UUserWidget* Widget, const FName& Name);
 	static class UWidgetTree* GetWidgetTree(const UUserWidget* Widget);
 
 	static void MarkBlueprintAsModified(const UObject* Object);
+
+	static void AddWidgetsToContainer(UUserWidget* Widget, const TSubclassOf<UUserWidget> WidgetClass, UUserWidget* ContainerWidget, int Amount);
 	
 };
 #endif

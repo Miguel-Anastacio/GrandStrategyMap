@@ -102,6 +102,9 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category= "Instanced Struct Utils")
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
 
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category= "Instanced Struct Utils")
+    static void LogInstancedStruct(const FInstancedStruct& Struct);
+    
     /// TODO - Add Specializations and expose them to Blueprints
     template<typename T>
     static T GetPropertyValueFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult)
