@@ -18,7 +18,7 @@ public:
 		return TileView;
 	};
 protected:
-	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
+	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		TileView = Tree->ConstructWidget<UTileView>(UTileView::StaticClass(), FName("TileView"));;
 	};

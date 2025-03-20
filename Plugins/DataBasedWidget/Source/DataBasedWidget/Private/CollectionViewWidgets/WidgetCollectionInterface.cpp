@@ -2,9 +2,17 @@
 #include "CollectionViewWidgets/WidgetCollectionInterface.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Blueprint/WidgetTree.h"
+#include "CollectionViewWidgets/CollectionViewWidgets.h"
 #include "Components/ListView.h"
 
-void IWidgetCollectionInterface::CreateCollectionContainer_Implementation()
+
+void IWidgetCollectionInterface::NativeRefreshCollection()
+{
+	OnRefreshCollection();
+}
+
+#if WITH_EDITOR
+void IWidgetCollectionInterface::CreateCollectionContainer()
 {
 	UUserWidget* Widget = Cast<UUserWidget>(this);
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(Widget);
@@ -13,16 +21,19 @@ void IWidgetCollectionInterface::CreateCollectionContainer_Implementation()
 		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
 		return;
 	}
-	
+
+	// If there is not a root widget, then create one
+	// You must implement SetRootWidget in c++, in BP there is no need you can just add the widget in the editor
 	if (!MainAssetWidgetTree->RootWidget)
 	{
-		Execute_SetRootWidget(Widget, MainAssetWidgetTree);
+		SetRootWidget(MainAssetWidgetTree);
 		MainAssetWidgetTree->RootWidget = Execute_GetCollectionContainer(Widget);
 		
 		MainAssetWidgetTree->Modify();
 		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(Widget);
 	}
 }
+#endif
 
 bool IWidgetCollectionInterface::IsCollectionListView()
 {

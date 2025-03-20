@@ -89,10 +89,9 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 		{
 			if (UObject* DefaultObject = BPGeneratedClass->GetDefaultObject())
 			{
-				// Check if the default object implements our interface
 				if (DefaultObject->GetClass()->ImplementsInterface(UWidgetCollectionInterface::StaticClass()))
 				{
-					IWidgetCollectionInterface::Execute_CreateCollectionContainer(DefaultObject);
+					Cast<IWidgetCollectionInterface>(DefaultObject)->CreateCollectionContainer();
 					IWidgetCollectionInterface::Execute_SetWidgetItemClass(DefaultObject, WidgetItemClass);
 					IWidgetCollectionInterface::Execute_SetDataTable(DefaultObject, const_cast<UDataTable*>(ListItems));
 					FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);

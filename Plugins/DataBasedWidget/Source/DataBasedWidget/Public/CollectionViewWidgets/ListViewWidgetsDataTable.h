@@ -21,7 +21,7 @@ public:
 	};
 
 protected:
-	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
+	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		ListView = Tree->ConstructWidget<UListView>(UListView::StaticClass(), FName("ListView"));;
 	};

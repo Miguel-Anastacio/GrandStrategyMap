@@ -3,6 +3,24 @@
 #include "CollectionViewWidgets/CollectionViewWidgets.h"
 #include "Components/ListView.h"
 
+void UWPropGenCollectionView::AddObject_Implementation(UObject* Object)
+{
+	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
+	{
+		SourceObjects.Add(Object);
+		View->AddItem(Object);
+	}
+}
+
+void UWPropGenCollectionView::RemoveObject_Implementation(UObject* Object)
+{
+	IWidgetCollectionInterface::RemoveObject_Implementation(Object);
+	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
+	{
+		View->RemoveItem(Object);
+	}
+}
+
 void UWPropGenCollectionView::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
@@ -39,5 +57,3 @@ void UWPropGenCollectionView::SetWidgetItemClass_Implementation(TSubclassOf<UUse
 		}
 	}
 }
-
-

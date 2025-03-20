@@ -21,6 +21,26 @@ class DATABASEDWIDGET_API IWidgetCollectionInterface
 	GENERATED_BODY()
 
 public:
+	// Is this needed ?
+	UFUNCTION(BlueprintImplementableEvent, Category = WidgetCollectionInterface)
+	void OnRefreshCollection();
+	virtual void NativeRefreshCollection();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
+	void ClearCollection();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
+	void AddObject(UObject* Object);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
+	void AddStruct(const FInstancedStruct& Struct);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
+	void RemoveObject(UObject* Object);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
+	void RemoveStruct(const FInstancedStruct& Struct);
+	
 	// wrapper to init from Instanced Struct exposed to BP
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
 	void InitFromStructs(const TArray<FInstancedStruct>& Structs);
@@ -35,9 +55,7 @@ public:
 
 	// Function that creates the container for displaying a collection of widgets
 #if WITH_EDITOR
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
 	void CreateCollectionContainer();
-	virtual void CreateCollectionContainer_Implementation();
 #endif
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
@@ -46,12 +64,16 @@ public:
 	
 	// Determines if the Collection container is of type ListView
 	bool IsCollectionListView();
-
-protected:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
-	void SetRootWidget(UWidgetTree* Tree);
-
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
 	UWidget* GetCollectionContainer();
+
+protected:
+#if WITH_EDITOR
+	virtual void SetRootWidget(UWidgetTree* Tree)
+	{
+		
+	};
+#endif
 
 };

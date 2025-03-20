@@ -20,7 +20,7 @@ public:
 
 	
 protected:
-	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
+	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		TreeView = Tree->ConstructWidget<UTreeView>(UTreeView::StaticClass(), FName("TreeView"));;
 	};

@@ -11,10 +11,29 @@ void UWPropGenVerticalBoxDataTable::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UWPropGenVerticalBoxDataTable::NativePreConstruct()
+
+#if WITH_EDITOR
+void UWPropGenVerticalBoxDataTable::OnDataTableChangedDeferred()
 {
-	Super::NativePreConstruct();
+	UpdateTimerHandle.Invalidate();
+	SetDataTable_Implementation(DataTable.Get());
 }
+
+void UWPropGenVerticalBoxDataTable::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if(!PropertyChangedEvent.Property)
+		return;
+	
+	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
+	// if (PropertyName == GET_MEMBER_NAME_CHECKED(UWPropGenVerticalBoxDataTable, DataTable))
+	{
+		// Schedule a deferred update to happen after the property change is complete
+		GEditor->GetTimerManager()->SetTimer(UpdateTimerHandle, this, &UWPropGenVerticalBoxDataTable::OnDataTableChangedDeferred, 0.1f, false);
+	}
+}
+#endif
+
 
 void UWPropGenVerticalBoxDataTable::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
 {
@@ -57,14 +76,11 @@ void UWPropGenVerticalBoxDataTable::SetWidgetItemClass_Implementation(TSubclassO
 
 void UWPropGenVerticalBoxDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
-	if (DataTable.Get() == NewDataTable)
-	{
-		return;
-	}
-	
 	DataTable = NewDataTable;
-
+	
 #if WITH_EDITOR
+	
+	// RegisterDataTableDelegates();
 	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("Container")));
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetVerticalBox)
@@ -84,6 +100,7 @@ void UWPropGenVerticalBoxDataTable::SetDataTable_Implementation(UDataTable* NewD
 		{
 			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(NewWidget))
 			{
+				// GenericStructWidget->NativeOnInitialized();
 				GenericStructWidget->InitFromStruct(Struct);
 			}
 			AssetVerticalBox->AddChildToVerticalBox(NewWidget);
@@ -102,6 +119,7 @@ void UWPropGenVerticalBoxDataTable::SetDataTable_Implementation(UDataTable* NewD
 	InitFromStructs(DataTableItems);
 #endif
 }
+
 
 
 

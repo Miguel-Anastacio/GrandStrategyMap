@@ -39,5 +39,4 @@ public:
 		return FClassIconFinder::FindThumbnailForClass(InAssetData.GetClass());
 	}
 
-	// virtual EAssetCommandResult OpenAssets(const FAssetOpenArgs& OpenArgs) const override;
 };

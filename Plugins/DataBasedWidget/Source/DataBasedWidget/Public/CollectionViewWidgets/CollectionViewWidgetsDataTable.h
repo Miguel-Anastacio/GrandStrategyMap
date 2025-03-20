@@ -6,6 +6,7 @@
 #include "Types/SlateEnums.h"
 #include "CollectionViewWidgetsDataTable.generated.h"
 
+// Base Class for 
 UCLASS(Abstract)
 class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenCollectionView
 {

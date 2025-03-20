@@ -14,21 +14,17 @@ class UPropGenStructWrapper : public UObject
 {
 	GENERATED_BODY()
 public:    
-	void SetStructInstance(FInstancedStruct& InStruct)
+	void SetStructInstance(const FInstancedStruct& InStruct)
 	{
-		InstancePtr = &InStruct;
-		StructInstance = *InstancePtr;
+		StructInstance = InStruct;
 	}
 	FInstancedStruct GetStructInstance() const
 	{
-		// if (StructInstance == nullptr)
 		return StructInstance;
 	}
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
 	FInstancedStruct StructInstance;
-
-	FInstancedStruct* InstancePtr;
 };
 
 UCLASS(Abstract)
@@ -37,6 +33,8 @@ class DATABASEDWIDGET_API UWPropGenCollectionView : public UUserWidget, public I
 	GENERATED_BODY()
 
 public:
+	virtual void AddObject_Implementation(UObject* Object) override;
+	virtual void RemoveObject_Implementation(UObject* Object) override;
 	// wrapper to init from Instanced Struct exposed to BP
 	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
 	
@@ -44,6 +42,7 @@ public:
 	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
 	
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
+
 protected:
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<UObject*> SourceObjects;

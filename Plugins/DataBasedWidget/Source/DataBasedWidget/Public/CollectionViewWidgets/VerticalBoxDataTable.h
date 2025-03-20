@@ -14,9 +14,11 @@ class DATABASEDWIDGET_API UWPropGenVerticalBoxDataTable : public UUserWidget, pu
 	GENERATED_BODY()
 
 public:
+
 	virtual void NativeConstruct() override;
-	virtual void NativePreConstruct() override;
-	
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
 	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
 
@@ -24,15 +26,21 @@ public:
 	{
 		return Container;
 	};
+	
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> MembersWidgetClass) override;
+	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
 
 protected:
-	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
+#if WITH_EDITOR
+	void OnDataTableChangedDeferred(); 
+	FTimerHandle UpdateTimerHandle;
+#endif
 	
-	virtual void SetRootWidget_Implementation(UWidgetTree* Tree) override
+	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		Container = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName("Container"));;
 	};
+
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = VerticalBoxDataTable)
 	class UVerticalBox* Container;

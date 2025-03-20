@@ -52,6 +52,7 @@ public class DataBasedWidget : ModuleRules
 				{
 					"UtilityModuleEditor",
 					"UMGEditor",
+					"UnrealEd"
 				}
 			);
 		}
