@@ -18,7 +18,6 @@ public:
 		return TreeView;
 	};
 
-	
 protected:
 	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{

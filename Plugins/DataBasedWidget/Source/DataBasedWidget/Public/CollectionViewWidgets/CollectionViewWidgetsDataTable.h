@@ -13,7 +13,7 @@ class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenCol
 	GENERATED_BODY()
 
 public:
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 	UFUNCTION(BlueprintCallable, Category=CollectionViewDataTable)
 	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
 

@@ -47,13 +47,6 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 	}
 }
 
-#if WITH_EDITOR
-void UGenericStructWidget::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-}
-#endif
-
 void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
 	if(WidgetFields.IsEmpty())
@@ -64,14 +57,14 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& PropertyName = WidgetPair.Key;
-		const UUserWidget* Widget = WidgetPair.Value;
+		UUserWidget* Widget = WidgetPair.Value;
 		
-		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		if(Widget && Widget->Implements<UPropGenDataDrivenUserWidgetInterface>())
 		{
-			IGenericUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
+			IPropGenDataDrivenUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
 		}
 	}
-	// UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
+	UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
@@ -82,15 +75,20 @@ void UGenericStructWidget::InitFromObject(const UObject* Object)
 		InitFromStruct(WrapperForStruct->GetStructInstance());
 		return;
 	}
+
+	if(WidgetFields.IsEmpty())
+	{
+		InitializeWidgetFields();
+	}
 	
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& PropertyName = WidgetPair.Key;
-		const UUserWidget* Widget = WidgetPair.Value;
+		UUserWidget* Widget = WidgetPair.Value;
 			
-		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		if(Widget && Widget->Implements<UPropGenDataDrivenUserWidgetInterface>())
 		{
-			IGenericUserWidgetInterface::Execute_InitFromUObject(Widget, PropertyName, Object);
+			IPropGenDataDrivenUserWidgetInterface::Execute_InitFromUObject(Widget, PropertyName, Object);
 		}
 	}
 }
@@ -108,11 +106,11 @@ void UGenericStructWidget::InitFromData(const UStruct* ClassType, const void* Da
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
 		const FName& PropertyName = WidgetPair.Key;
-		const UUserWidget* Widget = WidgetPair.Value;
+		UUserWidget* Widget = WidgetPair.Value;
 		
-		if(Widget && Widget->Implements<UGenericUserWidgetInterface>())
+		if(Widget && Widget->Implements<UPropGenDataDrivenUserWidgetInterface>())
 		{
-			if (const IGenericUserWidgetInterface* InterfaceInstance = Cast<IGenericUserWidgetInterface>(Widget))
+			if (const IPropGenDataDrivenUserWidgetInterface* InterfaceInstance = Cast<IPropGenDataDrivenUserWidgetInterface>(Widget))
 			{
 				InterfaceInstance->InitFromData(PropertyName, ClassType, Data);
 			}
@@ -158,8 +156,6 @@ void UGenericStructWidget::CreateGenericWidget(UWidgetMapDataAsset* DataWidgetMa
 
 void UGenericStructWidget::CreatePanelSlots() const
 {
-	// if (!MainPanel)
-	// 	return;
 	CreateMainPanel();
 	
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
@@ -223,6 +219,8 @@ void UGenericStructWidget::CreateMainPanel() const
 	if (!MainAssetWidgetTree->RootWidget)
 	{
 		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
+		// MainAssetWidgetTree->RootWidget = MainPanel;
+		// MainPanel = Cast<UGridPanel>(MainAssetWidgetTree->RootWidget);
 		MainAssetWidgetTree->Modify();
 		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
 	}

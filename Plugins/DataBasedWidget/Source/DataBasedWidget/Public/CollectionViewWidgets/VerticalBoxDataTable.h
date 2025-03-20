@@ -14,11 +14,7 @@ class DATABASEDWIDGET_API UWPropGenVerticalBoxDataTable : public UUserWidget, pu
 	GENERATED_BODY()
 
 public:
-
-	virtual void NativeConstruct() override;
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
+	virtual void NativeOnInitialized() override;
 	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
 	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
 
@@ -32,8 +28,8 @@ public:
 
 protected:
 #if WITH_EDITOR
-	void OnDataTableChangedDeferred(); 
-	FTimerHandle UpdateTimerHandle;
+	UFUNCTION(Blueprintable, CallInEditor, Category = VerticalBoxDataTable)
+	void RefreshContainer() const;
 #endif
 	
 	virtual void SetRootWidget(UWidgetTree* Tree) override

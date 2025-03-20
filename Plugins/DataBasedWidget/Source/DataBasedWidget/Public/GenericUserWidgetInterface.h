@@ -6,38 +6,60 @@
 #include "UObject/Interface.h"
 #include "GenericUserWidgetInterface.generated.h"
 
-UINTERFACE(MinimalAPI, BlueprintType)
-class UGenericUserWidgetInterface: public UInterface
+UINTERFACE(MinimalAPI, BlueprintType, DisplayName = "DataDrivenUserWidgetInterface")
+class UPropGenDataDrivenUserWidgetInterface: public UInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY() // Unreal Engine macro that generates required interface code
 };
 
-class DATABASEDWIDGET_API IGenericUserWidgetInterface
+class DATABASEDWIDGET_API IPropGenDataDrivenUserWidgetInterface
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Generic Widget Interface")
-	void InitFromStruct(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const;
+    /**
+     * Initializes widget from an instanced struct
+     * @param PropertyName - Name of the property to initialize
+     * @param InstancedStruct - Struct containing the data
+     */
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Data Driven Widget Interface")
+    void InitFromStruct(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const;
 
-	virtual void InitFromStruct_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const
-	{
-		if(InstancedStruct.IsValid())
-		{
-			InitFromData(PropertyName, InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
-		}
-	}
+    /**
+     * Default implementation for initializing from struct
+     * Validates the struct and passes it to the lower-level InitFromData method
+     */
+    virtual void InitFromStruct_Implementation(const FName& PropertyName, const FInstancedStruct& InstancedStruct) const
+    {
+       if(InstancedStruct.IsValid())
+       {
+          InitFromData(PropertyName, InstancedStruct.GetScriptStruct(), InstancedStruct.GetMemory());
+       }
+    }
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Generic Widget Interface")
-	void InitFromUObject(const FName& PropertyName, const UObject* Object) const;
+    /**
+     * Initializes widget from a UObject
+     * @param PropertyName - Name of the property to initialize
+     * @param Object - UObject containing the data
+     */
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Data Driven Widget Interface")
+    void InitFromUObject(const FName& PropertyName, const UObject* Object) const;
 
-	virtual void InitFromUObject_Implementation(const FName& PropertyName, const UObject* Object) const
-	{
-		InitFromData(PropertyName, Object->GetClass(), Object);
-	};
+    /**
+     * Default implementation for initializing from UObject
+     * Passes the object to the lower-level InitFromData method
+     */
+    virtual void InitFromUObject_Implementation(const FName& PropertyName, const UObject* Object) const
+    {
+       InitFromData(PropertyName, Object->GetClass(), Object);
+    };
 
-	// Low Level Implementation to Init Widget Fields, can apply to InitFromUobject/ Struct if you do not override those methods
-	virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const {};
-protected:
+    /**
+     * Low-level implementation to initialize widget fields
+     * This is a common path for both initialization methods
+     * @param PropertyName - Name of the property to initialize
+     * @param ClassType - Type information for the data
+     * @param Data - Pointer to the actual data
+     */
+    virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const {};
 };
-

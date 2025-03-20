@@ -4,20 +4,19 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/RichTextBlock.h"
 
-void UDoubleTextBlock::SetValues(const FText& LabelText, const FText& ValueText) const
+void UDoubleTextBlock::SetValues(const FText& NewLabelText, const FText& NewValueText) const
 {
 	if(Label)
-		Label->SetText(LabelText);
+		Label->SetText(NewLabelText);
 	if(Text)
-		Text->SetText(ValueText);
-	UE_LOG(LogTemp, Display, TEXT("DTB: %s - %s"), *LabelText.ToString(), *ValueText.ToString());
+		Text->SetText(NewValueText);
 }
 
 void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const
 {
 	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
-	const FString ValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
-	SetValues(FText::FromName(PropertyName), FText::FromString(ValueText));
+	const FString PropertyValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
+	SetValues(FText::FromName(PropertyName), FText::FromString(PropertyValueText));
 }
 
 void UDoubleTextBlock::NativeOnListItemObjectSet(UObject* ListItemObject)

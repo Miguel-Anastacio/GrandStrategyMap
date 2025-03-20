@@ -11,7 +11,7 @@
  */
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenPropertyWithIcon : public UUserWidget, public IGenericUserWidgetInterface, public IUserObjectListEntry
+class DATABASEDWIDGET_API UWPropGenPropertyWithIcon : public UUserWidget, public IPropGenDataDrivenUserWidgetInterface, public IUserObjectListEntry
 {
     GENERATED_BODY()
 
@@ -22,9 +22,9 @@ public:
     void SetIcon(UTexture2D* NewIcon) const;
 
 protected:
-    // IGenericUserWidgetInterface
+    // IPropGenDataDrivenUserWidgetInterface
     virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const override;
-    // IGenericUserWidgetInterface
+    // IPropGenDataDrivenUserWidgetInterface
 
     // IUserObjectListEntry
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

@@ -11,19 +11,19 @@
  */
 class URichTextBlock;
 UCLASS(Abstract, BlueprintType)
-class DATABASEDWIDGET_API UDoubleTextBlock : public UUserWidget, public IGenericUserWidgetInterface, public IUserObjectListEntry
+class DATABASEDWIDGET_API UDoubleTextBlock : public UUserWidget, public IPropGenDataDrivenUserWidgetInterface, public IUserObjectListEntry
 {
     GENERATED_BODY()
 
 public:
     /** Sets the initial values for the editable text widget. */
     UFUNCTION(BlueprintCallable, Category = "Double Text Block")
-    void SetValues(const FText& LabelText, const FText& ValueText) const;
+    void SetValues(const FText& NewLabelText, const FText& NewValueText) const;
 
 protected:
-    // IGenericUserWidgetInterface
+    // IPropGenDataDrivenUserWidgetInterface
     virtual void InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const override;
-    // IGenericUserWidgetInterface
+    // IPropGenDataDrivenUserWidgetInterface
 
     // IUserObjectListEntry
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

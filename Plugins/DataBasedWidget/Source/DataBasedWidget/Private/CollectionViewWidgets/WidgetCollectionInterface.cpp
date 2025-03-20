@@ -5,10 +5,9 @@
 #include "CollectionViewWidgets/CollectionViewWidgets.h"
 #include "Components/ListView.h"
 
-
-void IWidgetCollectionInterface::NativeRefreshCollection()
+void IWidgetCollectionInterface::ClearCollection()
 {
-	OnRefreshCollection();
+	BpClearCollection();
 }
 
 #if WITH_EDITOR

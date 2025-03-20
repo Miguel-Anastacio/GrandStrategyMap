@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
 #include "GenericStructWidget.h"
-#include "InstancedStruct.h"
 #include "CollectionViewWidgets/ListViewWidgetsDataTable.h"
 #include "CreateWidgetListAssetAction.generated.h"
 UCLASS()

@@ -2,7 +2,7 @@
 #include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 
-void UWPropGenCollectionViewDataTable::NativeConstruct()
+void UWPropGenCollectionViewDataTable::NativeOnInitialized()
 {
 	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	Execute_InitFromStructs(this, DataTableItems);

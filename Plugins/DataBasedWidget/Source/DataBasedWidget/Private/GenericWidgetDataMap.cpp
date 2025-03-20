@@ -7,9 +7,6 @@ void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Property
 	if(!PropertyChangedEvent.Property)
 		return;
 	
-	// if (!ClassType)
-	// 	return;
-
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, Class)
 		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, DefaultWidgetType))
@@ -58,11 +55,6 @@ void UWidgetMapDataAsset::SetClass()
 		ClassType = Struct;
 	}
 }
-
-// bool UWidgetMapDataAsset::IsScriptStruct(const UStruct* Struct) const
-// {
-// 	return false;
-// }
 
 void UWidgetMapDataAsset::Reset()
 {

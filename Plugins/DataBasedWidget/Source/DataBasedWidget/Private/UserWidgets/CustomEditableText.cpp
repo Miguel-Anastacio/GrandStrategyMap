@@ -31,9 +31,9 @@ void UWPropGenCustomEditableText::SetValues(const FText& Current, const FText& I
 	InputValue->SetText(Input);
 }
 
-void UWPropGenCustomEditableText::SetIDText(const FText& text) const
+void UWPropGenCustomEditableText::SetIDText(const FText& Text) const
 {
-	ID->SetText(text);
+	ID->SetText(Text);
 }
 
 void UWPropGenCustomEditableText::InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const

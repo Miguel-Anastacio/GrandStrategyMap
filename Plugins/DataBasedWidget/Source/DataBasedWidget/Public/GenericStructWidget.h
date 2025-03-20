@@ -11,62 +11,97 @@
 class UWidgetMapDataAsset;
 class UWCustomEditableText;
 class UVerticalBox;
+/**
+ * A generic widget class that can display structured data in a grid layout
+ * This widget can be initialized from either structured data or UObjects
+ */
 UCLASS(BlueprintType)
 class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	virtual void NativeOnInitialized() override;
-	virtual void NativePreConstruct() override;
-	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
-	const UStruct* GetDataClass() const;
-	
+    virtual void NativeOnInitialized() override;
+    
+    virtual void NativePreConstruct() override;
+    
+    virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+    
+    /** Returns the UStruct class of the data this widget is displaying */
+    const UStruct* GetDataClass() const;
+    
 #if WITH_EDITOR
-	void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
+    /**
+     * Creates widget elements based on a data asset mapping
+     * @param DataAssetWidgetMap - Asset containing property-to-widget mappings
+     */
+    void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
 #endif
 
-	// wrapper to init from Instanced Struct exposed to BP
-	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromStruct(const FInstancedStruct& InstancedStruct);
-	
-	// wrapper to init from UObject exposed to BP
-	UFUNCTION(BlueprintCallable,  Category = "Generic Struct Widget")
-	virtual void InitFromObject(const UObject* Object);
+    /**
+     * Blueprint-exposed function to initialize the widget from an instanced struct
+     * @param InstancedStruct - The struct data to display in this widget
+     */
+    UFUNCTION(BlueprintCallable, Category = "Generic Struct Widget")
+    virtual void InitFromStruct(const FInstancedStruct& InstancedStruct);
+    
+    /**
+     * Blueprint-exposed function to initialize the widget from a UObject
+     * @param Object - The object whose properties will be displayed in this widget
+     */
+    UFUNCTION(BlueprintCallable, Category = "Generic Struct Widget")
+    virtual void InitFromObject(const UObject* Object);
 
-	UPROPERTY(EditAnywhere, Category = "Generic Struct Widget")
-	int Columns = 1;
-	
-	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
-	class UGridPanel* MainPanel;
+    /** Number of columns to use in the grid layout */
+    UPROPERTY(EditAnywhere, Category = "Generic Struct Widget")
+    int Columns = 1;
+    
+    /** Grid panel that contains all the property widgets */
+    UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
+    class UGridPanel* MainPanel;
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
-	class UWidgetMapDataAsset* DataAssetWidgetMap;
+    /** Data asset that maps property types to widget classes */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
+    class UWidgetMapDataAsset* DataAssetWidgetMap;
 #endif
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
-	TMap<FName, UUserWidget*> WidgetFields;
-
-	// Should Widget Hold a reference at runtime to the data that is displaying?
+    
+    /** Map of property names to their corresponding widgets */
+    UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")
+    TMap<FName, UUserWidget*> WidgetFields;
 
 protected:
-	
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	UFUNCTION(CallInEditor, Category="Generic Struct Widget")
-	void CreatePanelSlots() const;
-	
-	void CreateMainPanel() const;
+    /**
+     * Editor function to create panel slots for the property widgets
+     * Can be called from the editor to refresh the layout
+     */
+    UFUNCTION(CallInEditor, Category="Generic Struct Widget")
+    void CreatePanelSlots() const;
+    
+    /** Creates the main grid panel for the widget */
+    void CreateMainPanel() const;
 #endif
 
-	// IUserObjectListEntry
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	// IUserObjectListEntry
+    // IUserObjectListEntry interface implementation
+    virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+    // End of IUserObjectListEntry interface
 
-	void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
-	void InitFromData(const UStruct* ClassType, const void* Data);
-private:	
-	void InitializeWidgetFields();
-	
+    /**
+     * Updates grid position indices for the next widget
+     * @param ColumnIndex - Current column index (will be updated)
+     * @param RowIndex - Current row index (will be updated)
+     */
+    void UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const;
+    
+    /**
+     * Core function that handles widget initialization from data
+     * @param ClassType - Type information for the data
+     * @param Data - Pointer to the actual data
+     */
+    void InitFromData(const UStruct* ClassType, const void* Data);
+    
+private:    
+    /** Initializes WidgetFields Map*/
+    void InitializeWidgetFields();
 };
