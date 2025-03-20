@@ -6,6 +6,7 @@
 #include "Serialization/JsonWriter.h"
 #include "Misc/FileHelper.h"
 #include "UtilityModule.h"
+#include "Engine/DataTable.h"
 #include "StructUtils/Public/InstancedStruct.h"
 void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
@@ -70,9 +71,14 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs
 		UE_LOG(LogUtilityModule, Error, TEXT("GetArrayOfInstancedStructs : Data Table is NULL"));
 		return TArray<FInstancedStruct>();
 	}
-	
+
+#if WITH_EDITOR
 	const FString Json = DataTable->GetTableAsJSON();
 	return LoadCustomDataFromJsonString(Json, DataTable->GetRowStruct());
+#else
+	return GetArrayOfInstancedStructsRuntime(DataTable);
+#endif
+	
 }
 
 TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(
@@ -83,6 +89,25 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs
 		return GetArrayOfInstancedStructs(LoadedDataTable);
 	}
 	return TArray<FInstancedStruct>();
+}
+
+TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructsRuntime(const UDataTable* DataTable)
+{
+	if(!DataTable)
+		return TArray<FInstancedStruct>();
+	
+	const UScriptStruct* RowStruct = DataTable->GetRowStruct();
+	const TMap<FName, uint8*>& RowMap = DataTable->GetRowMap();
+
+	TArray<FInstancedStruct> Instances;
+	Instances.Reserve(RowMap.Num());
+	for(const auto& [Name, Ptr] : RowMap )
+	{
+		FInstancedStruct Instance;
+		Instance.InitializeAs(RowStruct, Ptr);
+		Instances.Add(Instance);
+	}
+	return Instances;
 }
 
 TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)

@@ -5,8 +5,10 @@
 #include "ADStructUtilsFunctionLibrary.h"
 #include "InstancedStruct.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Templates/SubclassOf.h"
 #include "PropertyUtilityFunctionLibrary.generated.h"
 
+class UObject;
 UCLASS()
 class UTILITYMODULE_API UPropertyUtilityFunctionLibrary : public UBlueprintFunctionLibrary
 {

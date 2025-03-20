@@ -23,6 +23,8 @@ public:
     
     UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
     static TArray<FInstancedStruct> GetArrayOfInstancedStructsSoft(const TSoftObjectPtr<UDataTable> DataTable);
+
+    static TArray<FInstancedStruct> GetArrayOfInstancedStructsRuntime(const UDataTable* DataTable);
     /**
      * Reads data from a data table into a map.
      *
