@@ -14,8 +14,8 @@ void UDoubleTextBlock::SetValues(const FText& NewLabelText, const FText& NewValu
 
 void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const
 {
-	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
-	const FString PropertyValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
+	const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
+	const FString PropertyValueText = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromName(PropertyName), FText::FromString(PropertyValueText));
 }
 

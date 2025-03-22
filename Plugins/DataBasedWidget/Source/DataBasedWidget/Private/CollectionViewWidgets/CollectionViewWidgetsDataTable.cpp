@@ -4,9 +4,9 @@
 
 void UWPropGenCollectionViewDataTable::NativeOnInitialized()
 {
-	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	Execute_InitFromStructs(this, DataTableItems);
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
+	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
+	OnInit(DataTableItems);
 }
 
 void UWPropGenCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
@@ -25,4 +25,9 @@ void UWPropGenCollectionViewDataTable::SetDataTable_Implementation(UDataTable* N
 	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	InitFromStructs(DataTableItems);
 #endif
+}
+
+TArray<FInstancedStruct> UWPropGenCollectionViewDataTable::GetDataTableEntries() const
+{
+	return UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 }

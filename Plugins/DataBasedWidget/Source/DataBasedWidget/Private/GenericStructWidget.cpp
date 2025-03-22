@@ -8,9 +8,9 @@
 #include "GenericUserWidgetInterface.h"
 #include "GenericWidgetDataMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
-#include "CollectionViewWidgets/CollectionViewWidgets.h"
+#include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #if WITH_EDITOR
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #endif
 
 void UGenericStructWidget::NativeOnInitialized()
@@ -64,7 +64,7 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 			IPropGenDataDrivenUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
 		}
 	}
-	UADStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
+	UAtkStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
 }
 
 void UGenericStructWidget::InitFromObject(const UObject* Object)
@@ -160,8 +160,8 @@ void UGenericStructWidget::CreatePanelSlots() const
 	
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("MainPanel")));
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("MainPanel")));
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetGridPanel)
 	{
 		UE_LOG(LogDataBasedWidget, Error, TEXT("Missing Main Panel"));
@@ -183,7 +183,7 @@ void UGenericStructWidget::CreatePanelSlots() const
 	}
 	AssetGridPanel->ClearChildren();
 	AssetGridPanel->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 	
 	uint8 RowIndex = 0;
 	uint8 ColumnIndex = 0;
@@ -204,12 +204,12 @@ void UGenericStructWidget::CreatePanelSlots() const
 	}
 	
 	AssetGridPanel->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
 void UGenericStructWidget::CreateMainPanel() const
 {
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
 	if (!MainAssetWidgetTree)
 	{
 		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
@@ -219,10 +219,8 @@ void UGenericStructWidget::CreateMainPanel() const
 	if (!MainAssetWidgetTree->RootWidget)
 	{
 		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
-		// MainAssetWidgetTree->RootWidget = MainPanel;
-		// MainPanel = Cast<UGridPanel>(MainAssetWidgetTree->RootWidget);
 		MainAssetWidgetTree->Modify();
-		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+		UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 	}
 }
 

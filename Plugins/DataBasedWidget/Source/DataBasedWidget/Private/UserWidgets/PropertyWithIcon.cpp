@@ -24,11 +24,11 @@ void UWPropGenPropertyWithIcon::SetIcon(UTexture2D* NewIcon) const
 
 void UWPropGenPropertyWithIcon::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const
 {
-	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
-	const FString ValueText = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
+	const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
+	const FString ValueText = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromName(PropertyName), FText::FromString(ValueText));
 
-	SetIcon(UPropertyUtilityFunctionLibrary::GetPropertyAs<UTexture2D>(Property, UTexture2D::StaticClass(), Data));
+	SetIcon(UAtkPropertyUtilityFunctionLibrary::GetPropertyAs<UTexture2D>(Property, UTexture2D::StaticClass(), Data));
 }
 
 void UWPropGenPropertyWithIcon::NativeOnListItemObjectSet(UObject* ListItemObject)

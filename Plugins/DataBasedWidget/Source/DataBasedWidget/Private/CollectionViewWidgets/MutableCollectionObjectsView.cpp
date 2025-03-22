@@ -1,42 +1,43 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "CollectionViewWidgets/CollectionViewWidgets.h"
+#include "CollectionViewWidgets/MutableCollectionObjectsView.h"
+
+#include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "Components/ListView.h"
 #include "ContainerWrappers/ManagerObjectsArray.h"
 
-void UWPropGenMutableObjectsCollectionView::NativeOnInitialized()
+void UWPropGenMutableCollectionObjectsView::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 }
 
-void UWPropGenMutableObjectsCollectionView::SetObjectManager(UTkManagerObjectsArray* ManagerObjectsArray)
+void UWPropGenMutableCollectionObjectsView::SetObjectManager(UTkManagerObjectsArray* ManagerObjectsArray)
 {
 	ObjectManager = ManagerObjectsArray;
 	if(ObjectManager.IsValid())
 	{
-		ObjectManager->OnObjectAdded.AddDynamic(this, &UWPropGenMutableObjectsCollectionView::OnObjectAdded);
-		ObjectManager->OnObjectRemoved.AddDynamic(this, &UWPropGenMutableObjectsCollectionView::OnObjectRemoved);
-		ObjectManager->OnArraySet.AddDynamic(this, &UWPropGenMutableObjectsCollectionView::OnInit);
-		ObjectManager->OnArrayCleared.AddDynamic(this, &UWPropGenMutableObjectsCollectionView::OnCleared);
+		ObjectManager->OnObjectAdded.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectAdded);
+		ObjectManager->OnObjectRemoved.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectRemoved);
+		ObjectManager->OnArraySet.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnInit);
+		ObjectManager->OnArrayCleared.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnCleared);
+		OnInit(ObjectManager->GetArray_BP());
 	}
 }
 
-void UWPropGenMutableObjectsCollectionView::NativeDestruct()
+void UWPropGenMutableCollectionObjectsView::NativeDestruct()
 {
 	if (ObjectManager.IsValid())
 	{
-		ObjectManager->OnObjectAdded.RemoveDynamic(this, &UWPropGenMutableObjectsCollectionView::OnObjectAdded);
-		ObjectManager->OnObjectRemoved.RemoveDynamic(this, &UWPropGenMutableObjectsCollectionView::OnObjectRemoved);
-		ObjectManager->OnArraySet.RemoveDynamic(this, &UWPropGenMutableObjectsCollectionView::OnInit);
-		ObjectManager->OnArrayCleared.RemoveDynamic(this, &UWPropGenMutableObjectsCollectionView::OnCleared);
-
-		OnInit(ObjectManager->GetObjects());
+		ObjectManager->OnObjectAdded.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectAdded);
+		ObjectManager->OnObjectRemoved.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectRemoved);
+		ObjectManager->OnArraySet.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnInit);
+		ObjectManager->OnArrayCleared.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnCleared);
 	}
     
 	Super::NativeDestruct();
 }
 
-void UWPropGenMutableObjectsCollectionView::OnObjectAdded(UObject* Object)
+void UWPropGenMutableCollectionObjectsView::OnObjectAdded(UObject* Object)
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
@@ -44,7 +45,7 @@ void UWPropGenMutableObjectsCollectionView::OnObjectAdded(UObject* Object)
 	}
 }
 
-void UWPropGenMutableObjectsCollectionView::OnObjectRemoved(UObject* Object)
+void UWPropGenMutableCollectionObjectsView::OnObjectRemoved(UObject* Object)
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
@@ -52,7 +53,7 @@ void UWPropGenMutableObjectsCollectionView::OnObjectRemoved(UObject* Object)
 	}
 }
 
-void UWPropGenMutableObjectsCollectionView::OnInit(const TArray<UObject*>& Objects)
+void UWPropGenMutableCollectionObjectsView::OnInit(const TArray<UObject*>& Objects)
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
@@ -60,7 +61,7 @@ void UWPropGenMutableObjectsCollectionView::OnInit(const TArray<UObject*>& Objec
 	}
 }
 
-void UWPropGenMutableObjectsCollectionView::OnCleared()
+void UWPropGenMutableCollectionObjectsView::OnCleared()
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
@@ -68,22 +69,7 @@ void UWPropGenMutableObjectsCollectionView::OnCleared()
 	}
 }
 
-// void UWPropGenCollectionView::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
-// {
-// 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
-// 	{
-// 		// SourceObjects.Reserve(Structs.Num());
-// 		// for(FInstancedStruct DataStruct: Structs)
-// 		// {
-// 		// 	UPropGenStructWrapper* StructWrapper = NewObject<UPropGenStructWrapper>();
-// 		// 	StructWrapper->SetStructInstance(DataStruct);
-// 		// 	SourceObjects.Add(StructWrapper);
-// 		// }
-// 		// View->SetListItems(SourceObjects);
-// 	}
-// }
-
-void UWPropGenMutableObjectsCollectionView::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass)
+void UWPropGenMutableCollectionObjectsView::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass)
 {
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{

@@ -1,8 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "CollectionViewWidgets/VerticalBoxDataTable.h"
+#include "CollectionViewWidgets/StaticDataTableDisplay.h"
 #include "GenericStructWidget.h"
 #include "GenericUserWidgetInterface.h"
+#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 
 void UWPropGenStaticDataTableDisplay::NativeOnInitialized()
 {
@@ -12,7 +13,7 @@ void UWPropGenStaticDataTableDisplay::NativeOnInitialized()
 
 void UWPropGenStaticDataTableDisplay::Init()
 {
-	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
+	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
 	{
 		VerticalBox->ClearChildren();
@@ -52,8 +53,8 @@ void UWPropGenStaticDataTableDisplay::SetDataTable_Implementation(UDataTable* Ne
 #if WITH_EDITOR
 void UWPropGenStaticDataTableDisplay::RefreshContainer() const
 {
-	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("Container")));
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
+	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("Container")));
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetVerticalBox)
 	{
 		return;
@@ -64,8 +65,8 @@ void UWPropGenStaticDataTableDisplay::RefreshContainer() const
 	}
 	AssetVerticalBox->ClearChildren();
 	AssetVerticalBox->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
-	for(const FInstancedStruct& Struct : UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable))
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
+	for(const FInstancedStruct& Struct : UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable))
 	{
 		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetClass))
 		{
@@ -77,7 +78,7 @@ void UWPropGenStaticDataTableDisplay::RefreshContainer() const
 		}
 	}
 	AssetVerticalBox->Modify();
-	UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(this);
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 #endif
 

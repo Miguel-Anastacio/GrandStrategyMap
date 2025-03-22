@@ -2,19 +2,15 @@
 #include "CollectionViewWidgets/WidgetCollectionInterface.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Blueprint/WidgetTree.h"
-#include "CollectionViewWidgets/CollectionViewWidgets.h"
+#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
+#include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #include "Components/ListView.h"
-
-void IWidgetCollectionInterface::ClearCollection()
-{
-	BpClearCollection();
-}
 
 #if WITH_EDITOR
 void IWidgetCollectionInterface::CreateCollectionContainer()
 {
 	UUserWidget* Widget = Cast<UUserWidget>(this);
-	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(Widget);
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(Widget);
 	if (!MainAssetWidgetTree)
 	{
 		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
@@ -29,7 +25,7 @@ void IWidgetCollectionInterface::CreateCollectionContainer()
 		MainAssetWidgetTree->RootWidget = Execute_GetCollectionContainer(Widget);
 		
 		MainAssetWidgetTree->Modify();
-		UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(Widget);
+		UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(Widget);
 	}
 }
 #endif

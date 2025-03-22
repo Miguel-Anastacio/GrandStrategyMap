@@ -39,7 +39,7 @@ void UWPropGenCustomEditableText::SetIDText(const FText& Text) const
 void UWPropGenCustomEditableText::InitFromData(const FName& PropertyName, const UStruct* ClassType, const void* Data) const
 {
 	SetIDText(FText::FromName(PropertyName));
-	const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
-	const FString Text = UADStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
+	const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
+	const FString Text = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromString(Text), FText::FromString(Text));
 }

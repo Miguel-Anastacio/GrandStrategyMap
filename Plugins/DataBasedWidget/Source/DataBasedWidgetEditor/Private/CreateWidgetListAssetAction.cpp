@@ -5,7 +5,7 @@
 #include "EditorUtilityLibrary.h"
 #include "GenericStructWidget.h"
 #include "GenericWidgetDataMap.h"
-#include "CollectionViewWidgets/CollectionViewWidgets.h"
+#include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
@@ -57,12 +57,12 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 		
 	}
 	FString Message;
-	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
 UWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
 														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
 	if (!Asset)
 	{
@@ -81,7 +81,7 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 		return nullptr;
 	}
 	
-	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, WidgetListBaseClass,
+	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, WidgetListBaseClass,
 																						TEXT("/WBP_ListView_") + ObjectOriginName);
 	if (Blueprint)
 	{
@@ -93,7 +93,7 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 				{
 					Cast<IWidgetCollectionInterface>(DefaultObject)->CreateCollectionContainer();
 					IWidgetCollectionInterface::Execute_SetWidgetItemClass(DefaultObject, WidgetItemClass);
-					IWidgetCollectionInterface::Execute_SetDataTable(DefaultObject, const_cast<UDataTable*>(ListItems));
+					IPropGenWidgetDataTableInterface::Execute_SetDataTable(DefaultObject, const_cast<UDataTable*>(ListItems));
 					FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 				}
 			}
@@ -105,7 +105,7 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 UBlueprint* UCreateWidgetListAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
                                                                                         UWidgetMapDataAsset* MapDataAsset) const
 {
-	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
+	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{

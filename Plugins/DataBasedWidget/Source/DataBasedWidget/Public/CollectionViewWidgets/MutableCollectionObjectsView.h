@@ -6,7 +6,7 @@
 #include "WidgetCollectionInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-#include "CollectionViewWidgets.generated.h"
+#include "MutableCollectionObjectsView.generated.h"
 
 class UTkManagerObjectsArray;
 // Wrapper for InstancedStructs so that they can be used as source for ListView
@@ -29,7 +29,7 @@ protected:
 };
 
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenMutableObjectsCollectionView : public UUserWidget, public IWidgetCollectionInterface
+class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWidget, public IWidgetCollectionInterface
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ public:
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 
 protected:
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
 	TWeakObjectPtr<UTkManagerObjectsArray> ObjectManager;
 	
 };

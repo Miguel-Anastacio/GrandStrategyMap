@@ -2,13 +2,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CollectionViewWidgets.h"
+#include "MutableCollectionStructsView.h"
 #include "Types/SlateEnums.h"
 #include "CollectionViewWidgetsDataTable.generated.h"
 
-// Base Class for 
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenCollectionView
+class DATABASEDWIDGET_API UWPropGenCollectionViewDataTable : public UWPropGenMutableCollectionStructsView, public IPropGenWidgetDataTableInterface
 {
 	GENERATED_BODY()
 
@@ -17,6 +16,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category=CollectionViewDataTable)
 	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
 
+	TArray<FInstancedStruct> GetDataTableEntries() const;
 protected:
 	UPROPERTY(EditAnywhere, Category=CollectionViewDataTable, BlueprintReadWrite)
 	TSoftObjectPtr<UDataTable> DataTable;

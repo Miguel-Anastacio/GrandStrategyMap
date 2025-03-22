@@ -6,51 +6,37 @@
 #include "WidgetCollectionInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-#include "MutableCollectionObjectsView.generated.h"
+#include "MutableCollectionStructsView.generated.h"
 
-class UTkManagerObjectsArray;
-// Wrapper for InstancedStructs so that they can be used as source for ListView
-UCLASS()
-class UPropGenStructWrapper : public UObject
-{
-	GENERATED_BODY()
-public:    
-	void SetStructInstance(const FInstancedStruct& InStruct)
-	{
-		StructInstance = InStruct;
-	}
-	FInstancedStruct GetStructInstance() const
-	{
-		return StructInstance;
-	}
-protected:
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
-	FInstancedStruct StructInstance;
-};
+class UTkManagerStructsArray;
 
+// Supports GridView/TreeView/ListView by default
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWidget, public IWidgetCollectionInterface
+class DATABASEDWIDGET_API UWPropGenMutableCollectionStructsView : public UUserWidget, public IWidgetCollectionInterface
 {
 	GENERATED_BODY()
 
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeDestruct() override;
-	virtual void SetObjectManager(UTkManagerObjectsArray* ManagerObjectsArray);
+	UFUNCTION(BlueprintCallable)
+	virtual void SetManager(UTkManagerStructsArray* ManagerStructsArray);
 
 	UFUNCTION()
-	virtual void OnObjectAdded(UObject* Object);
+	virtual void OnStructAdded(const FInstancedStruct& DataStruct);
 	UFUNCTION()
-	virtual void OnObjectRemoved(UObject* Object);
+	virtual void OnStructRemoved(const FInstancedStruct& DataStruct);
 	UFUNCTION()
-	virtual void OnInit(const TArray<UObject*>& Objects);
+	virtual void OnInit(const TArray<FInstancedStruct>& Structs);
 	UFUNCTION()
 	virtual void OnCleared();
 	
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 
 protected:
-	UPROPERTY(VisibleInstanceOnly)
-	TWeakObjectPtr<UTkManagerObjectsArray> ObjectManager;
-	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
+	TWeakObjectPtr<UTkManagerStructsArray> StructManager;
+
+	UPROPERTY()
+	TArray<class UPropGenStructWrapper*> StructWrappers; 
 };

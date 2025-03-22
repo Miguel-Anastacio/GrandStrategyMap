@@ -15,7 +15,7 @@ public:
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
     virtual void CreateWidgetListFromDataTable(
         TSubclassOf<UUserWidget> WidgetForListItems = nullptr,
-        UPARAM(meta=(MustImplement="/Script/DataBasedWidget.WidgetCollectionInterface")) TSubclassOf<UUserWidget> BaseViewWidget = nullptr) const;
+        UPARAM(meta=(MustImplement="/Script/DataBasedWidget.WidgetCollectionInterface, /Script/DataBasedWidget.PropGenWidgetDataTableInterface")) TSubclassOf<UUserWidget> BaseViewWidget = nullptr) const;
 protected:    
     // Widget used by default for each field of UObject/Struct
     UPROPERTY(EditAnywhere, Category=CreateWidgetListFromDataTable, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))

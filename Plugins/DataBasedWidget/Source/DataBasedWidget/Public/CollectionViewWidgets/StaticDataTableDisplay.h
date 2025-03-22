@@ -6,7 +6,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Types/SlateEnums.h"
 #include "Components/VerticalBox.h"
-#include "VerticalBoxDataTable.generated.h"
+#include "StaticDataTableDisplay.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
 class DATABASEDWIDGET_API UWPropGenStaticDataTableDisplay : public UUserWidget, public IWidgetCollectionInterface, public IPropGenWidgetDataTableInterface

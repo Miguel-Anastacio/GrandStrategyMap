@@ -44,12 +44,12 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject(TSubclassOf<UUserWidge
 		
 	}
 	FString Message;
-	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
 UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
 														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
 	if (!Asset)
 	{
@@ -61,7 +61,7 @@ UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(cons
 UBlueprint* UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
 																UWidgetMapDataAsset* MapDataAsset) const
 {
-	UBlueprint* Blueprint = UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
+	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{

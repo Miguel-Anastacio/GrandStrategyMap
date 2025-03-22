@@ -31,69 +31,6 @@ class DATABASEDWIDGET_API IWidgetCollectionInterface
 
 public:
    /**
-    * Clears all items from the widget collection.
-    * Blueprint implementable for custom behavior in child widgets.
-    */
-   UFUNCTION(BlueprintCallable, DisplayName="Clear Collection", BlueprintImplementableEvent, Category = WidgetCollectionInterface)
-   void BpClearCollection();
-
-   /**
-    * Native C++ implementation for clearing the collection.
-    * Calls BpClearCollection
-    */
-   virtual void ClearCollection();
-
-   /**
-    * Adds a UObject to the widget collection.
-    * @param Object - The UObject to add to the collection
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void AddObject(UObject* Object);
-   
-   /**
-    * Adds an instanced struct to the widget collection.
-    * @param Struct - The instanced struct to add to the collection
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void AddStruct(const FInstancedStruct& Struct);
-   
-   /**
-    * Removes a specific UObject from the widget collection.
-    * @param Object - The UObject to remove from the collection
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void RemoveObject(UObject* Object);
-   
-   /**
-    * Removes a specific instanced struct from the widget collection.
-    * @param Struct - The instanced struct to remove from the collection
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void RemoveStruct(const FInstancedStruct& Struct);
-   
-   /**
-    * Initializes the collection with an array of instanced structs.
-    * @param Structs - Array of instanced structs to initialize the collection with
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void InitFromStructs(const TArray<FInstancedStruct>& Structs);
-   
-   /**
-    * Initializes the collection with an array of UObjects.
-    * @param Objects - Array of UObjects to initialize the collection with
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = WidgetCollectionInterface)
-   void InitFromObjects(const TArray<UObject*>& Objects);
-
-   /**
-    * Sets the data table that provides data for the widget collection.
-    * Optional method to override if the widget display depends on a DataTable.
-    * @param NewDataTable - The data table to use for the widget collection
-    */
-   UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
-   void SetDataTable(UDataTable* NewDataTable);
-
-   /**
     * Creates the container widget that will hold collection items.
     * Only available in the editor.
     */
@@ -138,4 +75,24 @@ protected:
 #if WITH_EDITOR
    virtual void SetRootWidget(UWidgetTree* Tree) {};
 #endif
+};
+
+
+UINTERFACE(MinimalAPI, BlueprintType, Blueprintable)
+class UPropGenWidgetDataTableInterface: public UInterface
+{
+	GENERATED_BODY()
+};
+
+class DATABASEDWIDGET_API IPropGenWidgetDataTableInterface
+{
+	GENERATED_BODY()
+public:
+	/**
+   * Sets the data table that provides data for the widget collection.
+   * Optional method to override if the widget display depends on a DataTable.
+   * @param NewDataTable - The data table to use for the widget collection
+   */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
+	void SetDataTable(UDataTable* NewDataTable);
 };
