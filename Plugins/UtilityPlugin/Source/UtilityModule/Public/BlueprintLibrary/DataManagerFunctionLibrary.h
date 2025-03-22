@@ -13,7 +13,7 @@ class FJsonObject;
  * Library for managing data functions, such as reading from data tables and writing to JSON files.
  */
 UCLASS()
-class UTILITYMODULE_API UDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UAtkDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -23,8 +23,6 @@ public:
     
     UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
     static TArray<FInstancedStruct> GetArrayOfInstancedStructsSoft(const TSoftObjectPtr<UDataTable> DataTable);
-
-    static TArray<FInstancedStruct> GetArrayOfInstancedStructsRuntime(const UDataTable* DataTable);
     /**
      * Reads data from a data table into a map.
      *
@@ -134,13 +132,7 @@ public:
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance);
-
-    // --------------------------------------------------------------------
-    // COLOR STUFF -> Move somewhere else
-    static FColor ConvertHexStringToRGB(const FString& Color);
-private:
-    static auto HexToDecimal(const FString& Hex) -> int32;
-
+    
     /**
      * Writes a string to a file.
      *

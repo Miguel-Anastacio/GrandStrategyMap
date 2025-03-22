@@ -26,7 +26,7 @@ struct SHADERSMODULE_API FReplaceColorComputeShaderDispatchParams
 	FReplaceColorComputeShaderDispatchParams(const TArray<uint8>& Pixels, const TArray<FColorReplace>& ReplacementRules)
 		: ReplacementRules(ReplacementRules)
 	{
-		PixelArray = UTextureUtilsFunctionLibrary::PackUint8ToUint32(Pixels);
+		PixelArray = UAtkTextureUtilsFunctionLibrary::PackUint8ToUint32(Pixels);
 		
 	};
 };

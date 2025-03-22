@@ -8,7 +8,7 @@
 #include "UtilityModule.h"
 #include "Engine/DataTable.h"
 #include "StructUtils/Public/InstancedStruct.h"
-void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
 {
 	if (!FFileHelper::SaveStringToFile(string, *filePath))
 	{
@@ -21,7 +21,7 @@ void UDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, con
 	outInfoMessage = outInfoMessage = FString::Printf(TEXT("Write string to file succeeded"));
 }
 
-TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::ReadJsonFile(const FString& filePath)
+TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::ReadJsonFile(const FString& filePath)
 {
 	FString jsonString;
 	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
@@ -37,7 +37,7 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::ReadJsonFile(const FString&
 	return jsonObject;
 }
 
-TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(const FString& filePath)
+TArray<TSharedPtr<FJsonValue>> UAtkDataManagerFunctionLibrary::ReadJsonFileArray(const FString& filePath)
 {
 	FString jsonString;
 	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
@@ -53,7 +53,7 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArray(co
 	return jsonValueArray;
 }
 
-TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArrayFromString(const FString& JsonString)
+TArray<TSharedPtr<FJsonValue>> UAtkDataManagerFunctionLibrary::ReadJsonFileArrayFromString(const FString& JsonString)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonValues;
 	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JsonString), JsonValues))
@@ -64,7 +64,7 @@ TArray<TSharedPtr<FJsonValue>> UDataManagerFunctionLibrary::ReadJsonFileArrayFro
 }
 
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs(const UDataTable* DataTable)
+TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructs(const UDataTable* DataTable)
 {
 	if(!DataTable)
 	{
@@ -72,30 +72,6 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs
 		return TArray<FInstancedStruct>();
 	}
 
-#if WITH_EDITOR
-	const FString Json = DataTable->GetTableAsJSON();
-	return LoadCustomDataFromJsonString(Json, DataTable->GetRowStruct());
-#else
-	return GetArrayOfInstancedStructsRuntime(DataTable);
-#endif
-	
-}
-
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(
-	const TSoftObjectPtr<UDataTable> DataTable)
-{
-	if (const UDataTable* LoadedDataTable = DataTable.LoadSynchronous())
-	{
-		return GetArrayOfInstancedStructs(LoadedDataTable);
-	}
-	return TArray<FInstancedStruct>();
-}
-
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructsRuntime(const UDataTable* DataTable)
-{
-	if(!DataTable)
-		return TArray<FInstancedStruct>();
-	
 	const UScriptStruct* RowStruct = DataTable->GetRowStruct();
 	const TMap<FName, uint8*>& RowMap = DataTable->GetRowMap();
 
@@ -110,7 +86,17 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::GetArrayOfInstancedStructs
 	return Instances;
 }
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)
+TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(
+	const TSoftObjectPtr<UDataTable> DataTable)
+{
+	if (const UDataTable* LoadedDataTable = DataTable.LoadSynchronous())
+	{
+		return GetArrayOfInstancedStructs(LoadedDataTable);
+	}
+	return TArray<FInstancedStruct>();
+}
+
+TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* structType)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
 	TArray<FInstancedStruct> OutArray;
@@ -138,7 +124,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 	return OutArray;
 }
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJsonString(const FString& JString,
+TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJsonString(const FString& JString,
 	const UScriptStruct* StructType)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArrayFromString(JString); 
@@ -167,7 +153,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJsonStri
 	return OutArray;
 }
 
-TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath,
+TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath,
                                                                              const TArray<UScriptStruct*>& StructTypes)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath); 
@@ -198,7 +184,7 @@ TArray<FInstancedStruct> UDataManagerFunctionLibrary::LoadCustomDataFromJson(con
 	return OutArray;
 }
 
-void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
+void UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
                                                                   const TArray<FInstancedStruct>& Array)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
@@ -217,7 +203,7 @@ void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString&
 	}
 }
 
-void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath,
+void UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath,
 	const TArray<FInstancedStruct>& Array)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
@@ -236,7 +222,7 @@ void UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString&
 	}
 }
 
-bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject, const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct)
+bool UAtkDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject, const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct)
 {
 	// Initialize the FInstancedStruct with the resolved type
 	OutInstancedStruct.InitializeAs(StructType);
@@ -249,7 +235,7 @@ bool UDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TShare
 	return true;
 }
 
-TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType)
+TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType)
 {
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	if(FJsonObjectConverter::UStructToJsonObject(StructType, Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
@@ -261,7 +247,7 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJ
 	return nullptr;
 }
 
-TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance)
+TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance)
 {
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	if(FJsonObjectConverter::UStructToJsonObject(Instance.GetScriptStruct(), Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
@@ -273,68 +259,7 @@ TSharedPtr<FJsonObject> UDataManagerFunctionLibrary::SerializeInstancedStructToJ
 	return nullptr;
 }
 
-int32 UDataManagerFunctionLibrary::HexToDecimal(const FString& Hex)
-{
-	static const TMap<TCHAR, int32> HexMap
-	{
-		TPair<TCHAR, int32>('0', 0),
-		TPair<TCHAR, int32>('1', 1),
-		TPair<TCHAR, int32>('2', 2),
-		TPair<TCHAR, int32>('3', 3),
-		TPair<TCHAR, int32>('4', 4),
-		TPair<TCHAR, int32>('5', 5),
-		TPair<TCHAR, int32>('6', 6),
-		TPair<TCHAR, int32>('7', 7),
-		TPair<TCHAR, int32>('8', 8),
-		TPair<TCHAR, int32>('9', 9),
-		TPair<TCHAR, int32>('A', 10),
-		TPair<TCHAR, int32>('B', 11),
-		TPair<TCHAR, int32>('C', 12),
-		TPair<TCHAR, int32>('D', 13),
-		TPair<TCHAR, int32>('E', 14),
-		TPair<TCHAR, int32>('F', 15),
-   };
-	const FString Temp = Hex.Reverse().ToUpper();
-	int32 Total = 0;
-	for (int i = 0; i < Temp.Len(); i++)
-	{
-		const int32* Value = HexMap.Find(Temp[i]);
-		if (Value)
-		{
-			Total += FMath::Pow(16.f, i) * (*Value);
-		}
-		else
-		{
-			UE_LOG(LogUtilityModule, Warning, TEXT("Invalid Hex value"));
-		}
-	}
-	return Total;
-}
-
-FColor UDataManagerFunctionLibrary::ConvertHexStringToRGB(const FString& Color)
-{
-	if (Color.StartsWith(FString("#")))
-	{
-		const FString noPrefix = Color.RightChop(1);
-		const FString r = noPrefix.LeftChop(6);
-		const FString g = noPrefix.Mid(2, 2);
-		const FString b = noPrefix.Mid(4, 2);
-		const FString alpha = noPrefix.RightChop(6);
-
-		FColor ColorValue;
-		ColorValue.R = HexToDecimal(r);
-		ColorValue.G = HexToDecimal(g);
-		ColorValue.B = HexToDecimal(b);
-		ColorValue.A = HexToDecimal(alpha);
-
-		return ColorValue;
-	}
-
-	UE_LOG(LogUtilityModule, Error, TEXT("Color is not hexadecimal format"));
-	return FColor();
-}
-
-void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
 {
 	FString JSONString;
 
@@ -355,7 +280,7 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const T
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
 {
 	FString JSONString;
 
@@ -376,7 +301,7 @@ void UDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const T
 	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
 }
 
-bool UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
+bool UAtkDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
 {
 	bool bResult = false;
 	for (TFieldIterator<FProperty> It(StructType); It; ++It)
@@ -396,7 +321,7 @@ bool UDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonO
 	return bResult;
 }
 
-void UDataManagerFunctionLibrary::LogReadJsonFailed(const FString& FilePath)
+void UAtkDataManagerFunctionLibrary::LogReadJsonFailed(const FString& FilePath)
 {
 	UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - some entries do not match the structure defined '%s'"), *FilePath);
 }

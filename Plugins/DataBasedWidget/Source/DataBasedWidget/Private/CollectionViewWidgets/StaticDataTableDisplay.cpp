@@ -4,19 +4,19 @@
 #include "GenericStructWidget.h"
 #include "GenericUserWidgetInterface.h"
 
-void UWPropGenVerticalBoxDataTable::NativeOnInitialized()
+void UWPropGenStaticDataTableDisplay::NativeOnInitialized()
 {
-	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	Execute_InitFromStructs(this, DataTableItems);
+	Init();
 	Super::NativeConstruct();
 }
 
-void UWPropGenVerticalBoxDataTable::InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs)
+void UWPropGenStaticDataTableDisplay::Init()
 {
+	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
 	{
 		VerticalBox->ClearChildren();
-		for(FInstancedStruct DataStruct : Structs)
+		for(FInstancedStruct DataStruct : DataTableItems)
 		{
 			UUserWidget* Widget = CreateWidget<UUserWidget>(this, WidgetClass);
 			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(Widget))
@@ -28,44 +28,29 @@ void UWPropGenVerticalBoxDataTable::InitFromStructs_Implementation(const TArray<
 	}
 }
 
-void UWPropGenVerticalBoxDataTable::InitFromObjects_Implementation(const TArray<UObject*>& Objects)
-{
-	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
-	{
-		VerticalBox->ClearChildren();
-		for(const UObject* Object : Objects)
-		{
-			UUserWidget* Widget = CreateWidget<UUserWidget>(this, WidgetClass);
-			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(Widget))
-			{
-				GenericStructWidget->InitFromObject(Object);
-			}
-			VerticalBox->AddChildToVerticalBox(Widget);
-		}
-	}
-}
-
-void UWPropGenVerticalBoxDataTable::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> MembersWidgetClass)
+void UWPropGenStaticDataTableDisplay::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> MembersWidgetClass)
 {
 	WidgetClass = MembersWidgetClass;
 }
 
-void UWPropGenVerticalBoxDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
+void UWPropGenStaticDataTableDisplay::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
 	DataTable = NewDataTable;
 	
+	if(FApp::IsGame())
+	{
+		// Init();
+	}
+	else
+	{
 #if WITH_EDITOR
 	RefreshContainer();
-	return;
-#else
-	// At runtime load data table and re init ListView
-	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	InitFromStructs(DataTableItems);
 #endif
+	}
 }
 
 #if WITH_EDITOR
-void UWPropGenVerticalBoxDataTable::RefreshContainer() const
+void UWPropGenStaticDataTableDisplay::RefreshContainer() const
 {
 	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAssetCreatorFunctionLibrary::GetPanelWidget(this, FName("Container")));
 	UWidgetTree* MainAssetWidgetTree = UAssetCreatorFunctionLibrary::GetWidgetTree(this);
@@ -86,7 +71,6 @@ void UWPropGenVerticalBoxDataTable::RefreshContainer() const
 		{
 			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(NewWidget))
 			{
-				// GenericStructWidget->NativeOnInitialized();
 				GenericStructWidget->InitFromStruct(Struct);
 			}
 			AssetVerticalBox->AddChildToVerticalBox(NewWidget);

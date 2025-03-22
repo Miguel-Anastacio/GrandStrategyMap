@@ -10,7 +10,7 @@
 
 class UObject;
 UCLASS()
-class UTILITYMODULE_API UPropertyUtilityFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UAtkPropertyUtilityFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -23,7 +23,13 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility, meta = (DeterminesOutputType = "ObjClass") ) 
     static UObject* GetObjectFromPropertyStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, TSubclassOf<class UObject> ObjClass);
     
+    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility ) 
+    static FInstancedStruct GetStructFromPropertyInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName);
+    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility ) 
+    static FInstancedStruct GetStructFromPropertyObj(const UObject* Object, const FName& PropertyName);
+    
     static bool IsPropertyOfType(const FProperty* Property, const UStruct* Class);
+    static FInstancedStruct GetStructFromProperty(const FProperty* Property, const void* Object);
     
     // From a InstancedStruct, get a specific property by name and return it as a T (T must inherit from UObject
     template <typename T>
@@ -34,7 +40,7 @@ public:
             return nullptr;
         }
         
-        FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(Struct.GetScriptStruct(), PropertyName);
+        FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(Struct.GetScriptStruct(), PropertyName);
         return GetPropertyAs<T>(Property, T::StaticClass(), Struct.GetMemory());
     }
     
@@ -47,7 +53,7 @@ public:
             return nullptr;
         }
         
-        FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName(Object->StaticClass(), PropertyName);
+        FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(Object->StaticClass(), PropertyName);
         return GetPropertyAs<T>(Property, T::StaticClass(), Object);
     }
 
@@ -59,19 +65,26 @@ public:
         
         // Check if it's an object property first
         const FObjectProperty* ObjectProperty = CastField<FObjectProperty>(Property);
-        if (!ObjectProperty)
+        if (ObjectProperty)
         {
-            return nullptr;
+            return HandleObjectProperty<T>(ObjectProperty, Class, ContainerPtr);
         }
-    
-        // Make sure it's of same UClass property
+
+        return nullptr;
+        
+    }
+
+    template <typename T>
+    static T* HandleObjectProperty(const FObjectProperty* ObjectProperty, const UStruct* Class, const void* ContainerPtr)
+    {
+        if(!ObjectProperty || !ContainerPtr)
+            return nullptr;
+        
         const UClass* PropertyClass = ObjectProperty->PropertyClass;
         if (!PropertyClass || (!PropertyClass->IsChildOf(Class)) && PropertyClass != Class)
         {
             return nullptr;
         }
-        
-        // Get the UTexture2D* from the container
         UObject* ObjectValue = ObjectProperty->GetObjectPropertyValue(ObjectProperty->ContainerPtrToValuePtr<void>(ContainerPtr));
         return Cast<T>(ObjectValue);
     }

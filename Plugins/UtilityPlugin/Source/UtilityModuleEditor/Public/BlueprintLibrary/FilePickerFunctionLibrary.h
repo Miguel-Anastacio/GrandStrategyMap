@@ -5,9 +5,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "FilePickerFunctionLibrary.generated.h"
 
-
 UCLASS()
-class UTILITYMODULEEDITOR_API UFilePickerFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULEEDITOR_API UAtkFilePickerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 	

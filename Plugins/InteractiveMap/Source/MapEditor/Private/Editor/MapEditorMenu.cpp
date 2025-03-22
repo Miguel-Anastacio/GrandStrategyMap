@@ -8,7 +8,7 @@
 #include "Editor/SMapTextureViewer.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
-#include "BlueprintLibrary/SlowTaskProgressBarFunctionLibrary.h"
+#include "BlueprintLibrary/MiscFunctionLibrary.h"
 #include "MapEditor/MapGenerator/source/map/Map.h"
 #include "Materials/MaterialInstanceConstant.h"
 
@@ -105,7 +105,7 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 void RMapEditorMenu::GenerateMap()
 {
 	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.OriginTexture;
-	const uint8* Data = UTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
+	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
 	if(!Data)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to read Height Map texture"));
@@ -116,7 +116,7 @@ void RMapEditorMenu::GenerateMap()
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
 	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
-	USlowTaskProgressBarFunctionLibrary::ExecuteSlowTaskWithProgressBar(
+	UAtkMiscFunctionLibrary::ExecuteSlowTaskWithProgressBar(
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			// Call GenerateMap and pass the progress callback
@@ -142,7 +142,7 @@ void RMapEditorMenu::GenerateMap()
 void RMapEditorMenu::SaveMap() const
 {
 	FString DirPath = FPaths::ProjectContentDir();
-	UFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
+	UAtkFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
 				
 	FPaths::NormalizeDirectoryName(DirPath);
 	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
@@ -186,7 +186,7 @@ void RMapEditorMenu::SaveMap() const
 	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
 	
 	FString Message;
-	UAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
 void RMapEditorMenu::AddReferencedObjects(FReferenceCollector& Collector)
@@ -263,17 +263,17 @@ void RMapEditorMenu::OutputLookupJson(const FString& FilePath) const
 	}
 	bool bResult = false;
 	FString Message;
-	UDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, OutputData, bResult, Message);
+	UAtkDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, OutputData, bResult, Message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 }
 
 UTexture2D* RMapEditorMenu::CreateLookupTextureAsset(const FString& PackagePath) const
 {
-	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
+	const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
 	FString Message;
 	bool bResult = false;
 	uint8_t* Buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
-	UTexture2D* Texture = UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map.Width(), Map.Height(), bResult, Message);
+	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map.Width(), Map.Height(), bResult, Message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 
 	if(Texture)
@@ -295,10 +295,10 @@ UTexture2D* RMapEditorMenu::CreateLookupTextureAsset(const FString& PackagePath)
 UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
 													UMaterialInstanceConstant* Material) const
 {
-	const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MapObject", UMapObject::StaticClass());
+	const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MapObject", UMapObject::StaticClass());
 	FString Message;
 	bool bResult = false;
-	UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMapObject::StaticClass(), nullptr, bResult, Message);
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMapObject::StaticClass(), nullptr, bResult, Message);
 	if(!Asset)
 	{
 		return nullptr;
@@ -327,10 +327,10 @@ UMaterialInstanceConstant* RMapEditorMenu::CreateMaterialInstanceAsset(UTexture2
 {
 	if(MapEditorPreset && MapEditorPreset->Material)
 	{
-		const auto AssetPath = UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MI_LookupMaterial", UMaterialInstance::StaticClass());
+		const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MI_LookupMaterial", UMaterialInstance::StaticClass());
 		FString Message;
 		bool bResult = false;
-		UObject* Asset = UAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMaterialInstanceConstant::StaticClass(), nullptr, bResult, Message);
+		UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMaterialInstanceConstant::StaticClass(), nullptr, bResult, Message);
 		if(!Asset)
 		{
 			return nullptr;
@@ -373,7 +373,7 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 			return;
 		}
 		
-		if(!UADStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
+		if(!UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
 		{
 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
 					*MapEditorPreset->TileDataStructType->GetName());
@@ -384,7 +384,7 @@ void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 		Index++;
 	}
 
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
+	UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
 }
 
 void RMapEditorMenu::OutputLookupGenFile(const FString& FilePath) const
@@ -406,7 +406,7 @@ void RMapEditorMenu::OutputLookupGenFile(const FString& FilePath) const
 	const FMapLookupGenFeedback GenInputsResults(MapEditorPreset->MapEditorDetails, LandTiles, OceanTiles);
 	bool bResult = false;
 	FString Message;
-	UDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
+	UAtkDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
 	if(!bResult)
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to Save map gen results %s"), *Message);

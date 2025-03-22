@@ -78,7 +78,7 @@ public:
     }
 
     /**
-     * Convert a property pointer use the item to conver the property to a string.
+     * Convert a property pointer use the item to convert the property to a string.
      */
     virtual FText GetPropertyValueText(const FProperty* Property) const
     {
@@ -98,7 +98,7 @@ public:
                SNew(SEditableTextCustom)
                .OnPropertyEdited_Lambda([this](const FName& Name, const FText& Text)
                {
-                   if(UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
+                   if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
                    {
                        ItemChanged.ExecuteIfBound(*Item);
                    }
@@ -185,7 +185,7 @@ public:
         {
             for(const auto& Struct : *InArgs._StructTypes)
             {
-                TArray<const FProperty*> OrderedProperties = UADStructUtilsFunctionLibrary::GetOrderedProperties(Struct);
+                TArray<const FProperty*> OrderedProperties = UAtkStructUtilsFunctionLibrary::GetOrderedProperties(Struct);
                 for (const FProperty* Property : OrderedProperties)
                 {
                     const FName PropertyName = Property->GetFName();

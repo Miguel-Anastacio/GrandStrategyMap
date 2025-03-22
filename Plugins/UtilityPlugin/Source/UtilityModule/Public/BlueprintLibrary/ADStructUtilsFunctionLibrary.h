@@ -61,9 +61,11 @@ struct TPropertyTraits<UScriptStruct>
     using Type = FStructProperty;
 };
 
-
+/**
+ * Utility functions for FInstancedStruct
+ */
 UCLASS()
-class UTILITYMODULE_API UADStructUtilsFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UAtkStructUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
     
@@ -132,12 +134,10 @@ public:
         return false;
     }
     UFUNCTION(BlueprintCallable, Category="Struct Utils")
-    static FInstancedStruct SetPropertyValueInStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue, bool& bResult);
+    static bool SetPropertyValueInStruct(UPARAM(ref) FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue, bool& bResult);
     
     UFUNCTION(BlueprintCallable, Category="Struct Utils")
     static bool SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);
-    
-    static FInstancedStruct GetStructFromProperty(const FProperty* Property,  const uint8* Object, bool& bOutResult);
 
     static FProperty* FindPropertyByDisplayName(const UStruct* Struct, const FName& DisplayName);
     static FProperty* FindPropertyByDisplayName(const TArray<const UStruct*>& Structs, const FName& DisplayName);
@@ -224,6 +224,7 @@ private:
         }
     };
     static FStructProp GetContainerThatHoldsProperty(const FString& PropertyName, void* StructMemory, const UScriptStruct* StructType);
+    
     // Generalized compatibility check
     template<typename T>
     static bool IsTypeCompatible(const FProperty* Property)

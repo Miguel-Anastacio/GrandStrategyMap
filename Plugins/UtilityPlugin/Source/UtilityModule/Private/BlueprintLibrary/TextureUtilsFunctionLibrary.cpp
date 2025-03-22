@@ -6,7 +6,7 @@
 #include "TextureCompiler.h"
 #include "UtilityModule.h"
 #include "TextureResource.h"
-TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Texture)
+TArray<uint8> UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Texture)
 {
 	// Initialize an empty TArray to hold the texture data
 	TArray<uint8> DataArray;
@@ -31,7 +31,7 @@ TArray<uint8> UTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Textu
 	return DataArray;
 }
 
-const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
+const uint8* UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
 {
 	if(!IsTextureValid(Texture))
 	{
@@ -51,7 +51,7 @@ const uint8* UTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Textu
 	return  Data;
 }
 
-FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
 	const TArray<uint8>& DataBuffer)
 {
 	if(Width * Height * 4 != DataBuffer.Num())
@@ -70,7 +70,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const TArray<uint8>& DataBuffer)
 {
 	if(!IsTextureValid(Texture))
 	{
@@ -97,7 +97,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const F
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const FVector2D& Uv, const uint8* DataBuffer)
 {
 	if(!IsTextureValid(Texture))
 	{
@@ -122,7 +122,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(UTexture2D* Texture, const F
 	
 	return GetColorFromIndex(Index, DataBuffer);
 }
-FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
 	const uint8* DataBuffer)
 {
 	bool bResult = false;
@@ -134,7 +134,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height,
 	return GetColorFromIndex(Index, DataBuffer);
 }
 
-TArray<uint32> UTextureUtilsFunctionLibrary::PackUint8ToUint32(const TArray<uint8>& DataArray)
+TArray<uint32> UAtkTextureUtilsFunctionLibrary::PackUint8ToUint32(const TArray<uint8>& DataArray)
 {
 	TArray<uint32> PackedArray;
 	// Ensure the input array has at least 4 bytes to process
@@ -162,7 +162,7 @@ TArray<uint32> UTextureUtilsFunctionLibrary::PackUint8ToUint32(const TArray<uint
 	return PackedArray;
 }
 
-TArray<uint8> UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(const TArray<uint32>& DataArray)
+TArray<uint8> UAtkTextureUtilsFunctionLibrary::UnPackUint32ToUint8(const TArray<uint32>& DataArray)
 {
 	TArray<uint8> UnPackedArray;
 	// Ensure the input array has at least 4 bytes to process
@@ -186,7 +186,7 @@ TArray<uint8> UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(const TArray<uin
 	return UnPackedArray;
 };
 
-FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArray<uint8>& DataBuffer)
 {
 	// Data read from texture is in BGRA format
 	return FColor(DataBuffer[Index + 2],
@@ -195,7 +195,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const TArra
 		DataBuffer[Index + 3]);
 }
 
-FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const uint8* DataBuffer)
+FColor UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const uint8* DataBuffer)
 {
 	// Data read from texture is in BGRA format
 	return FColor(DataBuffer[Index + 2],
@@ -204,7 +204,7 @@ FColor UTextureUtilsFunctionLibrary::GetColorFromIndex(uint32 Index, const uint8
 		DataBuffer[Index + 3]);
 }
 
-int32 UTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height,
+int32 UAtkTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 Width, uint32 Height,
 	bool& bOutResult)
 {
 	const uint32 y = Uv.Y * Height;
@@ -225,7 +225,7 @@ int32 UTextureUtilsFunctionLibrary::GetIndexFromUV(const FVector2D& Uv, uint32 W
 	return Index;
 }
 
-bool UTextureUtilsFunctionLibrary::IsTextureValid(const UTexture2D* Texture)
+bool UAtkTextureUtilsFunctionLibrary::IsTextureValid(const UTexture2D* Texture)
 {
 	if(!Texture)
 	{

@@ -6,7 +6,7 @@
 #include "Developer/DesktopPlatform/Public/IDesktopPlatform.h"
 #include "Developer/DesktopPlatform/Public/DesktopPlatformModule.h"
 
-void UFilePickerFunctionLibrary::OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames)
+void UAtkFilePickerFunctionLibrary::OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames)
 {
 	if (GEditor)
 	{
@@ -36,12 +36,12 @@ void UFilePickerFunctionLibrary::OpenFileDialog(const FString& DialogTitle, cons
 	}
 }
 
-void UFilePickerFunctionLibrary::OpenFileDialogJson(const FString& DefaultPath, TArray<FString>& OutFileNames)
+void UAtkFilePickerFunctionLibrary::OpenFileDialogJson(const FString& DefaultPath, TArray<FString>& OutFileNames)
 {
 	OpenFileDialog("Select Data File", DefaultPath, FString("JSon Files|*.json"), OutFileNames);
 }
 
-void UFilePickerFunctionLibrary::OpenDirectoryDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderName)
+void UAtkFilePickerFunctionLibrary::OpenDirectoryDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderName)
 {
 	if (GEditor)
 	{

@@ -43,7 +43,7 @@ public:
              .AvailableTags(AvailableTagsOfType)
              .OnTagChanged_Lambda([this](const FName& Name, const FName& NewTag)
              {
-                 if(UADStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
+                 if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
                  {
                      ItemChanged.ExecuteIfBound(*Item);
                  }
@@ -175,7 +175,7 @@ public:
         if(!Selection.IsValid())
             return;
         bool bOutResult;
-        const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*Selection, "ID", bOutResult);
+        const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*Selection, "ID", bOutResult);
         if(bOutResult)
             OnSelectionChanged.ExecuteIfBound(ID);
     }

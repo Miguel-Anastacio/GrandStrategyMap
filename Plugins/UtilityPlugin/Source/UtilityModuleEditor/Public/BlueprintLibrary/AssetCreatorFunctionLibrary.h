@@ -5,50 +5,34 @@
 #include "AssetCreatorFunctionLibrary.generated.h"
 
 /**
- * 
+ * Collection of functions to create assets through code, only available in c++
  */
 class UObject;
-UCLASS()
-class UTILITYMODULEEDITOR_API UAssetCreatorFunctionLibrary : public UBlueprintFunctionLibrary
+UCLASS(DisplayName="Asset Creator Function Library")
+class UTILITYMODULEEDITOR_API UAtkAssetCreatorFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAssetInPackageWithUniqueName(const FString& PackagePath, UClass* AssetClass, const FString& BaseName ,UFactory* Factory = nullptr);
 	
-	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
-	UFUNCTION(Blueprintable, Category= "Asset Creation")
 	static UTexture2D* CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data, uint32 Width, uint32 Height,
 											bool& bOutSuccess, FString& OutInfoMessage);
 	
 	static UTexture2D* CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data, uint32 Width, uint32 Height,
 											bool& bOutSuccess, FString& OutInfoMessage);
 
-	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
 	static FString CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass);
 
-	UFUNCTION(BlueprintCallable, Category = "Asset Creation")
 	static UBlueprint* CreateBlueprintDerivedFromClass(const FString& PackagePath, UClass* Class,const FString& AssetName);
 
-	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static bool SaveAsset(const FString& AssetPath, FString& OutInfoMessage);
 
-	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static TArray<UObject*> GetModifiedAssets(bool& OutResult, FString& OutInfoMessage);
 
-	UFUNCTION(BlueprintCallable, Category = "Asset Save")
 	static bool SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage);
-	
-	static void MarkWidgetAsModified(const UObject* Object);
-	static class UPanelWidget* GetPanelWidget(const UUserWidget* Widget, const FName& Name);
-	static class UWidgetTree* GetWidgetTree(const UUserWidget* Widget);
-
-	static void MarkBlueprintAsModified(const UObject* Object);
-
-	static void AddWidgetsToContainer(UUserWidget* Widget, const TSubclassOf<UUserWidget> WidgetClass, UUserWidget* ContainerWidget, int Amount);
 	
 };
 #endif

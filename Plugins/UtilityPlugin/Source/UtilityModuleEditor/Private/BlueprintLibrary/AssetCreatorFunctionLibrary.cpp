@@ -14,7 +14,7 @@
 #include "Factories/TextureFromBufferFactory.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 
-UObject* UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(const FString& PackagePath,
+UObject* UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(const FString& PackagePath,
 	UClass* AssetClass, const FString& BaseName, UFactory* Factory)
 {
 	// Ensure the asset name is unique
@@ -34,7 +34,7 @@ UObject* UAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(const 
 	return CreateAsset(OutPackageName, AssetClass, Factory, bResult, Message);
 }
 
-UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
+UObject* UAtkAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
                                                    bool& bOutSuccess, FString& OutInfoMessage)
 {
 	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
@@ -77,7 +77,7 @@ UObject* UAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UCl
 	return Asset;
 }
 
-UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data,
+UTexture2D* UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data,
 											uint32 Width, uint32 Height, bool& bOutSuccess, FString& OutInfoMessage)
 {
 	if(Data.IsEmpty())
@@ -91,7 +91,7 @@ UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FSt
 	return CreateTextureAssetFromBuffer(AssetPath, Buffer, Width, Height, bOutSuccess, OutInfoMessage);
 }
 
-UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data,
+UTexture2D* UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FString& AssetPath, uint8* Data,
 	uint32 Width, uint32 Height, bool& bOutSuccess, FString& OutInfoMessage)
 {
 	if(!Data)
@@ -108,14 +108,14 @@ UTexture2D* UAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(const FSt
 	return Cast<UTexture2D>(CreateAsset(AssetPath, UTexture2D::StaticClass(), Factory, bOutSuccess, OutInfoMessage));
 }
 
-FString UAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass)
+FString UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(const FString& PackagePath, const FString& BaseAssetName,UClass* AssetClass)
 {
 	// Create a package to hold the new asset
 	UPackage* Package = CreatePackage(*PackagePath);
 	return MakeUniqueObjectName(Package, AssetClass, FName(*BaseAssetName)).ToString();
 }
 
-bool UAssetCreatorFunctionLibrary::SaveAsset(const FString& AssetPath, FString& OutInfoMessage)
+bool UAtkAssetCreatorFunctionLibrary::SaveAsset(const FString& AssetPath, FString& OutInfoMessage)
 {
 	UObject* asset = StaticLoadObject(UObject::StaticClass(), nullptr, *AssetPath);
 	if(!asset)
@@ -136,7 +136,7 @@ bool UAssetCreatorFunctionLibrary::SaveAsset(const FString& AssetPath, FString& 
 	return result;
 }
 
-TArray<UObject*> UAssetCreatorFunctionLibrary::GetModifiedAssets(bool& OutResult, FString& OutInfoMessage)
+TArray<UObject*> UAtkAssetCreatorFunctionLibrary::GetModifiedAssets(bool& OutResult, FString& OutInfoMessage)
 {
 	TArray<UPackage*> ModifiedPackages = TArray<UPackage*>();
 	FEditorFileUtils::GetDirtyPackages(ModifiedPackages);
@@ -165,7 +165,7 @@ TArray<UObject*> UAssetCreatorFunctionLibrary::GetModifiedAssets(bool& OutResult
 	return assets;
 }
 
-bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage)
+bool UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& OutInfoMessage)
 {
 	bool result = false;
 	if(bPrompt)
@@ -179,90 +179,7 @@ bool UAssetCreatorFunctionLibrary::SaveModifiedAssets(bool bPrompt, FString& Out
 	return result;
 }
 
-void UAssetCreatorFunctionLibrary::MarkWidgetAsModified(const UObject* Object)
-{
-	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
-	if (!WidgetBlueprintGeneratedClass)
-		return;
-	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	if (!Package)
-		return;
-	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	if (!MainAsset)
-		return;
-	MainAsset->Modify();
-}
-
-UPanelWidget* UAssetCreatorFunctionLibrary::GetPanelWidget(const UUserWidget* Widget, const FName& Name)
-{
-	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
-	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	if (!MainAsset)
-	{
-		return nullptr;
-	}
-	if(!MainAsset->WidgetTree)
-	{
-		return nullptr;
-	}
-	return Cast<UPanelWidget>(MainAsset->WidgetTree->FindWidget(Name));
-}
-
-void UAssetCreatorFunctionLibrary::MarkBlueprintAsModified(const UObject* Object)
-{
-	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Object->GetClass());
-	if (!WidgetBlueprintGeneratedClass)
-		return;
-	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	if (!Package)
-		return;
-	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	if (!MainAsset)
-		return;
-	MainAsset->Modify();
-	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-}
-
-void UAssetCreatorFunctionLibrary::AddWidgetsToContainer(UUserWidget* Widget,
-	const TSubclassOf<UUserWidget> WidgetClass, UUserWidget* ContainerWidget, int Amount)
-{
-	if(!ContainerWidget || !Widget)
-		return;
-	
-	UWidgetTree* WidgetTree = GetWidgetTree(Widget);
-	if(!WidgetTree)
-		return;
-	
-	UPanelWidget* PanelWidget = GetPanelWidget(Widget, ContainerWidget->GetFName());
-	if(!PanelWidget)
-		return;
-	
-	for(int i = 0; i < Amount; i++)
-	{
-		if(UUserWidget* NewWidget = WidgetTree->ConstructWidget<UUserWidget>(WidgetClass))
-		{
-			PanelWidget->AddChild(NewWidget);
-		}
-	}
-
-	PanelWidget->Modify();
-	MarkBlueprintAsModified(Widget);
-}
-
-class UWidgetTree* UAssetCreatorFunctionLibrary::GetWidgetTree(const UUserWidget* Widget)
-{
-	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass());
-	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
-	if (!MainAsset)
-	{
-		return nullptr;
-	}
-	return MainAsset->WidgetTree;
-}
-
-UBlueprint* UAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(const FString& PackagePath, UClass* Class,const FString& AssetName)
+UBlueprint* UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(const FString& PackagePath, UClass* Class,const FString& AssetName)
 {
 	// Ensure the asset name is unique
 	FString OutPackageName = AssetName;

@@ -6,8 +6,9 @@
 #include "WidgetCollectionInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
-#include "CollectionViewWidgets.generated.h"
+#include "MutableCollectionObjectsView.generated.h"
 
+class UTkManagerObjectsArray;
 // Wrapper for InstancedStructs so that they can be used as source for ListView
 UCLASS()
 class UPropGenStructWrapper : public UObject
@@ -28,23 +29,28 @@ protected:
 };
 
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenCollectionView : public UUserWidget, public IWidgetCollectionInterface
+class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWidget, public IWidgetCollectionInterface
 {
 	GENERATED_BODY()
 
 public:
-	virtual void AddObject_Implementation(UObject* Object) override;
-	virtual void RemoveObject_Implementation(UObject* Object) override;
-	// wrapper to init from Instanced Struct exposed to BP
-	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
-	
-	// init from UObject exposed to BP
-	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
+	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
+	virtual void SetObjectManager(UTkManagerObjectsArray* ManagerObjectsArray);
+
+	UFUNCTION()
+	virtual void OnObjectAdded(UObject* Object);
+	UFUNCTION()
+	virtual void OnObjectRemoved(UObject* Object);
+	UFUNCTION()
+	virtual void OnInit(const TArray<UObject*>& Objects);
+	UFUNCTION()
+	virtual void OnCleared();
 	
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 
 protected:
 	UPROPERTY(VisibleInstanceOnly)
-	TArray<UObject*> SourceObjects;
+	TWeakObjectPtr<UTkManagerObjectsArray> ObjectManager;
 	
 };

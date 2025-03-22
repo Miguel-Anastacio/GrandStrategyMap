@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "AnastacioUtility",
+	"FriendlyName": "AnastacioUtilityToolkit",
 	"Description": "Collection of helper functions and classes for editor and runtime",
 	"Category": "Other",
 	"CreatedBy": "An@stacioDev",

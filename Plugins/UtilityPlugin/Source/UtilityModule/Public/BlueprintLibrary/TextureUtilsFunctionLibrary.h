@@ -6,7 +6,7 @@
 #include "TextureUtilsFunctionLibrary.generated.h"
 class UTexture2D;
 UCLASS()
-class UTILITYMODULE_API UTextureUtilsFunctionLibrary : public UBlueprintFunctionLibrary
+class UTILITYMODULE_API UAtkTextureUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -18,7 +18,7 @@ public:
 	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const uint8* DataBuffer);
 	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
 	static FColor GetColorFromUV(uint32 Width, uint32 Height,const FVector2D& Uv, const uint8* DataBuffer);
-
+	
 	static TArray<uint32> PackUint8ToUint32(const TArray<uint8>& DataArray);
 	static TArray<uint8> UnPackUint32ToUint8(const TArray<uint32>& DataArray);
 private:

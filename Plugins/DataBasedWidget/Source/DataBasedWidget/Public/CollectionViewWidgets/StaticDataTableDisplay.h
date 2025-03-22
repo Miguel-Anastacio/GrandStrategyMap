@@ -9,15 +9,12 @@
 #include "VerticalBoxDataTable.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenVerticalBoxDataTable : public UUserWidget, public IWidgetCollectionInterface
+class DATABASEDWIDGET_API UWPropGenStaticDataTableDisplay : public UUserWidget, public IWidgetCollectionInterface, public IPropGenWidgetDataTableInterface
 {
 	GENERATED_BODY()
 
 public:
 	virtual void NativeOnInitialized() override;
-	virtual void InitFromStructs_Implementation(const TArray<FInstancedStruct>& Structs) override;
-	virtual void InitFromObjects_Implementation(const TArray<UObject*>& Objects) override;
-
 	virtual UWidget* GetCollectionContainer_Implementation() override
 	{
 		return Container;
@@ -27,16 +24,18 @@ public:
 	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
 
 protected:
+	
 #if WITH_EDITOR
 	UFUNCTION(Blueprintable, CallInEditor, Category = VerticalBoxDataTable)
 	void RefreshContainer() const;
 #endif
 	
+	virtual void Init();
+	
 	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		Container = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName("Container"));;
 	};
-
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = VerticalBoxDataTable)
 	class UVerticalBox* Container;
