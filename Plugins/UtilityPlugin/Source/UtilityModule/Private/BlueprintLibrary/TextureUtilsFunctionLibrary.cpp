@@ -6,6 +6,7 @@
 #include "TextureCompiler.h"
 #include "UtilityModule.h"
 #include "TextureResource.h"
+
 TArray<uint8> UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Texture)
 {
 	// Initialize an empty TArray to hold the texture data

@@ -16,7 +16,7 @@ class UTILITYMODULEEDITOR_API UAtkAssetCreatorFunctionLibrary : public UBlueprin
 public:
 	static UObject* CreateAssetInPackageWithUniqueName(const FString& PackagePath, UClass* AssetClass, const FString& BaseName ,UFactory* Factory = nullptr);
 	
-	static UObject* CreateAsset(const FString& AssetPath, UClass* assetClass, UFactory* factory, bool& bOutSuccess, FString& OutInfoMessage);
+	static UObject* CreateAsset(const FString& AssetPath, UClass* AssetClass, UFactory* Factory, bool& bOutSuccess, FString& OutInfoMessage);
 	
 	static UTexture2D* CreateTextureAssetFromBuffer(const FString& AssetPath, TArray<uint8>& Data, uint32 Width, uint32 Height,
 											bool& bOutSuccess, FString& OutInfoMessage);

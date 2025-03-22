@@ -34,46 +34,46 @@ UObject* UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(con
 	return CreateAsset(OutPackageName, AssetClass, Factory, bResult, Message);
 }
 
-UObject* UAtkAssetCreatorFunctionLibrary::CreateAsset(const FString& assetPath, UClass* assetClass, UFactory* factory,
+UObject* UAtkAssetCreatorFunctionLibrary::CreateAsset(const FString& AssetPath, UClass* AssetClass, UFactory* Factory,
                                                    bool& bOutSuccess, FString& OutInfoMessage)
 {
 	IAssetTools& AssetTools =FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	UFactory* Factory = factory;
-	if(!Factory)
+	UFactory* Factory1 = Factory;
+	if(!Factory1)
 	{
 		for(UFactory* fac : AssetTools.GetNewAssetFactories())
 		{
-			if(fac->SupportedClass == assetClass)
+			if(fac->SupportedClass == AssetClass)
 			{
-				Factory = fac;
+				Factory1 = fac;
 				break;
 			}
 		}
 	}
-	if(!Factory)
+	if(!Factory1)
 	{
 		bOutSuccess = false;
-		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Was not able to find factory for Asset Class. '%s'"), *assetPath);
+		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Was not able to find factory for Asset Class. '%s'"), *AssetPath);
 		return nullptr;
 	}
 
-	if(Factory->SupportedClass != assetClass)
+	if(Factory1->SupportedClass != AssetClass)
 	{
 		bOutSuccess = false;
-		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Factory cannot create desired Asset Class. '%s'"), *assetPath);
+		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Factory cannot create desired Asset Class. '%s'"), *AssetPath);
 		return nullptr;
 	}
-	FString path = FPaths::GetPath(assetPath);
-	UObject* Asset = AssetTools.CreateAsset(FPaths::GetBaseFilename(assetPath), FPaths::GetPath(assetPath), assetClass, Factory);
+	FString path = FPaths::GetPath(AssetPath);
+	UObject* Asset = AssetTools.CreateAsset(FPaths::GetBaseFilename(AssetPath), FPaths::GetPath(AssetPath), AssetClass, Factory1);
 	if(!Asset)
 	{
 		bOutSuccess = false;
-		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Either the path is invalid or the asset already exists '%s'"), *assetPath);
+		OutInfoMessage = FString::Printf(TEXT("Create Asset Failed - Either the path is invalid or the asset already exists '%s'"), *AssetPath);
 		return nullptr;
 	}
 
 	bOutSuccess = true;
-	OutInfoMessage = FString::Printf(TEXT("Create Asset Successfully Created '%s'"), *assetPath);
+	OutInfoMessage = FString::Printf(TEXT("Create Asset Successfully Created '%s'"), *AssetPath);
 	return Asset;
 }
 

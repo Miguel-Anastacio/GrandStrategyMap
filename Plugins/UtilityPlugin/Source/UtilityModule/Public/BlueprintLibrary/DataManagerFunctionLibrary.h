@@ -23,13 +23,7 @@ public:
     
     UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
     static TArray<FInstancedStruct> GetArrayOfInstancedStructsSoft(const TSoftObjectPtr<UDataTable> DataTable);
-    /**
-     * Reads data from a data table into a map.
-     *
-     * @param DataTable The data table to read from.
-     * @param ArrayToUpdate The map to update with the data.
-     * @return True if successful, false otherwise.
-     */
+    
     template<class T>
     static bool ReadDataTableToArray(const UDataTable* DataTable, TArray<T>& ArrayToUpdate)
     {
@@ -45,22 +39,22 @@ public:
     /**
      * Writes a structure to a JSON file.
      *
-     * @param jsonFilePath The path to the JSON file.
-     * @param structure The structure to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
+     * @param FilePath The path to the JSON file.
+     * @param Structure The structure to write.
+     * @param bOutSuccess Whether the operation was successful.
+     * @param OutInfoMessage Information message about the operation.
      */
     template<class T>
-    static void WriteStructToJsonFile(const FString& jsonFilePath,const T& structure, bool& outSuccess, FString& outInfoMessage)
+    static void WriteStructToJsonFile(const FString& FilePath,const T& Structure, bool& bOutSuccess, FString& OutInfoMessage)
     {
-        TSharedPtr<FJsonObject> jsonObject = FJsonObjectConverter::UStructToJsonObject(structure);
-        if (!jsonObject)
+        TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(Structure);
+        if (!JsonObject)
         {
-            outSuccess = false;
-            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
+            bOutSuccess = false;
+            OutInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct) "));
             return;
         }
-        WriteJson(jsonFilePath, jsonObject, outSuccess, outInfoMessage);
+        WriteJson(FilePath, JsonObject, bOutSuccess, OutInfoMessage);
     }
 
      /**
@@ -127,6 +121,7 @@ public:
     static TArray<FInstancedStruct> LoadCustomDataFromJsonString(const FString& JString, const UScriptStruct* StructType);
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const TArray<UScriptStruct*>& StructTypes);
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
+    UFUNCTION(BlueprintCallable, Category=JsonUtils)
     static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
     
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
@@ -136,35 +131,35 @@ public:
     /**
      * Writes a string to a file.
      *
-     * @param filePath The path to the file.
-     * @param string The string to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
+     * @param FilePath The path to the file.
+     * @param String The string to write.
+     * @param bOutSuccess Whether the operation was successful.
+     * @param OutInfoMessage Information message about the operation.
      */
-    static void WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage);
+    static void WriteStringToFile(const FString& FilePath, const FString& String, bool& bOutSuccess, FString& OutInfoMessage);
     
     /**
      * Writes JSON data to a file.
      *
-     * @param jsonFilePath The path to the JSON file.
-     * @param jsonObject The JSON object to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
+     * @param JsonFilePath The path to the JSON file.
+     * @param JsonObject The JSON object to write.
+     * @param bOutSuccess Whether the operation was successful.
+     * @param OutInfoMessage Information message about the operation.
      */
-    static void WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage);
+    static void WriteJson(const FString& JsonFilePath, const TSharedPtr<FJsonObject> JsonObject, bool& bOutSuccess, FString& OutInfoMessage);
     
     /**
      * Writes JSON data to a file.
      *
-     * @param jsonFilePath The path to the JSON file.
-     * @param jsonValueArray The array of JSON values to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
+     * @param JsonFilePath The path to the JSON file.
+     * @param JsonValueArray The array of JSON values to write.
+     * @param bOutSuccess Whether the operation was successful.
+     * @param OutInfoMessage Information message about the operation.
      */
-    static void WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage);
+    static void WriteJson(const FString& JsonFilePath, const TArray<TSharedPtr<FJsonValue>>& JsonValueArray, bool& bOutSuccess, FString& OutInfoMessage);
 
-    static TSharedPtr<FJsonObject> ReadJsonFile(const FString& filePath);
-    static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& filePath);
+    static TSharedPtr<FJsonObject> ReadJsonFile(const FString& FilePath);
+    static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArray(const FString& FilePath);
     static TArray<TSharedPtr<FJsonValue>> ReadJsonFileArrayFromString(const FString& JsonString);
     static bool ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType);
     static void LogReadJsonFailed(const FString& FilePath);

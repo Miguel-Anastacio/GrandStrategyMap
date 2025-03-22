@@ -1,12 +1,11 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "BlueprintLibrary/MiscFunctionLibrary.h"
-
 #include <string_view>
-
 #include "UtilityModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "Misc/FeedbackContext.h"
+
 static float CurrentProgress = 0.0f;
 void UAtkMiscFunctionLibrary::ExecuteSlowTaskWithProgressBar(TFunction<void(TFunction<void(float, std::string_view)>)> Task)
 {

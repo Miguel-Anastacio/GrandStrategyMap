@@ -8,47 +8,47 @@
 #include "UtilityModule.h"
 #include "Engine/DataTable.h"
 #include "StructUtils/Public/InstancedStruct.h"
-void UAtkDataManagerFunctionLibrary::WriteStringToFile(const FString& filePath, const FString& string, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteStringToFile(const FString& FilePath, const FString& String, bool& bOutSuccess, FString& OutInfoMessage)
 {
-	if (!FFileHelper::SaveStringToFile(string, *filePath))
+	if (!FFileHelper::SaveStringToFile(String, *FilePath))
 	{
-		outSuccess = false;
-		outInfoMessage = outInfoMessage = FString::Printf(TEXT("Write string to file failed"));
+		bOutSuccess = false;
+		OutInfoMessage = OutInfoMessage = FString::Printf(TEXT("Write string to file failed"));
 		return;
 	}
 
-	outSuccess = true;
-	outInfoMessage = outInfoMessage = FString::Printf(TEXT("Write string to file succeeded"));
+	bOutSuccess = true;
+	OutInfoMessage = OutInfoMessage = FString::Printf(TEXT("Write string to file succeeded"));
 }
 
-TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::ReadJsonFile(const FString& filePath)
+TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::ReadJsonFile(const FString& FilePath)
 {
 	FString jsonString;
-	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
+	if(!FFileHelper::LoadFileToString(jsonString, *FilePath))
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *filePath);
+		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *FilePath);
 		return nullptr;
 	}
 	TSharedPtr<FJsonObject> jsonObject;
 	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(jsonString), jsonObject))
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *filePath);
+		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *FilePath);
 	}
 	return jsonObject;
 }
 
-TArray<TSharedPtr<FJsonValue>> UAtkDataManagerFunctionLibrary::ReadJsonFileArray(const FString& filePath)
+TArray<TSharedPtr<FJsonValue>> UAtkDataManagerFunctionLibrary::ReadJsonFileArray(const FString& FilePath)
 {
 	FString jsonString;
-	if(!FFileHelper::LoadFileToString(jsonString, *filePath))
+	if(!FFileHelper::LoadFileToString(jsonString, *FilePath))
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *filePath);
+		UE_LOG(LogUtilityModule, Error, TEXT("Error loading file '%s'"), *FilePath);
 		return TArray<TSharedPtr<FJsonValue>>();
 	}
 	TArray<TSharedPtr<FJsonValue>> jsonValueArray;
 	if(!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(jsonString), jsonValueArray))
 	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *filePath);
+		UE_LOG(LogUtilityModule, Error, TEXT("Read Json Failed - error parsing file '%s'"), *FilePath);
 	}
 	return jsonValueArray;
 }
@@ -259,46 +259,46 @@ TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::SerializeInstancedStruct
 	return nullptr;
 }
 
-void UAtkDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TSharedPtr<FJsonObject> jsonObject, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteJson(const FString& JsonFilePath, const TSharedPtr<FJsonObject> JsonObject, bool& bOutSuccess, FString& OutInfoMessage)
 {
 	FString JSONString;
 
-	if (!FJsonSerializer::Serialize(jsonObject.ToSharedRef(), TJsonWriterFactory<>::Create(&JSONString, 0)))
+	if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), TJsonWriterFactory<>::Create(&JSONString, 0)))
 	{
-		outSuccess = false;
-		outInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
+		bOutSuccess = false;
+		OutInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
 		return;
 	}
 
-	WriteStringToFile(jsonFilePath, JSONString, outSuccess, outInfoMessage);
-	if (!outSuccess)
+	WriteStringToFile(JsonFilePath, JSONString, bOutSuccess, OutInfoMessage);
+	if (!bOutSuccess)
 	{
 		return;
 	}
 
-	outSuccess = true;
-	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
+	bOutSuccess = true;
+	OutInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *JsonFilePath);
 }
 
-void UAtkDataManagerFunctionLibrary::WriteJson(const FString& jsonFilePath, const TArray<TSharedPtr<FJsonValue>>& jsonValueArray, bool& outSuccess, FString& outInfoMessage)
+void UAtkDataManagerFunctionLibrary::WriteJson(const FString& JsonFilePath, const TArray<TSharedPtr<FJsonValue>>& JsonValueArray, bool& bOutSuccess, FString& OutInfoMessage)
 {
 	FString JSONString;
 
-	if (!FJsonSerializer::Serialize(jsonValueArray, TJsonWriterFactory<>::Create(&JSONString, 0)))
+	if (!FJsonSerializer::Serialize(JsonValueArray, TJsonWriterFactory<>::Create(&JSONString, 0)))
 	{
-		outSuccess = false;
-		outInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
+		bOutSuccess = false;
+		OutInfoMessage = FString::Printf(TEXT("Write Json Failed - was not able to serialize the json string"));
 		return;
 	}
 
-	WriteStringToFile(jsonFilePath, JSONString, outSuccess, outInfoMessage);
-	if (!outSuccess)
+	WriteStringToFile(JsonFilePath, JSONString, bOutSuccess, OutInfoMessage);
+	if (!bOutSuccess)
 	{
 		return;
 	}
 
-	outSuccess = true;
-	outInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *jsonFilePath);
+	bOutSuccess = true;
+	OutInfoMessage = FString::Printf(TEXT("Write json succeeded = '%s"), *JsonFilePath);
 }
 
 bool UAtkDataManagerFunctionLibrary::ObjectHasMissingFields(const TSharedPtr<FJsonObject>& Object, int Index, const FString& FilePath, const UStruct* StructType)
