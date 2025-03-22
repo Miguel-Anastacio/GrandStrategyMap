@@ -64,7 +64,7 @@ struct TPropertyTraits<UScriptStruct>
 /**
  * Utility functions for FInstancedStruct
  */
-UCLASS()
+UCLASS(DisplayName="Struct Utils Function Library")
 class UTILITYMODULE_API UAtkStructUtilsFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

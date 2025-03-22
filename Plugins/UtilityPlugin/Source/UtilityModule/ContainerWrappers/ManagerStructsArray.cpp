@@ -1,44 +1,43 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#include "ContainerWrappers/ManagerObjectsArray.h"
+#include "ContainerWrappers/ManagerStructsArray.h"
 
-void UTkManagerObjectsArray::Add(UObject* Object)
+UTkManagerStructsArray::UTkManagerStructsArray(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	if(!Object)
-		return;
-	
-	Objects.Add(Object);
-	OnObjectAdded.Broadcast(Object);
-}	
-
-void UTkManagerObjectsArray::Remove(UObject* Object)
-{
-	if(!Object)
-		return;
-
-	int32 Index = Objects.IndexOfByPredicate([Object](const UObject* Element)
-	{
-		return Element == Object;
-	});
-	if (Index != INDEX_NONE)
-	{
-		Objects.RemoveAtSwap(Index);
-		OnObjectRemoved.Broadcast(Object);
-	}
 }
 
-void UTkManagerObjectsArray::Clear()
+void UTkManagerStructsArray::PostInitProperties()
 {
-	Objects.Empty();
-	OnArrayCleared.Broadcast();
+	UObject::PostInitProperties();
+	SetDelegates(OnStructAdded, OnStructRemoved, OnArraySet, OnArrayCleared);
 }
 
-TArray<UObject*> UTkManagerObjectsArray::GetObjects() const
+void UTkManagerStructsArray::Add_BP(const FInstancedStruct& DataStruct)
 {
-	return Objects;
+	Add(DataStruct);
 }
 
-void UTkManagerObjectsArray::SetObjects(const TArray<UObject*>& NewObjects)
+void UTkManagerStructsArray::AddMultiple_BP(const TArray<FInstancedStruct>& DataStructs)
 {
-	Objects = NewObjects;
-	OnArraySet.Broadcast(Objects);
+	AddMultiple(DataStructs);
+}
+
+void UTkManagerStructsArray::Remove_BP(const FInstancedStruct& DataStruct)
+{
+	Remove(DataStruct);
+}
+
+void UTkManagerStructsArray::Clear_BP()
+{
+	Clear();
+}
+
+TArray<FInstancedStruct> UTkManagerStructsArray::GetArray_BP() const
+{
+	return Get();
+}
+
+void UTkManagerStructsArray::SetArray_BP(const TArray<FInstancedStruct>& NewStructs)
+{
+	Set(NewStructs);
 }

@@ -9,7 +9,7 @@
 #include "PropertyUtilityFunctionLibrary.generated.h"
 
 class UObject;
-UCLASS()
+UCLASS(DisplayName="Property Utility Function Library")
 class UTILITYMODULE_API UAtkPropertyUtilityFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
@@ -23,9 +23,12 @@ public:
     UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility, meta = (DeterminesOutputType = "ObjClass") ) 
     static UObject* GetObjectFromPropertyStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, TSubclassOf<class UObject> ObjClass);
     
-    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility ) 
+    // From a InstancedStruct, get a specific property by name and return it as a InstancedStruct
+    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility) 
     static FInstancedStruct GetStructFromPropertyInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName);
-    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility ) 
+    
+    // From a UObject, get a specific property by name and return it as a InstancedStruct
+    UFUNCTION( BlueprintCallable, BlueprintPure, Category=PropertyUtility) 
     static FInstancedStruct GetStructFromPropertyObj(const UObject* Object, const FName& PropertyName);
     
     static bool IsPropertyOfType(const FProperty* Property, const UStruct* Class);

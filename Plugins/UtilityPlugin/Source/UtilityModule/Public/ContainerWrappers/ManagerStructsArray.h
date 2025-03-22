@@ -1,41 +1,50 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ManagerObjectsArray.generated.h"
+#include "InstancedStruct.h"
+#include "TemplatedArrayWrapper.h"
+#include "ManagerStructsArray.generated.h"
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStructArrayChange, const FInstancedStruct&, Struct);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStructArraySet, const TArray<FInstancedStruct>&, Array);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStructArrayClear);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObjectChangedSignature, UObject*, Object);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArraySetSignature, TArray<UObject*>&, Array);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnArrayClearedSignature);
-UCLASS(BlueprintType, Blueprintable)
-class UTkManagerObjectsArray : public UObject
+UCLASS(BlueprintType, Blueprintable, DisplayName=ManagerStructsArray)
+class UTILITYMODULE_API UTkManagerStructsArray : public UObject, public TArrayWrapper<FInstancedStruct, FOnStructArrayChange, FOnStructArraySet, FOnStructArrayClear>
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerObjectsArray)
-	void Add(UObject* Object);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerObjectsArray)
-	void Remove(UObject* Object);
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerObjectsArray)
-	void Clear();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerObjectsArray)
-	TArray<UObject*> GetObjects() const;
-	
-	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray)
-	void SetObjects(const TArray<UObject*>& NewObjects);
+	UTkManagerStructsArray(const FObjectInitializer& ObjectInitializer);
+	virtual void PostInitProperties() override;
 
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
-	FOnObjectChangedSignature OnObjectAdded;
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
-	FOnObjectChangedSignature OnObjectRemoved;
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
-	FOnArraySetSignature OnArraySet;
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
-	FOnArrayClearedSignature OnArrayCleared;
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=Add)
+	void Add_BP(const FInstancedStruct& DataStruct);
+
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=AddMultiple)
+	void AddMultiple_BP(const TArray<FInstancedStruct>& DataStructs);
+
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArraym, DisplayName=Remove)
+	void Remove_BP(const FInstancedStruct& DataStruct);
+
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=Clear)
+	void Clear_BP();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerStructsArray, DisplayName=GetArray)
+	TArray<FInstancedStruct> GetArray_BP() const;
 	
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(ExposeOnSpawn), Category=ManagerObjectsArray)
-	TArray<UObject*> Objects;
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
+	void SetArray_BP(const TArray<FInstancedStruct>& NewStructs);
+
+	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
+	FOnStructArrayChange OnStructAdded;
+
+	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
+	FOnStructArrayChange OnStructRemoved;
+	
+	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
+	FOnStructArraySet OnArraySet;
+
+	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
+	FOnStructArrayClear OnArrayCleared;
 	
 };

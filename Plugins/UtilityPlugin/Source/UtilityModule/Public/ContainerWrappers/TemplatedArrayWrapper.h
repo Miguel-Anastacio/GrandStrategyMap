@@ -1,13 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
-
 #include "CoreMinimal.h"
-#include "InstancedStruct.h"
-#include "ManagerStructsArray.generated.h"
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTest, const FInstancedStruct&, Struct);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArrayTest, const TArray<FInstancedStruct>&, Array);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClearSignature);
-
+/**
+ * Wrapper for an array that provides bindable events when the array is modified
+ */
 template<typename T, typename DelegateChange, typename DelegateArraySet, typename DelegateArrayClear>
 class TArrayWrapper
 {
@@ -37,7 +33,7 @@ public:
 protected:
 	void Add(const T& Value)
 	{
-		Array.Add(Value);
+		Array.Emplace(Value);
 		if(DelegateAdd)
 			DelegateAdd->Broadcast(Value);
 	}
@@ -71,34 +67,15 @@ protected:
 			DelegateSet->Broadcast(Value);
 	}
 
-};
+	TArray<T> Get() const
+	{
+		return Array;
+	}
 
-UCLASS(BlueprintType, Blueprintable)
-class UTILITYMODULE_API UTkManagerStructsArray : public UObject, public TArrayWrapper<FInstancedStruct, FOnTest, FOnArrayTest, FOnClearSignature>
-{
-	GENERATED_BODY()
-public:
-	UTkManagerStructsArray(const FObjectInitializer& ObjectInitializer);
-	virtual void PostInitProperties() override;
-	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
-	void Add_BP(const FInstancedStruct& DataStruct);
-	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
-	void Remove_BP(const FInstancedStruct& DataStruct);
-	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
-	void Clear_BP();
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerStructsArray)
-	TArray<FInstancedStruct> GetArray() const;
-	
-	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
-	void SetArray_BP(const TArray<FInstancedStruct>& NewStructs);
-
-	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
-	FOnTest OnStructAdded;
-	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
-	FOnTest OnStructRemoved;
-	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
-	FOnArrayTest OnArraySet;
-	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
-	FOnClearSignature OnArrayCleared;
-	
+	void AddMultiple(const TArray<T>& Value)
+	{
+		Array.Append(Value);
+		if(DelegateSet)
+			DelegateSet->Broadcast(Array);
+	}
 };

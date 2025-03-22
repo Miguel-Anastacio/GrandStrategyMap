@@ -12,7 +12,7 @@ class FJsonObject;
 /**
  * Library for managing data functions, such as reading from data tables and writing to JSON files.
  */
-UCLASS()
+UCLASS(DisplayName="Data Manager Function Library")
 class UTILITYMODULE_API UAtkDataManagerFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()

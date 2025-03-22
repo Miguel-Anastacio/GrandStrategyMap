@@ -1,17 +1,43 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2024 An@stacioDev All rights reserved.
+#include "ContainerWrappers/ManagerObjectsArray.h"
 
-#include "UtilityModule.h"
-DEFINE_LOG_CATEGORY(LogUtilityModule);
-
-// #define LOCTEXT_NAMESPACE "FInteractiveMapModule"
-
-void FUtilityModule::StartupModule()
+UTkManagerObjectsArray::UTkManagerObjectsArray(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	UE_LOG(LogUtilityModule, Log, TEXT("Utility module has been loaded"));
 }
-void FUtilityModule::ShutdownModule()
+
+void UTkManagerObjectsArray::PostInitProperties()
 {
-	UE_LOG(LogUtilityModule, Log, TEXT("Utility module has been unloaded"));
+	UObject::PostInitProperties();
+	SetDelegates(OnObjectAdded, OnObjectRemoved, OnArraySet, OnArrayCleared);
 }
-	
-IMPLEMENT_MODULE(FUtilityModule, UtilityModule)
+
+void UTkManagerObjectsArray::Add_BP(UObject* Object)
+{
+	Add(Object);
+}
+
+void UTkManagerObjectsArray::AddMultiple_BP(const TArray<UObject*>& Multiple)
+{
+	AddMultiple(Multiple);
+}
+
+void UTkManagerObjectsArray::Remove_BP(UObject* Object)
+{
+	Remove(Object);
+}
+
+void UTkManagerObjectsArray::Clear_BP()
+{
+	Clear();
+}
+
+TArray<UObject*> UTkManagerObjectsArray::GetArray_BP() const
+{
+	return Get();
+}
+
+void UTkManagerObjectsArray::SetArray_BP(const TArray<UObject*>& NewObjects)
+{
+	Set(NewObjects);
+}
