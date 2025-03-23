@@ -75,11 +75,11 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintPure, Category= "Instanced Struct Utils")
     static FString GetPropertyValueAsStringFromStruct(const FInstancedStruct& InstancedStruct, const FString& PropertyName, bool& OutResult);
 
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category= "Instanced Struct Utils")
+    UFUNCTION(BlueprintCallable, Category= "Instanced Struct Utils")
     static void LogInstancedStruct(const FInstancedStruct& Struct);
     
     UFUNCTION(BlueprintCallable, Category="Struct Utils")
-    static bool SetPropertyValueInStruct(UPARAM(ref) FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue, bool& bResult);
+    static bool SetPropertyValueInStruct(UPARAM(ref) FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);
     
     UFUNCTION(BlueprintCallable, Category="Struct Utils", DisplayName=SetValueInStruct)
     static bool SetPropertyValueNestedInStructFromString(FInstancedStruct& InstancedStruct, const FString& PropertyName, const FString& NewValue);

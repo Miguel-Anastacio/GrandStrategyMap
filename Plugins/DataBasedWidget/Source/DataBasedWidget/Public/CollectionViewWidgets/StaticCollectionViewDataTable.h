@@ -9,7 +9,7 @@
 #include "StaticDataTableDisplay.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenStaticCollectionViewDataTable : public UUserWidget, public IWidgetCollectionInterface, public IPropGenWidgetDataTableInterface
+class DATABASEDWIDGET_API UWPropGenStaticCollectionViewDataTable : public UUserWidget, public IPropGenWidgetCollectionInterface, public IPropGenWidgetDataTableInterface
 {
 	GENERATED_BODY()
 

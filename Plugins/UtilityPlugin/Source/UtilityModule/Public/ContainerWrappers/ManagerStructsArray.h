@@ -8,6 +8,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStructArrayChange, const FInstancedStruct&, Struct);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStructArraySet, const TArray<FInstancedStruct>&, Array);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStructArrayClear);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStructChanged, const FInstancedStruct&, OldData, const FInstancedStruct&, NewData );
 
 UCLASS(BlueprintType, Blueprintable, DisplayName=ManagerStructsArray)
 class UTILITYMODULE_API UTkManagerStructsArray : public UObject
@@ -32,9 +33,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category=ManagerStructsArray, DisplayName=GetArray)
 	TArray<FInstancedStruct> GetArray_BP() const;
 	
-	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray)
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=SetArray)
 	void SetArray_BP(const TArray<FInstancedStruct>& NewStructs);
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=At)
+	FInstancedStruct& At_BP(const int Index);
 
+	UFUNCTION(BlueprintCallable, Category=ManagerStructsArray, DisplayName=SetAt)
+	void SetAt(const int Index, const FInstancedStruct& NewStruct);
 	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
 	FOnStructArrayChange OnStructAdded;
 
@@ -47,6 +52,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
 	FOnStructArrayClear OnArrayCleared;
 
+	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
+	FOnStructChanged OnStructChanged;
 protected:
 	TArrayWrapper<FInstancedStruct, FOnStructArrayChange, FOnStructArraySet, FOnStructArrayClear> ArrayWrapper;
 };

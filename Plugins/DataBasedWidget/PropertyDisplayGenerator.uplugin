@@ -2,7 +2,7 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "DataBasedWidget",
+	"FriendlyName": "WidgetCreator",
 	"Description": "Streamline widget creation to represent data contained in a UObject/Struct",
 	"Category": "Other",
 	"CreatedBy": "An@stacioDev",
@@ -33,7 +33,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "UtilityPlugin",
+			"Name": "AnastacioUtilityToolkit",
 			"Enabled": true
 		}
 	]

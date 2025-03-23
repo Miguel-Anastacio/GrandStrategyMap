@@ -79,7 +79,7 @@ void UAtkStructUtilsFunctionLibrary::LogInstancedStruct(const FInstancedStruct& 
 
 
 bool UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(FInstancedStruct& InstancedStruct,
-                                                                         const FString& PropertyName, const FString& NewValue, bool& bResult)
+                                                                         const FString& PropertyName, const FString& NewValue)
 {
 	const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(),  FName(*PropertyName));
 	return SetPropertyValue(Property, InstancedStruct.GetMutableMemory(), NewValue);

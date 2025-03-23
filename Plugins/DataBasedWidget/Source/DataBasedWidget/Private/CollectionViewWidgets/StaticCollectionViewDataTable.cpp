@@ -1,8 +1,8 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "CollectionViewWidgets/StaticDataTableDisplay.h"
+#include "CollectionViewWidgets/StaticCollectionViewDataTable.h"
 #include "GenericWidget/GenericStructWidget.h"
-#include "GenericWidget/GenericUserWidgetInterface.h"
+#include "GenericWidget/DataDrivenUserWidgetInterface.h"
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 
 void UWPropGenStaticCollectionViewDataTable::NativeOnInitialized()

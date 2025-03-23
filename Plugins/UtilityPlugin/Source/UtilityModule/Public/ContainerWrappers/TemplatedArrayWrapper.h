@@ -13,13 +13,13 @@ protected:
 	DelegateChange* DelegateRemoved;
 	DelegateArraySet* DelegateSet;
 	DelegateArrayClear* DelegateClear;
-	
 public:
 	TArrayWrapper() :
 		DelegateAdd(nullptr),
 		DelegateRemoved(nullptr),
 		DelegateSet(nullptr),
 		DelegateClear(nullptr)
+		// DelegateDataChange(nullptr)
 	{}
 	void SetDelegates(DelegateChange& AddDel, DelegateChange& RemoveDel,
 				DelegateArraySet& SetDel, DelegateArrayClear& ClearDel)
@@ -29,12 +29,22 @@ public:
 		DelegateSet = &SetDel;
 		DelegateClear = &ClearDel;
 	}
+
 	
 	void Add(const T& Value)
 	{
 		Array.Emplace(Value);
 		if(DelegateAdd)
 			DelegateAdd->Broadcast(Value);
+	}
+
+	T* At(int Index)
+	{
+		if(Index >= 0 && Index < Array.Num())
+		{
+			return &Array[Index];
+		}
+		return nullptr;
 	}
 
 	void Remove(const T& Value)
@@ -76,5 +86,19 @@ public:
 		Array.Append(Value);
 		if(DelegateSet)
 			DelegateSet->Broadcast(Array);
+	}
+
+	bool SetAt(const int Index, const T& Value)
+	{
+		if(Index < 0 || Index >= Array.Num())
+		{
+			return false;
+		}
+		if(Value != Array[Index])
+		{
+			Array[Index] = Value;
+			return true;
+		}
+		return false;
 	}
 };

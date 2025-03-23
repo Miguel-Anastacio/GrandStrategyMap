@@ -41,3 +41,18 @@ void UTkManagerStructsArray::SetArray_BP(const TArray<FInstancedStruct>& NewStru
 {
 	ArrayWrapper.Set(NewStructs);
 }
+
+FInstancedStruct& UTkManagerStructsArray::At_BP(const int Index)
+{
+	return *ArrayWrapper.At(Index);
+}
+
+void UTkManagerStructsArray::SetAt(const int Index, const FInstancedStruct& NewStruct)
+{
+	const FInstancedStruct Prev = *ArrayWrapper.At(Index);
+	if(ArrayWrapper.SetAt(Index, NewStruct))
+	{
+		OnStructChanged.Broadcast(Prev, NewStruct);
+	}
+	
+}
