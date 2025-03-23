@@ -9,35 +9,35 @@ UTkManagerStructsArray::UTkManagerStructsArray(const FObjectInitializer& ObjectI
 void UTkManagerStructsArray::PostInitProperties()
 {
 	UObject::PostInitProperties();
-	SetDelegates(OnStructAdded, OnStructRemoved, OnArraySet, OnArrayCleared);
+	ArrayWrapper.SetDelegates(OnStructAdded, OnStructRemoved, OnArraySet, OnArrayCleared);
 }
 
 void UTkManagerStructsArray::Add_BP(const FInstancedStruct& DataStruct)
 {
-	Add(DataStruct);
+	ArrayWrapper.Add(DataStruct);
 }
 
 void UTkManagerStructsArray::AddMultiple_BP(const TArray<FInstancedStruct>& DataStructs)
 {
-	AddMultiple(DataStructs);
+	ArrayWrapper.AddMultiple(DataStructs);
 }
 
 void UTkManagerStructsArray::Remove_BP(const FInstancedStruct& DataStruct)
 {
-	Remove(DataStruct);
+	ArrayWrapper.Remove(DataStruct);
 }
 
 void UTkManagerStructsArray::Clear_BP()
 {
-	Clear();
+	ArrayWrapper.Clear();
 }
 
 TArray<FInstancedStruct> UTkManagerStructsArray::GetArray_BP() const
 {
-	return Get();
+	return ArrayWrapper.Get();
 }
 
 void UTkManagerStructsArray::SetArray_BP(const TArray<FInstancedStruct>& NewStructs)
 {
-	Set(NewStructs);
+	ArrayWrapper.Set(NewStructs);
 }

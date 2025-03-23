@@ -30,7 +30,6 @@ public:
 		DelegateClear = &ClearDel;
 	}
 	
-protected:
 	void Add(const T& Value)
 	{
 		Array.Emplace(Value);

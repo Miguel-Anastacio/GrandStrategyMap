@@ -10,7 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArrayChangedSignature, UObject*, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArraySetSignature, const TArray<UObject*>&, Array);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnArrayClearedSignature);
 UCLASS(BlueprintType, Blueprintable,DisplayName=ManagerObjectsArray)
-class UTILITYMODULE_API UTkManagerObjectsArray : public UObject, public TArrayWrapper<UObject*, FOnArrayChangedSignature, FOnArraySetSignature, FOnArrayClearedSignature>
+class UTILITYMODULE_API UTkManagerObjectsArray : public UObject
 {
 	GENERATED_BODY()
 
@@ -49,4 +49,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
 	FOnArrayClearedSignature OnArrayCleared;
 	
+protected:
+	TArrayWrapper<UObject*, FOnArrayChangedSignature, FOnArraySetSignature, FOnArrayClearedSignature> ArrayWrapper;
 };

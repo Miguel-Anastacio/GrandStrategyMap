@@ -10,7 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStructArraySet, const TArray<FIns
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStructArrayClear);
 
 UCLASS(BlueprintType, Blueprintable, DisplayName=ManagerStructsArray)
-class UTILITYMODULE_API UTkManagerStructsArray : public UObject, public TArrayWrapper<FInstancedStruct, FOnStructArrayChange, FOnStructArraySet, FOnStructArrayClear>
+class UTILITYMODULE_API UTkManagerStructsArray : public UObject
 {
 	GENERATED_BODY()
 public:
@@ -46,5 +46,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category=ManagerStructsArray)
 	FOnStructArrayClear OnArrayCleared;
-	
+
+protected:
+	TArrayWrapper<FInstancedStruct, FOnStructArrayChange, FOnStructArraySet, FOnStructArrayClear> ArrayWrapper;
 };

@@ -9,35 +9,35 @@ UTkManagerObjectsArray::UTkManagerObjectsArray(const FObjectInitializer& ObjectI
 void UTkManagerObjectsArray::PostInitProperties()
 {
 	UObject::PostInitProperties();
-	SetDelegates(OnObjectAdded, OnObjectRemoved, OnArraySet, OnArrayCleared);
+	ArrayWrapper.SetDelegates(OnObjectAdded, OnObjectRemoved, OnArraySet, OnArrayCleared);
 }
 
 void UTkManagerObjectsArray::Add_BP(UObject* Object)
 {
-	Add(Object);
+	ArrayWrapper.Add(Object);
 }
 
 void UTkManagerObjectsArray::AddMultiple_BP(const TArray<UObject*>& Multiple)
 {
-	AddMultiple(Multiple);
+	ArrayWrapper.AddMultiple(Multiple);
 }
 
 void UTkManagerObjectsArray::Remove_BP(UObject* Object)
 {
-	Remove(Object);
+	ArrayWrapper.Remove(Object);
 }
 
 void UTkManagerObjectsArray::Clear_BP()
 {
-	Clear();
+	ArrayWrapper.Clear();
 }
 
 TArray<UObject*> UTkManagerObjectsArray::GetArray_BP() const
 {
-	return Get();
+	return ArrayWrapper.Get();
 }
 
 void UTkManagerObjectsArray::SetArray_BP(const TArray<UObject*>& NewObjects)
 {
-	Set(NewObjects);
+	ArrayWrapper.Set(NewObjects);
 }

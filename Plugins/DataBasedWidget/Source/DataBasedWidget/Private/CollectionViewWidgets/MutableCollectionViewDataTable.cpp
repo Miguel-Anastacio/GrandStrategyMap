@@ -1,15 +1,16 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#include "ContainerWrappers/ManagerStructsArray.h"
 
-void UWPropGenCollectionViewDataTable::NativeOnInitialized()
+void UWPropGenMutableCollectionViewDataTable::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	OnInit(DataTableItems);
 }
 
-void UWPropGenCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
+void UWPropGenMutableCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
 	if (DataTable.Get() == NewDataTable)
 	{
@@ -27,7 +28,17 @@ void UWPropGenCollectionViewDataTable::SetDataTable_Implementation(UDataTable* N
 #endif
 }
 
-TArray<FInstancedStruct> UWPropGenCollectionViewDataTable::GetDataTableEntries() const
+void UWPropGenMutableCollectionViewDataTable::SetManager(UTkManagerStructsArray* ManagerStructsArray)
+{
+	// If the List is based on a data table, then add dataTable entries to Struct Manager
+	if(ManagerStructsArray)
+	{
+		ManagerStructsArray->AddMultiple_BP(GetDataTableEntries());
+	}
+	Super::SetManager(ManagerStructsArray);
+}
+
+TArray<FInstancedStruct> UWPropGenMutableCollectionViewDataTable::GetDataTableEntries() const
 {
 	return UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 }
