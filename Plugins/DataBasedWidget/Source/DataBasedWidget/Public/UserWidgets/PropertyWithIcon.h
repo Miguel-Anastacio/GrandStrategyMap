@@ -1,7 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
-#include "GenericWidget/GenericUserWidgetInterface.h"
+#include "GenericWidget/DataDrivenUserWidgetInterface.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "PropertyWithIcon.generated.h"
@@ -10,7 +10,7 @@
  * Two text blocks and a image
  */
 class URichTextBlock;
-UCLASS(Abstract, BlueprintType)
+UCLASS(Abstract, BlueprintType, DisplayName=PropertyWithIcon)
 class DATABASEDWIDGET_API UWPropGenPropertyWithIcon : public UUserWidget, public IPropGenDataDrivenUserWidgetInterface, public IUserObjectListEntry
 {
     GENERATED_BODY()

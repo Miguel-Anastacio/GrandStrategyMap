@@ -5,7 +5,7 @@
 #include "DataBasedWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "GenericWidget/GenericUserWidgetInterface.h"
+#include "GenericWidget/DataDrivenUserWidgetInterface.h"
 #include "GenericWidget/GenericWidgetDataMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
@@ -13,12 +13,12 @@
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #endif
 
-void UGenericStructWidget::NativeOnInitialized()
+void UWPropGenGeneric::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 }
 
-void UGenericStructWidget::NativePreConstruct()
+void UWPropGenGeneric::NativePreConstruct()
 {
 	InitializeWidgetFields();
 #if WITH_EDITOR
@@ -38,7 +38,7 @@ void UGenericStructWidget::NativePreConstruct()
 	Super::NativePreConstruct();
 }
 
-void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
+void UWPropGenGeneric::ReleaseSlateResources(bool bReleaseChildren)
 {
 	Super::ReleaseSlateResources(bReleaseChildren);
 	if (MainPanel)
@@ -47,7 +47,7 @@ void UGenericStructWidget::ReleaseSlateResources(bool bReleaseChildren)
 	}
 }
 
-void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruct)
+void UWPropGenGeneric::InitFromStruct(const FInstancedStruct& InstancedStruct)
 {
 	if(WidgetFields.IsEmpty())
 	{
@@ -64,10 +64,9 @@ void UGenericStructWidget::InitFromStruct(const FInstancedStruct& InstancedStruc
 			IPropGenDataDrivenUserWidgetInterface::Execute_InitFromStruct(Widget, PropertyName, InstancedStruct);
 		}
 	}
-	UAtkStructUtilsFunctionLibrary::LogInstancedStruct(InstancedStruct);
 }
 
-void UGenericStructWidget::InitFromObject(const UObject* Object)
+void UWPropGenGeneric::InitFromObject(const UObject* Object)
 {
 	// Handle Instance Struct Wrappers
 	if(const UPropGenStructWrapper* WrapperForStruct = Cast<UPropGenStructWrapper>(Object))
@@ -93,7 +92,7 @@ void UGenericStructWidget::InitFromObject(const UObject* Object)
 	}
 }
 
-const UStruct* UGenericStructWidget::GetDataClass() const
+const UStruct* UWPropGenGeneric::GetDataClass() const
 {
 	if(!DataAssetWidgetMap)
 		return nullptr;
@@ -101,7 +100,7 @@ const UStruct* UGenericStructWidget::GetDataClass() const
 	return DataAssetWidgetMap->GetDataClass();
 }
 
-void UGenericStructWidget::InitFromData(const UStruct* ClassType, const void* Data)
+void UWPropGenGeneric::InitFromData(const UStruct* ClassType, const void* Data)
 {
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
 	{
@@ -118,7 +117,7 @@ void UGenericStructWidget::InitFromData(const UStruct* ClassType, const void* Da
 	}
 }
 	
-void UGenericStructWidget::InitializeWidgetFields()
+void UWPropGenGeneric::InitializeWidgetFields()
 {
 	if(!MainPanel)
 		return;
@@ -148,13 +147,13 @@ void UGenericStructWidget::InitializeWidgetFields()
 }
 
 #if WITH_EDITOR
-void UGenericStructWidget::CreateGenericWidget(UWidgetMapDataAsset* DataWidgetMap)
+void UWPropGenGeneric::CreateGenericWidget(UPropGenWidgetMapDataAsset* DataWidgetMap)
 {
 	this->DataAssetWidgetMap = DataWidgetMap;
 	CreatePanelSlots();
 }
 
-void UGenericStructWidget::CreatePanelSlots() const
+void UWPropGenGeneric::CreatePanelSlots() const
 {
 	CreateMainPanel();
 	
@@ -207,7 +206,7 @@ void UGenericStructWidget::CreatePanelSlots() const
 	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 }
 
-void UGenericStructWidget::CreateMainPanel() const
+void UWPropGenGeneric::CreateMainPanel() const
 {
 	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
 	if (!MainAssetWidgetTree)
@@ -224,13 +223,13 @@ void UGenericStructWidget::CreateMainPanel() const
 	}
 }
 
-void UGenericStructWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
+void UWPropGenGeneric::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	InitFromObject(ListItemObject);
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 
-void UGenericStructWidget::UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const
+void UWPropGenGeneric::UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) const
 {
 	ColumnIndex++;
 	if(ColumnIndex >= Columns)

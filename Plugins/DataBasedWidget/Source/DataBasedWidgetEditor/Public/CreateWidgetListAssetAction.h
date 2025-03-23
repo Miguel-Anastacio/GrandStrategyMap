@@ -5,7 +5,7 @@
 #include "CollectionViewWidgets/ListViewWidgetsDataTable.h"
 #include "CreateWidgetListAssetAction.generated.h"
 
-class UWidgetMapDataAsset;
+class UPropGenWidgetMapDataAsset;
 UCLASS()
 class DATABASEDWIDGETEDITOR_API UCreateWidgetListAssetAction  : public UAssetActionUtility
 {
@@ -22,11 +22,11 @@ protected:
     UPROPERTY(EditAnywhere, Category=CreateWidgetListFromDataTable, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
     TSubclassOf<UUserWidget> DefaultWidgetForFields;
 
-    static UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
+    static UPropGenWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
     static UBlueprint* CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
                                                     TSubclassOf<UUserWidget> WidgetListBaseClass, TSubclassOf<UUserWidget> WidgetItemClass,
                                                    const UDataTable* ListItems);
-    UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset) const;
+    UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UPropGenWidgetMapDataAsset* MapDataAsset) const;
 
     static UStruct* GetAssetStruct(const UObject* Asset);
 

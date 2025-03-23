@@ -26,7 +26,7 @@ public:
 	
 	virtual FText GetAssetDisplayName() const override { return FText::FromString("WidgetMapDataAsset"); }
 	virtual FLinearColor GetAssetColor() const override { return FLinearColor(FColor(48, 165, 171)); }
-	virtual TSoftClassPtr<UObject> GetAssetClass() const override { return UWidgetMapDataAsset::StaticClass(); }
+	virtual TSoftClassPtr<UObject> GetAssetClass() const override { return UPropGenWidgetMapDataAsset::StaticClass(); }
 
 	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override
 	{

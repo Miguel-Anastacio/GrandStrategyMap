@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GenericWidget//GenericUserWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
+#include "GenericWidget/DataDrivenUserWidgetInterface.h"
 #include "CustomEditableText.generated.h"
 
 /**
@@ -23,7 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FEditableTextCommitSignature, cla
  */
 class UEditableTextBox;
 class URichTextBlock;
-UCLASS(Abstract, BlueprintType)
+UCLASS(Abstract, BlueprintType, DisplayName=CustomEditableText)
 class DATABASEDWIDGET_API  UWPropGenCustomEditableText : public UUserWidget, public  IPropGenDataDrivenUserWidgetInterface, public  IUserObjectListEntry
 {
     GENERATED_BODY()

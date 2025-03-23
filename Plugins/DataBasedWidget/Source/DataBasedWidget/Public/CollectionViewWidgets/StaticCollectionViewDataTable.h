@@ -6,9 +6,9 @@
 #include "Blueprint/WidgetTree.h"
 #include "Types/SlateEnums.h"
 #include "Components/VerticalBox.h"
-#include "StaticDataTableDisplay.generated.h"
+#include "StaticCollectionViewDataTable.generated.h"
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, DisplayName=StaticCollectionViewDataTable)
 class DATABASEDWIDGET_API UWPropGenStaticCollectionViewDataTable : public UUserWidget, public IPropGenWidgetCollectionInterface, public IPropGenWidgetDataTableInterface
 {
 	GENERATED_BODY()

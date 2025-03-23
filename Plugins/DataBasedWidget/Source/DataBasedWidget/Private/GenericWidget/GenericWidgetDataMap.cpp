@@ -1,23 +1,23 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "GenericWidget/GenericWidgetDataMap.h"
 
-void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UPropGenWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	if(!PropertyChangedEvent.Property)
 		return;
 	
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, Class)
-		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, DefaultWidgetType))
-		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UWidgetMapDataAsset, Struct)))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UPropGenWidgetMapDataAsset, Class)
+		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UPropGenWidgetMapDataAsset, DefaultWidgetType))
+		|| (PropertyName == GET_MEMBER_NAME_CHECKED(UPropGenWidgetMapDataAsset, Struct)))
 	{
 		SetClass();
 		Reset();
 	}
 }
 
-TArray<FString> UWidgetMapDataAsset::GetPropertyNameOptions() const
+TArray<FString> UPropGenWidgetMapDataAsset::GetPropertyNameOptions() const
 {
 	TArray<FString> PropertyNames;
 	for (TFieldIterator<FProperty> It(ClassType); It; ++It)
@@ -29,7 +29,7 @@ TArray<FString> UWidgetMapDataAsset::GetPropertyNameOptions() const
 	return PropertyNames;
 }
 
-void UWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
+void UPropGenWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
 {
 	if (!BaseClass)
 		return;
@@ -42,7 +42,7 @@ void UWidgetMapDataAsset::FillPropertyWidgetMap(const UStruct* BaseClass)
 	}
 }
 
-void UWidgetMapDataAsset::SetClass()
+void UPropGenWidgetMapDataAsset::SetClass()
 {
 	if(bUObjectBased)
 	{
@@ -56,14 +56,14 @@ void UWidgetMapDataAsset::SetClass()
 	}
 }
 
-void UWidgetMapDataAsset::Reset()
+void UPropGenWidgetMapDataAsset::Reset()
 {
 	FillPropertyWidgetMap(ClassType);
 	// Mark the asset as modified so it saves properly
 	MarkPackageDirty();
 }
 
-void UWidgetMapDataAsset::CreateFromData(UStruct* BaseStruct, const TSubclassOf<UUserWidget>& WidgetType)
+void UPropGenWidgetMapDataAsset::CreateFromData(UStruct* BaseStruct, const TSubclassOf<UUserWidget>& WidgetType)
 {
 	if (!BaseStruct)
 		return;
@@ -86,24 +86,24 @@ void UWidgetMapDataAsset::CreateFromData(UStruct* BaseStruct, const TSubclassOf<
 	Reset();
 }
 
-bool UWidgetMapDataAsset::IsValid() const
+bool UPropGenWidgetMapDataAsset::IsValid() const
 {
 	return ClassType != nullptr;
 }
 
-const UStruct* UWidgetMapDataAsset::GetDataClass() const
+const UStruct* UPropGenWidgetMapDataAsset::GetDataClass() const
 {
 	return ClassType;
 }
 
-const UScriptStruct* UWidgetMapDataAsset::GetClassAsScriptStruct() const
+const UScriptStruct* UPropGenWidgetMapDataAsset::GetClassAsScriptStruct() const
 {
 	if(bUObjectBased)
 		return nullptr;
 	return Cast<UScriptStruct>(ClassType);
 }
 
-const UClass* UWidgetMapDataAsset::GetClassAsUClass() const
+const UClass* UPropGenWidgetMapDataAsset::GetClassAsUClass() const
 {
 	if(!bUObjectBased)
 		return nullptr;

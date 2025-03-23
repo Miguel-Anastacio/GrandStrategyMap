@@ -5,7 +5,7 @@
 #include "Components/ListView.h"
 
 #if WITH_EDITOR
-void IWidgetCollectionInterface::CreateCollectionContainer()
+void IPropGenWidgetCollectionInterface::CreateCollectionContainer()
 {
 	UUserWidget* Widget = Cast<UUserWidget>(this);
 	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(Widget);
@@ -28,7 +28,7 @@ void IWidgetCollectionInterface::CreateCollectionContainer()
 }
 #endif
 
-bool IWidgetCollectionInterface::IsCollectionListView()
+bool IPropGenWidgetCollectionInterface::IsCollectionListView()
 {
 	UObject* Widget = Cast<UObject>(this);
 	return Cast<UListView>(Execute_GetCollectionContainer(Widget)) != nullptr;

@@ -10,7 +10,7 @@
 
 class UTkManagerObjectsArray;
 // Wrapper for InstancedStructs so that they can be used as source for ListView
-UCLASS()
+UCLASS(DisplayName=InstancedStructWrapper)
 class UPropGenStructWrapper : public UObject
 {
 	GENERATED_BODY()
@@ -29,7 +29,7 @@ protected:
 };
 
 UCLASS(Abstract)
-class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWidget, public IWidgetCollectionInterface
+class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWidget, public IPropGenWidgetCollectionInterface
 {
 	GENERATED_BODY()
 

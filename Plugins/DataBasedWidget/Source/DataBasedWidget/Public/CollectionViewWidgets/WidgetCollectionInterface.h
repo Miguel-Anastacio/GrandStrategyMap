@@ -15,8 +15,8 @@ class UWidget;
 * This interface defines methods for managing collections of widgets that can display 
 * UObjects and structs within container widgets.
 */
-UINTERFACE(MinimalAPI, BlueprintType, Blueprintable)
-class UWidgetCollectionInterface: public UInterface
+UINTERFACE(MinimalAPI, BlueprintType, Blueprintable, DisplayName="WidgetCollectionInterface")
+class UPropGenWidgetCollectionInterface: public UInterface
 {
    GENERATED_BODY()
 };
@@ -25,7 +25,7 @@ class UWidgetCollectionInterface: public UInterface
 * Interface implementation class for widget collections.
 * Provides methods to manage, display, and manipulate collections of widgets.
 */
-class DATABASEDWIDGET_API IWidgetCollectionInterface
+class DATABASEDWIDGET_API IPropGenWidgetCollectionInterface
 {
    GENERATED_BODY() 
 
@@ -78,7 +78,7 @@ protected:
 };
 
 
-UINTERFACE(MinimalAPI, BlueprintType, Blueprintable)
+UINTERFACE(MinimalAPI, BlueprintType, Blueprintable, DisplayName=WidgetColectionDataTableInterface)
 class UPropGenWidgetDataTableInterface: public UInterface
 {
 	GENERATED_BODY()

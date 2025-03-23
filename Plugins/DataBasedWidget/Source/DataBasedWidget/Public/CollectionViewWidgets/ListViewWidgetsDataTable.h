@@ -8,7 +8,7 @@
 #include "Types/SlateEnums.h"
 #include "ListViewWidgetsDataTable.generated.h"
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, DisplayName=MutableListViewDataTable)
 class DATABASEDWIDGET_API UWPropGenListViewDataTable : public UWPropGenMutableCollectionViewDataTable
 {
 	GENERATED_BODY()

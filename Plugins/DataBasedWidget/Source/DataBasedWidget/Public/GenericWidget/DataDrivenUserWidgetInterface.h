@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "InstancedStruct.h"
 #include "UObject/Interface.h"
-#include "GenericUserWidgetInterface.generated.h"
+#include "DataDrivenUserWidgetInterface.generated.h"
 
 UINTERFACE(MinimalAPI, BlueprintType, DisplayName = "DataDrivenUserWidgetInterface")
 class UPropGenDataDrivenUserWidgetInterface: public UInterface

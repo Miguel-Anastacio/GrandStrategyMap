@@ -4,7 +4,7 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/RichTextBlock.h"
 
-void UDoubleTextBlock::SetValues(const FText& NewLabelText, const FText& NewValueText) const
+void UWPropGenDoubleTextBlock::SetValues(const FText& NewLabelText, const FText& NewValueText) const
 {
 	if(Label)
 		Label->SetText(NewLabelText);
@@ -12,14 +12,19 @@ void UDoubleTextBlock::SetValues(const FText& NewLabelText, const FText& NewValu
 		Text->SetText(NewValueText);
 }
 
-void UDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const
+void UWPropGenDoubleTextBlock::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
+	Super::NativeTick(MyGeometry, InDeltaTime);
+}
+
+void UWPropGenDoubleTextBlock::InitFromData(const FName& PropertyName,const UStruct* ClassType,  const void* Data) const
+{
+	FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(ClassType, PropertyName);
 	const FString PropertyValueText = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsString(Property, Data);
 	SetValues(FText::FromName(PropertyName), FText::FromString(PropertyValueText));
 }
 
-void UDoubleTextBlock::NativeOnListItemObjectSet(UObject* ListItemObject)
+void UWPropGenDoubleTextBlock::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }

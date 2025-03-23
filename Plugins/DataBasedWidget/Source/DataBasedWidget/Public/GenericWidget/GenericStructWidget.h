@@ -8,15 +8,15 @@
 #include "Types/SlateEnums.h"
 #include "GenericStructWidget.generated.h"
 
-class UWidgetMapDataAsset;
+class UPropGenWidgetMapDataAsset;
 class UWCustomEditableText;
 class UVerticalBox;
 /**
  * A generic widget class that can display structured data in a grid layout
  * This widget can be initialized from either structured data or UObjects
  */
-UCLASS(BlueprintType)
-class DATABASEDWIDGET_API UGenericStructWidget : public UUserWidget, public IUserObjectListEntry
+UCLASS(BlueprintType, DisplayName=GenericWidget)
+class DATABASEDWIDGET_API UWPropGenGeneric : public UUserWidget, public IUserObjectListEntry
 {
     GENERATED_BODY()
 
@@ -35,7 +35,7 @@ public:
      * Creates widget elements based on a data asset mapping
      * @param DataAssetWidgetMap - Asset containing property-to-widget mappings
      */
-    void CreateGenericWidget(UWidgetMapDataAsset* DataAssetWidgetMap);
+    void CreateGenericWidget(UPropGenWidgetMapDataAsset* DataAssetWidgetMap);
 #endif
 
     /**
@@ -63,7 +63,7 @@ public:
 #if WITH_EDITORONLY_DATA
     /** Data asset that maps property types to widget classes */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
-    class UWidgetMapDataAsset* DataAssetWidgetMap;
+    class UPropGenWidgetMapDataAsset* DataAssetWidgetMap;
 #endif
     
     /** Map of property names to their corresponding widgets */

@@ -43,7 +43,7 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 		{
 			// create widget for item
 			UStruct* ItemClass = Cast<UStruct>(DataTable->RowStruct);
-			if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, ItemClass->GetName()))
+			if(UPropGenWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, ItemClass->GetName()))
 			{
 				WidgetMapDataAsset->CreateFromData(ItemClass, DefaultWidgetForFields);
 				// create WBP_widget
@@ -59,15 +59,15 @@ void UCreateWidgetListAssetAction::CreateWidgetListFromDataTable(TSubclassOf<UUs
 	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
-UWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
+UPropGenWidgetMapDataAsset* UCreateWidgetListAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
-	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UPropGenWidgetMapDataAsset::StaticClass(),
 														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
 	if (!Asset)
 	{
 		return nullptr;
 	}
-	return Cast<UWidgetMapDataAsset>(Asset);
+	return Cast<UPropGenWidgetMapDataAsset>(Asset);
 }
 
 UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
@@ -88,10 +88,10 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 		{
 			if (UObject* DefaultObject = BPGeneratedClass->GetDefaultObject())
 			{
-				if (DefaultObject->GetClass()->ImplementsInterface(UWidgetCollectionInterface::StaticClass()))
+				if (DefaultObject->GetClass()->ImplementsInterface(UPropGenWidgetCollectionInterface::StaticClass()))
 				{
-					Cast<IWidgetCollectionInterface>(DefaultObject)->CreateCollectionContainer();
-					IWidgetCollectionInterface::Execute_SetWidgetItemClass(DefaultObject, WidgetItemClass);
+					Cast<IPropGenWidgetCollectionInterface>(DefaultObject)->CreateCollectionContainer();
+					IPropGenWidgetCollectionInterface::Execute_SetWidgetItemClass(DefaultObject, WidgetItemClass);
 					IPropGenWidgetDataTableInterface::Execute_SetDataTable(DefaultObject, const_cast<UDataTable*>(ListItems));
 					FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 				}
@@ -102,16 +102,16 @@ UBlueprint* UCreateWidgetListAssetAction::CreateWidgetListBlueprint(const FStrin
 }
 
 UBlueprint* UCreateWidgetListAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
-                                                                                        UWidgetMapDataAsset* MapDataAsset) const
+                                                                                        UPropGenWidgetMapDataAsset* MapDataAsset) const
 {
-	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
+	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UWPropGenGeneric::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{
 		// **Modify the default field in UGenericStructWidget**
 		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
 		{
-			if (UGenericStructWidget* DefaultObject = Cast<UGenericStructWidget>(BPGeneratedClass->GetDefaultObject()))
+			if (UWPropGenGeneric* DefaultObject = Cast<UWPropGenGeneric>(BPGeneratedClass->GetDefaultObject()))
 			{
 				DefaultObject->CreateGenericWidget(MapDataAsset);
 				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
@@ -147,7 +147,7 @@ bool UCreateWidgetListAssetAction::ValidateContainerClassAndMemberWidget(
 	if(!WidgetListBaseClass || !WidgetItemClass)
 		return false;
 	
-	if(IWidgetCollectionInterface* Interface = Cast<IWidgetCollectionInterface>(WidgetListBaseClass->ClassDefaultObject))
+	if(IPropGenWidgetCollectionInterface* Interface = Cast<IPropGenWidgetCollectionInterface>(WidgetListBaseClass->ClassDefaultObject))
 	{
 		if(Interface->IsCollectionListView())
 		{

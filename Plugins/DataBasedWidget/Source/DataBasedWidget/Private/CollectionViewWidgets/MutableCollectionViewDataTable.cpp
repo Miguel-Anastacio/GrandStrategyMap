@@ -19,13 +19,14 @@ void UWPropGenMutableCollectionViewDataTable::SetDataTable_Implementation(UDataT
 	
 	DataTable = NewDataTable;
 
-#if WITH_EDITOR
-	return;
-#else
+// #if WITH_EDITOR
+// 	return;
+// #else
 	// At runtime load data table and re init ListView
-	const TArray<FInstancedStruct> DataTableItems = UDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	InitFromStructs(DataTableItems);
-#endif
+	ClearManager();
+	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
+	OnInit(DataTableItems);
+// #endif
 }
 
 void UWPropGenMutableCollectionViewDataTable::SetManager(UTkManagerStructsArray* ManagerStructsArray)

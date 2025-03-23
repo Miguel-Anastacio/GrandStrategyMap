@@ -28,11 +28,11 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject(TSubclassOf<UUserWidge
 		UStruct* AssetClass = GetAssetStruct(Asset);
 		
 		// create widget map
-		if(UWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
+		if(UPropGenWidgetMapDataAsset* WidgetMapDataAsset = CreateWidgetMapDataAsset(PackagePath, Asset->GetName()))
 		{
 			if(!DefaultWidgetForFields)
 			{
-				DefaultWidgetForFields = UDoubleTextBlock::StaticClass();
+				DefaultWidgetForFields = UWPropGenDoubleTextBlock::StaticClass();
 			}
 			
 			WidgetMapDataAsset->CreateFromData(AssetClass, DefaultWidgetForFields);
@@ -46,28 +46,28 @@ void UCreateWidgetFromAssetAction::CreateWidgetFromObject(TSubclassOf<UUserWidge
 	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
-UWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
+UPropGenWidgetMapDataAsset* UCreateWidgetFromAssetAction::CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName)
 {
-	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UWidgetMapDataAsset::StaticClass(),
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UPropGenWidgetMapDataAsset::StaticClass(),
 														TEXT("/DA_WidgetMapDataAsset_")  + ObjectOriginName);
 	if (!Asset)
 	{
 		return nullptr;
 	}
-	return Cast<UWidgetMapDataAsset>(Asset);
+	return Cast<UPropGenWidgetMapDataAsset>(Asset);
 }
 
 UBlueprint* UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName,
-																UWidgetMapDataAsset* MapDataAsset) const
+																UPropGenWidgetMapDataAsset* MapDataAsset) const
 {
-	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UGenericStructWidget::StaticClass(),
+	UBlueprint* Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UWPropGenGeneric::StaticClass(),
 																						TEXT("/WBP_GenericWidget_") + AssetName);
 	if (Blueprint)
 	{
 		// **Modify the default field in UGenericStructWidget**
 		if (const UBlueprintGeneratedClass* BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
 		{
-			if (UGenericStructWidget* DefaultObject = Cast<UGenericStructWidget>(BPGeneratedClass->GetDefaultObject()))
+			if (UWPropGenGeneric* DefaultObject = Cast<UWPropGenGeneric>(BPGeneratedClass->GetDefaultObject()))
 			{
 				DefaultObject->CreateGenericWidget(MapDataAsset);
 				FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);

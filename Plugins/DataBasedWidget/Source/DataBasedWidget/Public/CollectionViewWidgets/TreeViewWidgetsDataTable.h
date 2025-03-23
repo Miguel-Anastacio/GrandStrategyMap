@@ -7,7 +7,7 @@
 #include "Components/TreeView.h"
 #include "TreeViewWidgetsDataTable.generated.h"
 
-UCLASS(Blueprintable,  BlueprintType)
+UCLASS(Blueprintable,  BlueprintType, DisplayName=MutableTreeViewDataTable)
 class DATABASEDWIDGET_API UWPropGenTreeViewDataTable : public UWPropGenMutableCollectionViewDataTable
 {
 	GENERATED_BODY()

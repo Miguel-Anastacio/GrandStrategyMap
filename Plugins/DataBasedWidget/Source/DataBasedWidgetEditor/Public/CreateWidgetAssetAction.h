@@ -17,8 +17,8 @@ public:
 
 protected:    
     
-    static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
-    UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UWidgetMapDataAsset* MapDataAsset) const;
+    static class UPropGenWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
+    UBlueprint* CreateBlueprintDerivedFromGenericStructWidget(const FString& PackagePath, const FString& AssetName, UPropGenWidgetMapDataAsset* MapDataAsset) const;
 
     static UStruct* GetAssetStruct(const UObject* Asset);
     

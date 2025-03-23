@@ -20,7 +20,7 @@ void UWPropGenStaticCollectionViewDataTable::Init()
 		for(FInstancedStruct DataStruct : DataTableItems)
 		{
 			UUserWidget* Widget = CreateWidget<UUserWidget>(this, WidgetClass);
-			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(Widget))
+			if(UWPropGenGeneric* GenericStructWidget = Cast<UWPropGenGeneric>(Widget))
 			{
 				GenericStructWidget->InitFromStruct(DataStruct);
 			}
@@ -70,7 +70,7 @@ void UWPropGenStaticCollectionViewDataTable::RefreshContainer() const
 	{
 		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetClass))
 		{
-			if(UGenericStructWidget* GenericStructWidget = Cast<UGenericStructWidget>(NewWidget))
+			if(UWPropGenGeneric* GenericStructWidget = Cast<UWPropGenGeneric>(NewWidget))
 			{
 				GenericStructWidget->InitFromStruct(Struct);
 			}

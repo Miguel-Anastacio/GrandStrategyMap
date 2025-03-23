@@ -5,8 +5,8 @@
 #include "Engine/DataTable.h"
 #include "GenericWidgetDataMap.generated.h"
 
-UCLASS(BlueprintType)
-class DATABASEDWIDGET_API UWidgetMapDataAsset : public UDataAsset
+UCLASS(BlueprintType, DisplayName=WidgetMapDataAsset)
+class DATABASEDWIDGET_API UPropGenWidgetMapDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
@@ -32,15 +32,14 @@ protected:
 #if WITH_EDITOR
 	// UObject interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	// End of UObject interface
 	
 	UFUNCTION()
 	TArray<FString> GetPropertyNameOptions() const;
-	// End of UObject interface
 #endif
 	void FillPropertyWidgetMap(const UStruct* BaseClass);
 	void SetClass();
-	// bool IsScriptStruct(const UStruct* Struct) const;
-
+	
 	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(InlineEditConditionToggle))
     bool bUObjectBased = true;
 

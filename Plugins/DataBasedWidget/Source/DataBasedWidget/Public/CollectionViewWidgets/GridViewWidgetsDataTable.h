@@ -7,7 +7,7 @@
 #include "Components/TileView.h"
 #include "GridViewWidgetsDataTable.generated.h"
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, DisplayName=MutableGridViewDataTable)
 class DATABASEDWIDGET_API UWPropGenGridViewDataTable : public UWPropGenMutableCollectionViewDataTable
 {
 	GENERATED_BODY()

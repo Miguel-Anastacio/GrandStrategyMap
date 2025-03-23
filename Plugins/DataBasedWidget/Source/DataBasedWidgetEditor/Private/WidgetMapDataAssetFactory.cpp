@@ -4,7 +4,7 @@
 
 UWidgetMapDataAssetFactory::UWidgetMapDataAssetFactory(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
-	SupportedClass = UWidgetMapDataAsset::StaticClass();
+	SupportedClass = UPropGenWidgetMapDataAsset::StaticClass();
 	bCreateNew = true;
 	bEditorImport = false;
 	bEditAfterNew = true;
@@ -12,6 +12,6 @@ UWidgetMapDataAssetFactory::UWidgetMapDataAssetFactory(const FObjectInitializer&
 
 UObject* UWidgetMapDataAssetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
-	return NewObject<UWidgetMapDataAsset>(InParent, Class, Name, Flags | RF_Transactional);
+	return NewObject<UPropGenWidgetMapDataAsset>(InParent, Class, Name, Flags | RF_Transactional);
 }
 
