@@ -124,35 +124,6 @@ TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(
 	return OutArray;
 }
 
-TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJsonString(const FString& JString,
-	const UScriptStruct* StructType)
-{
-	TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArrayFromString(JString); 
-	TArray<FInstancedStruct> OutArray;
-	int32 index = 0;
-	FInstancedStruct InstancedStruct;
-	for(const auto& JsonValue : JsonArray)
-	{
-		TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
-		if (!JsonObject.IsValid())
-		{
-			UE_LOG(LogTemp, Error, TEXT("Invalid JSON object in array."));
-			continue;
-		}
-
-		// Deserialize the object into an FInstancedStruct
-		FInstancedStruct NewInstancedStruct;
-		if (DeserializeJsonToFInstancedStruct(JsonObject, StructType, NewInstancedStruct))
-		{
-			// ObjectHasMissingFields(JsonObject, index, FilePath, structType);
-			OutArray.Add(MoveTemp(NewInstancedStruct));
-		}
-
-		index++;
-	}
-	return OutArray;
-}
-
 TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(const FString& FilePath,
                                                                              const TArray<UScriptStruct*>& StructTypes)
 {
@@ -184,32 +155,13 @@ TArray<FInstancedStruct> UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(
 	return OutArray;
 }
 
-void UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType,
-                                                                  const TArray<FInstancedStruct>& Array)
-{
-	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
-	for (const auto& Value : Array)
-	{
-		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, StructType);
-		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
-	}
-
-	bool bResult = false;
-	FString OutInfoMessage;
-	WriteJson(FilePath, JsonValueArray, bResult, OutInfoMessage);
-	if(!bResult)
-	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array: %s"), *OutInfoMessage);
-	}
-}
-
 void UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FString& FilePath,
 	const TArray<FInstancedStruct>& Array)
 {
 	TArray<TSharedPtr<FJsonValue>> JsonValueArray;
 	for (const auto& Value : Array)
 	{
-		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value, Value.GetScriptStruct());
+		TSharedPtr<FJsonObject> StructObject = SerializeInstancedStructToJson(Value);
 		JsonValueArray.Add(MakeShared<FJsonValueObject>(StructObject));
 	}
 
@@ -233,18 +185,6 @@ bool UAtkDataManagerFunctionLibrary::DeserializeJsonToFInstancedStruct(const TSh
 		return false;
 	}
 	return true;
-}
-
-TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType)
-{
-	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-	if(FJsonObjectConverter::UStructToJsonObject(StructType, Instance.GetMemory(), JsonObject.ToSharedRef(), 0, 0))
-	{
-		return JsonObject;
-	}
-
-	UE_LOG(LogUtilityModule, Error, TEXT("Failed to serialize instanced struct of type %s"), *StructType->GetName());
-	return nullptr;
 }
 
 TSharedPtr<FJsonObject> UAtkDataManagerFunctionLibrary::SerializeInstancedStructToJson(const FInstancedStruct& Instance)

@@ -18,6 +18,7 @@ class UTILITYMODULE_API UAtkDataManagerFunctionLibrary : public UBlueprintFuncti
     GENERATED_BODY()
 
 public:
+    
     UFUNCTION(BlueprintCallable, BlueprintPure ,Category = "Data")
     static TArray<FInstancedStruct> GetArrayOfInstancedStructs(const UDataTable* DataTable);
     
@@ -36,6 +37,8 @@ public:
         return !ArrayToUpdate.IsEmpty();
     }
 
+    UFUNCTION(BlueprintCallable, Category=JsonUtils)
+    static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
     /**
      * Writes a structure to a JSON file.
      *
@@ -60,31 +63,31 @@ public:
      /**
      * Writes an array to a JSON file.
      *
-     * @param jsonFilePath The path to the JSON file.
-     * @param array The array to write.
-     * @param outSuccess Whether the operation was successful.
-     * @param outInfoMessage Information message about the operation.
+     * @param JsonFilePath The path to the JSON file.
+     * @param Array The array to write.
+     * @param bOutSuccess Whether the operation was successful.
+     * @param OutInfoMessage Information message about the operation.
      */
     template<class T>
-    static void WriteArrayToJsonFile(const FString& jsonFilePath, const TArray<T>& array, bool& outSuccess, FString& outInfoMessage)
+    static void WriteArrayToJsonFile(const FString& JsonFilePath, const TArray<T>& Array, bool& bOutSuccess, FString& OutInfoMessage)
     {
         TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
         if (!JsonObject)
         {
-            outSuccess = false;
-            outInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct)"));
+            bOutSuccess = false;
+            OutInfoMessage = FString::Printf(TEXT("Write struct json failed - not able to convert structure to json object (structure has to be a UStruct)"));
             return;
         }
 
         TArray<TSharedPtr<FJsonValue>> JsonValues;
-        for (const auto& Value : array)
+        for (const auto& Value : Array)
         {
             TSharedPtr<FJsonObject> StructObject = MakeShared<FJsonObject>();
             Value.SerializeToJson(StructObject);
             JsonValues.Add(MakeShared<FJsonValueObject>(StructObject));
         }
 
-        WriteJson(jsonFilePath, JsonValues, outSuccess, outInfoMessage);
+        WriteJson(JsonFilePath, JsonValues, bOutSuccess, OutInfoMessage);
     }
     
     template<class T>
@@ -116,16 +119,11 @@ public:
         }
         return OutArray;
     }
-
+    
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const UScriptStruct* StructType);
-    static TArray<FInstancedStruct> LoadCustomDataFromJsonString(const FString& JString, const UScriptStruct* StructType);
     static TArray<FInstancedStruct> LoadCustomDataFromJson(const FString& FilePath, const TArray<UScriptStruct*>& StructTypes);
-    static void WriteInstancedStructArrayToJson(const FString& FilePath, const UScriptStruct* StructType, const TArray<FInstancedStruct>& Array);
-    UFUNCTION(BlueprintCallable, Category=JsonUtils)
-    static void WriteInstancedStructArrayToJson(const FString& FilePath, const TArray<FInstancedStruct>& Array);
     
     static bool DeserializeJsonToFInstancedStruct(const TSharedPtr<FJsonObject> JsonObject,const UScriptStruct* StructType, FInstancedStruct& OutInstancedStruct);
-    static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance, const UScriptStruct* StructType);
     static TSharedPtr<FJsonObject> SerializeInstancedStructToJson(const FInstancedStruct& Instance);
     
     /**
@@ -136,8 +134,10 @@ public:
      * @param bOutSuccess Whether the operation was successful.
      * @param OutInfoMessage Information message about the operation.
      */
+    UFUNCTION(BlueprintCallable, Category=JsonUtils)
     static void WriteStringToFile(const FString& FilePath, const FString& String, bool& bOutSuccess, FString& OutInfoMessage);
     
+private:
     /**
      * Writes JSON data to a file.
      *
