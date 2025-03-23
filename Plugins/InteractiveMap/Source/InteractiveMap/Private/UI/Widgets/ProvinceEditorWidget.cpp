@@ -2,7 +2,7 @@
 #include "UI/Widgets/ProvinceEditorWidget.h"
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
-#include "GenericStructWidget.h"
+#include "GenericWidget/GenericStructWidget.h"
 
 void UProvinceEditorWidget::SetProvinceData(const FInstancedStruct& Data, int ProvinceID)
 {

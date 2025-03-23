@@ -42,10 +42,10 @@ protected:
 	
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	class UGenericStructWidget* ProvinceDataWidget;
+	class UWPropGenGeneric* ProvinceDataWidget;
 
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	class UGenericStructWidget* OceanTileDataWidget;
+	class UWPropGenGeneric* OceanTileDataWidget;
 	
 	// The unique identifier of the currently selected province.
 	int ProvinceSelectedID; 

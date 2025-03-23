@@ -63,7 +63,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "DataBasedWidget",
+			"Name": "PropertyDisplayGenerator",
 			"Enabled": true
 		}
 	]
