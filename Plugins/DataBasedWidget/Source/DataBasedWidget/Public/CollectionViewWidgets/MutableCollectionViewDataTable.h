@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "MutableCollectionStructsView.h"
 #include "Types/SlateEnums.h"
-#include "CollectionViewWidgetsDataTable.generated.h"
+#include "MutableCollectionViewDataTable.generated.h"
 
 UCLASS(Abstract)
 class DATABASEDWIDGET_API UWPropGenMutableCollectionViewDataTable : public UWPropGenMutableCollectionStructsView, public IPropGenWidgetDataTableInterface
@@ -13,9 +13,13 @@ class DATABASEDWIDGET_API UWPropGenMutableCollectionViewDataTable : public UWPro
 
 public:
 	virtual void NativeOnInitialized() override;
-	UFUNCTION(BlueprintCallable, Category=CollectionViewDataTable)
+	
+	// Begin IPropGenWidgetDataTableInterface
 	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
+	// End IPropGenWidgetDataTableInterface
+	
 	virtual void SetManager(UTkManagerStructsArray* ManagerStructsArray) override;
+
 	TArray<FInstancedStruct> GetDataTableEntries() const;
 protected:
 	UPROPERTY(EditAnywhere, Category=CollectionViewDataTable, BlueprintReadWrite)

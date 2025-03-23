@@ -1,6 +1,5 @@
 
 #include "WidgetMapDataAssetFactory.h"
-#include "GenericWidgetDataMap.h"
 #include "Styling/SlateStyle.h"
 
 UWidgetMapDataAssetFactory::UWidgetMapDataAssetFactory(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)

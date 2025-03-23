@@ -2,14 +2,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CollectionViewWidgetsDataTable.h"
+#include "MutableCollectionViewDataTable.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/ListView.h"
 #include "Types/SlateEnums.h"
 #include "ListViewWidgetsDataTable.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class DATABASEDWIDGET_API UWPropGenListViewDataTable : public UWPropGenCollectionViewDataTable
+class DATABASEDWIDGET_API UWPropGenListViewDataTable : public UWPropGenMutableCollectionViewDataTable
 {
 	GENERATED_BODY()
 

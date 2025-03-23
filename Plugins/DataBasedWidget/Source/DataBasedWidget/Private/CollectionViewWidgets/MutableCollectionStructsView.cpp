@@ -3,7 +3,7 @@
 #include "CollectionViewWidgets/MutableCollectionStructsView.h"
 
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-#include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
+#include "CollectionViewWidgets/MutableCollectionViewDataTable.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #include "Components/ListView.h"
 #include "ContainerWrappers/ManagerStructsArray.h"
@@ -18,11 +18,6 @@ void UWPropGenMutableCollectionStructsView::SetManager(UTkManagerStructsArray* M
 	StructManager = ManagerStructsArray;
 	if(StructManager.IsValid())
 	{
-		// If the List is based on a data table, then add dataTable entries to Struct Manager
-		if(const UWPropGenCollectionViewDataTable* DataTableView = Cast<UWPropGenCollectionViewDataTable>(this))
-		{
-			StructManager->AddMultiple_BP(DataTableView->GetDataTableEntries());
-		}
 		OnInit(StructManager->GetArray_BP());
 		
 		StructManager->OnStructAdded.AddDynamic(this, &UWPropGenMutableCollectionStructsView::OnStructAdded);

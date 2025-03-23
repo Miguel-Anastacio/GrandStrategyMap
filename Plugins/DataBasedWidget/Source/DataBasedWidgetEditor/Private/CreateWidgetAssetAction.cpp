@@ -1,11 +1,10 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CreateWidgetAssetAction.h"
-
-#include "DoubleTextBlock.h"
+#include "GenericWidget/GenericStructWidget.h"
+#include "UserWidgets/DoubleTextBlock.h"
 #include "EditorUtilityLibrary.h"
-#include "GenericStructWidget.h"
-#include "GenericWidgetDataMap.h"
+#include "GenericWidget/GenericWidgetDataMap.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Engine/UserDefinedStruct.h"

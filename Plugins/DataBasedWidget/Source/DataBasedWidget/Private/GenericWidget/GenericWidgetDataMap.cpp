@@ -1,5 +1,5 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#include "GenericWidgetDataMap.h"
+#include "GenericWidget/GenericWidgetDataMap.h"
 
 void UWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

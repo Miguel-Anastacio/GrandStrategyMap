@@ -89,10 +89,9 @@ class DATABASEDWIDGET_API IPropGenWidgetDataTableInterface
 	GENERATED_BODY()
 public:
 	/**
-   * Sets the data table that provides data for the widget collection.
-   * Optional method to override if the widget display depends on a DataTable.
-   * @param NewDataTable - The data table to use for the widget collection
-   */
+	* Sets the data table that provides data for the widget collection.
+	* @param NewDataTable - The data table to use for the widget collection
+	*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=WidgetCollectionInterface)
 	void SetDataTable(UDataTable* NewDataTable);
 };

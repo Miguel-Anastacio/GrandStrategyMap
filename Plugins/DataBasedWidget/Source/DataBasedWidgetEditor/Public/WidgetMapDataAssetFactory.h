@@ -2,7 +2,7 @@
 
 #include "AssetDefinitionDefault.h"
 #include "ClassIconFinder.h"
-#include "GenericWidgetDataMap.h"
+#include "GenericWidget/GenericWidgetDataMap.h"
 #include "Factories/Factory.h"
 #include "UObject/NameTypes.h"
 #include "UObject/ObjectMacros.h"

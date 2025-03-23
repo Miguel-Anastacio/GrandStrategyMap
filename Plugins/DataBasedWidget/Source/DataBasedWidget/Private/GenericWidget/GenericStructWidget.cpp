@@ -1,12 +1,12 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "GenericStructWidget.h"
+#include "GenericWidget/GenericStructWidget.h"
 #include "UObject/Field.h"
 #include "DataBasedWidget.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
-#include "GenericUserWidgetInterface.h"
-#include "GenericWidgetDataMap.h"
+#include "GenericWidget/GenericUserWidgetInterface.h"
+#include "GenericWidget/GenericWidgetDataMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #if WITH_EDITOR

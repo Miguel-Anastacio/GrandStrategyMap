@@ -1,5 +1,5 @@
 // Copyright 2024 An@stacioDev All rights reserved.
-#include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
+#include "CollectionViewWidgets/MutableCollectionViewDataTable.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "ContainerWrappers/ManagerStructsArray.h"
 

@@ -1,7 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
-#include "GenericUserWidgetInterface.h"
+#include "GenericWidget/GenericUserWidgetInterface.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "PropertyWithIcon.generated.h"

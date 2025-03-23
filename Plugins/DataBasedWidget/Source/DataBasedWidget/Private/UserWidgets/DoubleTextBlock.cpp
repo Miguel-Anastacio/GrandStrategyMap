@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
-#include "DoubleTextBlock.h"
+#include "UserWidgets/DoubleTextBlock.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Components/RichTextBlock.h"
 

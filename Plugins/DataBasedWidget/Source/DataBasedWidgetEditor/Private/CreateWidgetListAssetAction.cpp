@@ -3,10 +3,9 @@
 #include "CreateWidgetListAssetAction.h"
 
 #include "EditorUtilityLibrary.h"
-#include "GenericStructWidget.h"
-#include "GenericWidgetDataMap.h"
+#include "GenericWidget/GenericStructWidget.h"
+#include "GenericWidget/GenericWidgetDataMap.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
-#include "CollectionViewWidgets/CollectionViewWidgetsDataTable.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "CollectionViewWidgets/ListViewWidgetsDataTable.h"

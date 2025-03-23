@@ -2,9 +2,10 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
-#include "GenericStructWidget.h"
 #include "CollectionViewWidgets/ListViewWidgetsDataTable.h"
 #include "CreateWidgetListAssetAction.generated.h"
+
+class UWidgetMapDataAsset;
 UCLASS()
 class DATABASEDWIDGETEDITOR_API UCreateWidgetListAssetAction  : public UAssetActionUtility
 {
@@ -21,7 +22,7 @@ protected:
     UPROPERTY(EditAnywhere, Category=CreateWidgetListFromDataTable, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
     TSubclassOf<UUserWidget> DefaultWidgetForFields;
 
-    static class UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
+    static UWidgetMapDataAsset* CreateWidgetMapDataAsset(const FString& PackagePath, const FString& ObjectOriginName);
     static UBlueprint* CreateWidgetListBlueprint(const FString& PackagePath, const FString& ObjectOriginName,
                                                     TSubclassOf<UUserWidget> WidgetListBaseClass, TSubclassOf<UUserWidget> WidgetItemClass,
                                                    const UDataTable* ListItems);

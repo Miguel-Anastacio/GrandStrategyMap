@@ -1,17 +1,17 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "CollectionViewWidgets/StaticDataTableDisplay.h"
-#include "GenericStructWidget.h"
-#include "GenericUserWidgetInterface.h"
+#include "GenericWidget/GenericStructWidget.h"
+#include "GenericWidget/GenericUserWidgetInterface.h"
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 
-void UWPropGenStaticDataTableDisplay::NativeOnInitialized()
+void UWPropGenStaticCollectionViewDataTable::NativeOnInitialized()
 {
 	Init();
 	Super::NativeConstruct();
 }
 
-void UWPropGenStaticDataTableDisplay::Init()
+void UWPropGenStaticCollectionViewDataTable::Init()
 {
 	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
 	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
@@ -29,12 +29,12 @@ void UWPropGenStaticDataTableDisplay::Init()
 	}
 }
 
-void UWPropGenStaticDataTableDisplay::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> MembersWidgetClass)
+void UWPropGenStaticCollectionViewDataTable::SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> MembersWidgetClass)
 {
 	WidgetClass = MembersWidgetClass;
 }
 
-void UWPropGenStaticDataTableDisplay::SetDataTable_Implementation(UDataTable* NewDataTable)
+void UWPropGenStaticCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
 	DataTable = NewDataTable;
 	
@@ -51,7 +51,7 @@ void UWPropGenStaticDataTableDisplay::SetDataTable_Implementation(UDataTable* Ne
 }
 
 #if WITH_EDITOR
-void UWPropGenStaticDataTableDisplay::RefreshContainer() const
+void UWPropGenStaticCollectionViewDataTable::RefreshContainer() const
 {
 	UVerticalBox* AssetVerticalBox = Cast<UVerticalBox>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("Container")));
 	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);

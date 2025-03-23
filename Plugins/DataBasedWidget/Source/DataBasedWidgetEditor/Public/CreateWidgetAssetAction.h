@@ -2,7 +2,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
-#include "GenericStructWidget.h"
+#include "GenericWidget/GenericStructWidget.h"
 #include "CreateWidgetAssetAction.generated.h"
 UCLASS()
 class DATABASEDWIDGETEDITOR_API UCreateWidgetFromAssetAction  : public UAssetActionUtility

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GenericUserWidgetInterface.h"
+#include "GenericWidget//GenericUserWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "CustomEditableText.generated.h"
