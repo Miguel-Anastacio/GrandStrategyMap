@@ -22,9 +22,9 @@ void UTkManagerObjectsArray::AddMultiple_BP(const TArray<UObject*>& Multiple)
 	ArrayWrapper.AddMultiple(Multiple);
 }
 
-void UTkManagerObjectsArray::Remove_BP(UObject* Object)
+bool UTkManagerObjectsArray::Remove_BP(UObject* Object)
 {
-	ArrayWrapper.Remove(Object);
+	return ArrayWrapper.Remove(Object);
 }
 
 void UTkManagerObjectsArray::Clear_BP()
@@ -40,4 +40,30 @@ TArray<UObject*> UTkManagerObjectsArray::GetArray_BP() const
 void UTkManagerObjectsArray::SetArray_BP(const TArray<UObject*>& NewObjects)
 {
 	ArrayWrapper.Set(NewObjects);
+}
+
+void UTkManagerObjectsArray::SetAt_BP(const int Index, UObject* Object)
+{
+	if(ArrayWrapper.SetAt(Index, Object))
+	{
+		OnObjectChanged.Broadcast(Object);
+	}
+}
+
+UObject* UTkManagerObjectsArray::At_BP(const int Index)
+{
+	return *ArrayWrapper.At(Index);
+}
+
+UObject* UTkManagerObjectsArray::Last_BP()
+{
+	if(ArrayWrapper.IsEmpty())
+		return nullptr;
+	
+	return ArrayWrapper.Last();
+}
+
+bool UTkManagerObjectsArray::IsEmpty() const
+{
+	return ArrayWrapper.Get().IsEmpty();
 }

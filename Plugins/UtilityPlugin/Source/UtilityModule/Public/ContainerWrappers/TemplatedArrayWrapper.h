@@ -29,7 +29,6 @@ public:
 		DelegateSet = &SetDel;
 		DelegateClear = &ClearDel;
 	}
-
 	
 	void Add(const T& Value)
 	{
@@ -37,17 +36,52 @@ public:
 		if(DelegateAdd)
 			DelegateAdd->Broadcast(Value);
 	}
+	
+	void InsertAt(int32 Index, const T& Value)
+	{
+		if (Index >= 0 && Index <= Array.Num())
+		{
+			Array.Insert(Value, Index);
+			if (DelegateAdd)
+				DelegateAdd->Broadcast(Value);
+		}
+	}
+	
+	bool Pop()
+	{
+		if (!Array.IsEmpty())
+		{
+			T RemovedValue = Array.Last();
+			Array.Pop();
+			if (DelegateRemoved)
+				DelegateRemoved->Broadcast(RemovedValue);
+			return true;
+		}
+		return false;
+	}
+	
+	bool Swap(const int32 FirstIndex, const int32 SecondIndex)
+	{
+		if (ValidIndex(FirstIndex) && ValidIndex(SecondIndex))
+		{
+			Array.Swap(FirstIndex, SecondIndex);
+			if (DelegateSet)
+				DelegateSet->Broadcast(Array);
+			return true;
+		}
+		return false;
+	}
 
 	T* At(int Index)
 	{
-		if(Index >= 0 && Index < Array.Num())
+		if(ValidIndex())
 		{
 			return &Array[Index];
 		}
 		return nullptr;
 	}
 
-	void Remove(const T& Value)
+	bool Remove(const T& Value)
 	{
 		const int32 Index = Array.IndexOfByPredicate([Value](const T& Element)
 		{
@@ -59,7 +93,10 @@ public:
 			Array.RemoveAt(Index);
 			if(DelegateRemoved)
 				DelegateRemoved->Broadcast(Value);
+
+			return true;
 		}
+		return false;
 	}
 
 	void Clear()
@@ -90,7 +127,7 @@ public:
 
 	bool SetAt(const int Index, const T& Value)
 	{
-		if(Index < 0 || Index >= Array.Num())
+		if(!ValidIndex(Index))
 		{
 			return false;
 		}
@@ -100,5 +137,20 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	bool IsEmpty()
+	{
+		return Array.IsEmpty();
+	}
+
+	T& Last ()
+	{
+		return Array.Last();
+	}
+private:
+	bool ValidIndex(int32 Index) const
+	{
+		return Index >= 0 && Index < Array.Num();
 	}
 };

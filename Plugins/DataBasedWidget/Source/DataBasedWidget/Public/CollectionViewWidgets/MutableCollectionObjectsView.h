@@ -36,7 +36,10 @@ class DATABASEDWIDGET_API UWPropGenMutableCollectionObjectsView : public UUserWi
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeDestruct() override;
+	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
 	virtual void SetObjectManager(UTkManagerObjectsArray* ManagerObjectsArray);
+	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
+	virtual void ClearManager();
 
 	UFUNCTION()
 	virtual void OnObjectAdded(UObject* Object);
@@ -46,6 +49,8 @@ public:
 	virtual void OnInit(const TArray<UObject*>& Objects);
 	UFUNCTION()
 	virtual void OnCleared();
+	UFUNCTION()
+	virtual void OnObjectChanged(const UObject* Object);
 	
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 

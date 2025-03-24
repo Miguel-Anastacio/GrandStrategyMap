@@ -1,10 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 
 #include "CollectionViewWidgets/MutableCollectionStructsView.h"
-
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
-#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-#include "CollectionViewWidgets/MutableCollectionViewDataTable.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #include "Components/ListView.h"
 #include "ContainerWrappers/ManagerStructsArray.h"
@@ -92,7 +89,7 @@ void UWPropGenMutableCollectionStructsView::OnCleared()
 
 void UWPropGenMutableCollectionStructsView::OnStructChanged(const FInstancedStruct& Prev, const FInstancedStruct& New)
 {
-	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
+	if(const UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
 		const int32 Index = StructWrappers.IndexOfByPredicate([Prev](const UPropGenStructWrapper* Element)
 		{
@@ -104,12 +101,10 @@ void UWPropGenMutableCollectionStructsView::OnStructChanged(const FInstancedStru
 			UPropGenStructWrapper* Wrapper = StructWrappers[Index];
 			UUserWidget* EntryWidget = View->GetEntryWidgetFromItem(Wrapper);
 			Wrapper->SetStructInstance(New);
-			// IUserObjectListEntry::Execute_OnListItemObjectSet(EntryWidget, Wrapper);
 			if(UWPropGenGeneric* Widget = Cast<UWPropGenGeneric>(EntryWidget))
 			{
 				Widget->InitFromStruct(New);
 			}
-			// View->RequestRefresh();
 		}
 	}
 }

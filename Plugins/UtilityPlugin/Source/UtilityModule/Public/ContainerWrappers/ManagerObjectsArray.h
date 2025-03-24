@@ -9,13 +9,14 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArrayChangedSignature, UObject*, Object);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArraySetSignature, const TArray<UObject*>&, Array);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnArrayClearedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObjectChanged, const UObject*, Object);
 UCLASS(BlueprintType, Blueprintable,DisplayName=ManagerObjectsArray)
 class UTILITYMODULE_API UTkManagerObjectsArray : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UTkManagerObjectsArray(const FObjectInitializer& ObjectInitializer);
+	explicit UTkManagerObjectsArray(const FObjectInitializer& ObjectInitializer);
 	virtual void PostInitProperties() override;
 
 	// BP exposed methods to call TArrayWrapper methods
@@ -24,9 +25,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=AddMultiple)
 	void AddMultiple_BP(const TArray<UObject*>& Multiple);
-	
+
+	// remove should give feedback
 	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=Remove)
-	void Remove_BP(UObject* Object);
+	bool Remove_BP(UObject* Object);
 	
 	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=Clear)
 	void Clear_BP();
@@ -36,19 +38,30 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=SetArray)
 	void SetArray_BP(const TArray<UObject*>& NewObjects);
+	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=SetAt)
+	void SetAt_BP(const int Index, UObject* Object);
+	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=SetAt)
+	UObject* At_BP(const int Index);
+	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=Last)
+	UObject* Last_BP();
+	UFUNCTION(BlueprintCallable, Category=ManagerObjectsArray, DisplayName=IsEmpty)
+	bool IsEmpty() const;
 
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category=ManagerObjectsArray)
 	FOnArrayChangedSignature OnObjectAdded;
 	
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category=ManagerObjectsArray)
 	FOnArrayChangedSignature OnObjectRemoved;
 
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category=ManagerObjectsArray)
 	FOnArraySetSignature OnArraySet;
 
-	UPROPERTY(BlueprintAssignable, Category=ManagerObjectsArray)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category=ManagerObjectsArray)
 	FOnArrayClearedSignature OnArrayCleared;
-	
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category=ManagerObjectsArray)
+	FOnObjectChanged OnObjectChanged;
+
 protected:
 	TArrayWrapper<UObject*, FOnArrayChangedSignature, FOnArraySetSignature, FOnArrayClearedSignature> ArrayWrapper;
+
 };

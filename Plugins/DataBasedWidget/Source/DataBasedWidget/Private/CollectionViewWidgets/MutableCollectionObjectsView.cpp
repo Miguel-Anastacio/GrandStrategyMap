@@ -4,6 +4,7 @@
 #include "CollectionViewWidgets/MutableCollectionViewDataTable.h"
 #include "Components/ListView.h"
 #include "ContainerWrappers/ManagerObjectsArray.h"
+#include "GenericWidget/GenericStructWidget.h"
 
 void UWPropGenMutableCollectionObjectsView::NativeOnInitialized()
 {
@@ -19,11 +20,12 @@ void UWPropGenMutableCollectionObjectsView::SetObjectManager(UTkManagerObjectsAr
 		ObjectManager->OnObjectRemoved.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectRemoved);
 		ObjectManager->OnArraySet.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnInit);
 		ObjectManager->OnArrayCleared.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnCleared);
+		ObjectManager->OnObjectChanged.AddDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectChanged);
 		OnInit(ObjectManager->GetArray_BP());
 	}
 }
 
-void UWPropGenMutableCollectionObjectsView::NativeDestruct()
+void UWPropGenMutableCollectionObjectsView::ClearManager()
 {
 	if (ObjectManager.IsValid())
 	{
@@ -31,8 +33,14 @@ void UWPropGenMutableCollectionObjectsView::NativeDestruct()
 		ObjectManager->OnObjectRemoved.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectRemoved);
 		ObjectManager->OnArraySet.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnInit);
 		ObjectManager->OnArrayCleared.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnCleared);
+		ObjectManager->OnObjectChanged.RemoveDynamic(this, &UWPropGenMutableCollectionObjectsView::OnObjectChanged);
+		ObjectManager = nullptr;
 	}
-    
+}
+
+void UWPropGenMutableCollectionObjectsView::NativeDestruct()
+{
+	ClearManager();
 	Super::NativeDestruct();
 }
 
@@ -65,6 +73,18 @@ void UWPropGenMutableCollectionObjectsView::OnCleared()
 	if(UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
 	{
 		View->ClearListItems();
+	}
+}
+
+void UWPropGenMutableCollectionObjectsView::OnObjectChanged(const UObject* Object)
+{
+	if(const UListView* View = Cast<UListView>(Execute_GetCollectionContainer(this)))
+	{
+		UUserWidget* EntryWidget = View->GetEntryWidgetFromItem(Object);
+		if(UWPropGenGeneric* GenericWidget = Cast<UWPropGenGeneric>(EntryWidget))
+		{
+			GenericWidget->InitFromObject(Object);
+		}
 	}
 }
 
