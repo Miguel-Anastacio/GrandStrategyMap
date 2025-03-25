@@ -1,7 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "CollectionViewWidgets/WidgetCollectionInterface.h"
 #include "Blueprint/WidgetTree.h"
+#if WITH_EDITOR
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
+#endif
 #include "Components/ListView.h"
 
 #if WITH_EDITOR

@@ -3,7 +3,9 @@
 #include "CollectionViewWidgets/StaticCollectionViewDataTable.h"
 #include "GenericWidget/GenericStructWidget.h"
 #include "GenericWidget/DataDrivenUserWidgetInterface.h"
+#if WITH_EDITOR
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
+#endif
 
 void UWPropGenStaticCollectionViewDataTable::NativeOnInitialized()
 {
@@ -37,17 +39,9 @@ void UWPropGenStaticCollectionViewDataTable::SetWidgetItemClass_Implementation(T
 void UWPropGenStaticCollectionViewDataTable::SetDataTable_Implementation(UDataTable* NewDataTable)
 {
 	DataTable = NewDataTable;
-	
-	if(FApp::IsGame())
-	{
-		// Init();
-	}
-	else
-	{
 #if WITH_EDITOR
 	RefreshContainer();
 #endif
-	}
 }
 
 #if WITH_EDITOR

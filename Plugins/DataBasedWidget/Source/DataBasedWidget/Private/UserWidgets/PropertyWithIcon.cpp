@@ -5,6 +5,7 @@
 #include "BlueprintLibrary/PropertyUtilityFunctionLibrary.h"
 #include "Components/RichTextBlock.h"
 #include "Components/Image.h"
+#include "Engine/Texture2D.h"
 
 void UWPropGenPropertyWithIcon::SetValues(const FText& LabelText, const FText& ValueText) const
 {

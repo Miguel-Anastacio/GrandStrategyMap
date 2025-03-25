@@ -40,7 +40,7 @@ public:
 	virtual void ClearManager();
 
 protected:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category=Data)
 	TWeakObjectPtr<UTkManagerStructsArray> StructManager;
 
 	UPROPERTY()

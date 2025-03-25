@@ -28,14 +28,15 @@ protected:
 #if WITH_EDITOR
 	UFUNCTION(Blueprintable, CallInEditor, Category = VerticalBoxDataTable)
 	void RefreshContainer() const;
-#endif
-	
-	virtual void Init();
 	
 	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		Container = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName("Container"));;
 	};
+#endif
+	
+	virtual void Init();
+	
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = VerticalBoxDataTable)
 	class UVerticalBox* Container;

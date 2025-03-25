@@ -1,6 +1,6 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "GenericWidget/GenericWidgetDataMap.h"
-
+#if WITH_EDITOR
 void UPropGenWidgetMapDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -109,3 +109,4 @@ const UClass* UPropGenWidgetMapDataAsset::GetClassAsUClass() const
 		return nullptr;
 	return Cast<UClass>(ClassType);
 }
+#endif

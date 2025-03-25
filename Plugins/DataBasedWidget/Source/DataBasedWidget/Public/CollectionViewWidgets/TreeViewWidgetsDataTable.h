@@ -19,10 +19,12 @@ public:
 	};
 
 protected:
+#if WITH_EDITOR
 	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		TreeView = Tree->ConstructWidget<UTreeView>(UTreeView::StaticClass(), FName("TreeView"));;
 	};
+#endif
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewDataTable)
 	class UTreeView* TreeView;

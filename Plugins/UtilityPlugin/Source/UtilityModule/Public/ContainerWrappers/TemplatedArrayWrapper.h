@@ -74,7 +74,7 @@ public:
 
 	T* At(int Index)
 	{
-		if(ValidIndex())
+		if(ValidIndex(Index))
 		{
 			return &Array[Index];
 		}

@@ -91,7 +91,7 @@ void UWPropGenGeneric::InitFromObject(const UObject* Object)
 		}
 	}
 }
-
+#if WITH_EDITOR
 const UStruct* UWPropGenGeneric::GetDataClass() const
 {
 	if(!DataAssetWidgetMap)
@@ -99,7 +99,7 @@ const UStruct* UWPropGenGeneric::GetDataClass() const
 	
 	return DataAssetWidgetMap->GetDataClass();
 }
-
+#endif
 void UWPropGenGeneric::InitFromData(const UStruct* ClassType, const void* Data)
 {
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)
@@ -134,7 +134,8 @@ void UWPropGenGeneric::InitializeWidgetFields()
 		FName FieldName(*Property->GetAuthoredName());
 		for(const auto& Widget : MainPanel->GetAllChildren())
 		{
-			if(FieldName == Widget->GetCategoryName())
+			// TODO - FIX THIS (widget names cannot be edited)
+			if(FieldName == Widget->GetName())
 			{
 				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
 				{

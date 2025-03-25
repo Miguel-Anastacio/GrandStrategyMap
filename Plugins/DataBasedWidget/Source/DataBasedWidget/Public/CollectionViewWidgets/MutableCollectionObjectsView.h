@@ -24,7 +24,7 @@ public:
 		return StructInstance;
 	}
 protected:
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"), Category=Data)
 	FInstancedStruct StructInstance;
 };
 
@@ -55,7 +55,7 @@ public:
 	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
 
 protected:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category=Data)
 	TWeakObjectPtr<UTkManagerObjectsArray> ObjectManager;
 	
 };

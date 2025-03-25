@@ -18,10 +18,12 @@ public:
 		return TileView;
 	};
 protected:
+#if WITH_EDITOR
 	virtual void SetRootWidget(UWidgetTree* Tree) override
 	{
 		TileView = Tree->ConstructWidget<UTileView>(UTileView::StaticClass(), FName("TileView"));;
 	};
+#endif
 	
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = ListViewDataTable)
 	UTileView* TileView;

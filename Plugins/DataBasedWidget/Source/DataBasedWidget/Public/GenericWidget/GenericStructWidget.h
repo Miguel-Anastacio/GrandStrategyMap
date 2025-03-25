@@ -11,6 +11,7 @@
 class UPropGenWidgetMapDataAsset;
 class UWCustomEditableText;
 class UVerticalBox;
+class UPropGenWidgetMapDataAsset;
 /**
  * A generic widget class that can display structured data in a grid layout
  * This widget can be initialized from either structured data or UObjects

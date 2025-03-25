@@ -2,9 +2,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InstancedStruct.h"
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "UObject/Interface.h"
+#include "Templates/SubclassOf.h"
 #include "WidgetCollectionInterface.generated.h"
 
 class UWidgetTree;

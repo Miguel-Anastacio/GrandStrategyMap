@@ -2,7 +2,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
+#include "Engine/DataAsset.h"
+#include "Blueprint/UserWidget.h"
+#include "Templates/SubclassOf.h"
 #include "GenericWidgetDataMap.generated.h"
 
 UCLASS(BlueprintType, DisplayName=WidgetMapDataAsset)
@@ -20,6 +22,7 @@ public:
 	const UScriptStruct* GetClassAsScriptStruct() const;
 	const UClass* GetClassAsUClass() const;
 #endif
+
 	// Widget used by default
 	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
 	TSubclassOf<UUserWidget> DefaultWidgetType;
@@ -29,16 +32,16 @@ public:
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
 
 protected:
-#if WITH_EDITOR
+# if WITH_EDITOR
 	// UObject interface
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	// End of UObject interface
 	
 	UFUNCTION()
 	TArray<FString> GetPropertyNameOptions() const;
-#endif
 	void FillPropertyWidgetMap(const UStruct* BaseClass);
 	void SetClass();
+#endif
 	
 	UPROPERTY(Category=StructWidgetMap, EditAnywhere, meta=(InlineEditConditionToggle))
     bool bUObjectBased = true;
@@ -50,5 +53,4 @@ protected:
 
 	UPROPERTY()
 	UStruct* ClassType = nullptr;
-	
 };

@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "DataBasedWidget.h"
-#include "AssetToolsModule.h"
 #define LOCTEXT_NAMESPACE "FDataBasedWidgetModule"
 DEFINE_LOG_CATEGORY(LogDataBasedWidget);
 void FDataBasedWidgetModule::StartupModule()
