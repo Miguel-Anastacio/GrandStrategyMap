@@ -59,10 +59,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "AnastacioUtilityToolkit",
-			"Enabled": true
-		},
-		{
 			"Name": "PropertyDisplayGenerator",
 			"Enabled": true
 		}

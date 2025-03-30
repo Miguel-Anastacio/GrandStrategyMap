@@ -16,6 +16,31 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "UtilityModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			]
+		},
+		{
+			"Name": "UtilityModuleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		},
+		{
+			"Name": "UtilityTestModule",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		},
+		{
 			"Name": "DataBasedWidget",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
@@ -30,10 +55,6 @@
 	"Plugins": [
 		{
 			"Name": "StructUtils",
-			"Enabled": true
-		},
-		{
-			"Name": "AnastacioUtilityToolkit",
 			"Enabled": true
 		}
 	]
