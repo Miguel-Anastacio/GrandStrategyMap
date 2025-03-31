@@ -24,7 +24,7 @@
 				"UMG"
 			]
 		},
-		{
+		{ 
 			"Name": "UtilityModuleEditor",
 			"Type": "Editor",
 			"LoadingPhase": "PostEngineInit",
