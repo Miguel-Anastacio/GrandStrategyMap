@@ -13,7 +13,8 @@ public:
     
     UFUNCTION(CallInEditor, Category=CreateWidgetFromAsset)
     virtual void CreateWidgetFromObject(
-        UPARAM(meta=(MustImplement="UserObjectListEntry")) TSubclassOf<UUserWidget> DefaultWidgetForFields = nullptr) const ;
+        UPARAM( meta=(AllowedClasses="UserWidget", MustImplement="/Script/DataBasedWidget.PropGenDataDrivenUserWidgetInterface"))
+        TSubclassOf<UUserWidget> DefaultWidgetForFields = nullptr) const ;
 
 protected:    
     

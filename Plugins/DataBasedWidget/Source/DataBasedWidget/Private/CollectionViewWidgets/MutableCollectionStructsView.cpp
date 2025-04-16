@@ -14,6 +14,15 @@ void UWPropGenMutableCollectionStructsView::NativeOnInitialized()
 
 void UWPropGenMutableCollectionStructsView::SetManager(UTkManagerStructsArray* ManagerStructsArray)
 {
+	if(ManagerStructsArray == StructManager)
+		return;
+	
+	// clear ref to prev StructManager
+	if(StructManager.IsValid())
+	{
+		ClearManager();
+	}
+	
 	StructManager = ManagerStructsArray;
 	if(StructManager.IsValid())
 	{

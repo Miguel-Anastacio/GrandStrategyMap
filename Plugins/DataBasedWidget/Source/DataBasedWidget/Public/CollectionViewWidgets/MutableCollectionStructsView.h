@@ -22,6 +22,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
 	virtual void SetManager(UTkManagerStructsArray* ManagerStructsArray);
 
+	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
+	virtual void ClearManager();
+	
 	UFUNCTION()
 	virtual void OnStructAdded(const FInstancedStruct& DataStruct);
 	UFUNCTION()
@@ -33,11 +36,7 @@ public:
 	UFUNCTION()
 	virtual void OnStructChanged(const FInstancedStruct& Prev, const FInstancedStruct& New);
 	
-	
-	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
-
-	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
-	virtual void ClearManager();
+	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;;
 
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category=Data)

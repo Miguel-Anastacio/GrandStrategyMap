@@ -27,7 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))
 	TSubclassOf<UUserWidget> DefaultWidgetType;
 	
-	UPROPERTY(Category = StructWidgetMap, EditAnywhere, meta=(AllowedClasses="UserWidget", MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface",
+	UPROPERTY(Category = StructWidgetMap, EditAnywhere, meta=(AllowedClasses="UserWidget", MustImplement="/Script/DataBasedWidget.PropGenDataDrivenUserWidgetInterface",
 																GetKeyOptions="GetPropertyNameOptions"))
 	TMap<FName, TSubclassOf<UUserWidget>> PropertyWidgetMap;
 

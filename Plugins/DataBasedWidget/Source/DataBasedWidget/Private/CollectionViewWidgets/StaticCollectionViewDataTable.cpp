@@ -10,23 +10,28 @@
 void UWPropGenStaticCollectionViewDataTable::NativeOnInitialized()
 {
 	Init();
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 }
 
 void UWPropGenStaticCollectionViewDataTable::Init()
 {
 	const TArray<FInstancedStruct> DataTableItems = UAtkDataManagerFunctionLibrary::GetArrayOfInstancedStructsSoft(DataTable);
-	if(UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
+	if(const UVerticalBox* VerticalBox = Cast<UVerticalBox>(Execute_GetCollectionContainer(this)))
 	{
-		VerticalBox->ClearChildren();
-		for(FInstancedStruct DataStruct : DataTableItems)
+		int Index = 0;
+		TArray<UWidget*> Widgets;
+		WidgetTree->GetAllWidgets(Widgets);
+		for(UWidget* Widget : Widgets)
 		{
-			UUserWidget* Widget = CreateWidget<UUserWidget>(this, WidgetClass);
 			if(UWPropGenGeneric* GenericStructWidget = Cast<UWPropGenGeneric>(Widget))
 			{
-				GenericStructWidget->InitFromStruct(DataStruct);
+				if(Index >= DataTableItems.Num())
+				{
+					return;
+				}
+				GenericStructWidget->InitFromStruct(DataTableItems[Index]);
+				Index++;
 			}
-			VerticalBox->AddChildToVerticalBox(Widget);
 		}
 	}
 }

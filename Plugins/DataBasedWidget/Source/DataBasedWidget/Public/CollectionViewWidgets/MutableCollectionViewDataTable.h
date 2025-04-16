@@ -12,17 +12,7 @@ class DATABASEDWIDGET_API UWPropGenMutableCollectionViewDataTable : public UWPro
 	GENERATED_BODY()
 
 public:
-	virtual void NativeOnInitialized() override;
-	
-	// Begin IPropGenWidgetDataTableInterface
+	// When calling this the Manager reference will be cleared
+	// The list will just display thc contents of the DT
 	virtual void SetDataTable_Implementation(UDataTable* NewDataTable) override;
-	// End IPropGenWidgetDataTableInterface
-	
-	virtual void SetManager(UTkManagerStructsArray* ManagerStructsArray) override;
-
-	TArray<FInstancedStruct> GetDataTableEntries() const;
-protected:
-	UPROPERTY(EditAnywhere, Category=CollectionViewDataTable, BlueprintReadWrite)
-	TSoftObjectPtr<UDataTable> DataTable;
-	
 };
