@@ -3,7 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "MapObject.h"
 #include "Components/ActorComponent.h"
 #include "MapDataComponent.generated.h"
@@ -21,25 +26,25 @@ public:
     TMap<FColor, int32> GetLookUpTable() const;
 
     /** Gets the province data map. */
-    FORCEINLINE TMap<int32, FInstancedStruct>* GetProvinceDataMap() const;
+    FORCEINLINE TMap<int32, FInstancedStruct> *GetProvinceDataMap() const;
 
     /** Gets the province ID. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    int32 GetTileID(const FColor& Color, bool& bOutResult) const;
+    int32 GetTileID(const FColor &Color, bool &bOutResult) const;
 
     /** Gets province data by name. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Map Data")
-    bool GetTileData(int32 ID, FInstancedStruct& Out_Data) const;
-    
+    bool GetTileData(int32 ID, FInstancedStruct &Out_Data) const;
+
     /** Gets province data by id. */
-    FInstancedStruct* GetTileData(int32 ID) const;
+    FInstancedStruct *GetTileData(int32 ID) const;
 
-    bool SetTileData(const FInstancedStruct& NewData, int32 ID) const;
+    bool SetTileData(const FInstancedStruct &NewData, int32 ID) const;
 
-    void SetMapObject(UMapObject* MapObject);
-    int* FindId(const FColor& Color) const;
+    void SetMapObject(UMapObject *MapObject);
+    int *FindId(const FColor &Color) const;
     FColor GetColor(int32 ID) const;
-    
+
 protected:
     TWeakObjectPtr<class UMapObject> MapObjectRef;
 };

@@ -2,7 +2,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "WidgetCollectionInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
@@ -19,30 +24,30 @@ class DATABASEDWIDGET_API UWPropGenMutableCollectionStructsView : public UUserWi
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeDestruct() override;
-	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
-	virtual void SetManager(UTkManagerStructsArray* ManagerStructsArray);
+	UFUNCTION(BlueprintCallable, Category = MutableCollectionStructsView)
+	virtual void SetManager(UTkManagerStructsArray *ManagerStructsArray);
 
-	UFUNCTION(BlueprintCallable, Category=MutableCollectionStructsView)
+	UFUNCTION(BlueprintCallable, Category = MutableCollectionStructsView)
 	virtual void ClearManager();
-	
+
 	UFUNCTION()
-	virtual void OnStructAdded(const FInstancedStruct& DataStruct);
+	virtual void OnStructAdded(const FInstancedStruct &DataStruct);
 	UFUNCTION()
-	virtual void OnStructRemoved(const FInstancedStruct& DataStruct);
+	virtual void OnStructRemoved(const FInstancedStruct &DataStruct);
 	UFUNCTION()
-	virtual void OnInit(const TArray<FInstancedStruct>& Structs);
+	virtual void OnInit(const TArray<FInstancedStruct> &Structs);
 	UFUNCTION()
 	virtual void OnCleared();
 	UFUNCTION()
-	virtual void OnStructChanged(const FInstancedStruct& Prev, const FInstancedStruct& New);
-	
-	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;;
+	virtual void OnStructChanged(const FInstancedStruct &Prev, const FInstancedStruct &New);
+
+	virtual void SetWidgetItemClass_Implementation(TSubclassOf<UUserWidget> WidgetClass) override;
+	;
 
 protected:
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category=Data)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = Data)
 	TWeakObjectPtr<UTkManagerStructsArray> StructManager;
 
 	UPROPERTY()
-	TArray<class UPropGenStructWrapper*> StructWrappers;
-
+	TArray<class UPropGenStructWrapper *> StructWrappers;
 };

@@ -11,7 +11,12 @@
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/SListView.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "SlateWidgets/DropDownSelectorWidget.h"
 #include "SlateWidgets/InstancedStructList.h"
@@ -22,73 +27,69 @@
 class SCustomInstancedStructListRow : public SInstancedStructListRow
 {
 public:
-
     SLATE_BEGIN_ARGS(SCustomInstancedStructListRow) {}
-    SLATE_ARGUMENT(const TSet<FName>*, PropertiesNotEditable)
-    SLATE_ARGUMENT(const TSet<FName>*, PropertiesWithDropDown)
+    SLATE_ARGUMENT(const TSet<FName> *, PropertiesNotEditable)
+    SLATE_ARGUMENT(const TSet<FName> *, PropertiesWithDropDown)
     SLATE_ARGUMENT(TSharedPtr<FInstancedStruct>, Item)
     SLATE_ARGUMENT(TWeakObjectPtr<UMapObject>, MapObject)
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
     SLATE_END_ARGS()
 
 public:
-     virtual TSharedRef<SWidget> DisplayDropdownProperty(const FProperty* Property)
+    virtual TSharedRef<SWidget> DisplayDropdownProperty(const FProperty *Property)
     {
-         const TArray<FName> AvailableTagsOfType = MapObject->GetVisualPropertiesNamesOfType(Property->GetFName());
-         return SNew(SBox)
-         .Padding(FMargin(4.0f, 0.0f))
-         .VAlign(VAlign_Center)
-         [
-             SNew(SDropDownSelectorWidget)
-             .AvailableTags(AvailableTagsOfType)
-             .OnTagChanged_Lambda([this](const FName& Name, const FName& NewTag)
-             {
+        const TArray<FName> AvailableTagsOfType = MapObject->GetVisualPropertiesNamesOfType(Property->GetFName());
+        return SNew(SBox)
+            .Padding(FMargin(4.0f, 0.0f))
+            .VAlign(VAlign_Center)
+                [SNew(SDropDownSelectorWidget)
+                     .AvailableTags(AvailableTagsOfType)
+                     .OnTagChanged_Lambda([this](const FName &Name, const FName &NewTag)
+                                          {
                  if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
                  {
                      ItemChanged.ExecuteIfBound(*Item);
-                 }
-             })
-             .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-             .PropertyName(Property->GetFName())
-         ];
+                 } })
+                     .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
+                     .PropertyName(Property->GetFName())];
     }
 
-    void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
+    void Construct(const FArguments &InArgs, const TSharedRef<STableViewBase> &InOwnerTableView)
     {
-        if(InArgs._PropertiesNotEditable)
+        if (InArgs._PropertiesNotEditable)
         {
             NotEditableProperties = *(InArgs._PropertiesNotEditable);
         }
-        if(InArgs._PropertiesWithDropDown)
+        if (InArgs._PropertiesWithDropDown)
         {
             PropertiesWithDropDown = *(InArgs._PropertiesWithDropDown);
         }
         MapObject = InArgs._MapObject;
         SInstancedStructListRow::Construct(
-        SInstancedStructListRow::FArguments().Item(InArgs._Item).OnItemChanged(InArgs._OnItemChanged),
-        InOwnerTableView);
+            SInstancedStructListRow::FArguments().Item(InArgs._Item).OnItemChanged(InArgs._OnItemChanged),
+            InOwnerTableView);
     }
 
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override
+    virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName &ColumnName) override
     {
         // iterate struct properties and generate a widget for it
         for (TFieldIterator<FProperty> It(Item->GetScriptStruct()); It; ++It)
         {
-            const FProperty* Property = *It;
+            const FProperty *Property = *It;
             const FName PropertyName = Property->GetFName();
             if (ColumnName != PropertyName)
                 continue;
-            else if(IsPropertyDropDown(PropertyName))
+            else if (IsPropertyDropDown(PropertyName))
             {
                 return DisplayDropdownProperty(Property);
             }
-            else if(IsPropertyEditable(PropertyName))
+            else if (IsPropertyEditable(PropertyName))
             {
                 return DisplayEditableProperty(Property);
             }
-            else 
+            else
             {
-               return DisplayNotEditableProperty(Property);
+                return DisplayNotEditableProperty(Property);
             }
         }
 
@@ -96,20 +97,20 @@ public:
         return SNullWidget::NullWidget;
     }
 
-    bool IsPropertyEditable(const FName& PropertyName) const 
+    bool IsPropertyEditable(const FName &PropertyName) const
     {
-         // if(NotEditableProperties)
-         //     return true;
+        // if(NotEditableProperties)
+        //     return true;
         return !NotEditableProperties.Contains(PropertyName);
     }
 
-    bool IsPropertyDropDown(const FName& PropertyName) const 
-     {
-         // // if(!PropertiesWithDropDown)
-         // return false;
-         return PropertiesWithDropDown.Contains(PropertyName);
-     }
-    
+    bool IsPropertyDropDown(const FName &PropertyName) const
+    {
+        // // if(!PropertiesWithDropDown)
+        // return false;
+        return PropertiesWithDropDown.Contains(PropertyName);
+    }
+
 protected:
     TSet<FName> NotEditableProperties;
     TSet<FName> PropertiesWithDropDown;
@@ -125,27 +126,27 @@ class SCustomInstancedStructList : public SInstancedStructList
 {
 public:
     SLATE_BEGIN_ARGS(SCustomInstancedStructList)
-        : _ListSource(nullptr)
-        , _StructTypes()
-        , _ItemHeight(20.0f)
-    {}
+        : _ListSource(nullptr), _StructTypes(), _ItemHeight(20.0f)
+    {
+    }
     SLATE_DEFAULT_SLOT(FArguments, Content)
-    SLATE_ARGUMENT(const TArray<TSharedPtr<FInstancedStruct>>*, ListSource)
-    SLATE_ARGUMENT(const TArray<UScriptStruct*>*, StructTypes)
+    SLATE_ARGUMENT(const TArray<TSharedPtr<FInstancedStruct>> *, ListSource)
+    SLATE_ARGUMENT(const TArray<UScriptStruct *> *, StructTypes)
     SLATE_ARGUMENT(float, ItemHeight)
-    SLATE_ARGUMENT(const TSet<FName>*, NotEditableProperties)
-    SLATE_ARGUMENT(const TSet<FName>*, PropertiesWithDropdown)
+    SLATE_ARGUMENT(const TSet<FName> *, NotEditableProperties)
+    SLATE_ARGUMENT(const TSet<FName> *, PropertiesWithDropdown)
     SLATE_ARGUMENT(TWeakObjectPtr<UMapObject>, MapObject)
-        
+
     // called when a struct is edited by the user
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
     SLATE_EVENT(FSelectionChanged, OnSelectionChanged)
     SLATE_END_ARGS()
 
     SCustomInstancedStructList() : SInstancedStructList()
-    {}
+    {
+    }
 
-    void Construct(const FArguments& InArgs)
+    void Construct(const FArguments &InArgs)
     {
         NotEditableProperties = *(InArgs._NotEditableProperties);
         PropertiesWithDropDown = *(InArgs._PropertiesWithDropdown);
@@ -153,13 +154,13 @@ public:
         OnSelectionChanged = InArgs._OnSelectionChanged;
         SInstancedStructList::Construct(
             SInstancedStructList::FArguments()
-            .ItemHeight(InArgs._ItemHeight)
-            .ListSource(InArgs._ListSource)
-            .StructTypes(InArgs._StructTypes)
-            .OnItemChanged(InArgs._OnItemChanged));
+                .ItemHeight(InArgs._ItemHeight)
+                .ListSource(InArgs._ListSource)
+                .StructTypes(InArgs._StructTypes)
+                .OnItemChanged(InArgs._OnItemChanged));
     }
     // override if you wish to change the SWidget used for the Row
-    virtual TSharedRef<class ITableRow> OnGenerateRow(TSharedPtr<FInstancedStruct> Item, const TSharedRef<STableViewBase >& OwnerTable) override
+    virtual TSharedRef<class ITableRow> OnGenerateRow(TSharedPtr<FInstancedStruct> Item, const TSharedRef<STableViewBase> &OwnerTable) override
     {
         return SNew(SCustomInstancedStructListRow, OwnerTable)
             .Item(Item)
@@ -172,11 +173,11 @@ public:
     virtual void HandleSelectionChanged(TSharedPtr<FInstancedStruct> Selection, ESelectInfo::Type SelectInfo) override
     {
         SInstancedStructList::HandleSelectionChanged(Selection, SelectInfo);
-        if(!Selection.IsValid())
+        if (!Selection.IsValid())
             return;
         bool bOutResult;
         const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*Selection, "ID", bOutResult);
-        if(bOutResult)
+        if (bOutResult)
             OnSelectionChanged.ExecuteIfBound(ID);
     }
 

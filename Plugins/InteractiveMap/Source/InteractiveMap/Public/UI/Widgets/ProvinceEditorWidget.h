@@ -4,12 +4,17 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Types/SlateEnums.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "ProvinceEditorWidget.generated.h"
 
 class UCustomButtonWidget;
 class UEditableText;
-class URichTextBlock; 
+class URichTextBlock;
 class UWCustomEditableText;
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UProvinceEditorWidget : public UUserWidget
@@ -24,7 +29,7 @@ public:
 	 * @param provinceID The unique identifier of the province.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-	void SetProvinceData(const FInstancedStruct& Data, int ProvinceID);
+	void SetProvinceData(const FInstancedStruct &Data, int ProvinceID);
 
 	/**
 	 * Sets the reference to the interactive map actor.
@@ -32,27 +37,26 @@ public:
 	 * @param map Pointer to the interactive map actor.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Province Editor")
-	void SetInteractiveMapReference(class AClickableMap* Map);
+	void SetInteractiveMapReference(class AClickableMap *Map);
 
 protected:
 	/**
 	 * Overrides the initialization method to perform custom initialization tasks.
 	 */
 	virtual void NativeOnInitialized() override;
-	
+
 protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	class UWPropGenGeneric* ProvinceDataWidget;
+	class UWPropGenGeneric *ProvinceDataWidget;
 
 	UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Province Editor")
-	class UWPropGenGeneric* OceanTileDataWidget;
-	
+	class UWPropGenGeneric *OceanTileDataWidget;
+
 	// The unique identifier of the currently selected province.
-	int ProvinceSelectedID; 
+	int ProvinceSelectedID;
 	// Data structure containing information about the currently selected province.
-	FInstancedStruct ProvinceSelectedData; 
+	FInstancedStruct ProvinceSelectedData;
 	// Pointer to the interactive map actor used as a reference for this component.
 	UPROPERTY()
-	class AClickableMap* GameMapReference; 
-
+	class AClickableMap *GameMapReference;
 };

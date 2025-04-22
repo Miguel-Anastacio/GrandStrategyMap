@@ -57,7 +57,6 @@ public:
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReplaceColorComputeShaderLibrary_AsyncExecutionCompleted, const int, Value);
 
-
 UCLASS() // Change the _API to match your project
 class SHADERSMODULE_API UReplaceColorComputeShaderLibrary_AsyncExecution : public UBlueprintAsyncActionBase
 {
