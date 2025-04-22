@@ -1,3 +1,4 @@
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 
 #include "AssetDefinitionDefault.h"

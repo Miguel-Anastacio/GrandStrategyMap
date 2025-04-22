@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "DataBasedWidget.h"
 #define LOCTEXT_NAMESPACE "FDataBasedWidgetModule"

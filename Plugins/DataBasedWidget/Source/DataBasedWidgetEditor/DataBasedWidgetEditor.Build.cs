@@ -27,7 +27,7 @@ public class DataBasedWidgetEditor : ModuleRules
 			{
 				// ... add other public dependencies that you statically link with here ...
 				"Core",
-				"StructUtils", 
+				 
 			}
 			);
 		
@@ -42,7 +42,8 @@ public class DataBasedWidgetEditor : ModuleRules
 				"UMG", 
 				"UMGEditor",
 				"DataBasedWidget", 
-				"UtilityModule"
+				"UtilityModule",
+				"StructUtils"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -28,7 +28,7 @@ public class DataBasedWidget : ModuleRules
 				"Core",
 				// ... add other public dependencies that you statically link with here ...
 				"UtilityModule",
-				"StructUtils"
+				
 			}
 		);
 			
@@ -40,7 +40,8 @@ public class DataBasedWidget : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"UMG", 
+				"UMG",
+				"StructUtils"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
