@@ -41,10 +41,6 @@ public:
 		SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<int>, OutputBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FColourReplace>, ColorReplacementDataBuffer)
 
-		// SHADER_PARAMETER_RDG_BUFFER_SRV(Buffer<int>, Input)
-		// SHADER_PARAMETER_RDG_BUFFER_UAV(RWBuffer<int>, Output)
-		//
-
 	END_SHADER_PARAMETER_STRUCT()
 
 public:
@@ -60,13 +56,6 @@ public:
 		FGlobalShader::ModifyCompilationEnvironment(Parameters, OutEnvironment);
 
 		const FPermutationDomain PermutationVector(Parameters.PermutationId);
-
-		/*
-		* Here you define constants that can be used statically in the shader code.
-		* Example:
-		*/
-		// OutEnvironment.SetDefine(TEXT("MY_CUSTOM_CONST"), TEXT("1"));
-
 		/*
 		* These defines are used in the thread count section of our shader
 		*/

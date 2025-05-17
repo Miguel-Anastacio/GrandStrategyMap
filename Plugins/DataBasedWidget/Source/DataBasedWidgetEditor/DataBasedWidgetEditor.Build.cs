@@ -43,7 +43,6 @@ public class DataBasedWidgetEditor : ModuleRules
 				"UMGEditor",
 				"DataBasedWidget", 
 				"UtilityModule",
-				"StructUtils"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -22,7 +22,6 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"UMG",
-				"StructUtils"
 			],
 			"PlatformAllowList": [
 				"Win64"
@@ -44,7 +43,6 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"StructUtils"
 			],
 			"PlatformAllowList": [
 				"Win64"
@@ -57,12 +55,6 @@
 			"PlatformAllowList": [
 				"Win64"
 			]
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "StructUtils",
-			"Enabled": true
 		}
 	]
 }
