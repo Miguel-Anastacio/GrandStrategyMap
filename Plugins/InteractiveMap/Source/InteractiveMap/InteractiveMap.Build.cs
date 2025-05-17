@@ -33,7 +33,8 @@ public class InteractiveMap : ModuleRules
 				"SharedModule",
 				"StructUtils",
 				"UMG", 
-				"ShadersModule"
+				"ShadersModule",
+				"DataBasedWidget"
              
 				// ... add other public dependencies that you statically link with here ...
 			}

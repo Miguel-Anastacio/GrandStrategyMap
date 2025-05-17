@@ -1,0 +1,60 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "PropertyDisplayGenerator",
+	"Description": "Streamline widget creation to represent data contained in a UObject/Struct. Create dynamic data displays from data tables with minimal code",
+	"Category": "Other",
+	"CreatedBy": "An@stacioDev",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "com.epicgames.launcher://ue/Fab/product/b3a51c74-395f-45c7-9af2-c4e979cfcf6c",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UtilityModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG",
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "UtilityModuleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "DataBasedWidget",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "DataBasedWidgetEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		}
+	]
+}

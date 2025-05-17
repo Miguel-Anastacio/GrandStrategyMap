@@ -8,7 +8,7 @@
 class UCustomButtonWidget;
 class UMapObject;
 //
-class UCustomEditableText;
+class UWCustomEditableText;
 
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UMapModeSelectorWidget : public UUserWidget

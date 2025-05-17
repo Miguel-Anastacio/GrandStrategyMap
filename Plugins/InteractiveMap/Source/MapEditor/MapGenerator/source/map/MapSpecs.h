@@ -7,8 +7,14 @@ namespace MapGenerator
 		int seed = 0;
 		int tiles = 5;
 		int lloyd = 0;
+		int searchRadiusBeforeNewTile = 100;
 
-		LookupFeatures(int s, int pts, int l) : seed(s), tiles(pts), lloyd(l) {};
+		LookupFeatures(int s, int pts, int l, int radius)
+		:	seed(s)
+			,tiles(pts)
+			,lloyd(l)
+			,searchRadiusBeforeNewTile((radius))
+		{};
 		LookupFeatures() = default;
 	};
 
@@ -36,12 +42,17 @@ namespace MapGenerator
 		float borderLine = 3.0f;
 		float cutOffHeight = 0.001f;
 
-		LookupMapData(NoiseData noiseData, LookupFeatures landSpec, LookupFeatures oceanSpec, unsigned w, unsigned h, float borderThick, float cutOff) : borderNoise(noiseData),
-																																						 land(landSpec),
-																																						 ocean(oceanSpec),
-																																						 width(w), height(h),
-																																						 borderLine(borderThick),
-																																						 cutOffHeight(cutOff) {};
+		LookupMapData(NoiseData noiseData, LookupFeatures landSpec, LookupFeatures oceanSpec, unsigned w, unsigned h,
+			float borderThick, float cutOff)
+		:	borderNoise(noiseData),
+			land(landSpec),
+			ocean(oceanSpec),
+			width(w), height(h),
+			borderLine(borderThick),
+			cutOffHeight(cutOff)
+
+		{};
+
 		LookupMapData() = default;
 	};
 

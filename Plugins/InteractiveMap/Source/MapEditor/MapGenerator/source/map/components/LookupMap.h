@@ -26,7 +26,7 @@ namespace MapGenerator
 		TileMap GenerateTileMapFromMask(const std::shared_ptr<Diagram> &diagram, const NoiseData &borderNoise, float borderThick,
 										const MapMask *mask, TileType type,
 										std::unordered_set<data::Color> &colorsInUse,
-										const char *name = "example.png",
+										const int searchRadiusBeforeNewTile = 100,
 										 std::function<void(float, std::string_view)> progressCallback = nullptr);
 
 		const TileMap& GetTileMap() const;

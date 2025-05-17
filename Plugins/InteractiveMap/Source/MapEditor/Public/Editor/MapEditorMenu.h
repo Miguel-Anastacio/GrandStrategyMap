@@ -26,7 +26,7 @@ struct FTileIdData
 	int32 Name = -1;
 
 	// Serialize to JSON
-	void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
+	void SerializeToJson(const TSharedPtr<FJsonObject>& OutJsonObject) const
 	{
 		OutJsonObject->SetStringField(TEXT("Name"), FString::FromInt(Name));
 		OutJsonObject->SetStringField(TEXT("Color"), ColorString);
@@ -43,7 +43,7 @@ struct FLookupGen
 	int32 Name = -1;
 
 	// Serialize to JSON
-	void SerializeToJson(TSharedPtr<FJsonObject>& OutJsonObject) const
+	void SerializeToJson(const TSharedPtr<FJsonObject>& OutJsonObject) const
 	{
 		OutJsonObject->SetStringField(TEXT("Name"), FString::FromInt(Name));
 		OutJsonObject->SetStringField(TEXT("Color"), ColorString);

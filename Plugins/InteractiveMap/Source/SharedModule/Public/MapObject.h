@@ -3,7 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Misc/EngineVersionComparison.h"
+#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "VisualProperties.h"
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
@@ -15,8 +20,8 @@ struct FBaseMapStruct
 {
 	GENERATED_BODY()
 
-	virtual ~FBaseMapStruct(){};
-	
+	virtual ~FBaseMapStruct() {};
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ID = -1;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
@@ -26,18 +31,17 @@ struct FBaseMapStruct
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Region = "NO REGION";
 
-	virtual  FString ToString() const
+	virtual FString ToString() const
 	{
 		return FString::Printf(TEXT("ID: %d - Name: %s - Area: %s - Region - %s"), ID, *Name, *Area, *Region);
 	}
 };
 
-
 USTRUCT(BlueprintType)
 struct FLookupEntry
 {
 	GENERATED_BODY()
-    
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Color;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
@@ -56,7 +60,7 @@ struct FExampleStruct : public FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Owner = "ProvinceOwner";
 };
@@ -68,16 +72,16 @@ struct FMapDataStruct : public FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
-	
+
 	virtual FString ToString() const override
 	{
 		return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
@@ -90,10 +94,10 @@ struct FPopulation : public FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int Size = 0;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FName Profession;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FName Culture = "BRA";
 };
@@ -105,16 +109,16 @@ struct FComplexMapDataStruct : public FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FPopulation Population;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
-	
+
 	// virtual FString ToString() const override
 	// {
 	// 	return FString::Printf(TEXT("ID: %d - Name: %s, Population %d, Owner: %s"), ID, *Name, Population, *Country);
@@ -130,126 +134,125 @@ class SHAREDMODULE_API UMapObject : public UObject
 
 	// UObject Interface
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
 #endif
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
 	// ======================================================
 public:
 	// Logging
-	void LogLookupTable() const ;
+	void LogLookupTable() const;
 	void LogMapData() const;
 	void LogVisualProperties() const;
 
 	// Get type of tiles, checks DataStruct used
 	bool IsTileWater(int32 ID) const;
 	bool IsTileLand(int32 ID) const;
-	bool IsStructValid(const FInstancedStruct& Struct) const;
-	bool IsStructValid(const UScriptStruct* Struct) const;
+	bool IsStructValid(const FInstancedStruct &Struct) const;
+	bool IsStructValid(const UScriptStruct *Struct) const;
 
 #if WITH_EDITOR
 	void SaveData() const;
 	void LoadDataFromFile();
-	void SetLookupTexture(UTexture2D* Texture2D);
-	void SetMapDataFilePath(const FString& FilePath, bool LoadFromFile = true);
-	void SetLookupFilePath(const FString& FilePath)
+	void SetLookupTexture(UTexture2D *Texture2D);
+	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetLookupFilePath(const FString &FilePath)
 	{
 		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
 		LoadLookupMap(FilePath);
 	}
 #endif
-	void LoadLookupMap(const FString& FilePath);
-	
-	
+	void LoadLookupMap(const FString &FilePath);
+
 	FString GetFilePath() const
 	{
 		return this->FilePathMapData;
 	}
 
 	// Getters MapData
-	TMap<int32, FInstancedStruct>& GetMapData(){ return MapData; }
+	TMap<int32, FInstancedStruct> &GetMapData() { return MapData; }
 	TArray<FInstancedStruct> GetMapDataValue() const
 	{
 		TArray<FInstancedStruct> OutArray;
 		MapData.GenerateValueArray(OutArray);
-        return OutArray;
+		return OutArray;
 	}
-	int32 FindID(const FColor& Color);
-	int32* FindIDPtr(const FColor& Color);
+	int32 FindID(const FColor &Color);
+	int32 *FindIDPtr(const FColor &Color);
 	FColor GetColor(int32 ID) const;
-	FInstancedStruct* GetTileData(int32 ID);
-	
+	FInstancedStruct *GetTileData(int32 ID);
+
 	// Setter Map Data
-	bool SetTileData(const FInstancedStruct& NewData, int32 ID);
-	
+	bool SetTileData(const FInstancedStruct &NewData, int32 ID);
+
 	// Get Lookup
 	TMap<FColor, int32> GetLookupTable() const
 	{
 		return LookupTable;
 	};
-	const TArray<uint8>& GetLookupTextureData() const
+	const TArray<uint8> &GetLookupTextureData() const
 	{
 		return LookupTextureData;
 	}
 	// Update In Editor only, used in Map Object Display
 #if WITH_EDITOR
-	void UpdateDataInEditor(const FInstancedStruct& NewData);
+	void UpdateDataInEditor(const FInstancedStruct &NewData);
 #endif
-	FColor GetColorFromUv(const FVector2D& Uv) const;
+	FColor GetColorFromUv(const FVector2D &Uv) const;
+
 public:
-	
 #if WITH_EDITORONLY_DATA
 	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName= "Visual Property Types",  meta=(RequiredAssetDataTags="RowStructure=/Script/SharedModule.VisualPropertyType"))
-	UDataTable* VisualPropertyTypesDT;
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
+	UDataTable *VisualPropertyTypesDT;
 
 	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName="Visual Properties", meta=(RequiredAssetDataTags="RowStructure=/Script/SharedModule.VisualProperty"))
-	class UDataTable* VisualPropertiesDT;
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
+	class UDataTable *VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UMaterialInterface* MaterialOverride;
+	class UMaterialInterface *MaterialOverride;
 #endif
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* StructType;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
-	UScriptStruct* OceanStructType;
-	
-	FOnAssetChanged OnObjectChanged;
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UTexture2D* LookupTexture;
 
-	const TMap<FVisualPropertyType, FArrayOfVisualProperties>& GetVisualPropertiesMap() const;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct *StructType;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+	UScriptStruct *OceanStructType;
+
+	FOnAssetChanged OnObjectChanged;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	class UTexture2D *LookupTexture;
+
+	const TMap<FVisualPropertyType, FArrayOfVisualProperties> &GetVisualPropertiesMap() const;
 	TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
 
-	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct, const FName& PropertyName, bool& OutResult) const;
+	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
 	void ReadDataTables();
-	FVisualProperty GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const;
-	FVisualProperty GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const;
+	FVisualProperty GetVisualProperty(const FName &Type, const FName &Tag, bool &OutResult) const;
+	FVisualProperty GetVisualProperty(const FVisualPropertyType &Type, const FName &Tag, bool &OutResult) const;
 
-	TArray<FName> GetVisualPropertiesNamesOfType(const FName& Type) const;
+	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
 	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
 	// TMap<FName, TSet<FName>> VpMappedByType() const;
 private:
-	bool IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const;
-	
+	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
+
 	UPROPERTY()
 	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
-	
+
 	UPROPERTY()
 	TMap<int32, FInstancedStruct> MapData;
 
 	UPROPERTY()
 	TMap<FColor, int32> LookupTable;
-	
+
 	UPROPERTY(VisibleAnywhere, Category = "Lookup")
 	FString LookupFilePath;
 
 	UPROPERTY()
 	TArray<uint8> LookupTextureData;
-	
-	UPROPERTY(VisibleAnywhere, Category="Data")
+
+	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
 };

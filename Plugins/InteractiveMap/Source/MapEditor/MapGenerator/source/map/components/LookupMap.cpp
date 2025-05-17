@@ -38,8 +38,8 @@ namespace MapGenerator
 		const auto width = Width();
 		const auto height = Height();
 		std::unordered_set<data::Color> colorsInUse;
-		auto landTileMap = GenerateTileMapFromMask(m_landDiagram, data.borderNoise, data.borderLine, landMask, TileType::LAND, colorsInUse, "landMaskLookUp.png", progressCallback);
-		auto oceanTileMap = GenerateTileMapFromMask(m_oceanDiagram, data.borderNoise, data.borderLine, oceanMask, TileType::WATER, colorsInUse, "oceanMaskLookUp.png", progressCallback);
+		auto landTileMap = GenerateTileMapFromMask(m_landDiagram, data.borderNoise, data.borderLine, landMask, TileType::LAND, colorsInUse, data.land.searchRadiusBeforeNewTile, progressCallback);
+		auto oceanTileMap = GenerateTileMapFromMask(m_oceanDiagram, data.borderNoise, data.borderLine, oceanMask, TileType::WATER, colorsInUse, data.ocean.searchRadiusBeforeNewTile, progressCallback);
 		
 		TileMap lookUpTileMap = TileMap::BlendTileMap(landTileMap, TileType::LAND, oceanTileMap, TileType::WATER);
 		m_lookUpTileMap = std::make_unique<TileMap>(std::move(lookUpTileMap));
@@ -53,7 +53,7 @@ namespace MapGenerator
 	TileMap LookupMap::GenerateTileMapFromMask(const std::shared_ptr<Diagram> &diagram, const NoiseData &noiseData, float borderThick,
 											   const MapMask *mapMask, TileType type,
 											   std::unordered_set<data::Color> &colors,
-											   const char *name,
+											   const int searchRadiusBeforeNewTile,
 											   std::function<void(float, std::string_view)> progressCallback)
 	{
 		const auto width = Width();
@@ -82,7 +82,7 @@ namespace MapGenerator
 			progressCallback(4.0f, "Flood Fill");
 		}
 
-		maskTileMap.FloodFillMissingTiles(100);
+		maskTileMap.FloodFillMissingTiles(searchRadiusBeforeNewTile);
 		if(progressCallback)
 		{
 			progressCallback(4.0f, "FloodFill MissingTiles");

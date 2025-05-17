@@ -26,7 +26,7 @@ struct SHADERSMODULE_API FReplaceColorComputeShaderDispatchParams
 	FReplaceColorComputeShaderDispatchParams(const TArray<uint8>& Pixels, const TArray<FColorReplace>& ReplacementRules)
 		: ReplacementRules(ReplacementRules)
 	{
-		PixelArray = UTextureUtilsFunctionLibrary::PackUint8ToUint32(Pixels);
+		PixelArray = UAtkTextureUtilsFunctionLibrary::PackUint8ToUint32(Pixels);
 		
 	};
 };
@@ -56,7 +56,6 @@ public:
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReplaceColorComputeShaderLibrary_AsyncExecutionCompleted, const int, Value);
-
 
 UCLASS() // Change the _API to match your project
 class SHADERSMODULE_API UReplaceColorComputeShaderLibrary_AsyncExecution : public UBlueprintAsyncActionBase

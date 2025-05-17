@@ -1,25 +1,20 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "UI/Widgets/ProvinceEditorWidget.h"
-#include "UserWidgets/CustomEditableText.h"
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
-#include "UserWidgets/GenericStructWidget.h"
+#include "GenericWidget/GenericStructWidget.h"
 
 void UProvinceEditorWidget::SetProvinceData(const FInstancedStruct& Data, int ProvinceID)
 {
 	ProvinceSelectedData = Data;
 	ProvinceSelectedID = ProvinceID;
-	// if(!ProvinceDataWidget || !OceanTileDataWidget)
-	// {
-	// 	return;
-	// }
-	if(Data.GetScriptStruct() == ProvinceDataWidget->GetStruct())
+	if(Data.GetScriptStruct() == ProvinceDataWidget->GetDataClass())
 	{
 		OceanTileDataWidget->SetVisibility(ESlateVisibility::Collapsed);
 		ProvinceDataWidget->InitFromStruct(Data);
 		ProvinceDataWidget->SetVisibility(ESlateVisibility::Visible);
 	}
-	else if(Data.GetScriptStruct() == OceanTileDataWidget->GetStruct())
+	else if(Data.GetScriptStruct() == OceanTileDataWidget->GetDataClass())
 	{
 		ProvinceDataWidget->SetVisibility(ESlateVisibility::Collapsed);
 		OceanTileDataWidget->InitFromStruct(Data);

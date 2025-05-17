@@ -13,11 +13,13 @@ struct FMapDetails
 {
 	GENERATED_BODY()
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=100000), Category = "Map Details")
-	int NumberOfTiles = 10;
+	int32 NumberOfTiles = 10;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Map Details")
-	int Seed = 10;
+	int32 Seed = 10;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=20), Category = "Map Details")
-	int LloydIteration = 10;
+	int32 LloydIteration = 10;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=1000), Category = "Map Details")
+	int32 SearcRadiusBeforeNewTile = 100;
 };
 
 USTRUCT(BlueprintType)
@@ -25,10 +27,10 @@ struct FNoiseDetails
 {
 	GENERATED_BODY()
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Noise Details")
-	int Seed = 12002943;
+	int32 Seed = 12002943;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere,meta=(ClampMin=0, ClampMax=16), Category = "Noise Details")
-	int Octaves = 4;
+	int32 Octaves = 4;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=1), Category = "Noise Details")
 	float Frequency = 0.05f;
@@ -49,9 +51,12 @@ struct FModuleDefinition
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
-	UTexture2D* HeightMapTexture;
+	UTexture2D* OriginTexture;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=(ClampMin=0, ClampMax=1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
+	bool UseHeightMap = true;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition = "UseHeightMap", ClampMin=0, ClampMax=1))
 	float CutoffHeight = 0.001f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Land Settings")
@@ -129,19 +134,25 @@ public:
 	MapGenerator::LookupFeatures LandSettings() const
 	{
 		return MapGenerator::LookupFeatures(MapEditorDetails.LandDetails.Seed, MapEditorDetails.LandDetails.NumberOfTiles,
-							MapEditorDetails.LandDetails.LloydIteration);
+							MapEditorDetails.LandDetails.LloydIteration, MapEditorDetails.LandDetails.SearcRadiusBeforeNewTile);
 	};
 	MapGenerator::LookupFeatures OceanSettings() const
 	{
 		return MapGenerator::LookupFeatures(MapEditorDetails.OceanDetails.Seed, MapEditorDetails.OceanDetails.NumberOfTiles,
-							MapEditorDetails.OceanDetails.LloydIteration);
+							MapEditorDetails.OceanDetails.LloydIteration, MapEditorDetails.LandDetails.SearcRadiusBeforeNewTile);
 	};
 
 	MapGenerator::LookupMapData GetLookupMapData() const
 	{
-		const uint32 Width = MapEditorDetails.HeightMapTexture->GetSizeX();
-		const uint32 Height = MapEditorDetails.HeightMapTexture->GetSizeY();
+		const uint32 Width = MapEditorDetails.OriginTexture->GetSizeX();
+		const uint32 Height = MapEditorDetails.OriginTexture->GetSizeY();
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
-											Width, Height, MapEditorDetails.NoiseDetails.LineThickness, MapEditorDetails.CutoffHeight);
+											Width, Height, MapEditorDetails.NoiseDetails.LineThickness,
+											MapEditorDetails.CutoffHeight);
+	}
+
+	bool FromHeightMap() const
+	{
+		return MapEditorDetails.UseHeightMap;
 	}
 };

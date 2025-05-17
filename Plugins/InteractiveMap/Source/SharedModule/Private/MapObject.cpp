@@ -4,10 +4,10 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#include "BlueprintLibrary/MiscFunctionLibrary.h"
 #if WITH_EDITOR
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
-#include "AssetToolsModule.h"
 #endif
 
 #if WITH_EDITOR
@@ -22,7 +22,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
 	{
-		LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+		LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 		LoadLookupMap(LookupFilePath);
 	}
 	
@@ -107,7 +107,7 @@ TMap<FName, FArrayOfVisualProperties> UMapObject::GetVisualPropertyNameMap() con
 FColor UMapObject::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct,
                                                        const FName& PropertyName, bool& OutResult) const
 {
-	const FString PropertyValue = UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
+	const FString PropertyValue = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
 
 	if (!OutResult)
 		return FColor::Black;
@@ -125,11 +125,11 @@ void UMapObject::ReadDataTables()
 	
 	VisualPropertiesMap.Empty();	
 	TArray<FVisualPropertyType*> AllTypes;
-	if(UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
+	if(UAtkDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
 	{
 	}
 	TArray<FVisualProperty*> VisualProperties;
-	UDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
+	UAtkDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
 	
 	for(const auto& Type : AllTypes)
 	{
@@ -210,7 +210,7 @@ TSet<FName> UMapObject::GetNamesOfVisualPropertiesInMapData() const
 	Names.Reserve(VisualPropertiesMap.Num());
 	for(const auto& [VpType, Properties] : VisualPropertiesMap)
 	{
-		if(const FProperty* Property = UADStructUtilsFunctionLibrary::FindPropertyByDisplayName({OceanStructType, StructType}, VpType.Type))
+		if(const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName({OceanStructType, StructType}, VpType.Type))
 		{
 			// check if property is not numeric
 			if(!Property->IsA(FNumericProperty::StaticClass()))
@@ -287,12 +287,12 @@ void UMapObject::LogMapData() const
 	for(const auto& [ID, Data] : MapData)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
-		UADStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
+		UAtkStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
 		{
 			const FString PropertyName = Property->GetAuthoredName();
 			bool bOutResult = false;
 			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
-				*UADStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
+				*UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
 		});
 	}
 }
@@ -316,13 +316,13 @@ void UMapObject::SaveData() const
 {
 	TArray<FInstancedStruct> Values;
 	MapData.GenerateValueArray(Values);
-	UDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, Values);
+	UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, Values);
 }
 
 void UMapObject::LoadDataFromFile()
 {
 	TArray<FString> FilesNames;
-	UFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
+	UAtkFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
 	if(FilesNames.IsEmpty())
 	{
 		// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("No file selected"));
@@ -342,7 +342,7 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 		return;
 
 	LookupTexture = Texture2D;
-	LookupTextureData = UTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 }
 
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
@@ -351,14 +351,14 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	TArray<FInstancedStruct> StructData;
 	if(LoadFromFile)
 	{
-		StructData = UDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
+		StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
 	for(const auto& Data: StructData)
 	{
 		if(Data.IsValid())
 		{
 			bool bOutResult = false;
-			int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
+			int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
 			if(bOutResult)
 			{
 				MapData.Emplace(ID, Data);
@@ -412,16 +412,16 @@ FInstancedStruct* UMapObject::GetTileData(int32 ID)
 
 FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
 {
-	return UTextureUtilsFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
+	return UAtkTextureUtilsFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
 }
 
 void UMapObject::LoadLookupMap(const FString& FilePath)
 {
-	const TArray<FLookupEntry> Lookup = UDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(FilePath);
+	const TArray<FLookupEntry> Lookup = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(FilePath);
 	LookupTable.Empty();
 	for(const auto& Entry : Lookup)
 	{
-		LookupTable.Emplace(UDataManagerFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+		LookupTable.Emplace(UAtkMiscFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
 	}
 }
 
@@ -431,7 +431,7 @@ void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
 	if(NewData.GetScriptStruct()->IsChildOf(FBaseMapStruct::StaticStruct()))
 	{
 		bool bResult = false;
-		const int32 ID = UADStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
+		const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
 		if(bResult)
 		{
 			MapData[ID] = NewData;

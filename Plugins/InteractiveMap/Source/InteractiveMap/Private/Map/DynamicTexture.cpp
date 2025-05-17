@@ -21,7 +21,7 @@ void UDynamicTexture::SetTextureData(const TArray<uint8>& NewData)
 
 void UDynamicTexture::SetTextureData(const TArray<uint32>& NewData)
 {
-	SetTextureData(UTextureUtilsFunctionLibrary::UnPackUint32ToUint8(NewData));
+	SetTextureData(UAtkTextureUtilsFunctionLibrary::UnPackUint32ToUint8(NewData));
 }
 
 void UDynamicTexture::FillTexture(const FLinearColor& Color)

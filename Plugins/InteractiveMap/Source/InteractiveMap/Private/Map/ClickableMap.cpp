@@ -332,7 +332,7 @@ void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRen
 
 FColor AClickableMap::GetColorFromLookUpTexture(const FVector2D& Uv) const
 {
-	return UTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, Uv, MapColorCodeTextureData);
+	return UAtkTextureUtilsFunctionLibrary::GetColorFromUV(MapLookUpTexture, Uv, MapColorCodeTextureData);
 }
 
 void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, UDynamicTextureComponent* textureComponent)
