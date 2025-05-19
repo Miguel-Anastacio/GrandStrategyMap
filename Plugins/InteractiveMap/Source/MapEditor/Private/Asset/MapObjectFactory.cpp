@@ -3,6 +3,7 @@
 #include "MapObject.h"
 // #include "CustomObjectToolkit.h"
 #include "Asset/MapObjectToolkit.h"
+#include "Editor/MapEditorApp.h"
 #include "Styling/SlateStyle.h"
 
 UMapObjectFactory::UMapObjectFactory(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -23,8 +24,14 @@ EAssetCommandResult UAssetDefinition_MapObject::OpenAssets(const FAssetOpenArgs&
 {
 	for (UMapObject* EditingAsset : OpenArgs.LoadObjects<UMapObject>())
 	{
-		const TSharedRef<FMapObjectToolkit> CustomObjectToolkit(new FMapObjectToolkit());
-		CustomObjectToolkit->InitEditor(OpenArgs.ToolkitHost, EditingAsset);
+		// const TSharedRef<FMapObjectToolkit> CustomObjectToolkit(new FMapObjectToolkit());
+		// CustomObjectToolkit->InitEditor(OpenArgs.ToolkitHost, EditingAsset);
+		if(EditingAsset)
+		{
+			EToolkitMode::Type mode = OpenArgs.ToolkitHost.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+			TSharedRef<FMapEditorApp> editorApp(new FMapEditorApp());
+			editorApp->InitEditor(mode, OpenArgs.ToolkitHost, EditingAsset);
+		}
 	}
 
 	return EAssetCommandResult::Handled;

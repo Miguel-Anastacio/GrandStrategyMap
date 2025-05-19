@@ -11,6 +11,12 @@ class MAPEDITOR_API FMapObjectToolkit : public FAssetEditorToolkit
 {
 public:
 	void InitEditor(const TSharedPtr<IToolkitHost>& InitToolkitHost, UMapObject* Object);
+	void InitToolsMenu();
+	void ChangeLayoutToMapData() const;
+	bool IsDataListTabFocused() const;
+
+	TSharedRef<FTabManager::FLayout> GetMapDataEditorLayout() const;
+	TSharedRef<FTabManager::FLayout> GetMapLookupEditorLayout() const;
 	
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& TabManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& TabManager) override;

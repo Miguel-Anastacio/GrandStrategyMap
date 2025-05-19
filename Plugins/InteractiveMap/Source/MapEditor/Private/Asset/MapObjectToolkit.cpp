@@ -18,7 +18,66 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 {
 	CustomObject = Object;
 	
-	const TSharedRef<FTabManager::FLayout> Layout = FTabManager::NewLayout(FName(TEXT("Layout")))
+	const TSharedRef<FTabManager::FLayout> Layout = GetMapLookupEditorLayout();
+	
+	InitToolsMenu();
+	InitAssetEditor(EToolkitMode::Standalone, InitToolkitHost, GetToolkitFName(), Layout, true, true, CustomObject.Get());
+}
+
+void FMapObjectToolkit::InitToolsMenu()
+{
+	// Get the toolbar builder
+	FToolMenuOwnerScoped OwnerScoped(this);
+    
+	// Create the main editor toolbar
+	{
+		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("AssetEditor.MapObjectEditor.Toolbar");
+		FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("AssetActions");
+        
+		// Add navigation buttons
+		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
+			"OpenDetailsTab",
+			FUIAction(
+				FExecuteAction::CreateSP(this, &FMapObjectToolkit::ChangeLayoutToMapData),
+				FCanExecuteAction(),
+				FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsDataListTabFocused)
+			),
+			NSLOCTEXT("MyAssetEditor", "DetailsTabLabel", "Details"),
+			NSLOCTEXT("MyAssetEditor", "DetailsTabTooltip", "Show the details tab"),
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details")
+		));
+        
+		// Section.AddEntry(FToolMenuEntry::InitToolBarButton(
+		// 	"OpenViewportTab",
+		// 	FUIAction(
+		// 		FExecuteAction::CreateSP(this, &FMapObjectToolkit::FocusViewportTab),
+		// 		FCanExecuteAction(),
+		// 		FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsViewportTabFocused)
+		// 	),
+		// 	NSLOCTEXT("MyAssetEditor", "ViewportTabLabel", "Viewport"),
+		// 	NSLOCTEXT("MyAssetEditor", "ViewportTabTooltip", "Show the viewport tab"),
+		// 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Viewports")
+		// ));
+        
+		// Add more buttons for other tabs
+	}
+}
+
+void FMapObjectToolkit::ChangeLayoutToMapData() const
+{
+	// TabManager->CloseAllAreas();
+	// TabManager->RestoreFrom(GetMapDataEditorLayout(), TabManager->);
+}
+
+bool FMapObjectToolkit::IsDataListTabFocused() const
+{
+	TSharedPtr<SDockTab> Tab = TabManager->FindExistingLiveTab(DataListTab);
+	return Tab.IsValid() && Tab->IsForeground();
+}
+
+TSharedRef<FTabManager::FLayout> FMapObjectToolkit::GetMapLookupEditorLayout() const
+{
+	return FTabManager::NewLayout(FName(TEXT("MapLookupEditorLayout")))
 	->AddArea
 	(
 		FTabManager::NewPrimaryArea()
@@ -40,7 +99,37 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 				FTabManager::NewStack()
 				->SetSizeCoefficient(0.35f)
 				->AddTab(DataSourceTab, ETabState::OpenedTab)
-				->AddTab(DataListTab, ETabState::OpenedTab)
+				->SetHideTabWell(false)
+			)
+		)	
+	);
+}
+
+TSharedRef<FTabManager::FLayout> FMapObjectToolkit::GetMapDataEditorLayout() const
+{
+	return FTabManager::NewLayout(FName(TEXT("MapDataEditorLayout")))
+	->AddArea
+	(
+		FTabManager::NewPrimaryArea()
+		->SetOrientation(Orient_Horizontal)
+		->Split
+		(
+			FTabManager::NewStack()
+			->SetSizeCoefficient(.5f)
+			->AddTab(MapViewportTab, ETabState::OpenedTab)
+			->SetHideTabWell(true)
+		)
+		->Split
+		(
+			FTabManager::NewSplitter()
+			->SetOrientation(Orient_Vertical)
+			->SetSizeCoefficient(.45f)
+			->Split
+			(
+				FTabManager::NewStack()
+				->SetSizeCoefficient(0.35f)
+				->AddTab(DataSourceTab, ETabState::OpenedTab)
+				// ->AddTab(DataListTab, ETabState::OpenedTab)
 				->SetHideTabWell(false)
 			)
 			// ->Split
@@ -52,8 +141,6 @@ void FMapObjectToolkit::InitEditor(const TSharedPtr<IToolkitHost >& InitToolkitH
 			// )
 		)	
 	);
-	
-	InitAssetEditor(EToolkitMode::Standalone, InitToolkitHost, GetToolkitFName(), Layout, true, true, CustomObject.Get());
 }
 
 void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
