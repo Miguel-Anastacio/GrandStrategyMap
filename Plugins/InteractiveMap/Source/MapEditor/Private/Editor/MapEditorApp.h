@@ -25,12 +25,18 @@ public: // FAssetEditorToolkit interface
 	{
 		return MapViewport;
 	}
+	TSharedPtr<class STextureViewer> GetMapTexturePreview() const
+	{
+		return MapTexturePreview;
+	}
+	
 private:
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
 
 
 	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
+	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 	virtual FString GetReferencerName() const override

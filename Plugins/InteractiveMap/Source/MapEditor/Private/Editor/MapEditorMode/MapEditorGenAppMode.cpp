@@ -2,6 +2,7 @@
 #include "MapEditorGenAppMode.h"
 
 #include "MapEditorGenTabFactory.h"
+#include "MapEditorTexturePreviewFactory.h"
 #include "Editor/MapViewportTabFactory.h"
 #include "Editor/NameDefines.h"
 #include "Editor/MapEditorApp.h"
@@ -11,7 +12,8 @@ FMapEditorGenAppMode::FMapEditorGenAppMode(TSharedPtr<FMapEditorApp> app)
 {
 	TabSet.RegisterFactory(MakeShareable(new FMapEditorGenTabFactory(app)));
 	TabSet.RegisterFactory(MakeShareable(new FMapViewportTabFactory(app)));
-	TabLayout = FTabManager::NewLayout("MapEditorAppMode_Layout_v1")
+	TabSet.RegisterFactory(MakeShareable(new FMapEditorTexturePreviewFactory(app)));
+	TabLayout = FTabManager::NewLayout("MapEditorAppMode_Layout_v2")
 	->AddArea
 	(
 		FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
@@ -21,9 +23,21 @@ FMapEditorGenAppMode::FMapEditorGenAppMode(TSharedPtr<FMapEditorApp> app)
 				->SetOrientation(Orient_Horizontal)
 				->Split
 				(
-					FTabManager::NewStack()
-					->SetSizeCoefficient(0.5f)
-					->AddTab(MapEditorViewportTabName, ETabState::OpenedTab)
+					FTabManager::NewSplitter()
+					->SetOrientation(Orient_Vertical)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.5f)
+						->AddTab(MapEditorViewportTabName, ETabState::OpenedTab)
+					)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.5f)
+						->AddTab(MapEditorPreviewTabName, ETabState::OpenedTab)
+					)
+					
 				)
 				->Split
 				(

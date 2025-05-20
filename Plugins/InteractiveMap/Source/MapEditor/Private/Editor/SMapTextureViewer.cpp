@@ -1,5 +1,4 @@
 #include "Editor/SMapTextureViewer.h"
-
 #include "Editor/STextureDisplay.h"
 #include "Engine/Texture2D.h"
 
@@ -13,84 +12,75 @@ void STextureViewer::Construct(const FArguments& InArgs)
     // MainBrush = Brushes[0];
     ChildSlot
     [
-       SNew(SHorizontalBox)
+        SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[0]);
-                   return FReply::Handled();
-               })
-               [
-                   SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(0);
-                  })
-               ]
-            ]
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(SButton)
-                .OnClicked_Lambda([this]() -> FReply
-                {
-                    TextureDisplay->SetMainBrush(Brushes[1]);
-                  return FReply::Handled();
-                })
-               [
-                   SNew(SImage)
-                   .Image_Lambda([this]() -> const FSlateBrush*
-                   {
-                       return GetBrush(1);
-                   })
-               ]
-            ]
-            + SVerticalBox::Slot()
-           .AutoHeight()
+           SNew(SButton)
+           .OnClicked_Lambda([this]() -> FReply
+           {
+               TextureDisplay->SetMainBrush(Brushes[0]);
+               return FReply::Handled();
+           })
            [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[2]);
-                 return FReply::Handled();
-               })
-              [
-                  SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(2);
-                  })
-              ]
-           ]
-            + SVerticalBox::Slot()
-           .AutoHeight()
-           [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[3]);
-                   return FReply::Handled();
-               })
-              [
-                  SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(3);
-                  })
-              ]
+               SNew(SImage)
+              .Image_Lambda([this]() -> const FSlateBrush*
+              {
+                  return GetBrush(0);
+              })
            ]
         ]
         + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SAssignNew(TextureDisplay, STextureDisplay)
+            SNew(SButton)
+            .OnClicked_Lambda([this]() -> FReply
+            {
+                TextureDisplay->SetMainBrush(Brushes[1]);
+              return FReply::Handled();
+            })
+           [
+               SNew(SImage)
+               .Image_Lambda([this]() -> const FSlateBrush*
+               {
+                   return GetBrush(1);
+               })
+           ]
         ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+           SNew(SButton)
+           .OnClicked_Lambda([this]() -> FReply
+           {
+               TextureDisplay->SetMainBrush(Brushes[2]);
+             return FReply::Handled();
+           })
+          [
+              SNew(SImage)
+              .Image_Lambda([this]() -> const FSlateBrush*
+              {
+                  return GetBrush(2);
+              })
+          ]
+       ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+           SNew(SButton)
+           .OnClicked_Lambda([this]() -> FReply
+           {
+               TextureDisplay->SetMainBrush(Brushes[3]);
+               return FReply::Handled();
+           })
+          [
+              SNew(SImage)
+              .Image_Lambda([this]() -> const FSlateBrush*
+              {
+                  return GetBrush(3);
+              })
+          ]
+       ]
     ];
 }
 
