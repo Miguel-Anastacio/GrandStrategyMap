@@ -129,8 +129,8 @@ void RMapEditorMenu::GenerateMap()
 			// UpdateDisplayTexture
 			if(TextureViewer && MapEditorPreset)
 			{
-				TextureViewer->OnTextureChanged(LookupTexture.Get());
-				TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
+				// TextureViewer->OnTextureChanged(LookupTexture.Get());
+				// TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
 			}
 
 			const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Editor/SMapTextureViewer.h"
 #include "WorkflowOrientedApp/WorkflowTabFactory.h"
 // One tab factory for each tab you want to have in application
 class  FMapEditorTexturePreviewFactory : public  FWorkflowTabFactory
@@ -14,4 +15,5 @@ public:
 
 protected:
 	TWeakPtr<class FMapEditorApp> App;
+	FTextureChanged TextureChangedDelegate;
 };

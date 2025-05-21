@@ -1,5 +1,7 @@
 // Copyright 2025 An@stacioDev All rights reserved.
 #include "MapEditorTexturePreviewFactory.h"
+
+#include "MapEditorGenAppMode.h"
 #include "Editor/MapEditorApp.h"
 #include "Editor/NameDefines.h"
 #include "Editor/SMapTextureViewer.h"
@@ -16,7 +18,8 @@ TSharedRef<SWidget> FMapEditorTexturePreviewFactory::CreateTabBody(const FWorkfl
 {
     const FMapEditorApp* app = App.Pin().Get();
 	TSharedPtr<STextureViewer> TextureViewer = app->GetMapTexturePreview();
-	return SAssignNew(TextureViewer, STextureViewer);
+	return SAssignNew(TextureViewer, STextureViewer)
+		.OnTextureSelected_Raw(app, &FMapEditorApp::OnTexturePreviewClicked);
 }
 
 FText FMapEditorTexturePreviewFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

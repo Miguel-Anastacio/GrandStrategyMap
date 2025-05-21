@@ -11,6 +11,8 @@ public: // FWorkflowCentricApplication interface
 
 	class UMapObject* GetWorkingAsset() const { return WorkingAsset; }
 	class UMapEditorPreset* GetMapGenPreset() const { return MapGenPreset; }
+
+	void OnTexturePreviewClicked(FName ID) const;
 	
 public: // FAssetEditorToolkit interface
 	virtual FName GetToolkitFName() const override { return FName("MapEditorApp"); }
@@ -33,8 +35,7 @@ public: // FAssetEditorToolkit interface
 private:
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
-
-
+	
 	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
 	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	/** FGCObject interface */

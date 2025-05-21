@@ -32,6 +32,14 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 	SetCurrentMode(MapEditorGenModeName);
 }
 
+void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
+{
+	if(GetCurrentMode() == MapEditorGenModeName)
+	{
+		UE_LOG(LogTemp, Display, TEXT("OnTexturePreviewClicked %s"), *ID.ToString());
+	}
+}
+
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	if(MapGenPreset)

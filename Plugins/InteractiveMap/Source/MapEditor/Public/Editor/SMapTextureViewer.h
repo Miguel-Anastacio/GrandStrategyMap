@@ -12,34 +12,47 @@ class STextureDisplay;
 class FAdvancedPreviewScene;
 class UTexture2D;  // Forward declaration for UTexture2D class
 
-/**
- * Custom Editor Widget to manage texture selection, details, and display.
- */
-class STextureViewer : public SCompoundWidget
+
+class SButtonWithImage : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(STextureViewer)
+    SLATE_BEGIN_ARGS(SButtonWithImage)
     {}
+        SLATE_EVENT(FOnClicked, OnClicked)
+        SLATE_ATTRIBUTE(const FSlateBrush*, Image)
+        SLATE_ARGUMENT(FName, ID)
     SLATE_END_ARGS()
 
     /** Constructor and widget setup */
     void Construct(const FArguments& InArgs);
 
-    /** Updates the main window to display the selected texture */
-    FReply ChangeImageSelected();
+    TAttribute<const FSlateBrush*> ImageAttr;
+    FOnClicked OnClickedDelegate;
+    FName ID;
+};
 
-    // UFUNCTION()
-    void OnTextureChanged(UTexture2D* texture);
+/**
+ * Custom Editor Widget to manage texture selection, details, and display.
+ */
+DECLARE_DELEGATE_OneParam(FTextureChanged, FName);
+class STextureViewer : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS(STextureViewer)
+    {}
+        SLATE_EVENT(FTextureChanged, OnTextureSelected)
+    SLATE_END_ARGS()
 
-    const FSlateBrush* GetMainBrush() const;
+    /** Constructor and widget setup */
+    void Construct(const FArguments& InArgs);
+    void SetTextures(const TArray<TPair<FName, UTexture2D*>>& Textures);
 
-    void SetTextures(const TArray<UTexture2D*>& Textures);
-
-protected:
-    static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);
 private:
+    static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);
     const FSlateBrush* GetBrush(int index) const;
-    TArray<TSharedPtr<FSlateBrush>> Brushes;
-    TSharedPtr<STextureDisplay> TextureDisplay;
+    TSharedRef<SButtonWithImage> CreateImagePreview(int index) const;
+    
+    TStaticArray<TPair<FName, TSharedPtr<FSlateBrush>>, 4> BrushPairs;
+    FTextureChanged TextureSelected;
     
 };
