@@ -29,38 +29,38 @@ void FMapObjectToolkit::InitToolsMenu()
 	// Get the toolbar builder
 	FToolMenuOwnerScoped OwnerScoped(this);
     
-	// Create the main editor toolbar
-	{
-		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("AssetEditor.MapObjectEditor.Toolbar");
-		FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("AssetActions");
-        
-		// Add navigation buttons
-		Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-			"OpenDetailsTab",
-			FUIAction(
-				FExecuteAction::CreateSP(this, &FMapObjectToolkit::ChangeLayoutToMapData),
-				FCanExecuteAction(),
-				FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsDataListTabFocused)
-			),
-			NSLOCTEXT("MyAssetEditor", "DetailsTabLabel", "Details"),
-			NSLOCTEXT("MyAssetEditor", "DetailsTabTooltip", "Show the details tab"),
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details")
-		));
-        
-		// Section.AddEntry(FToolMenuEntry::InitToolBarButton(
-		// 	"OpenViewportTab",
-		// 	FUIAction(
-		// 		FExecuteAction::CreateSP(this, &FMapObjectToolkit::FocusViewportTab),
-		// 		FCanExecuteAction(),
-		// 		FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsViewportTabFocused)
-		// 	),
-		// 	NSLOCTEXT("MyAssetEditor", "ViewportTabLabel", "Viewport"),
-		// 	NSLOCTEXT("MyAssetEditor", "ViewportTabTooltip", "Show the viewport tab"),
-		// 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Viewports")
-		// ));
-        
-		// Add more buttons for other tabs
-	}
+	// // Create the main editor toolbar
+	// {
+	// 	UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("AssetEditor.MapObjectEditor.Toolbar");
+	// 	FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("AssetActions");
+ //        
+	// 	// Add navigation buttons
+	// 	Section.AddEntry(FToolMenuEntry::InitToolBarButton(
+	// 		"OpenDetailsTab",
+	// 		FUIAction(
+	// 			FExecuteAction::CreateSP(this, &FMapObjectToolkit::ChangeLayoutToMapData),
+	// 			FCanExecuteAction(),
+	// 			FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsDataListTabFocused)
+	// 		),
+	// 		NSLOCTEXT("MyAssetEditor", "DetailsTabLabel", "Details"),
+	// 		NSLOCTEXT("MyAssetEditor", "DetailsTabTooltip", "Show the details tab"),
+	// 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details")
+	// 	));
+ //        
+	// 	// Section.AddEntry(FToolMenuEntry::InitToolBarButton(
+	// 	// 	"OpenViewportTab",
+	// 	// 	FUIAction(
+	// 	// 		FExecuteAction::CreateSP(this, &FMapObjectToolkit::FocusViewportTab),
+	// 	// 		FCanExecuteAction(),
+	// 	// 		FIsActionChecked::CreateSP(this, &FMapObjectToolkit::IsViewportTabFocused)
+	// 	// 	),
+	// 	// 	NSLOCTEXT("MyAssetEditor", "ViewportTabLabel", "Viewport"),
+	// 	// 	NSLOCTEXT("MyAssetEditor", "ViewportTabTooltip", "Show the viewport tab"),
+	// 	// 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Viewports")
+	// 	// ));
+ //        
+	// 	// Add more buttons for other tabs
+	// }
 }
 
 void FMapObjectToolkit::ChangeLayoutToMapData() const

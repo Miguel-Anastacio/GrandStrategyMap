@@ -123,10 +123,12 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 Scre
 			MapAssetRef = MapAsset;
 		}
 		const FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
-		
-		MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
-		return MapAsset->MapObject->FindID(Color);
 
+		if(MapAsset->Material)
+		{
+			MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
+			return MapAsset->MapObject->FindID(Color);
+		}
 	}
 	return -1;
 }
