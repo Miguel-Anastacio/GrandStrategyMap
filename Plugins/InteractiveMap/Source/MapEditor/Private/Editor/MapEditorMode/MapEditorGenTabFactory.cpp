@@ -52,7 +52,7 @@ TSharedRef<SWidget> FMapEditorGenTabFactory::CreateTabBody(const FWorkflowTabSpa
                 .OnClicked_Lambda([this]() -> FReply
                 {
                     // Button click handler logic
-                    ///GenerateMap();
+                    App.Pin().Get()->GenerateMap();
                     return FReply::Handled();
                 })
             ]

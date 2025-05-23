@@ -30,4 +30,4 @@ void FShadersModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FShadersModule, InteractiveMap)
+IMPLEMENT_MODULE(FShadersModule, ShaderModule)

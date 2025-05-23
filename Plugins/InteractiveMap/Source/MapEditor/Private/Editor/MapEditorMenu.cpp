@@ -2,17 +2,14 @@
 #include "Engine/Texture2D.h"
 #include "MapEditor.h"
 #include "MapObject.h"
-#include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/SMapTextureViewer.h"
-#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "BlueprintLibrary/MiscFunctionLibrary.h"
-#include "MapEditor/MapGenerator/source/map/Map.h"
 #include "Materials/MaterialInstanceConstant.h"
 
-RMapEditorMenu::RMapEditorMenu() : Map(1028, 1028)
+RMapEditorMenu::RMapEditorMenu() 
 {
 	RegisterTabs();
 }
@@ -120,21 +117,21 @@ void RMapEditorMenu::GenerateMap()
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			// Call GenerateMap and pass the progress callback
-			const MapGenerator::MapModeGen GenType = MapEditorPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
-																						: MapGenerator::MapModeGen::FromMask;
-			Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), GenType, ProgressCallback);
-			LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
-			LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
-			LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
-			// UpdateDisplayTexture
-			if(TextureViewer && MapEditorPreset)
-			{
-				// TextureViewer->OnTextureChanged(LookupTexture.Get());
-				// TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
-			}
-
-			const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
-			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
+			// const MapGenerator::MapModeGen GenType = MapEditorPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
+			// 																			: MapGenerator::MapModeGen::FromMask;
+			// Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), GenType, ProgressCallback);
+			// LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
+			// LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
+			// LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
+			// // UpdateDisplayTexture
+			// if(TextureViewer && MapEditorPreset)
+			// {
+			// 	// TextureViewer->OnTextureChanged(LookupTexture.Get());
+			// 	// TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
+			// }
+			//
+			// const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
+			// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
 
 		});
 }
@@ -197,19 +194,19 @@ void RMapEditorMenu::AddReferencedObjects(FReferenceCollector& Collector)
 	}
 }
 
-TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
-{
-	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
-	const int Width = TileMap.Width();
-	const int Height = TileMap.Height();
-	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
-	// if(buffer)
-	// {
-	// 	delete buffer;
-	// 	buffer = nullptr;
-	// }
-	return Texture;
-}
+// TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
+// {
+// 	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
+// 	const int Width = TileMap.Width();
+// 	const int Height = TileMap.Height();
+// 	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
+// 	// if(buffer)
+// 	// {
+// 	// 	delete buffer;
+// 	// 	buffer = nullptr;
+// 	// }
+// 	return Texture;
+// }
 
 TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
 {
@@ -253,43 +250,44 @@ TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* Buffer, unsigned Wid
 
 void RMapEditorMenu::OutputLookupJson(const FString& FilePath) const
 {
-	int32 Id = 0;
-	TArray<FTileIdData> OutputData;
-	OutputData.Reserve(Map.GetLookupTileMap().GetCellMap().size());
-	for (const auto& Cell : Map.GetLookupTileMap().GetCellMap())
-	{
-		OutputData.Emplace(FTileIdData(Cell.second.ConvertToHex().c_str(), Id));
-		Id++;
-	}
-	bool bResult = false;
-	FString Message;
-	UAtkDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, OutputData, bResult, Message);
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
+	// int32 Id = 0;
+	// TArray<FTileIdData> OutputData;
+	// OutputData.Reserve(Map.GetLookupTileMap().GetCellMap().size());
+	// for (const auto& Cell : Map.GetLookupTileMap().GetCellMap())
+	// {
+	// 	OutputData.Emplace(FTileIdData(Cell.second.ConvertToHex().c_str(), Id));
+	// 	Id++;
+	// }
+	// bool bResult = false;
+	// FString Message;
+	// UAtkDataManagerFunctionLibrary::WriteArrayToJsonFile(FilePath, OutputData, bResult, Message);
+	// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 }
 
 UTexture2D* RMapEditorMenu::CreateLookupTextureAsset(const FString& PackagePath) const
 {
-	const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
-	FString Message;
-	bool bResult = false;
-	uint8_t* Buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
-	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map.Width(), Map.Height(), bResult, Message);
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
-
-	if(Texture)
-	{
-		Texture->CompressionSettings = TC_EditorIcon;
-		Texture->MipGenSettings = TMGS_NoMipmaps;
-		Texture->PostEditChange();
-	}
-	
-	if(Buffer)
-	{
-		delete[] Buffer;
-		Buffer = nullptr;
-	}
-
-	return Texture;
+	// const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
+	// FString Message;
+	// bool bResult = false;
+	// uint8_t* Buffer = Map.GetLookupTileMap().ConvertTileMapToRawBuffer();
+	// UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map.Width(), Map.Height(), bResult, Message);
+	// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
+	//
+	// if(Texture)
+	// {
+	// 	Texture->CompressionSettings = TC_EditorIcon;
+	// 	Texture->MipGenSettings = TMGS_NoMipmaps;
+	// 	Texture->PostEditChange();
+	// }
+	//
+	// if(Buffer)
+	// {
+	// 	delete[] Buffer;
+	// 	Buffer = nullptr;
+	// }
+	//
+	// return Texture;
+	return nullptr;
 }
 
 UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
@@ -349,66 +347,66 @@ UMaterialInstanceConstant* RMapEditorMenu::CreateMaterialInstanceAsset(UTexture2
 
 void RMapEditorMenu::OutputStubMapDataJson(const FString& FilePath) const
 {
-	TArray<FInstancedStruct> Output;
-	const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
-	Output.Reserve(Size);
-	uint32 Index = 0;
-	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size %d"), Size);
-	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
-	for (const auto& [Position, Color] : TileMap.GetCellMap())
-	{
-		FInstancedStruct Struct;
-		// Create a struct dependent on the type of tile
-		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
-		{
-			Struct.InitializeAs(MapEditorPreset->TileDataStructType);
-		}
-		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
-		{
-			Struct.InitializeAs(MapEditorPreset->OceanTileDataType);
-		}
-		else
-		{
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Tile in LookupTileMap is undefined!!"));
-			return;
-		}
-		
-		if(!UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
-		{
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
-					*MapEditorPreset->TileDataStructType->GetName());
-			return;
-		}
-		
-		Output.Emplace(Struct);
-		Index++;
-	}
-
-	UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
+	// TArray<FInstancedStruct> Output;
+	// const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
+	// Output.Reserve(Size);
+	// uint32 Index = 0;
+	// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size %d"), Size);
+	// const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	// for (const auto& [Position, Color] : TileMap.GetCellMap())
+	// {
+	// 	FInstancedStruct Struct;
+	// 	// Create a struct dependent on the type of tile
+	// 	if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+	// 	{
+	// 		Struct.InitializeAs(MapEditorPreset->TileDataStructType);
+	// 	}
+	// 	else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+	// 	{
+	// 		Struct.InitializeAs(MapEditorPreset->OceanTileDataType);
+	// 	}
+	// 	else
+	// 	{
+	// 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Tile in LookupTileMap is undefined!!"));
+	// 		return;
+	// 	}
+	// 	
+	// 	if(!UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(Struct, "ID", Index))
+	// 	{
+	// 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create stub Map Data of type %s - ID is missing"),
+	// 				*MapEditorPreset->TileDataStructType->GetName());
+	// 		return;
+	// 	}
+	// 	
+	// 	Output.Emplace(Struct);
+	// 	Index++;
+	// }
+	//
+	// UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePath, Output);
 }
 
 void RMapEditorMenu::OutputLookupGenFile(const FString& FilePath) const
 {
-	int32 OceanTiles = 0;
-	int32 LandTiles = 0;
-	const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
-	for (const auto& [Position, Color] : TileMap.GetCellMap())
-	{
-		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
-		{
-			LandTiles++;
-		}
-		else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
-		{
-			OceanTiles++;
-		}
-	}
-	const FMapLookupGenFeedback GenInputsResults(MapEditorPreset->MapEditorDetails, LandTiles, OceanTiles);
-	bool bResult = false;
-	FString Message;
-	UAtkDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
-	if(!bResult)
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to Save map gen results %s"), *Message);
-	}
+	// int32 OceanTiles = 0;
+	// int32 LandTiles = 0;
+	// const MapGenerator::TileMap& TileMap = Map.GetLookupTileMap();
+	// for (const auto& [Position, Color] : TileMap.GetCellMap())
+	// {
+	// 	if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
+	// 	{
+	// 		LandTiles++;
+	// 	}
+	// 	else if(TileMap.IsTileOfType(MapGenerator::TileType::WATER, Position.x, Position.y))
+	// 	{
+	// 		OceanTiles++;
+	// 	}
+	// }
+	// const FMapLookupGenFeedback GenInputsResults(MapEditorPreset->MapEditorDetails, LandTiles, OceanTiles);
+	// bool bResult = false;
+	// FString Message;
+	// UAtkDataManagerFunctionLibrary::WriteStructToJsonFile(FilePath, GenInputsResults, bResult, Message);
+	// if(!bResult)
+	// {
+	// 	UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to Save map gen results %s"), *Message);
+	// }
 }

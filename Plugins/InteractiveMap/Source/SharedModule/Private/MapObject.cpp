@@ -10,7 +10,13 @@
 #include "UObject/ObjectSaveContext.h"
 #endif
 
+UMapObject::UMapObject(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	Map = MakeShareable(new MapGenerator::Map(1024, 1024));
+}
+
 #if WITH_EDITOR
+
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
@@ -70,6 +76,20 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	OnObjectChanged.Broadcast();
 	// SetMapDataFilePath(FilePathMapData);	
 }
+TSharedPtr<MapGenerator::Map> UMapObject::GetMapGen() const
+{
+	return Map;
+}
+
+void UMapObject::SetPreviewTextures(const TArray<UTexture2D*>& Textures)
+{
+	PreviewTextures = Textures;
+}
+
+const TArray<UTexture2D*>& UMapObject::GetPreviewTextures() const
+{
+	return PreviewTextures;
+}
 
 #endif
 void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
@@ -88,6 +108,7 @@ void UMapObject::PostLoad()
 	SetMapDataFilePath(FilePathMapData);
 #endif
 }
+
 
 const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapObject::GetVisualPropertiesMap() const
 {

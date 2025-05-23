@@ -58,5 +58,7 @@ void FMapEditorDataAppMode::PreDeactivateMode()
 
 void FMapEditorDataAppMode::PostActivateMode()
 {
+	TSharedPtr<FMapEditorApp> app = App.Pin();
+	app->RestoreTexturePreview();
 	FApplicationMode::PostActivateMode();
 }

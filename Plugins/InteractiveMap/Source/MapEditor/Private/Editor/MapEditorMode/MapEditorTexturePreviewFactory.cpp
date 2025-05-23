@@ -16,9 +16,8 @@ FMapEditorTexturePreviewFactory::FMapEditorTexturePreviewFactory(TSharedPtr<clas
 // Set the contents of the tab
 TSharedRef<SWidget> FMapEditorTexturePreviewFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
-    const FMapEditorApp* app = App.Pin().Get();
-	TSharedPtr<STextureViewer> TextureViewer = app->GetMapTexturePreview();
-	return SAssignNew(TextureViewer, STextureViewer)
+	FMapEditorApp* app = App.Pin().Get();
+	return SAssignNew(app->MapTexturePreview, STextureViewer)
 		.OnTextureSelected_Raw(app, &FMapEditorApp::OnTexturePreviewClicked);
 }
 

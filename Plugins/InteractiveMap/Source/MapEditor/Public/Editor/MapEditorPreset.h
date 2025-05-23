@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MapEditor/MapGenerator/source/map/components/HeightMap.h"
+#include "source/map/components/HeightMap.h"
 #include "MapEditorPreset.generated.h"
 
 struct FBaseMapStruct;

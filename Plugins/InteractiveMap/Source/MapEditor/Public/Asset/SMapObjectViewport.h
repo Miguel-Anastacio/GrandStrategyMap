@@ -38,6 +38,7 @@ SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
 	void UpdatePreviewActor(int32 ID) const;
+	void UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	

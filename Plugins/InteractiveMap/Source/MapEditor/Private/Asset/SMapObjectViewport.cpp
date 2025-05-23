@@ -159,6 +159,11 @@ void SMapObjectViewport::UpdatePreviewActor(int32 ID) const
 	MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
 }
 
+void SMapObjectViewport::UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const
+{
+	MapAsset->SetMaterial(Texture2D, ParentMaterial);
+}
+
 void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SEditorViewport::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);

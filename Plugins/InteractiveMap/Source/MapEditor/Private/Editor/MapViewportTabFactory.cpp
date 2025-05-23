@@ -20,11 +20,10 @@ TSharedRef<SWidget> FMapViewportTabFactory::CreateTabBody(const FWorkflowTabSpaw
 	if(!App.IsValid())
 		return SNew(SOverlay);
 	
-	TSharedPtr<SMapObjectViewport> Viewport = App.Pin().Get()->GetMapViewport();
 	return SNew(SOverlay)
 	+ SOverlay::Slot()
 	[
-		SAssignNew(Viewport, SMapObjectViewport)
+		SAssignNew(App.Pin().Get()->MapViewport, SMapObjectViewport)
 		.EditingObject(App.Pin().Get()->GetWorkingAsset())
 	];
 }

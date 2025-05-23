@@ -8,7 +8,6 @@
 #include "PropertyEditorModule.h"
 #include "Misc/Optional.h"
 #include "Framework/Docking/TabManager.h"
-#include "MapEditor/MapGenerator/source/map/Map.h"
 #include "MapEditorMenu.generated.h"
 
 class UMapObject;
@@ -75,9 +74,9 @@ public:
 private:
 	TObjectPtr<UMapEditorPreset> MapEditorPreset = nullptr;
 	TSharedPtr<STextureViewer> TextureViewer;
-	MapGenerator::Map Map;
+	// MapGenerator::Map Map;
 
-	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
+	// static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 	

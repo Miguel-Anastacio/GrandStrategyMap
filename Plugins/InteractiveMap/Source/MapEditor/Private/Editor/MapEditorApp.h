@@ -1,6 +1,7 @@
 // Copyright 2025 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "ThirdParty/MapGeneratorLibrary/MapGenerator/source/map/Map.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
 // Application that owns the editor window
 class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook, public FGCObject
@@ -27,10 +28,15 @@ public: // FAssetEditorToolkit interface
 	{
 		return MapViewport;
 	}
-	TSharedPtr<class STextureViewer> GetMapTexturePreview() const
-	{
-		return MapTexturePreview;
-	}
+	// TSharedPtr<class STextureViewer> GetMapTexturePreview() const
+	// {
+	// 	return MapTexturePreview;
+	// }
+	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
+	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
+
+	void GenerateMap();
+	void RestoreTexturePreview() const;
 	
 private:
 	/** FGCObject interface */
@@ -40,11 +46,11 @@ private:
 		return TEXT("FMapEditorApp");
 	}
 	void AddToolbarExtender();
+
+	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
+	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
-	
-	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
-	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	
 };

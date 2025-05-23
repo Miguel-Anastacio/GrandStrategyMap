@@ -13,6 +13,7 @@
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
+#include "source/map/Map.h"
 
 #include "MapObject.generated.h"
 USTRUCT(BlueprintType)
@@ -132,6 +133,7 @@ class SHAREDMODULE_API UMapObject : public UObject
 {
 	GENERATED_BODY()
 
+	UMapObject(const FObjectInitializer& ObjectInitializer);
 	// UObject Interface
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
@@ -140,6 +142,7 @@ class SHAREDMODULE_API UMapObject : public UObject
 	virtual void PostLoad() override;
 	// ======================================================
 public:
+	
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
@@ -152,6 +155,10 @@ public:
 	bool IsStructValid(const UScriptStruct *Struct) const;
 
 #if WITH_EDITOR
+	TSharedPtr<MapGenerator::Map> GetMapGen() const;
+	void SetPreviewTextures(const TArray<UTexture2D*>& Textures);
+	const TArray<UTexture2D*>&  GetPreviewTextures() const;
+	
 	void SaveData() const;
 	void LoadDataFromFile();
 	void SetLookupTexture(UTexture2D *Texture2D);
@@ -234,7 +241,6 @@ public:
 
 	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
 	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
-	// TMap<FName, TSet<FName>> VpMappedByType() const;
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 
@@ -255,4 +261,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
+
+	// UPROPERTY()
+#if WITH_EDITORONLY_DATA
+	TSharedPtr<MapGenerator::Map> Map;
+	UPROPERTY()
+	TArray<UTexture2D*> PreviewTextures;
+#endif
+	
 };

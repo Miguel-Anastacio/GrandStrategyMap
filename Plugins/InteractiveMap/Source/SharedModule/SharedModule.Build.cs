@@ -32,13 +32,14 @@ public class SharedModule : ModuleRules
 				// ... add other public dependencies that you statically link with here ...
 			}
 		);
-			
+		
 		if (Target.bBuildEditor)
 		{
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
-					"UtilityModuleEditor"
+					"UtilityModuleEditor",
+					"MapGeneratorLibrary"
 					// ... add private dependencies that you statically link with here ...	
 				}
 			);
