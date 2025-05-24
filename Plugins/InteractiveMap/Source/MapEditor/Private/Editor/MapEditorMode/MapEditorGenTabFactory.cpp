@@ -66,7 +66,7 @@ TSharedRef<SWidget> FMapEditorGenTabFactory::CreateTabBody(const FWorkflowTabSpa
                 .Text(FText::FromString("Save"))
                 .OnClicked_Lambda([this]() -> FReply
                 {
-                    //SaveMap();
+                    App.Pin().Get()->SaveGeneratedMap();
                     return FReply::Handled();
                 })
             ];

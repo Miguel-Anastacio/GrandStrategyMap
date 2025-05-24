@@ -13,26 +13,6 @@
 class UMapObject;
 
 USTRUCT(NotBlueprintType)
-struct FTileIdData 
-{
-	GENERATED_BODY()
-	FTileIdData()  : ColorString(TEXT("")), Name(-1) {};
-	FTileIdData(const char* color, int32 id) :  ColorString(color), Name(id) {};
-
-	UPROPERTY()
-	FString ColorString = "";
-	UPROPERTY()
-	int32 Name = -1;
-
-	// Serialize to JSON
-	void SerializeToJson(const TSharedPtr<FJsonObject>& OutJsonObject) const
-	{
-		OutJsonObject->SetStringField(TEXT("Name"), FString::FromInt(Name));
-		OutJsonObject->SetStringField(TEXT("Color"), ColorString);
-	}
-};
-
-USTRUCT(NotBlueprintType)
 struct FLookupGen 
 {
 	GENERATED_BODY()
@@ -62,7 +42,6 @@ public:
 	TSharedRef<SDockTab> SpawnDetailsTab(const FSpawnTabArgs& Args);
 	TSharedRef<SDockTab> SpawnViewport(const FSpawnTabArgs& Args);
 
-	void GenerateMap();
 	void SaveMap() const;
 
 	/** FGCObject interface */
@@ -78,8 +57,6 @@ private:
 
 	// static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 
-	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
-	
 	void OutputLookupJson(const FString& FilePath) const;
 	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
 	UMapObject* CreateMapObjectAsset(const FString& PackagePath, UTexture2D* Texture, const FString& LookupFilePath,const FString& MapDataFilePath,

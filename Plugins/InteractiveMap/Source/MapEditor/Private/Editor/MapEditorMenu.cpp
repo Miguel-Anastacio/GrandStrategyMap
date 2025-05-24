@@ -63,7 +63,6 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnDetailsTab(const FSpawnTabArgs& Args)
 				.OnClicked_Lambda([this]() -> FReply
 				{
 					// Button click handler logic
-					GenerateMap();
 					return FReply::Handled();
 				})
 			]
@@ -97,43 +96,6 @@ TSharedRef<SDockTab> RMapEditorMenu::SpawnViewport(const FSpawnTabArgs& Args)
 			SAssignNew(TextureViewer, STextureViewer)
 		]
 	];
-}
-
-void RMapEditorMenu::GenerateMap()
-{
-	UTexture2D* Texture = MapEditorPreset->MapEditorDetails.OriginTexture;
-	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
-	if(!Data)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to read Height Map texture"));
-		return;
-	}
-	 
-	// TODO - improve this, adjust MapGeneratorLib
-	const uint32 Height = Texture->GetSizeY();
-	const uint32 Width = Texture->GetSizeX();
-	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
-	UAtkMiscFunctionLibrary::ExecuteSlowTaskWithProgressBar(
-		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
-		{
-			// Call GenerateMap and pass the progress callback
-			// const MapGenerator::MapModeGen GenType = MapEditorPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
-			// 																			: MapGenerator::MapModeGen::FromMask;
-			// Map.GenerateMap(vector, Width, Height, MapEditorPreset->GetLookupMapData(), GenType, ProgressCallback);
-			// LookupTexture = CreateLookupTexture(Map.GetLookupTileMap());
-			// LookupLandTexture = CreateTexture(Map.GetLookupTileMap().GetLandTileMap(), Width, Height);
-			// LookupOceanTexture = CreateTexture(Map.GetLookupTileMap().GetOceanTileMap(), Width, Height);
-			// // UpdateDisplayTexture
-			// if(TextureViewer && MapEditorPreset)
-			// {
-			// 	// TextureViewer->OnTextureChanged(LookupTexture.Get());
-			// 	// TextureViewer->SetTextures(TArray<UTexture2D*>{LookupTexture.Get(), LookupLandTexture.Get(), LookupOceanTexture.Get(), Texture});
-			// }
-			//
-			// const uint32 Size = Map.GetLookupTileMap().GetCellMap().size();
-			// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
-
-		});
 }
 
 void RMapEditorMenu::SaveMap() const
@@ -180,7 +142,7 @@ void RMapEditorMenu::SaveMap() const
 	const FString LookupGenResultsFilePath = CompleteDirPath + "/MapGenParamsResults.json";
 	OutputLookupGenFile(LookupGenResultsFilePath);
 	
-	CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
+	// CreateMapObjectAsset(PackagePath, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
 	
 	FString Message;
 	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
@@ -192,60 +154,6 @@ void RMapEditorMenu::AddReferencedObjects(FReferenceCollector& Collector)
 	{
 		Collector.AddReferencedObject(MapEditorPreset);
 	}
-}
-
-// TObjectPtr<UTexture2D> RMapEditorMenu::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
-// {
-// 	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
-// 	const int Width = TileMap.Width();
-// 	const int Height = TileMap.Height();
-// 	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
-// 	// if(buffer)
-// 	// {
-// 	// 	delete buffer;
-// 	// 	buffer = nullptr;
-// 	// }
-// 	return Texture;
-// }
-
-TObjectPtr<UTexture2D> RMapEditorMenu::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
-{
-
-    // TODO - CORRECT THIS FUNCTION 
-	//Create a string containing the texture's path
-	FString PackageName = TEXT("/Game/ProceduralTextures/");
-	FString BaseTextureName = FString("LookupTexture");
-	PackageName += BaseTextureName;
- 
-	//Create the package that will store our texture
-	UPackage* Package = CreatePackage(*PackageName);
-	GLog->Log("project dir:" + FPaths::ProjectDir());
- 
-	//Create a unique name for our asset. For example, if a texture named ProcTexture already exists the editor
-	//will name the new texture as "ProcTexture_1"
-	FName TextureName = MakeUniqueObjectName(Package, UTexture2D::StaticClass(), FName(*BaseTextureName));
-	Package->FullyLoad();
- 
-	TObjectPtr<UTexture2D> NewTexture = NewObject<UTexture2D>(Package, TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
-	
-	// Set texture properties
-	NewTexture->Source.Init(Width, Height, 1, 1, TSF_BGRA8);
-	
-	// Lock the mipmap and write the buffer data
-	uint8* MipData = NewTexture->Source.LockMip(0);
-	int32 BufferSize = Width * Height * 4; // BGRA8 format
-	FMemory::Memcpy(MipData, Buffer, BufferSize);
-	NewTexture->Source.UnlockMip(0);
-	
-	// Update the texture to reflect changes
-	NewTexture->PostEditChange();
-
-	// TODO - CHANGE THIS This function should not manage the buffer memory
-	//Since we don't need access to the pixel data anymore free the memory
-	delete[] Buffer;
-	Buffer = nullptr;
-	
-	return NewTexture;
 }
 
 void RMapEditorMenu::OutputLookupJson(const FString& FilePath) const

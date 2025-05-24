@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "ThirdParty/MapGeneratorLibrary/MapGenerator/source/map/Map.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
+
 // Application that owns the editor window
 class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook, public FGCObject
 {
@@ -37,6 +38,9 @@ public: // FAssetEditorToolkit interface
 
 	void GenerateMap();
 	void RestoreTexturePreview() const;
+
+	void SaveGeneratedMap();
+	bool IsMapSaved() const;
 	
 private:
 	/** FGCObject interface */
@@ -49,8 +53,17 @@ private:
 
 	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
+	void SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
+                               													UMaterialInstanceConstant* Material) const;
+	void OutputLookupJson(const FString& FilePath) const;
+	void OutputLookupGenFile(const FString& FilePath) const;
+	void OutputStubMapDataJson(const FString& FilePath) const;
+	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
+	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
+
+	bool bMapSaved = false;
 	
 };
