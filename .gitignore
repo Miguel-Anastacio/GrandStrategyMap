@@ -79,5 +79,6 @@ enc_temp_folder/*
 # JetBrains user
 *.user
 Content/MapEditor/*
-
+Plugins/InteractiveMap/Source/ThirdParty/MapGeneratorLibrary/MapGenerator/build
+Plugins/InteractiveMap/Source/ThirdParty/MapGeneratorLibrary/MapGenerator/vs
 

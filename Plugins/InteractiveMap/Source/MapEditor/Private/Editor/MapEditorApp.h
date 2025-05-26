@@ -24,20 +24,13 @@ public: // FAssetEditorToolkit interface
 	virtual FString GetDocumentationLink() const override { return TEXT(""); }
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>& Toolkit) override {}
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) override {}
-
-	TSharedPtr<class SMapObjectViewport> GetMapViewport() const
-	{
-		return MapViewport;
-	}
-	// TSharedPtr<class STextureViewer> GetMapTexturePreview() const
-	// {
-	// 	return MapTexturePreview;
-	// }
+	
 	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
 
 	void GenerateMap();
 	void RestoreTexturePreview() const;
+	void RestoreMapGenPreset() const;
 
 	void SaveGeneratedMap();
 	bool IsMapSaved() const;

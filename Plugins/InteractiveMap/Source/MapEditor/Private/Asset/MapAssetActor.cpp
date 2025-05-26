@@ -44,9 +44,9 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 	// {
 	// 	MapMesh->SetStaticMesh(MapObject->Mesh);
 	// }
-	if(MapObject->MaterialOverride)
+	if(MapObject->GetMaterialOverride())
 	{
-		Material = UMaterialInstanceDynamic::Create(MapObject->MaterialOverride, this);
+		Material = UMaterialInstanceDynamic::Create(MapObject->GetMaterialOverride(), this);
 		MapMesh->SetMaterial(0, Material);
 	}
 	

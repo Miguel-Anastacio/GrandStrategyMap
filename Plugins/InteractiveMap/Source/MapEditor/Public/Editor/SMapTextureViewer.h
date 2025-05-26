@@ -46,6 +46,7 @@ public:
     /** Constructor and widget setup */
     void Construct(const FArguments& InArgs);
     void SetTextures(const TArray<TPair<FName, UTexture2D*>>& Textures);
+    void SetTextureAtIndex(const TPair<FName, UTexture2D*>& Texture, int index);
 
 private:
     static TSharedPtr<FSlateBrush> CreateBrush(UTexture2D* Texture, const FVector2D& Size);

@@ -66,5 +66,6 @@ void FMapEditorGenAppMode::PostActivateMode()
 {
 	TSharedPtr<FMapEditorApp> app = App.Pin();
 	app->RestoreTexturePreview();
+	app->RestoreMapGenPreset();
 	FApplicationMode::PostActivateMode();
 }

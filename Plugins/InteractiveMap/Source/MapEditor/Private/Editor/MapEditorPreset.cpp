@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Editor/MapEditorPreset.h"
-
 #include "MapEditor.h"
 #include "MapObject.h"
 
@@ -28,8 +27,6 @@ void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
             this->PostEditChange();
 		}
 	}
-
 }
-
 #endif}
 

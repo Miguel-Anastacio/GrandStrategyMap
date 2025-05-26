@@ -81,7 +81,7 @@ namespace MapGenerator
 
 	uint8_t* TileMap::ConvertTileMapToRawBuffer() const
 	{
-		uint8* buffer = new uint8[m_tiles.size() * 4];
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
 		
 		for (unsigned i = 0; i < Height(); i++)
 		{
@@ -247,19 +247,19 @@ namespace MapGenerator
 		}
 	}
 
-	uint8* TileMap::GetLandTileMap() const
+	uint8_t* TileMap::GetLandTileMap() const
 	{
 		return GetTileMapOfType(TileType::LAND);
 	}
 
-	uint8* TileMap::GetOceanTileMap() const
+	uint8_t* TileMap::GetOceanTileMap() const
 	{
 		return GetTileMapOfType(TileType::WATER);
 	}
 
-	uint8* TileMap::GetTileMapOfType(TileType type) const
+	uint8_t* TileMap::GetTileMapOfType(TileType type) const
 	{
-		uint8* buffer = new uint8[m_tiles.size() * 4];
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
 		for (unsigned i = 0; i < Height(); i++)
 		{
 			for (unsigned j = 0; j < Width(); j++)
@@ -269,8 +269,8 @@ namespace MapGenerator
 				if (m_tiles[tileIndex].type == type)
 				{
 					buffer[index] = m_tiles[tileIndex].color.B;
-					buffer[index + 1] = m_tiles[tileIndex].color.R;
-					buffer[index + 2] = m_tiles[tileIndex].color.G;
+					buffer[index + 1] = m_tiles[tileIndex].color.G;
+					buffer[index + 2] = m_tiles[tileIndex].color.R;
 					buffer[index + 3] = m_tiles[tileIndex].color.A;
 				}
 				else

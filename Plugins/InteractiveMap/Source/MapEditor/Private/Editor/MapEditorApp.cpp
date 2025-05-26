@@ -43,7 +43,7 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 		);
 	AddToolbarExtender(); 
 	
-	SetCurrentMode(MapDataEditorModeName);
+	SetCurrentMode(MapEditorGenModeName);
 }
 
 void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
@@ -112,7 +112,9 @@ void FMapEditorApp::GenerateMap()
 													LookupOceanTexture,
 													Texture
 												});
-				MapObject->SetLookupTexture(LookupTexture);
+				MapObject->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
+				MapObject->MarkPackageDirty();
+				MapObject->SetMapSaved(false);
 			}
 
 			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, LookupTexture);
@@ -121,7 +123,6 @@ void FMapEditorApp::GenerateMap()
 			
 			const uint32 Size = MapGen->GetLookupTileMap().GetCellMap().size();
 			// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
-			bMapSaved = false;
 		});
 }
 
@@ -130,6 +131,9 @@ void FMapEditorApp::RestoreTexturePreview() const
 	if(!WorkingAsset)
 		return;
 	const TArray<UTexture2D*> Textures = WorkingAsset->GetPreviewTextures();
+
+	const bool mapSaved = WorkingAsset->IsMapSaved();
+	
 	if(MapTexturePreview && Textures.Num() > 3)
 	{
 		MapTexturePreview->SetTextures(TArray
@@ -140,17 +144,27 @@ void FMapEditorApp::RestoreTexturePreview() const
 								TPair<FName, UTexture2D*>(FName("HeightMap"), Textures[3])
 							});
 	}
+	// else
+	// {
+	// 	// MapTexturePreview->SetTextureAtIndex(TPair<FName, UTexture2D*>(FName("Lookup"), WorkingAsset->LookupTexture), 0);
+	// }
 
-	if(!Textures.IsEmpty())	
+	if(!Textures.IsEmpty() && !WorkingAsset->IsMapSaved())	
 		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Textures[0]);
+}
 
+void FMapEditorApp::RestoreMapGenPreset() const
+{
+	MapGenPreset->MapEditorDetails = WorkingAsset->GetLastParamsUsed();
+	MapGenPreset->TileDataStructType = WorkingAsset->StructType;
+	MapGenPreset->OceanTileDataType = WorkingAsset->OceanStructType;
 }
 
 void FMapEditorApp::SaveGeneratedMap()
 {
 	FString DirPath = FPaths::ProjectContentDir();
 	UAtkFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
-				
+
 	FPaths::NormalizeDirectoryName(DirPath);
 	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
 	{
@@ -190,7 +204,7 @@ void FMapEditorApp::SaveGeneratedMap()
 	OutputLookupGenFile(LookupGenResultsFilePath);	
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
-	bMapSaved = true;
+	WorkingAsset->SetMapSaved(true);
 	
 	FString Message;
 	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
@@ -232,7 +246,7 @@ void FMapEditorApp::AddToolbarExtender()
 				}),
 				FCanExecuteAction().CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() != MapDataEditorModeName && bMapSaved;
+					return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
 				}),
 				FIsActionChecked::CreateLambda([this]() -> bool
 				{
@@ -309,6 +323,9 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	int32 BufferSize = Width * Height * 4; // BGRA8 format
 	FMemory::Memcpy(MipData, Buffer, BufferSize);
 	NewTexture->Source.UnlockMip(0);
+
+	NewTexture->CompressionSettings = TC_EditorIcon;
+	NewTexture->MipGenSettings = TMGS_NoMipmaps;
 	
 	// Update the texture to reflect changes
 	NewTexture->PostEditChange();
@@ -328,7 +345,7 @@ void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Te
 	MapObject->SetLookupFilePath(LookupFilePath);
 	if(Material)
 	{
-		MapObject->MaterialOverride = Material;
+		MapObject->SetMaterialOverride(Material);
 	}
 
 	if(MapGenPreset && MapGenPreset->TileDataStructType)

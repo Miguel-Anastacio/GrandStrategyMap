@@ -49,6 +49,14 @@ void STextureViewer::SetTextures(const TArray<TPair<FName, UTexture2D*>>& Textur
     }
 }
 
+void STextureViewer::SetTextureAtIndex(const TPair<FName, UTexture2D*>& Texture, int index)
+{
+    if(index >= BrushPairs.Num())
+        return;;
+    BrushPairs[index].Key = Texture.Key;
+    BrushPairs[index].Value.Get()->SetResourceObject(Texture.Value);
+}
+
 const FSlateBrush* STextureViewer::GetBrush(int index) const
 {
     if(index >= BrushPairs.Num() || index < 0)

@@ -89,6 +89,6 @@ private:
 
 	float m_cutOffHeight = 0.001f;
 	// std::unique_ptr<Texture> m_lookUpTexture;
-	uint8* GetTileMapOfType(TileType type) const;
+	uint8_t* GetTileMapOfType(TileType type) const;
 };
 }

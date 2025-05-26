@@ -107,11 +107,11 @@ namespace MapGenerator
 
 		void ColorInBorders(const Mask &mask);
 		
-		uint8* GetOceanTileMap() const;
-		uint8* GetLandTileMap() const;
+		uint8_t* GetOceanTileMap() const;
+		uint8_t* GetLandTileMap() const;
 
 	private:
-		uint8* GetTileMapOfType(TileType type) const;
+		uint8_t* GetTileMapOfType(TileType type) const;
 		std::vector<Tile> m_tiles;
 		std::unordered_map<mygal::Vector2<int>, data::Color> m_cells;
 

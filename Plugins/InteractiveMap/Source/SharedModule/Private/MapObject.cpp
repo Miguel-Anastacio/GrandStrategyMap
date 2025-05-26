@@ -91,6 +91,26 @@ const TArray<UTexture2D*>& UMapObject::GetPreviewTextures() const
 	return PreviewTextures;
 }
 
+FMapGenParams UMapObject::GetLastParamsUsed() const
+{
+	return  LastParamsUsedGen;
+}
+
+void UMapObject::SetLastParamsUsed(const FMapGenParams& Params)
+{
+	LastParamsUsedGen = Params;
+}
+
+bool UMapObject::IsMapSaved() const
+{
+	return bMapSaved;
+}
+
+void UMapObject::SetMapSaved(bool Saved)
+{
+	bMapSaved = Saved;
+}
+
 #endif
 void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 {
@@ -106,6 +126,14 @@ void UMapObject::PostLoad()
 #if WITH_EDITOR
 	LoadLookupMap(LookupFilePath);
 	SetMapDataFilePath(FilePathMapData);
+	if(PreviewTextures.IsEmpty())
+	{
+		PreviewTextures.Emplace(LookupTexture);
+	}
+	else
+	{
+		PreviewTextures[0] = LookupTexture;
+	}
 #endif
 }
 
@@ -242,24 +270,6 @@ TSet<FName> UMapObject::GetNamesOfVisualPropertiesInMapData() const
 	}
 	return Names;
 }
-
-// TMap<FName, TSet<FName>> UMapObject::VpMappedByType() const
-// {
-// 	TMap<FName, TSet<FName>> Map;
-// 	Map.Reserve(VisualPropertiesMap.Num());
-// 	for(const auto& [VpType, Property] : VisualPropertiesMap)
-// 	{
-// 		TSet<FName> Names;
-// 		Names.Reserve(Property.VisualProperties.Num());
-// 		for(const FVisualProperty& VisualProperty : Property.VisualProperties)
-// 		{
-// 			Names.Emplace(VisualProperty.Type);
-// 		}
-// 		Map.Emplace(VpType, Names);
-// 	}
-//
-// 	return Map;
-// }
 
 bool UMapObject::IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const
 {
@@ -460,4 +470,20 @@ void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
 		}
 	}
 }
+
+void UMapObject::SetMaterialOverride(UMaterialInterface* MaterialInterface)
+{
+	MaterialOverride = MaterialInterface;
+}
+
+UMaterialInterface* UMapObject::GetMaterialOverride() const
+{
+	return MaterialOverride;
+}
+
+UDataTable* UMapObject::GetVisualPropertyTypes() const
+{
+	return VisualPropertyTypesDT;
+}
+
 #endif

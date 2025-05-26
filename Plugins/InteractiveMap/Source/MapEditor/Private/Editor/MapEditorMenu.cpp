@@ -214,7 +214,7 @@ UMapObject* RMapEditorMenu::CreateMapObjectAsset(const FString& PackagePath, UTe
 	MapObject->SetLookupFilePath(LookupFilePath);
 	if(Material)
 	{
-		MapObject->MaterialOverride = Material;
+		// MapObject->MaterialOverride = Material;
 	}
 
 	if(MapEditorPreset && MapEditorPreset->TileDataStructType)

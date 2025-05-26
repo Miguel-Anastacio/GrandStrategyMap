@@ -13,7 +13,11 @@
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
+#if WITH_EDITOR
 #include "source/map/Map.h"
+#include "MapGenParamStructs.h"
+#endif
+
 
 #include "MapObject.generated.h"
 USTRUCT(BlueprintType)
@@ -141,8 +145,37 @@ class SHAREDMODULE_API UMapObject : public UObject
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
 	// ======================================================
-public:
 	
+#if WITH_EDITOR
+public:
+	TSharedPtr<MapGenerator::Map> GetMapGen() const;
+	void SetPreviewTextures(const TArray<UTexture2D*>& Textures);
+	const TArray<UTexture2D*>&  GetPreviewTextures() const;
+	FMapGenParams GetLastParamsUsed() const;
+	void SetLastParamsUsed(const FMapGenParams& Params);
+	bool IsMapSaved() const;
+	void SetMapSaved(bool Saved);
+
+	void SaveData() const;
+	void LoadDataFromFile();
+	void SetLookupTexture(UTexture2D *Texture2D);
+	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetLookupFilePath(const FString &FilePath)
+	{
+		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
+		LoadLookupMap(FilePath);
+	}
+
+	// Update In Editor only, used in Map Object Display
+	void UpdateDataInEditor(const FInstancedStruct &NewData);
+	
+	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
+	UMaterialInterface* GetMaterialOverride() const;
+
+	UDataTable* GetVisualPropertyTypes() const;
+#endif
+	
+public:	
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
@@ -154,21 +187,6 @@ public:
 	bool IsStructValid(const FInstancedStruct &Struct) const;
 	bool IsStructValid(const UScriptStruct *Struct) const;
 
-#if WITH_EDITOR
-	TSharedPtr<MapGenerator::Map> GetMapGen() const;
-	void SetPreviewTextures(const TArray<UTexture2D*>& Textures);
-	const TArray<UTexture2D*>&  GetPreviewTextures() const;
-	
-	void SaveData() const;
-	void LoadDataFromFile();
-	void SetLookupTexture(UTexture2D *Texture2D);
-	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
-	void SetLookupFilePath(const FString &FilePath)
-	{
-		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
-		LoadLookupMap(FilePath);
-	}
-#endif
 	void LoadLookupMap(const FString &FilePath);
 
 	FString GetFilePath() const
@@ -201,25 +219,9 @@ public:
 	{
 		return LookupTextureData;
 	}
-	// Update In Editor only, used in Map Object Display
-#if WITH_EDITOR
-	void UpdateDataInEditor(const FInstancedStruct &NewData);
-#endif
 	FColor GetColorFromUv(const FVector2D &Uv) const;
 
 public:
-#if WITH_EDITORONLY_DATA
-	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
-	UDataTable *VisualPropertyTypesDT;
-
-	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
-	class UDataTable *VisualPropertiesDT;
-	// Material used to apply to MapAsset in preview
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UMaterialInterface *MaterialOverride;
-#endif
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *StructType;
@@ -241,6 +243,7 @@ public:
 
 	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
 	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
+	
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 
@@ -262,11 +265,30 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
 
-	// UPROPERTY()
+	// UPROPERTY
 #if WITH_EDITORONLY_DATA
-	TSharedPtr<MapGenerator::Map> Map;
+	/** Data table for visual property types */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
+	UDataTable *VisualPropertyTypesDT;
+
+	/** Data table for visual properties */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
+	class UDataTable *VisualPropertiesDT;
+	// Material used to apply to MapAsset in preview
+	UPROPERTY(EditAnywhere, Category = "Lookup")
+	class UMaterialInterface *MaterialOverride;
+
+	// Used for Map Editor
 	UPROPERTY()
 	TArray<UTexture2D*> PreviewTextures;
+
+	UPROPERTY()
+	FMapGenParams LastParamsUsedGen;
+	
+	TSharedPtr<MapGenerator::Map> Map;
+
+	UPROPERTY()
+	bool bMapSaved = false;
 #endif
 	
 };
