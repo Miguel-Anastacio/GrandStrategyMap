@@ -40,8 +40,7 @@ public class DataBasedWidget : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"UMG",
-				
+				"UMG"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
@@ -56,6 +55,11 @@ public class DataBasedWidget : ModuleRules
 					"UnrealEd"
 				}
 			);
+		}
+		
+		if (Target.Version.MajorVersion <= 5 && Target.Version.MinorVersion <= 4)
+		{
+			PrivateDependencyModuleNames.Add("StructUtils");
 		}
 		
 		
