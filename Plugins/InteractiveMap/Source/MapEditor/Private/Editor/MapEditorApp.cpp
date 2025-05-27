@@ -75,6 +75,17 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
 	}
 }
 
+void FMapEditorApp::SaveAsset_Execute()
+{
+	FString AssetPath = WorkingAsset->GetPathName();
+	FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
+	FString DirPath = FPaths::GetPath(FullPath);
+	UE_LOG(LogTemp, Display, TEXT("%s"), *DirPath);
+	if(!WorkingAsset->IsMapSaved())
+		SaveGeneratedMap();
+	FWorkflowCentricApplication::SaveAsset_Execute();
+}
+
 void FMapEditorApp::GenerateMap()
 {
 	TSharedPtr<MapGenerator::Map> MapGen = GetWorkingAsset()->GetMapGen();
@@ -156,15 +167,21 @@ void FMapEditorApp::RestoreTexturePreview() const
 void FMapEditorApp::RestoreMapGenPreset() const
 {
 	MapGenPreset->MapEditorDetails = WorkingAsset->GetLastParamsUsed();
-	MapGenPreset->TileDataStructType = WorkingAsset->StructType;
-	MapGenPreset->OceanTileDataType = WorkingAsset->OceanStructType;
+	if(WorkingAsset->StructType)
+		MapGenPreset->TileDataStructType = WorkingAsset->StructType;
+	if(WorkingAsset->OceanStructType)
+		MapGenPreset->OceanTileDataType = WorkingAsset->OceanStructType;
 }
 
 void FMapEditorApp::SaveGeneratedMap()
 {
-	FString DirPath = FPaths::ProjectContentDir();
-	UAtkFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
-
+	// FString DirPath = FPaths::ProjectContentDir();
+	// UAtkFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
+	
+	// FString DirPath = WorkingAsset->GetPathName();
+	FString AssetPath = WorkingAsset->GetPathName();
+	FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
+	FString DirPath = FPaths::GetPath(FullPath);
 	FPaths::NormalizeDirectoryName(DirPath);
 	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
 	{
@@ -173,7 +190,7 @@ void FMapEditorApp::SaveGeneratedMap()
 	}
 	
 	const FString ProjectContentsDir = FPaths::CreateStandardFilename(FPaths::ProjectContentDir());
-	const FString CompleteDirPath =  FPaths::CreateStandardFilename(DirPath);
+	FString CompleteDirPath =  FPaths::CreateStandardFilename(DirPath);
 	
 	if(!DirPath.RemoveFromStart(ProjectContentsDir))
 	{
@@ -194,13 +211,14 @@ void FMapEditorApp::SaveGeneratedMap()
 		// return;
 	}
 
-	const FString LookupFilePath = CompleteDirPath + "/lookup.json";
+	CompleteDirPath = CompleteDirPath + "/" + TextureAsset->GetName();
+	const FString LookupFilePath = CompleteDirPath + + "_lookup.json";
 	OutputLookupJson(LookupFilePath);
 	
-	const FString StubMapDataFilePath = CompleteDirPath + "/MapDataStub.json";
+	const FString StubMapDataFilePath = CompleteDirPath + "_MapDataStub.json";
 	OutputStubMapDataJson(StubMapDataFilePath);
 	// Outputs the params and the results of the Map Lookup Created
-	const FString LookupGenResultsFilePath = CompleteDirPath + "/MapGenParamsResults.json";
+	const FString LookupGenResultsFilePath = CompleteDirPath + "_MapGenParamsResults.json";
 	OutputLookupGenFile(LookupGenResultsFilePath);	
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);

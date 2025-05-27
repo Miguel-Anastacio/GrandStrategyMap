@@ -1,5 +1,4 @@
 #include "Editor/SMapTextureViewer.h"
-#include "Editor/STextureDisplay.h"
 #include "Engine/Texture2D.h"
 
 void STextureViewer::Construct(const FArguments& InArgs)

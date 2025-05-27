@@ -48,7 +48,7 @@ struct SHAREDMODULE_API FMapGenParams
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
-	UTexture2D* OriginTexture;
+	UTexture2D* OriginTexture = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
 	bool UseHeightMap = true;

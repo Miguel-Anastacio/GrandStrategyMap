@@ -177,13 +177,7 @@ TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 	LevelViewportClient->bSetListenerPosition = false;
 	LevelViewportClient->SetRealtime(true);
 	
-	// LevelViewportClient->SetViewLocation( FVector(1000000.0f,-200.f, 0.f));
-	// LevelViewportClient->SetViewRotation( FRotator(-90.0f, -90.0f, 0.0f) );
-	// LevelViewportClient->SetViewLocationForOrbiting( FVector::ZeroVector );
 	LevelViewportClient->SetViewLocationForOrbiting(FVector(200, -150, 400));
-	// LevelViewportClient->bDisableInput = true;
-	// LevelViewportClient->inpu
-	// LevelViewportClient->SetOrthoZoom(1.0f);
 	
 	return LevelViewportClient.ToSharedRef();
 }

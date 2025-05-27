@@ -24,6 +24,7 @@ public: // FAssetEditorToolkit interface
 	virtual FString GetDocumentationLink() const override { return TEXT(""); }
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>& Toolkit) override {}
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) override {}
+	virtual void SaveAsset_Execute() override;
 	
 	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;

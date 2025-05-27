@@ -134,6 +134,7 @@ void UMapObject::PostLoad()
 	{
 		PreviewTextures[0] = LookupTexture;
 	}
+	bMapSaved = true;
 #endif
 }
 

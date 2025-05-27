@@ -287,7 +287,7 @@ private:
 	
 	TSharedPtr<MapGenerator::Map> Map;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	bool bMapSaved = false;
 #endif
 	
