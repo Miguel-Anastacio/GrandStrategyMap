@@ -1,6 +1,7 @@
 // Copyright 2025 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#include "InstancedStruct.h"
 #include "WorkflowOrientedApp/ApplicationMode.h"
 #include "WorkflowOrientedApp/WorkflowTabManager.h"
 // One mode for each set of tabs that are associated with your application

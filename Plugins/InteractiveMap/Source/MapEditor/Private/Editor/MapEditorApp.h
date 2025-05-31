@@ -34,7 +34,8 @@ public: // FAssetEditorToolkit interface
 	void RestoreMapGenPreset() const;
 
 	void SaveGeneratedMap();
-	bool IsMapSaved() const;
+	// MapDataEditor
+	void UpdateEntrySelected(int32 Index) const;
 	
 private:
 	/** FGCObject interface */
@@ -57,6 +58,8 @@ private:
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
+
+
 
 	bool bMapSaved = false;
 	

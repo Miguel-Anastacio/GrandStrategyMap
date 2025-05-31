@@ -7,3 +7,4 @@ inline FName MapEditorPreviewTabName = TEXT("MapEditorPreviewTab");
 inline FName MapDataEditorModeName = TEXT("MapDataEditorAppMode");
 inline FName MapObjectDetailsTabName = TEXT("MapObjectDetails");
 inline FName MapDataEditorTabName = TEXT("MapDataEditor");
+inline FName MapDataEntryEditorTabName = TEXT("MapDataEntryEditor");

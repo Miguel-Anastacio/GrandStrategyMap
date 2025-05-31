@@ -29,11 +29,11 @@ struct FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ID = -1;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Name = "NO NAME";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Area = "NO AREA";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Region = "NO REGION";
 
 	virtual FString ToString() const
@@ -75,16 +75,16 @@ struct FMapDataStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
 
 	virtual FString ToString() const override
@@ -289,6 +289,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bMapSaved = false;
+	UPROPERTY(EditAnywhere)
+	FInstancedStruct StructTest;
 #endif
 	
 };

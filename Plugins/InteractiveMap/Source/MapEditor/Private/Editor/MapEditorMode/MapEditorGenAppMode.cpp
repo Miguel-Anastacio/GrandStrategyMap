@@ -3,6 +3,7 @@
 
 #include "MapEditorGenTabFactory.h"
 #include "MapEditorTexturePreviewFactory.h"
+#include "MapObject.h"
 #include "Editor/MapViewportTabFactory.h"
 #include "Editor/NameDefines.h"
 #include "Editor/MapEditorApp.h"

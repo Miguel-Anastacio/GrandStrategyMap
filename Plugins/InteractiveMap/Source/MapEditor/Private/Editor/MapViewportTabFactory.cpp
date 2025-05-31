@@ -25,6 +25,7 @@ TSharedRef<SWidget> FMapViewportTabFactory::CreateTabBody(const FWorkflowTabSpaw
 	[
 		SAssignNew(App.Pin().Get()->MapViewport, SMapObjectViewport)
 		.EditingObject(App.Pin().Get()->GetWorkingAsset())
+		.app(App)
 	];
 }
 

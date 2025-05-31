@@ -32,7 +32,7 @@ public:
 	SLATE_BEGIN_ARGS(SMapObjectViewport) : _EditingObject(nullptr) {}
 
 	SLATE_ARGUMENT(UMapObject*, EditingObject)
-	SLATE_ARGUMENT(TWeakPtr<FMapObjectToolkit>, Toolkit)
+	SLATE_ARGUMENT(TWeakPtr<class FMapEditorApp>, app)
 	
 SLATE_END_ARGS()
 	
@@ -48,7 +48,7 @@ SLATE_END_ARGS()
 	virtual void OnFloatingButtonClicked() override {}
 	
 	TSoftObjectPtr<UMapObject> CustomObject = nullptr;
-	TWeakPtr<FMapObjectToolkit> MapObjectToolKit = nullptr;
+	TWeakPtr<class FMapEditorApp> MapEditorApp = nullptr;
 
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;

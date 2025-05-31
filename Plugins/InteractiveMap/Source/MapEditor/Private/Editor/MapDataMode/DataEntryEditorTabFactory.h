@@ -2,13 +2,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Editor/SMapTextureViewer.h"
 #include "WorkflowOrientedApp/WorkflowTabFactory.h"
 // One tab factory for each tab you want to have in application
-class  FMapDataEditorTabFactory : public  FWorkflowTabFactory
+class  FMapDataEntryEditorTabFactory : public  FWorkflowTabFactory
 {
 public:
-	FMapDataEditorTabFactory(TSharedPtr<class FMapEditorApp> app);
+	FMapDataEntryEditorTabFactory(TSharedPtr<class FMapEditorApp> app);
 	
 	virtual TSharedRef<SWidget> CreateTabBody(const FWorkflowTabSpawnInfo& Info) const override;
 	virtual FText GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const override;
@@ -17,4 +16,5 @@ public:
 protected:
 	TWeakPtr<class FMapEditorApp> App;
 	TWeakPtr<class FMapEditorDataAppMode> AppMode;
+	
 };

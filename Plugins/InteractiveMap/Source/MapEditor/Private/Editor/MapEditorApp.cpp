@@ -14,6 +14,7 @@
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "MapGeneratorWrapper.h"
+#include "Asset/SCustomInstancedStructList.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 
@@ -228,11 +229,6 @@ void FMapEditorApp::SaveGeneratedMap()
 	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
 }
 
-bool FMapEditorApp::IsMapSaved() const
-{
-	return bMapSaved;
-}
-
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	if(MapGenPreset)
@@ -264,7 +260,8 @@ void FMapEditorApp::AddToolbarExtender()
 				}),
 				FCanExecuteAction().CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
+					// return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
+					return true;
 				}),
 				FIsActionChecked::CreateLambda([this]() -> bool
 				{
@@ -512,4 +509,17 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 	}
 	
 	return Texture;
+}
+
+void FMapEditorApp::UpdateEntrySelected(int32 Index) const
+{
+	FName ModeName = GetCurrentMode();
+	if(ModeName == MapDataEditorModeName)
+	{
+		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+		if(DataEditorMode.IsValid())
+		{
+			DataEditorMode->EditableStructListDisplay->SetSelection(Index);
+		}
+	}
 }

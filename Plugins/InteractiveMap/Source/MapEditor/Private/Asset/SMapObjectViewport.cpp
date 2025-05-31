@@ -6,6 +6,7 @@
 #include "Asset/MapAssetActor.h"
 #include "Asset/MapObjectToolkit.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "Editor/MapEditorApp.h"
 #include "Math/Color.h"  
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,9 +25,9 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 		const int32 Index = GetIndexOfTileSelected(HitX, HitY);
 		if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
 		{
-			if(ViewportWidget->MapObjectToolKit.IsValid())
+			if(ViewportWidget->MapEditorApp.IsValid())
 			{
-				ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
+				ViewportWidget->MapEditorApp.Pin().Get()->UpdateEntrySelected(Index);
 			}
 			bTileSelected = true;
 		}
@@ -141,7 +142,7 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
-	MapObjectToolKit = InArgs._Toolkit;
+	MapEditorApp = InArgs._app;
 	if (!CustomObject.IsValid())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Editing asset is null"));

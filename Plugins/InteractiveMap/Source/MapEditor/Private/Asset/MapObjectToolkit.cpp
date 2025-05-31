@@ -157,7 +157,6 @@ void FMapObjectToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTab
 			[
 				SAssignNew(MapViewport, SMapObjectViewport)
 				.EditingObject(CustomObject.Get())
-				.Toolkit(TWeakPtr<FMapObjectToolkit>(SharedThis(this)))
 			]
 		];
 	}))

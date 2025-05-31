@@ -116,7 +116,7 @@ void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 {
 	UObject::PreSave(SaveContext);
 #if WITH_EDITOR
-	SaveData();
+	// SaveData();
 #endif
 }
 
@@ -385,6 +385,7 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	{
 		StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
+	TMap<int, FInstancedStruct> DataMap;
 	for(const auto& Data: StructData)
 	{
 		if(Data.IsValid())
@@ -393,10 +394,11 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 			int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
 			if(bOutResult)
 			{
-				MapData.Emplace(ID, Data);
+				DataMap.Emplace(ID, Data);
 			}
 		}
 	}
+	MapData = DataMap;
 }
 #endif
 
