@@ -80,7 +80,9 @@ public:
         for (TFieldIterator<FProperty> It(Item->GetScriptStruct()); It; ++It)
         {
             const FProperty *Property = *It;
-            const FName PropertyName = Property->GetFName();
+            const FText PropertyNameText = Property->GetDisplayNameText();
+            const FName PropertyName(PropertyNameText.ToString());
+
             if (ColumnName != PropertyName)
                 continue;
             else if (IsPropertyDropDown(PropertyName))
@@ -111,8 +113,6 @@ public:
 
     bool IsPropertyDropDown(const FName &PropertyName) const
     {
-        // // if(!PropertiesWithDropDown)
-        // return false;
         return PropertiesWithDropDown.Contains(PropertyName);
     }
 

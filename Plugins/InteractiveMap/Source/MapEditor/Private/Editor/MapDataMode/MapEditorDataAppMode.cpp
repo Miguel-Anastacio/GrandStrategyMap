@@ -105,15 +105,10 @@ void FMapEditorDataAppMode::PostActivateMode()
 void FMapEditorDataAppMode::Init()
 {
 	RefreshDataList();
-	// StructTypes.Empty();
-	// PropertyNamesNotEditable.Empty();
 	
 	TWeakObjectPtr<UMapObject> CustomObject = App.Pin().Get()->GetWorkingAsset();
 	StructTypes.Emplace(CustomObject.Get()->StructType);
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
-	// PropertyNamesNotEditable.Emplace("ID");
-	// PropertiesWithDropDown = CustomObject->GetNamesOfVisualPropertiesInMapData();
-	
 }
 
 void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data, int ID) 

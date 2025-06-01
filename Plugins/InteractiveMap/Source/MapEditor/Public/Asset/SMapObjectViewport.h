@@ -2,7 +2,6 @@
 #include "SCommonEditorViewportToolbarBase.h"
 #include "SEditorViewport.h"
 
-class FMapObjectToolkit;
 class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;

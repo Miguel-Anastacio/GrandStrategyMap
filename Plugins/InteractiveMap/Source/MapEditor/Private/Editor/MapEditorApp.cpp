@@ -363,7 +363,7 @@ void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Te
 		MapObject->SetMaterialOverride(Material);
 	}
 
-	if(MapGenPreset && MapGenPreset->TileDataStructType)
+	if(MapGenPreset && MapGenPreset->TileDataStructType && MapGenPreset->OceanTileDataType)
 	{
 		MapObject->StructType = MapGenPreset->TileDataStructType;
 		MapObject->OceanStructType = MapGenPreset->OceanTileDataType;

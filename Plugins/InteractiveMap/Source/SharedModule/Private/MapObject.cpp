@@ -34,20 +34,22 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
-		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(StructType, FName("ID")))
 		{
-			// THROW ERROR AT USER  FACE
-			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
+			const FText Title = FText::FromString(TEXT("Error"));
+			const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 			StructType = nullptr;
 			this->PostEditChange();
 		}
 	}
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
 	{
-		if(!OceanStructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(OceanStructType, FName("ID")))
 		{
-			// THROW ERROR AT USER  FACE
-			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
+			const FText Title = FText::FromString(TEXT("Error"));
+			const FText Message = FText::FromString(TEXT("OceanStructType must have a numeric field named ID"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 			StructType = nullptr;
 			this->PostEditChange();
 		}
@@ -57,7 +59,6 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	{
 		LoadLookupMap(LookupFilePath);
 	}
-
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertiesDT))
 	{
 		if(VisualPropertyTypesDT)

@@ -35,7 +35,7 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 		{
 			app->MapViewport->UpdatePreviewActor(ID);
 			FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
-			appMode->EntryWrapper->StructInstance = *Entry;
+			appMode->EntryWrapper->SetStructInstance(*Entry);
 			appMode->EntryWrapper->ID = ID;
 		});
 }

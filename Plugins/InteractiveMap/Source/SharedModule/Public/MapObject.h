@@ -107,22 +107,35 @@ struct FPopulation : public FBaseMapStruct
 	FName Culture = "BRA";
 };
 
+UENUM(BlueprintType)
+enum class EClimate : uint8
+{
+	Arctic,
+	Desert,
+	Jungle,
+	Swamp,
+	Savana,
+};
+
 USTRUCT(BlueprintType)
 struct FComplexMapDataStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FPopulation Population;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	EClimate Climate = EClimate::Arctic;
 
 	// virtual FString ToString() const override
 	// {
