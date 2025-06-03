@@ -11,7 +11,6 @@
 #include "../../utils/VectorWrapper.h"
 namespace MapGenerator
 {
-
 	LookupMap::LookupMap(const char *name, unsigned width, unsigned height)
 		: MapComponent(width, height, name)
 	{
@@ -90,14 +89,15 @@ namespace MapGenerator
 	
 		maskTileMap.ColorInBorders(mapMask->GetMask());
 		if(progressCallback)
-        {
-        	progressCallback(4.0f, "Color in borders");
-        }
+		{
+			progressCallback(4.0f, "Color in borders");
+		}
 		return maskTileMap;
 	}
 
 	const TileMap& LookupMap::GetTileMap() const
 	{
+		assert(m_lookUpTileMap != nullptr);
 		return *m_lookUpTileMap;
 	}
 
@@ -118,6 +118,19 @@ namespace MapGenerator
 			// ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");
 		}
 
+	}
+
+	void LookupMap::SetTileMap(const std::vector<Tile>& tiles)
+	{
+		m_lookUpTileMap = std::make_unique<TileMap>(Width(), Height(), std::move(tiles));
+	}
+
+	std::vector<Tile> LookupMap::GetTiles() const
+	{
+		if(m_lookUpTileMap == nullptr)
+			return std::vector<Tile>();
+		
+		return m_lookUpTileMap->GetTiles();
 	}
 
 }

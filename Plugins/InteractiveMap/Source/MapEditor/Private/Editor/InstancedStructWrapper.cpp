@@ -11,6 +11,9 @@ void UInstancedStructWrapper::PostEditChangeProperty(FPropertyChangedEvent& Prop
 	if(Previous.IsValid() && Previous.GetScriptStruct() != StructInstance.GetScriptStruct())
 	{
 		StructInstance = Previous;
+		const FText Title = FText::FromString(TEXT("Error: Not allowed change"));
+		const FText Message = FText::FromString(TEXT("Type of struct of data of entry cannot be changed after creation"));
+		EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 	}
 	else if(AppMode.IsValid())
 	{

@@ -10,6 +10,12 @@ namespace MapGenerator
 	TileMap::TileMap(unsigned width, unsigned height) : Dimensions(width, height), m_tiles(width * height, Tile())
 	{
 	}
+
+	TileMap::TileMap(unsigned width, unsigned height, const std::vector<Tile>& tiles)
+		: Dimensions(width, height)
+		, m_tiles(std::move(tiles))
+	{
+	}
 	void TileMap::MarkTilesNotInMaskAsVisited(const Mask &mask, TileType type)
 	{
 		auto width = Width();

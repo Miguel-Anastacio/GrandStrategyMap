@@ -1,8 +1,6 @@
 
 #include "Asset/MapObjectFactory.h"
 #include "MapObject.h"
-// #include "CustomObjectToolkit.h"
-#include "Asset/MapObjectToolkit.h"
 #include "Editor/MapEditorApp.h"
 #include "Styling/SlateStyle.h"
 

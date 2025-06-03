@@ -34,6 +34,7 @@ namespace MapGenerator
 
 	public:
 		TileMap(unsigned width, unsigned height);
+		TileMap(unsigned width, unsigned height, const std::vector<Tile>& tiles);
 		TileMap(const TileMap &) = delete;
 		TileMap &operator=(const TileMap &) = delete;
 
@@ -110,6 +111,13 @@ namespace MapGenerator
 		uint8_t* GetOceanTileMap() const;
 		uint8_t* GetLandTileMap() const;
 
+		void SetTiles(const std::vector<Tile>& tiles)
+		{
+			m_tiles = tiles;
+			ComputeCells();
+			ComputeColorsInUse();
+		}
+	
 	private:
 		uint8_t* GetTileMapOfType(TileType type) const;
 		std::vector<Tile> m_tiles;

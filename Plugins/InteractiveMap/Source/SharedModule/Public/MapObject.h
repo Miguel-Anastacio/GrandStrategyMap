@@ -9,6 +9,7 @@
 #else
 #include "InstancedStruct.h"
 #endif
+#include "MapGeneratorWrapper.h"
 #include "VisualProperties.h"
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
@@ -157,17 +158,22 @@ class SHAREDMODULE_API UMapObject : public UObject
 #endif
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
+	virtual void Serialize(FArchive& Ar) override;
 	// ======================================================
 	
 #if WITH_EDITOR
 public:
 	TSharedPtr<MapGenerator::Map> GetMapGen() const;
-	void SetPreviewTextures(const TArray<UTexture2D*>& Textures);
-	const TArray<UTexture2D*>&  GetPreviewTextures() const;
+	void SetMapGen(TSharedPtr<MapGenerator::Map> MapGen);
+	UTexture2D*  GetRootTexture() const;
+	void SetRootTexture(UTexture2D* texture);
 	FMapGenParams GetLastParamsUsed() const;
 	void SetLastParamsUsed(const FMapGenParams& Params);
 	bool IsMapSaved() const;
 	void SetMapSaved(bool Saved);
+	// Map Gen serialization -> move somewhere else
+	void SerializeMap(FArchive& Ar);
+	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 	void SaveData() const;
 	void LoadDataFromFile();
@@ -293,7 +299,7 @@ private:
 
 	// Used for Map Editor
 	UPROPERTY()
-	TArray<UTexture2D*> PreviewTextures;
+	UTexture2D* OriginTexture;
 
 	UPROPERTY()
 	FMapGenParams LastParamsUsedGen;
@@ -302,8 +308,27 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bMapSaved = false;
-	UPROPERTY(EditAnywhere)
-	FInstancedStruct StructTest;
 #endif
 	
 };
+
+static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
+
+template <typename T>
+static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& ThreadBuffers, std::vector<MapGenerator::Tile>& tiles)
+{
+	ParallelFor(NumThreads, [&](int32 Index)
+	{
+		TArray<uint8>& Buffer = ThreadBuffers[Index];
+		T Target(Buffer);
+
+		int32 ChunkSize = tiles.size() / NumThreads;
+		int32 Start = Index * ChunkSize;
+		int32 End = (Index == NumThreads - 1) ? tiles.size() : Start + ChunkSize;
+
+		for (int32 i = Start; i < End; ++i)
+		{
+			SerializeTile(tiles[i], Target);  // Manual serialize per field
+		}
+	});
+}

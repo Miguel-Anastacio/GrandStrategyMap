@@ -1,14 +1,10 @@
 #include "Asset/SMapObjectViewport.h"
 #include "AdvancedPreviewScene.h"
-#include "EngineUtils.h"
 #include "MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
-#include "Asset/MapObjectToolkit.h"
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "Editor/MapEditorApp.h"
 #include "Math/Color.h"  
-#include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
 
 FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject)

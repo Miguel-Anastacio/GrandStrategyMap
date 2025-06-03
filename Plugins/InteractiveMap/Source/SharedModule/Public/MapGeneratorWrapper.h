@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "source/map/components/LookupMap.h"
 #include "MapGeneratorWrapper.generated.h"
 
 USTRUCT(NotBlueprintType)

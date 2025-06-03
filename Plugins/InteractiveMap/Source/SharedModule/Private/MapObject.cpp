@@ -39,6 +39,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 			const FText Title = FText::FromString(TEXT("Error"));
 			const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
 			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+			// this should keep the previous values
 			StructType = nullptr;
 			this->PostEditChange();
 		}
@@ -50,7 +51,8 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 			const FText Title = FText::FromString(TEXT("Error"));
 			const FText Message = FText::FromString(TEXT("OceanStructType must have a numeric field named ID"));
 			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
-			StructType = nullptr;
+			// this should keep the previous value
+			OceanStructType = nullptr;
 			this->PostEditChange();
 		}
 	}
@@ -82,14 +84,19 @@ TSharedPtr<MapGenerator::Map> UMapObject::GetMapGen() const
 	return Map;
 }
 
-void UMapObject::SetPreviewTextures(const TArray<UTexture2D*>& Textures)
+void UMapObject::SetMapGen(TSharedPtr<MapGenerator::Map> MapGen)
 {
-	PreviewTextures = Textures;
+	Map = MapGen;
 }
 
-const TArray<UTexture2D*>& UMapObject::GetPreviewTextures() const
+UTexture2D* UMapObject::GetRootTexture() const
 {
-	return PreviewTextures;
+	return OriginTexture;
+}
+
+void UMapObject::SetRootTexture(UTexture2D* texture)
+{
+	OriginTexture = texture;
 }
 
 FMapGenParams UMapObject::GetLastParamsUsed() const
@@ -112,6 +119,126 @@ void UMapObject::SetMapSaved(bool Saved)
 	bMapSaved = Saved;
 }
 
+void UMapObject::SerializeMap(FArchive& Ar)
+{
+	int32 Version = 2;
+	Ar << Version;
+
+	if(Version >= 2)
+	{
+		unsigned width = Map->Width();  
+		unsigned height = Map->Height();
+		Ar << width;
+		Ar << height;
+
+		if(Ar.IsSaving())
+		{
+			std::vector<MapGenerator::Tile> tiles = Map->GetTiles();
+			int32 count = static_cast<int32>(tiles.size());
+			Ar << count;
+			TArray<TArray<uint8>> ThreadBuffers;
+			int32 NumThreads = 8;
+			ThreadBuffers.SetNum(NumThreads);
+
+			ParallelFor(NumThreads, [&](int32 Index)
+			{
+				TArray<uint8>& Buffer = ThreadBuffers[Index];
+				FMemoryWriter Writer(Buffer);
+
+				int32 ChunkSize = tiles.size() / NumThreads;
+				int32 Start = Index * ChunkSize;
+				int32 End = (Index == NumThreads - 1) ? tiles.size() : Start + ChunkSize;
+
+				for (int32 i = Start; i < End; ++i)
+				{
+					SerializeTile(tiles[i], Writer);  // Manual serialize per field
+				}
+			});
+			Ar << NumThreads;
+			for (int32 i = 0; i < NumThreads; ++i)
+			{
+				int32 Size = ThreadBuffers[i].Num();
+				Ar << Size;
+				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
+			}
+		}
+		
+		else
+		{
+			int count = 0;
+			int NumThreads = 0;
+			
+			Ar << count;
+			Ar << NumThreads;
+
+			std::vector<MapGenerator::Tile> tiles;
+			tiles.resize(count);
+
+			TArray<TArray<uint8>> ThreadBuffers;
+			ThreadBuffers.SetNum(NumThreads);
+
+			// Step 1: Read each chunk
+			for (int32 i = 0; i < NumThreads; ++i)
+			{
+				int32 Size = 0;
+				Ar << Size;
+				ThreadBuffers[i].SetNumUninitialized(Size);
+				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
+			}
+
+			// Step 2: Deserialize in parallel
+			ParallelFor(NumThreads, [&](int32 Index)
+			{
+				TArray<uint8>& Buffer = ThreadBuffers[Index];
+				FMemoryReader Reader(Buffer);
+
+				int32 ChunkSize = count / NumThreads;
+				int32 Start = Index * ChunkSize;
+				int32 End = (Index == NumThreads - 1) ? count : Start + ChunkSize;
+
+				for (int32 i = Start; i < End; ++i)
+				{
+					SerializeTile(tiles[i], Reader);
+				}
+			});
+			Map->SetSize(width, height);
+			Map->SetLookupTileMap(tiles);
+		}
+	}
+}
+
+void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar)
+{
+	uint8 r, g, b, a;
+	int32 cx, cy;
+	int32 type = static_cast<int32>(Tile.type); // store enum as int
+
+	if (Ar.IsSaving())
+	{
+		r = Tile.color.R;
+		g = Tile.color.G;
+		b = Tile.color.B;
+		a = Tile.color.A;
+
+		cx = Tile.centroid.x;
+		cy = Tile.centroid.y;
+	}
+
+	Ar << r << g << b << a;
+	Ar << Tile.visited;
+	Ar << type;
+	Ar << Tile.isBorder;
+	Ar << cx << cy;
+
+	if (Ar.IsLoading())
+	{
+		Tile.color = MapGenerator::Color(r, g, b, a);
+		Tile.type = static_cast<MapGenerator::TileType>(type);
+		Tile.centroid = mygal::Vector2<int>(cx, cy);
+	}
+
+}
+
 #endif
 void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 {
@@ -127,15 +254,15 @@ void UMapObject::PostLoad()
 #if WITH_EDITOR
 	LoadLookupMap(LookupFilePath);
 	SetMapDataFilePath(FilePathMapData);
-	if(PreviewTextures.IsEmpty())
-	{
-		PreviewTextures.Emplace(LookupTexture);
-	}
-	else
-	{
-		PreviewTextures[0] = LookupTexture;
-	}
 	bMapSaved = true;
+#endif
+}
+
+void UMapObject::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+#if WITH_EDITOR
+	SerializeMap(Ar);
 #endif
 }
 

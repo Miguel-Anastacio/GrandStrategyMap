@@ -32,8 +32,7 @@ namespace MapGenerator
 		{
 			return m_lookupmap->GetTileMap();
 		}
-	inline const std::vector<double>
-	NoiseMap() const
+	inline const std::vector<double> NoiseMap() const
 	{
 		assert(m_heightmap != nullptr);
 		return m_heightmap->NoiseMap();
@@ -72,6 +71,11 @@ namespace MapGenerator
 	void SaveMap(const std::string &filePath) const;
 	void Reset();
 
+	void SetSize(unsigned width, unsigned height);
+	void SetLookupTileMap(const std::vector<Tile>& tiles);
+	std::vector<Tile> GetTiles() const;
+
+	bool IsValid() const;
 
 private:
 	// void SaveMapComponent(MapComponent* component, const char* filePath, const char* message = "map component");

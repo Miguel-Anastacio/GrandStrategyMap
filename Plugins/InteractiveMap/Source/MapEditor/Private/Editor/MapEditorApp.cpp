@@ -12,7 +12,6 @@
 #include "Materials/MaterialInstanceConstant.h"
 #include "MapEditor.h"
 #include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
-#include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "MapGeneratorWrapper.h"
 #include "Asset/SCustomInstancedStructList.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
@@ -21,6 +20,7 @@
 void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManager)
 {
 	FWorkflowCentricApplication::RegisterTabSpawners(tabManager);
+	LoadPreviewTexturesFromMapMapObject(WorkingAsset);
 }
 
 void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost,
@@ -43,7 +43,6 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 		,objectsToEdit
 		);
 	AddToolbarExtender(); 
-	
 	SetCurrentMode(MapEditorGenModeName);
 }
 
@@ -51,45 +50,42 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
 {
 	if(GetCurrentMode() == MapEditorGenModeName)
 	{
-		UTexture2D* Texture2D = nullptr;
+		TWeakObjectPtr<UTexture2D> Texture2D = nullptr;
 		if(ID == FName("Lookup"))
 		{
-			Texture2D = WorkingAsset->GetPreviewTextures()[0];
+			Texture2D = GetLookupTexture();
 		}
 		else if(ID == FName("LookupLand"))
 		{
-			Texture2D = WorkingAsset->GetPreviewTextures()[1];
+			Texture2D = GetLookupLandTexture();
 		}
 		else if(ID == FName("LookupOcean"))
 		{
-			Texture2D = WorkingAsset->GetPreviewTextures()[2];
+			Texture2D = GetLookupOceanTexture();
 		}
 		else if(ID == FName("HeightMap"))
 		{
-			Texture2D = WorkingAsset->GetPreviewTextures()[3];
+			Texture2D = GetRootTexture();
 		}
 		
-		if(Texture2D)
+		if(Texture2D.IsValid())
 		{
-			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D);
+			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D.Get());
 		}
 	}
 }
 
 void FMapEditorApp::SaveAsset_Execute()
 {
-	FString AssetPath = WorkingAsset->GetPathName();
-	FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
-	FString DirPath = FPaths::GetPath(FullPath);
-	UE_LOG(LogTemp, Display, TEXT("%s"), *DirPath);
 	if(!WorkingAsset->IsMapSaved())
 		SaveGeneratedMap();
+	
 	FWorkflowCentricApplication::SaveAsset_Execute();
 }
 
 void FMapEditorApp::GenerateMap()
 {
-	TSharedPtr<MapGenerator::Map> MapGen = GetWorkingAsset()->GetMapGen();
+	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024));
 	
 	UTexture2D* Texture = MapGenPreset->MapEditorDetails.OriginTexture;
 	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
@@ -109,32 +105,24 @@ void FMapEditorApp::GenerateMap()
 			//Call GenerateMap and pass the progress callback
 			const MapGenerator::MapModeGen GenType = MapGenPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
 																						: MapGenerator::MapModeGen::FromMask;
-			MapGen->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType, ProgressCallback);
-			
-			UTexture2D* LookupTexture = CreateLookupTexture(MapGen->GetLookupTileMap());
-			UTexture2D* LookupLandTexture = CreateTexture(MapGen->GetLookupTileMap().GetLandTileMap(), Width, Height);
-			UTexture2D* LookupOceanTexture = CreateTexture(MapGen->GetLookupTileMap().GetOceanTileMap(), Width, Height);
+			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType, ProgressCallback);
+
+			// Update the preview textures
+			PreviewLookupTexture = CreateLookupTexture(TempMapGenerator->GetLookupTileMap());
+			PreviewLookupTextureLand = CreateTexture(TempMapGenerator->GetLookupTileMap().GetLandTileMap(), Width, Height);
+			PreviewLookupTextureOcean = CreateTexture(TempMapGenerator->GetLookupTileMap().GetOceanTileMap(), Width, Height);
+			PreviewRootTexture = Texture;
 			// UpdateDisplayTexture
 			if(UMapObject* MapObject = GetWorkingAsset())
 			{
-				MapObject->SetPreviewTextures(TArray<UTexture2D*>
-												{
-													LookupTexture,
-													LookupLandTexture,
-													LookupOceanTexture,
-													Texture
-												});
 				MapObject->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
 				MapObject->MarkPackageDirty();
 				MapObject->SetMapSaved(false);
 			}
 
-			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, LookupTexture);
+			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, PreviewLookupTexture);
 			
 			RestoreTexturePreview();
-			
-			const uint32 Size = MapGen->GetLookupTileMap().GetCellMap().size();
-			// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("CellMap size after gen %d"), Size);
 		});
 }
 
@@ -142,27 +130,19 @@ void FMapEditorApp::RestoreTexturePreview() const
 {
 	if(!WorkingAsset)
 		return;
-	const TArray<UTexture2D*> Textures = WorkingAsset->GetPreviewTextures();
-
-	const bool mapSaved = WorkingAsset->IsMapSaved();
-	
-	if(MapTexturePreview && Textures.Num() > 3)
+	if(MapTexturePreview)
 	{
 		MapTexturePreview->SetTextures(TArray
 							{
-								TPair<FName, UTexture2D*>(FName("Lookup"), Textures[0]),
-								TPair<FName, UTexture2D*>(FName("LookupLand"), Textures[1]),
-								TPair<FName, UTexture2D*>(FName("LookupOcean"), Textures[2]),
-								TPair<FName, UTexture2D*>(FName("HeightMap"), Textures[3])
+								TPair<FName, UTexture2D*>(FName("Lookup"), GetLookupTexture().Get()),
+								TPair<FName, UTexture2D*>(FName("LookupLand"), GetLookupLandTexture().Get()),
+								TPair<FName, UTexture2D*>(FName("LookupOcean"), GetLookupOceanTexture().Get()),
+								TPair<FName, UTexture2D*>(FName("HeightMap"), GetRootTexture().Get())
 							});
 	}
-	// else
-	// {
-	// 	// MapTexturePreview->SetTextureAtIndex(TPair<FName, UTexture2D*>(FName("Lookup"), WorkingAsset->LookupTexture), 0);
-	// }
 
-	if(!Textures.IsEmpty() && !WorkingAsset->IsMapSaved())	
-		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Textures[0]);
+	if(WorkingAsset->IsMapSaved())	
+		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, GetLookupTexture().Get());
 }
 
 void FMapEditorApp::RestoreMapGenPreset() const
@@ -176,10 +156,6 @@ void FMapEditorApp::RestoreMapGenPreset() const
 
 void FMapEditorApp::SaveGeneratedMap()
 {
-	// FString DirPath = FPaths::ProjectContentDir();
-	// UAtkFilePickerFunctionLibrary::OpenDirectoryDialog("Select Folder To Save Assets", FPaths::ProjectContentDir(), DirPath);
-	
-	// FString DirPath = WorkingAsset->GetPathName();
 	FString AssetPath = WorkingAsset->GetPathName();
 	FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
 	FString DirPath = FPaths::GetPath(FullPath);
@@ -197,11 +173,12 @@ void FMapEditorApp::SaveGeneratedMap()
 	{
 		return;
 	}
+	
 	const FString PackagePath = "/Game/" + DirPath + "/";
 	UTexture2D* TextureAsset = CreateLookupTextureAsset(PackagePath);
 	if(!TextureAsset)
 	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create material Asset"));
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create texture Asset"));
 		return;
 	}
 	
@@ -223,10 +200,13 @@ void FMapEditorApp::SaveGeneratedMap()
 	OutputLookupGenFile(LookupGenResultsFilePath);	
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
+	
+	WorkingAsset->SetRootTexture(PreviewRootTexture);
+	WorkingAsset->SetMapGen(TempMapGenerator);
 	WorkingAsset->SetMapSaved(true);
 	
 	FString Message;
-	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(false, Message);
 }
 
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
@@ -312,6 +292,8 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateLookupTexture(const MapGenerator::Ti
 
 TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
 {
+	if(!Buffer)
+		return nullptr;
 
 	// TODO - CORRECT THIS FUNCTION 
 	//Create a string containing the texture's path
@@ -353,8 +335,34 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	return NewTexture;
 }
 
+TObjectPtr<UTexture2D> FMapEditorApp::CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height)
+{
+	if(!Buffer)
+		return nullptr;
+	
+	TObjectPtr<UTexture2D> NewTexture = NewObject<UTexture2D>();
+	
+	// Set texture properties
+	NewTexture->Source.Init(Width, Height, 1, 1, TSF_BGRA8);
+	// Lock the mipmap and write the buffer data
+	uint8* MipData = NewTexture->Source.LockMip(0);
+	int32 BufferSize = Width * Height * 4; // BGRA8 format
+	FMemory::Memcpy(MipData, Buffer, BufferSize);
+	NewTexture->Source.UnlockMip(0);
+
+	NewTexture->CompressionSettings = TC_EditorIcon;
+	NewTexture->MipGenSettings = TMGS_NoMipmaps;
+
+	// TODO - CHANGE THIS This function should not manage the buffer memory
+	//Since we don't need access to the pixel data anymore free the memory
+	delete[] Buffer;
+	Buffer = nullptr;
+	
+	return NewTexture;
+}
+
 void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath,
-	const FString& MapDataFilePath, UMaterialInstanceConstant* Material) const
+                                           const FString& MapDataFilePath, UMaterialInstanceConstant* Material) const
 {
 	MapObject->SetLookupTexture(Texture);
 	MapObject->SetLookupFilePath(LookupFilePath);
@@ -369,7 +377,6 @@ void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Te
 		MapObject->OceanStructType = MapGenPreset->OceanTileDataType;
 		MapObject->SetMapDataFilePath(MapDataFilePath);
 	}
-	
 	MapObject->PostEditChange();
 }
 
@@ -377,7 +384,7 @@ void FMapEditorApp::OutputLookupJson(const FString& FilePath) const
 {
 	int32 Id = 0;
 	TArray<FTileIdData> OutputData;
-	TSharedPtr<MapGenerator::Map> Map = WorkingAsset->GetMapGen();
+	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
 	OutputData.Reserve(Map->GetLookupTileMap().GetCellMap().size());
 	for (const auto& Cell : Map->GetLookupTileMap().GetCellMap())
 	{
@@ -395,7 +402,7 @@ void FMapEditorApp::OutputLookupGenFile(const FString& FilePath) const
 {
 	int32 OceanTiles = 0;
 	int32 LandTiles = 0;
-	const MapGenerator::TileMap& TileMap = WorkingAsset->GetMapGen()->GetLookupTileMap();
+	const MapGenerator::TileMap& TileMap = TempMapGenerator->GetLookupTileMap();
 	for (const auto& [Position, Color] : TileMap.GetCellMap())
 	{
 		if(TileMap.IsTileOfType(MapGenerator::TileType::LAND, Position.x, Position.y))
@@ -420,7 +427,7 @@ void FMapEditorApp::OutputLookupGenFile(const FString& FilePath) const
 void FMapEditorApp::OutputStubMapDataJson(const FString& FilePath) const
 {
 	TArray<FInstancedStruct> Output;
-	TSharedPtr<MapGenerator::Map> Map = WorkingAsset->GetMapGen();
+	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
 	const uint32 Size = Map->GetLookupTileMap().GetCellMap().size();
 	Output.Reserve(Size);
 	uint32 Index = 0;
@@ -489,7 +496,7 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 	const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
 	FString Message;
 	bool bResult = false;
-	TSharedPtr<MapGenerator::Map> Map = WorkingAsset->GetMapGen();
+	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
 	
 	uint8_t* Buffer = Map->GetLookupTileMap().ConvertTileMapToRawBuffer();
 	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map->Width(), Map->Height(), bResult, Message);
@@ -509,6 +516,43 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 	}
 	
 	return Texture;
+}
+
+void FMapEditorApp::LoadPreviewTexturesFromMapMapObject(const UMapObject* MapObject)
+{
+	if(!MapObject)
+		return;
+
+	PreviewLookupTexture = MapObject->LookupTexture;
+	PreviewRootTexture = MapObject->GetRootTexture();
+	
+	TSharedPtr<MapGenerator::Map> MapGen = MapObject->GetMapGen();
+	if(MapGen->IsValid())
+	{
+		const MapGenerator::TileMap& TileMap = MapGen->GetLookupTileMap();
+		PreviewLookupTextureLand = CreateTexture(TileMap.GetLandTileMap(), TileMap.Width(), TileMap.Height());
+		PreviewLookupTextureOcean = CreateTexture(TileMap.GetOceanTileMap(), TileMap.Width(), TileMap.Height());
+	}
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetLookupTexture() const
+{
+	return PreviewLookupTexture;
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetLookupLandTexture() const
+{
+	return PreviewLookupTextureLand;
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetLookupOceanTexture() const
+{
+	return PreviewLookupTextureOcean;
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetRootTexture() const
+{
+	return PreviewRootTexture;
 }
 
 void FMapEditorApp::UpdateEntrySelected(int32 Index) const

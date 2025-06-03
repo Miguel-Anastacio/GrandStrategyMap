@@ -46,8 +46,10 @@ private:
 	}
 	void AddToolbarExtender();
 
+	// Map GEN section
 	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
+	static TObjectPtr<UTexture2D> CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height);
 	void SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
                                													UMaterialInstanceConstant* Material) const;
 	void OutputLookupJson(const FString& FilePath) const;
@@ -55,12 +57,24 @@ private:
 	void OutputStubMapDataJson(const FString& FilePath) const;
 	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
 	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
+	// =====================================================
+	// TexturePreview
+	void LoadPreviewTexturesFromMapMapObject(const UMapObject* MapObject);
+	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
+	TWeakObjectPtr<UTexture2D> GetLookupLandTexture() const;
+	TWeakObjectPtr<UTexture2D> GetLookupOceanTexture() const;
+	TWeakObjectPtr<UTexture2D> GetRootTexture() const;
+	
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
 
 
+	UTexture2D* PreviewLookupTexture = nullptr;
+	UTexture2D* PreviewLookupTextureLand = nullptr;
+	UTexture2D* PreviewLookupTextureOcean = nullptr;
+	UTexture2D* PreviewRootTexture = nullptr;
 
-	bool bMapSaved = false;
+	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;
 	
 };
