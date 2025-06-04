@@ -219,6 +219,6 @@ namespace MapGenerator
 
 	bool Map::IsValid() const
 	{
-		return m_lookupmap != nullptr;
+		return m_lookupmap != nullptr && m_lookupmap->GetTiles().size() > 0;
 	}
 }

@@ -115,6 +115,11 @@ void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data, int ID)
 {
 	TSharedPtr<FMapEditorApp> app = App.Pin();
 	app->GetWorkingAsset()->SetTileData(Data, ID);
+	// mark asset as changed
+	if(!app->GetWorkingAsset()->GetPackage()->IsDirty())
+	{
+		app->GetWorkingAsset()->Modify();
+	}
 	RefreshDataList();
 }
 

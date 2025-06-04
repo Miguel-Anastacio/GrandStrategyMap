@@ -130,31 +130,19 @@ void UMapObject::SerializeMap(FArchive& Ar)
 		unsigned height = Map->Height();
 		Ar << width;
 		Ar << height;
+		int32 NumThreads = 8;
+		Ar << NumThreads;
 
 		if(Ar.IsSaving())
 		{
 			std::vector<MapGenerator::Tile> tiles = Map->GetTiles();
 			int32 count = static_cast<int32>(tiles.size());
 			Ar << count;
+			
 			TArray<TArray<uint8>> ThreadBuffers;
-			int32 NumThreads = 8;
 			ThreadBuffers.SetNum(NumThreads);
-
-			ParallelFor(NumThreads, [&](int32 Index)
-			{
-				TArray<uint8>& Buffer = ThreadBuffers[Index];
-				FMemoryWriter Writer(Buffer);
-
-				int32 ChunkSize = tiles.size() / NumThreads;
-				int32 Start = Index * ChunkSize;
-				int32 End = (Index == NumThreads - 1) ? tiles.size() : Start + ChunkSize;
-
-				for (int32 i = Start; i < End; ++i)
-				{
-					SerializeTile(tiles[i], Writer);  // Manual serialize per field
-				}
-			});
-			Ar << NumThreads;
+			
+			SerializeParallel<FMemoryWriter>(NumThreads, ThreadBuffers, tiles);
 			for (int32 i = 0; i < NumThreads; ++i)
 			{
 				int32 Size = ThreadBuffers[i].Num();
@@ -162,14 +150,10 @@ void UMapObject::SerializeMap(FArchive& Ar)
 				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
 			}
 		}
-		
-		else
+		else if(Ar.IsLoading())
 		{
 			int count = 0;
-			int NumThreads = 0;
-			
 			Ar << count;
-			Ar << NumThreads;
 
 			std::vector<MapGenerator::Tile> tiles;
 			tiles.resize(count);
@@ -185,22 +169,8 @@ void UMapObject::SerializeMap(FArchive& Ar)
 				ThreadBuffers[i].SetNumUninitialized(Size);
 				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
 			}
-
-			// Step 2: Deserialize in parallel
-			ParallelFor(NumThreads, [&](int32 Index)
-			{
-				TArray<uint8>& Buffer = ThreadBuffers[Index];
-				FMemoryReader Reader(Buffer);
-
-				int32 ChunkSize = count / NumThreads;
-				int32 Start = Index * ChunkSize;
-				int32 End = (Index == NumThreads - 1) ? count : Start + ChunkSize;
-
-				for (int32 i = Start; i < End; ++i)
-				{
-					SerializeTile(tiles[i], Reader);
-				}
-			});
+			SerializeParallel<FMemoryReader>(NumThreads, ThreadBuffers, tiles);
+			
 			Map->SetSize(width, height);
 			Map->SetLookupTileMap(tiles);
 		}
@@ -244,7 +214,7 @@ void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 {
 	UObject::PreSave(SaveContext);
 #if WITH_EDITOR
-	// SaveData();
+	SaveData();
 #endif
 }
 
