@@ -307,7 +307,7 @@ private:
 	TSharedPtr<MapGenerator::Map> Map;
 
 	UPROPERTY(VisibleAnywhere)
-	bool bMapSaved = false;
+	bool bMapSaved = true;
 #endif
 	
 };

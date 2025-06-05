@@ -7,9 +7,15 @@
 // Application that owns the editor window
 class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook, public FGCObject
 {
-public: // FWorkflowCentricApplication interface
+public:
+	
+	virtual ~FMapEditorApp();
+	// FWorkflowCentricApplication interface
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& tabManager) override;
 	void InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost, UObject* InObject);
+
+	// FEditorUndoClient interface
+	virtual void PostUndo(bool bSuccess) override;
 
 	class UMapObject* GetWorkingAsset() const { return WorkingAsset; }
 	class UMapEditorPreset* GetMapGenPreset() const { return MapGenPreset; }

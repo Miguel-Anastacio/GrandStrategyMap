@@ -1,5 +1,7 @@
 // Copyright 2025 An@stacioDev All rights reserved.
 #include "MapEditorApp.h" 
+
+#include "FileHelpers.h"
 #include "Editor/NameDefines.h"
 #include "MapObject.h"
 #include "Asset/SMapObjectViewport.h"
@@ -17,6 +19,11 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 
+FMapEditorApp::~FMapEditorApp()
+{
+	GEditor->UnregisterForUndo(this);
+}
+
 void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManager)
 {
 	FWorkflowCentricApplication::RegisterTabSpawners(tabManager);
@@ -26,6 +33,7 @@ void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManage
 void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost,
 	UObject* InObject)
 {
+	GEditor->RegisterForUndo(this);
 	WorkingAsset = Cast<UMapObject>(InObject);
 	MapGenPreset = NewObject<UMapEditorPreset>();
 
@@ -44,6 +52,18 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 		);
 	AddToolbarExtender(); 
 	SetCurrentMode(MapEditorGenModeName);
+}
+
+void FMapEditorApp::PostUndo(bool bSuccess)
+{
+	FEditorUndoClient::PostUndo(bSuccess);
+	if(bSuccess)
+	{
+		LoadPreviewTexturesFromMapMapObject(WorkingAsset);
+		TempMapGenerator = WorkingAsset->GetMapGen();
+		MapGenPreset->MapEditorDetails = WorkingAsset->GetLastParamsUsed();
+		RestoreTexturePreview();
+	}
 }
 
 void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
@@ -115,9 +135,11 @@ void FMapEditorApp::GenerateMap()
 			// UpdateDisplayTexture
 			if(UMapObject* MapObject = GetWorkingAsset())
 			{
-				MapObject->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
-				MapObject->MarkPackageDirty();
+				// Causes slowdown in map gen -> maybe consider custom revert method through UI and not hook into Post Undo
+				const FScopedTransaction Transaction(NSLOCTEXT("MapEditor", "UndoEditMapGen", "Map Generated"));
+				MapObject->Modify();
 				MapObject->SetMapSaved(false);
+				MapObject->MarkPackageDirty();
 			}
 
 			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, PreviewLookupTexture);
@@ -200,13 +222,14 @@ void FMapEditorApp::SaveGeneratedMap()
 	OutputLookupGenFile(LookupGenResultsFilePath);	
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
-	
+
+	WorkingAsset->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
 	WorkingAsset->SetRootTexture(PreviewRootTexture);
 	WorkingAsset->SetMapGen(TempMapGenerator);
 	WorkingAsset->SetMapSaved(true);
 	
-	FString Message;
-	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(false, Message);
+	// FString Message;
+	UEditorLoadingAndSavingUtils::SavePackages({TextureAsset->GetPackage(), Material->GetPackage()}, true);
 }
 
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
@@ -297,8 +320,8 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 
 	// TODO - CORRECT THIS FUNCTION 
 	//Create a string containing the texture's path
-	FString PackageName = TEXT("/Game/ProceduralTextures/");
-	FString BaseTextureName = FString("LookupTexture");
+	FString PackageName = TEXT("/Game/Preview/");
+	FString BaseTextureName = FString("PreviewTexture");
 	PackageName += BaseTextureName;
  
 	//Create the package that will store our texture
@@ -307,7 +330,7 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
  
 	//Create a unique name for our asset. For example, if a texture named ProcTexture already exists the editor
 	//will name the new texture as "ProcTexture_1"
-	FName TextureName = MakeUniqueObjectName(Package, UTexture2D::StaticClass(), FName(*BaseTextureName));
+	FName TextureName = MakeUniqueObjectName(Package, UTexture2D::StaticClass(), FName(*BaseTextureName), EUniqueObjectNameOptions::GloballyUnique);
 	Package->FullyLoad();
  
 	TObjectPtr<UTexture2D> NewTexture = NewObject<UTexture2D>(Package, TextureName, RF_Public | RF_Standalone | RF_MarkAsRootSet);
@@ -471,15 +494,7 @@ UMaterialInstanceConstant* FMapEditorApp::CreateMaterialInstanceAsset(UTexture2D
 {
 	if(MapGenPreset && MapGenPreset->Material)
 	{
-		const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "MI_LookupMaterial", UMaterialInstance::StaticClass());
-		FString Message;
-		bool bResult = false;
-		UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAsset(PackagePath + AssetPath, UMaterialInstanceConstant::StaticClass(), nullptr, bResult, Message);
-		if(!Asset)
-		{
-			return nullptr;
-		}
-
+		UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UMaterialInstanceConstant::StaticClass(), "MI_LookupMaterial");
 		UMaterialInstanceConstant* MaterialInstance= Cast<UMaterialInstanceConstant>(Asset);
 		MaterialInstance->SetParentEditorOnly(MapGenPreset->Material);
 		MaterialInstance->SetTextureParameterValueEditorOnly(FName("DynamicTexture"), Texture);
@@ -493,13 +508,12 @@ UMaterialInstanceConstant* FMapEditorApp::CreateMaterialInstanceAsset(UTexture2D
 
 UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) const
 {
-	const auto AssetPath = UAtkAssetCreatorFunctionLibrary::CreateUniqueAssetNameInPackage(PackagePath, "LookupTexture", UTexture2D::StaticClass());
+	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
+	uint8_t* Buffer = Map->GetLookupTileMap().ConvertTileMapToRawBuffer();
+	
 	FString Message;
 	bool bResult = false;
-	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
-	
-	uint8_t* Buffer = Map->GetLookupTileMap().ConvertTileMapToRawBuffer();
-	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath + AssetPath, Buffer, Map->Width(), Map->Height(), bResult, Message);
+	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath, "LookupTexture", Buffer, Map->Width(), Map->Height(), bResult, Message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 	
 	if(Texture)
