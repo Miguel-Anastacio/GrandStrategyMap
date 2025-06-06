@@ -262,33 +262,54 @@ namespace MapGenerator
 	{
 		return GetTileMapOfType(TileType::WATER);
 	}
+	
+	uint8_t* TileMap::GetBordersTileMap(const data::Color borderColor, const data::Color notBorderColor) const
+	{
+		return GetTileMap([](const Tile &tile)
+			{
+				return tile.isBorder;
+			}, borderColor, notBorderColor);
+	}
 
 	uint8_t* TileMap::GetTileMapOfType(TileType type) const
 	{
-		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
-		for (unsigned i = 0; i < Height(); i++)
-		{
-			for (unsigned j = 0; j < Width(); j++)
+		return GetTileMap([type](const Tile &tile)
 			{
-				const int tileIndex = (i * Width() + j);
-				const int index = tileIndex * 4;
-				if (m_tiles[tileIndex].type == type)
-				{
-					buffer[index] = m_tiles[tileIndex].color.B;
-					buffer[index + 1] = m_tiles[tileIndex].color.G;
-					buffer[index + 2] = m_tiles[tileIndex].color.R;
-					buffer[index + 3] = m_tiles[tileIndex].color.A;
-				}
-				else
-				{
-					buffer[index] = 0;
-					buffer[index + 1] = 0;
-					buffer[index + 2] = 0;
-					buffer[index + 3] = 0;
-				}
-			}
-		}
+				return tile.type == type;
+			});
+	}
 
+	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
+	{
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		forEachTile([&](const Tile& tile, unsigned bufferIndex)
+		{
+			if (predicate(tile))
+			{
+				fillBufferPosWithColor(bufferIndex, buffer, tile.color);
+			}
+			else
+			{
+				fillBufferPosWithColor(bufferIndex, buffer, data::Color(0, 0, 0, 0));
+			}
+		});
+		return buffer;
+	}
+
+	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const
+	{
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		forEachTile([&](const Tile& tile, unsigned bufferIndex)
+		{
+			if (predicate(tile))
+			{
+				fillBufferPosWithColor(bufferIndex, buffer, colorOnFullfil);
+			}
+			else
+			{
+				fillBufferPosWithColor(bufferIndex, buffer, colorOnNotFullfil);
+			}
+		});
 		return buffer;
 	}
 
@@ -305,6 +326,13 @@ namespace MapGenerator
 		}	*/
 	}
 
+	void TileMap::fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color)
+	{
+		buffer[index]	  = color.B;
+		buffer[index + 1] = color.G;
+		buffer[index + 2] = color.R;
+		buffer[index + 3] = color.A;
+	}
 	std::ostream &operator<<(std::ostream &os, const TileMap &map)
 	{
 		int index = 0;

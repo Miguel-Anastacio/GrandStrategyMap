@@ -70,6 +70,7 @@ private:
 	TWeakObjectPtr<UTexture2D> GetLookupLandTexture() const;
 	TWeakObjectPtr<UTexture2D> GetLookupOceanTexture() const;
 	TWeakObjectPtr<UTexture2D> GetRootTexture() const;
+	TWeakObjectPtr<UTexture2D> GetBorderTexture() const;
 	
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
@@ -79,6 +80,7 @@ private:
 	UTexture2D* PreviewLookupTexture = nullptr;
 	UTexture2D* PreviewLookupTextureLand = nullptr;
 	UTexture2D* PreviewLookupTextureOcean = nullptr;
+	UTexture2D* PreviewBorderTexture = nullptr;
 	UTexture2D* PreviewRootTexture = nullptr;
 
 	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;

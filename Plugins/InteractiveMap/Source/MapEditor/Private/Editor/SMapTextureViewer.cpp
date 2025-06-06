@@ -33,6 +33,11 @@ void STextureViewer::Construct(const FArguments& InArgs)
        [
           CreateImagePreview(3)
        ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+          CreateImagePreview(4)
+       ]
     ];
 }
 

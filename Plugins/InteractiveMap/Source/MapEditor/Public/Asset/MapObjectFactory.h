@@ -36,7 +36,7 @@ public:
 
 	virtual const FSlateBrush* GetThumbnailBrush(const FAssetData& InAssetData, const FName InClassName) const override
 	{
-		return FInteractiveMapEditorModule::CustomAssetsEditorSlateStyle->GetBrush(FName("CustomAsset.Thumbnail"));
+		return FAppStyle::GetBrush("ClassThumbnail.Object");
 	}
 
 	virtual EAssetCommandResult OpenAssets(const FAssetOpenArgs& OpenArgs) const override;

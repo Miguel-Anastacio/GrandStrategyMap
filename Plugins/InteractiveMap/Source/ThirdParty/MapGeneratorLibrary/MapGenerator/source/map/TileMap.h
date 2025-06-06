@@ -110,6 +110,7 @@ namespace MapGenerator
 		
 		uint8_t* GetOceanTileMap() const;
 		uint8_t* GetLandTileMap() const;
+		uint8_t* GetBordersTileMap(const data::Color borderColor = data::Color(0, 0, 0, 255), const data::Color notBorderColor = data::Color(255, 255, 255, 255)) const;
 
 		void SetTiles(const std::vector<Tile>& tiles)
 		{
@@ -120,6 +121,8 @@ namespace MapGenerator
 	
 	private:
 		uint8_t* GetTileMapOfType(TileType type) const;
+		uint8_t* GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const;
+		uint8_t* GetTileMap(std::function<bool(const Tile&)> predicate) const;
 		std::vector<Tile> m_tiles;
 		std::unordered_map<mygal::Vector2<int>, data::Color> m_cells;
 
@@ -134,6 +137,21 @@ namespace MapGenerator
 				return false;
 			}
 			return true;
+		}
+
+		static void fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color);
+		template <typename Func>
+		void forEachTile(Func&& func) const
+		{
+			for (unsigned i = 0; i < Height(); i++)
+			{
+				for (unsigned j = 0; j < Width(); j++)
+				{
+					const int tileIndex = (i * Width() + j);
+					const int index = tileIndex * 4;
+					func(m_tiles[tileIndex], index);
+				}
+			}
 		}
 	};
 

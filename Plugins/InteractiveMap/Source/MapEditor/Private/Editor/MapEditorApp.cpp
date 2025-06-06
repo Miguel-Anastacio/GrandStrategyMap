@@ -87,6 +87,10 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
 		{
 			Texture2D = GetRootTexture();
 		}
+		else if(ID == FName("Borders"))
+		{
+			Texture2D = GetBorderTexture();
+		}
 		
 		if(Texture2D.IsValid())
 		{
@@ -131,8 +135,9 @@ void FMapEditorApp::GenerateMap()
 			PreviewLookupTexture = CreateLookupTexture(TempMapGenerator->GetLookupTileMap());
 			PreviewLookupTextureLand = CreateTexture(TempMapGenerator->GetLookupTileMap().GetLandTileMap(), Width, Height);
 			PreviewLookupTextureOcean = CreateTexture(TempMapGenerator->GetLookupTileMap().GetOceanTileMap(), Width, Height);
+			PreviewBorderTexture = CreateTexture(TempMapGenerator->GetLookupTileMap().GetBordersTileMap(), Width, Height);
 			PreviewRootTexture = Texture;
-			// UpdateDisplayTexture
+			
 			if(UMapObject* MapObject = GetWorkingAsset())
 			{
 				// Causes slowdown in map gen -> maybe consider custom revert method through UI and not hook into Post Undo
@@ -159,6 +164,7 @@ void FMapEditorApp::RestoreTexturePreview() const
 								TPair<FName, UTexture2D*>(FName("Lookup"), GetLookupTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("LookupLand"), GetLookupLandTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("LookupOcean"), GetLookupOceanTexture().Get()),
+								TPair<FName, UTexture2D*>(FName("Borders"), GetBorderTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("HeightMap"), GetRootTexture().Get())
 							});
 	}
@@ -546,6 +552,7 @@ void FMapEditorApp::LoadPreviewTexturesFromMapMapObject(const UMapObject* MapObj
 		const MapGenerator::TileMap& TileMap = MapGen->GetLookupTileMap();
 		PreviewLookupTextureLand = CreateTexture(TileMap.GetLandTileMap(), TileMap.Width(), TileMap.Height());
 		PreviewLookupTextureOcean = CreateTexture(TileMap.GetOceanTileMap(), TileMap.Width(), TileMap.Height());
+		PreviewBorderTexture = CreateTexture(TileMap.GetBordersTileMap(), TileMap.Width(), TileMap.Height());
 	}
 }
 
@@ -567,6 +574,11 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetLookupOceanTexture() const
 TWeakObjectPtr<UTexture2D> FMapEditorApp::GetRootTexture() const
 {
 	return PreviewRootTexture;
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetBorderTexture() const
+{
+	return PreviewBorderTexture;
 }
 
 void FMapEditorApp::UpdateEntrySelected(int32 Index) const
