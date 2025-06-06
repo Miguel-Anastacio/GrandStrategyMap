@@ -30,6 +30,8 @@ namespace MapGenerator
 										 std::function<void(float, std::string_view)> progressCallback = nullptr);
 
 		const TileMap& GetTileMap() const;
+		std::vector<Tile> GetTiles() const;
+		void SetTileMap(const std::vector<Tile>& tiles);
 
 	private:
 		void computeDiagramFromMask(const LookupFeatures &data, MapMask *mask, std::shared_ptr<Diagram> &diagram,  std::function<void(float, std::string_view)> progressCallback = nullptr) const;

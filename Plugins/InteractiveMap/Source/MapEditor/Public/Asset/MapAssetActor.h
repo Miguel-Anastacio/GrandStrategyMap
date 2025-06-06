@@ -19,6 +19,8 @@ public:
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* Material;
+
+	void SetMaterial(UTexture2D* Texture, UMaterial* ParentMaterial);
 protected:
 	AMapAsset();
 	virtual void BeginPlay() override;

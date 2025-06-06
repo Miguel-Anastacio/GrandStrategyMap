@@ -20,10 +20,12 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "SlateWidgets/DropDownSelectorWidget.h"
 #include "SlateWidgets/InstancedStructList.h"
+#include "MapObject.h"
 
 /**
  * Generic row for a generic list. Pass in structure type.
  */
+// template <typename  T>
 class SCustomInstancedStructListRow : public SInstancedStructListRow
 {
 public:
@@ -32,6 +34,7 @@ public:
     SLATE_ARGUMENT(const TSet<FName> *, PropertiesWithDropDown)
     SLATE_ARGUMENT(TSharedPtr<FInstancedStruct>, Item)
     SLATE_ARGUMENT(TWeakObjectPtr<UMapObject>, MapObject)
+    // SLATE_ARGUMENT(T*, DataObject)
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
     SLATE_END_ARGS()
 
@@ -46,10 +49,11 @@ public:
                      .AvailableTags(AvailableTagsOfType)
                      .OnTagChanged_Lambda([this](const FName &Name, const FName &NewTag)
                                           {
-                 if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
-                 {
-                     ItemChanged.ExecuteIfBound(*Item);
-                 } })
+                                             if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
+                                             {
+                                                 ItemChanged.ExecuteIfBound(*Item);
+                                             }
+                                          })
                      .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
                      .PropertyName(Property->GetFName())];
     }
@@ -76,16 +80,19 @@ public:
         for (TFieldIterator<FProperty> It(Item->GetScriptStruct()); It; ++It)
         {
             const FProperty *Property = *It;
-            const FName PropertyName = Property->GetFName();
+            const FText PropertyNameText = Property->GetDisplayNameText();
+            const FName PropertyName(PropertyNameText.ToString());
+
             if (ColumnName != PropertyName)
                 continue;
             else if (IsPropertyDropDown(PropertyName))
             {
-                return DisplayDropdownProperty(Property);
+                return DisplayNotEditableProperty(Property);
             }
             else if (IsPropertyEditable(PropertyName))
             {
-                return DisplayEditableProperty(Property);
+                // return DisplayEditableProperty(Property);
+                return DisplayNotEditableProperty(Property);
             }
             else
             {
@@ -106,8 +113,6 @@ public:
 
     bool IsPropertyDropDown(const FName &PropertyName) const
     {
-        // // if(!PropertiesWithDropDown)
-        // return false;
         return PropertiesWithDropDown.Contains(PropertyName);
     }
 
@@ -130,8 +135,8 @@ public:
     {
     }
     SLATE_DEFAULT_SLOT(FArguments, Content)
-    SLATE_ARGUMENT(const TArray<TSharedPtr<FInstancedStruct>> *, ListSource)
-    SLATE_ARGUMENT(const TArray<UScriptStruct *> *, StructTypes)
+    SLATE_ARGUMENT(TArray<TSharedPtr<FInstancedStruct>> *, ListSource)
+    SLATE_ARGUMENT(TArray<UScriptStruct *> *, StructTypes)
     SLATE_ARGUMENT(float, ItemHeight)
     SLATE_ARGUMENT(const TSet<FName> *, NotEditableProperties)
     SLATE_ARGUMENT(const TSet<FName> *, PropertiesWithDropdown)

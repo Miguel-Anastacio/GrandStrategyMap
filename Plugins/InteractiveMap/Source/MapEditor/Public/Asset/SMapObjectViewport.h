@@ -2,7 +2,6 @@
 #include "SCommonEditorViewportToolbarBase.h"
 #include "SEditorViewport.h"
 
-class FMapObjectToolkit;
 class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;
@@ -32,12 +31,13 @@ public:
 	SLATE_BEGIN_ARGS(SMapObjectViewport) : _EditingObject(nullptr) {}
 
 	SLATE_ARGUMENT(UMapObject*, EditingObject)
-	SLATE_ARGUMENT(TWeakPtr<FMapObjectToolkit>, Toolkit)
+	SLATE_ARGUMENT(TWeakPtr<class FMapEditorApp>, app)
 	
 SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
 	void UpdatePreviewActor(int32 ID) const;
+	void UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	
@@ -47,7 +47,7 @@ SLATE_END_ARGS()
 	virtual void OnFloatingButtonClicked() override {}
 	
 	TSoftObjectPtr<UMapObject> CustomObject = nullptr;
-	TWeakPtr<FMapObjectToolkit> MapObjectToolKit = nullptr;
+	TWeakPtr<class FMapEditorApp> MapEditorApp = nullptr;
 
 protected:
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;

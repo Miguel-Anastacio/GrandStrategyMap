@@ -119,7 +119,7 @@ void UDynamicTextureComponent::UpdateTexture(bool bFreeData)
 	struct FUpdateTextureRegionsData
 	{
 		FTexture2DResource* Texture2DResource;
-		FRHITexture2D* TextureRHI;
+		FRHITexture* TextureRHI;
 		int32 MipIndex;
 		uint32 NumRegions;
 		FUpdateTextureRegion2D* Regions;

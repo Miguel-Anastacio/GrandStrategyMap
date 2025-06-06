@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Editor/MapEditorPreset.h"
-
 #include "MapEditor.h"
 #include "MapObject.h"
+#include "BlueprintLibrary/PropertyUtilityFunctionLibrary.h"
 
 #if WITH_EDITOR
 UMapEditorPreset::UMapEditorPreset()
@@ -20,16 +20,15 @@ void UMapEditorPreset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
 	if(TileDataStructType)
 	{
-		if(!TileDataStructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(TileDataStructType, FName("ID")))
 		{
-			// THROW ERROR AT USER  FACE
-            UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
-            TileDataStructType = nullptr;
-            this->PostEditChange();
+			const FText Title = FText::FromString(TEXT("Error"));
+			const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+			TileDataStructType = nullptr;
+			this->PostEditChange();
 		}
 	}
-
 }
-
-#endif}
+#endif
 

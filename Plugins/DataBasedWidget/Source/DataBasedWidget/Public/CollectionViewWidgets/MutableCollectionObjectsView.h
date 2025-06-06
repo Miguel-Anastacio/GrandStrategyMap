@@ -31,7 +31,7 @@ public:
 	}
 
 protected:
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"), Category = Data)
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"), Category = Data, VisibleAnywhere)
 	FInstancedStruct StructInstance;
 };
 

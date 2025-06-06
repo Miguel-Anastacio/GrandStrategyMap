@@ -21,7 +21,7 @@
 			"LoadingPhase": "PreDefault",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG",
+				"UMG"
 			],
 			"PlatformAllowList": [
 				"Win64"

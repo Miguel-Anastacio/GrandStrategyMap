@@ -1,125 +1,89 @@
 #include "Editor/SMapTextureViewer.h"
-
-#include "Editor/STextureDisplay.h"
 #include "Engine/Texture2D.h"
 
 void STextureViewer::Construct(const FArguments& InArgs)
 {
-    for(int i = 0; i < 4; i++)
+    TextureSelected = InArgs._OnTextureSelected;
+    int test = 0;
+    for(auto& pair : BrushPairs)
     {
-        Brushes.Add(CreateBrush(nullptr, FVector2D(128, 128)));
+        pair.Value = CreateBrush(nullptr, FVector2D(128, 128));
+        pair.Key = FName(*FString::Printf(TEXT("Test%d"), test++));
     }
-    
-    // MainBrush = Brushes[0];
     ChildSlot
     [
-       SNew(SHorizontalBox)
+        SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[0]);
-                   return FReply::Handled();
-               })
-               [
-                   SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(0);
-                  })
-               ]
-            ]
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(SButton)
-                .OnClicked_Lambda([this]() -> FReply
-                {
-                    TextureDisplay->SetMainBrush(Brushes[1]);
-                  return FReply::Handled();
-                })
-               [
-                   SNew(SImage)
-                   .Image_Lambda([this]() -> const FSlateBrush*
-                   {
-                       return GetBrush(1);
-                   })
-               ]
-            ]
-            + SVerticalBox::Slot()
-           .AutoHeight()
-           [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[2]);
-                 return FReply::Handled();
-               })
-              [
-                  SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(2);
-                  })
-              ]
-           ]
-            + SVerticalBox::Slot()
-           .AutoHeight()
-           [
-               SNew(SButton)
-               .OnClicked_Lambda([this]() -> FReply
-               {
-                   TextureDisplay->SetMainBrush(Brushes[3]);
-                   return FReply::Handled();
-               })
-              [
-                  SNew(SImage)
-                  .Image_Lambda([this]() -> const FSlateBrush*
-                  {
-                      return GetBrush(3);
-                  })
-              ]
-           ]
+            CreateImagePreview(0)
         ]
         + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SAssignNew(TextureDisplay, STextureDisplay)
+            CreateImagePreview(1)
         ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+           CreateImagePreview(2)
+       ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+          CreateImagePreview(3)
+       ]
+        + SHorizontalBox::Slot()
+       .AutoWidth()
+       [
+          CreateImagePreview(4)
+       ]
     ];
 }
 
-FReply STextureViewer::ChangeImageSelected()
-{
-    // MainImage = Images[0];
-    // if()
-    return FReply::Handled();
-}
 
-void STextureViewer::OnTextureChanged(UTexture2D* texture)
-{
-    TextureDisplay->SetMainBrush(texture);
-}
-
-void STextureViewer::SetTextures(const TArray<UTexture2D*>& Textures)
+void STextureViewer::SetTextures(const TArray<TPair<FName, UTexture2D*>>& Textures)
 {
     for(int i = 0; i < Textures.Num(); i++)
     {
-        if(i >= Brushes.Num())
+        if(i >= BrushPairs.Num())
             break;
-        Brushes[i]->SetResourceObject(Textures[i]);
+        BrushPairs[i].Key = Textures[i].Key;
+        BrushPairs[i].Value.Get()->SetResourceObject(Textures[i].Value);
     }
+}
+
+void STextureViewer::SetTextureAtIndex(const TPair<FName, UTexture2D*>& Texture, int index)
+{
+    if(index >= BrushPairs.Num())
+        return;;
+    BrushPairs[index].Key = Texture.Key;
+    BrushPairs[index].Value.Get()->SetResourceObject(Texture.Value);
 }
 
 const FSlateBrush* STextureViewer::GetBrush(int index) const
 {
-    return Brushes[index].Get();
+    if(index >= BrushPairs.Num() || index < 0)
+        return nullptr;
+    
+    return BrushPairs[index].Value.Get();
 }
+
+ TSharedRef<SButtonWithImage> STextureViewer::CreateImagePreview(int index) const
+{
+    return SNew(SButtonWithImage)
+     .ID(BrushPairs[index].Key)
+     .OnClicked_Lambda([this, index]() -> FReply
+     {
+         TextureSelected.ExecuteIfBound(BrushPairs[index].Key);
+         return FReply::Handled();
+     })
+     .Image_Lambda([this, index]() -> const FSlateBrush*
+     {
+           return GetBrush(index);
+     });
+}
+
 
 TSharedPtr<FSlateBrush> STextureViewer::CreateBrush(UTexture2D* Texture, const FVector2D& Size)
 {
@@ -131,4 +95,20 @@ TSharedPtr<FSlateBrush> STextureViewer::CreateBrush(UTexture2D* Texture, const F
     Brush->DrawAs = ESlateBrushDrawType::Image;
     Brush->ImageSize = Size;
     return Brush;
+}
+
+void SButtonWithImage::Construct(const FArguments& InArgs)
+{
+    ImageAttr = InArgs._Image;
+    OnClickedDelegate = InArgs._OnClicked;
+
+    ChildSlot
+    [
+        SNew(SButton)
+        .OnClicked(OnClickedDelegate)
+        [
+            SNew(SImage)
+            .Image(ImageAttr)
+        ]
+    ];
 }

@@ -65,7 +65,7 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	AssetGridPanel->Modify();
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
 	TArray<FVisualPropertyType*> PropTypes;
-	if(UAtkDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->VisualPropertyTypesDT, PropTypes))
+	if(UAtkDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->GetVisualPropertyTypes(), PropTypes))
 	{
 		int RowIndex = 0;
 		int ColumnIndex = 0;

@@ -33,12 +33,12 @@ public class MapEditor : ModuleRules
 				"UtilityModule",
 				"UtilityModuleEditor",
 				"StructUtils",
-				"SharedModule", "Engine"
+				"SharedModule", 
+				"Engine"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
 			
-		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -58,10 +58,10 @@ public class MapEditor : ModuleRules
 				"EditorStyle",
 				"WorkspaceMenuStructure",
 				"PropertyEditor",
+				"MapGeneratorLibrary"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "MapGenerator", "MapGeneratord.lib"));
 		
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]

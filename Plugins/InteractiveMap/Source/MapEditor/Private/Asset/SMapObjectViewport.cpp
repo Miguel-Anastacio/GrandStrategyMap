@@ -1,13 +1,10 @@
 #include "Asset/SMapObjectViewport.h"
 #include "AdvancedPreviewScene.h"
-#include "EngineUtils.h"
 #include "MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
-#include "Asset/MapObjectToolkit.h"
-#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
+#include "Editor/MapEditorApp.h"
 #include "Math/Color.h"  
-#include "HAL/PlatformApplicationMisc.h"
 #include "Kismet/GameplayStatics.h"
 
 FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject)
@@ -24,9 +21,9 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 		const int32 Index = GetIndexOfTileSelected(HitX, HitY);
 		if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
 		{
-			if(ViewportWidget->MapObjectToolKit.IsValid())
+			if(ViewportWidget->MapEditorApp.IsValid())
 			{
-				ViewportWidget->MapObjectToolKit.Pin().Get()->UpdateTreeSelection(Index);
+				ViewportWidget->MapEditorApp.Pin().Get()->UpdateEntrySelected(Index);
 			}
 			bTileSelected = true;
 		}
@@ -123,10 +120,12 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 Scre
 			MapAssetRef = MapAsset;
 		}
 		const FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
-		
-		MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
-		return MapAsset->MapObject->FindID(Color);
 
+		if(MapAsset->Material)
+		{
+			MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
+			return MapAsset->MapObject->FindID(Color);
+		}
 	}
 	return -1;
 }
@@ -139,7 +138,7 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	
 	SEditorViewport::Construct(SEditorViewport::FArguments());
 	
-	MapObjectToolKit = InArgs._Toolkit;
+	MapEditorApp = InArgs._app;
 	if (!CustomObject.IsValid())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Editing asset is null"));
@@ -157,6 +156,11 @@ void SMapObjectViewport::UpdatePreviewActor(int32 ID) const
 	MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
 }
 
+void SMapObjectViewport::UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const
+{
+	MapAsset->SetMaterial(Texture2D, ParentMaterial);
+}
+
 void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SEditorViewport::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
@@ -170,13 +174,7 @@ TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 	LevelViewportClient->bSetListenerPosition = false;
 	LevelViewportClient->SetRealtime(true);
 	
-	// LevelViewportClient->SetViewLocation( FVector(1000000.0f,-200.f, 0.f));
-	// LevelViewportClient->SetViewRotation( FRotator(-90.0f, -90.0f, 0.0f) );
-	// LevelViewportClient->SetViewLocationForOrbiting( FVector::ZeroVector );
 	LevelViewportClient->SetViewLocationForOrbiting(FVector(200, -150, 400));
-	// LevelViewportClient->bDisableInput = true;
-	// LevelViewportClient->inpu
-	// LevelViewportClient->SetOrthoZoom(1.0f);
 	
 	return LevelViewportClient.ToSharedRef();
 }

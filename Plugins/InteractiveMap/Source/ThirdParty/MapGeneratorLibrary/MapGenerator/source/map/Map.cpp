@@ -179,6 +179,27 @@ namespace MapGenerator
 		// m_terrainTypes.
 		m_cutOffHeight = 0.01f;
 	}
+	
+	void Map::SetSize(unsigned width, unsigned height)
+	{
+		Reset();
+		setDimensions(width, height);
+	}
+	void Map::SetLookupTileMap(const std::vector<Tile>& tiles)
+	{
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
+		m_lookupmap->SetTileMap(tiles);
+	}
+	
+	std::vector<Tile> Map::GetTiles() const
+	{
+		if(m_lookupmap == nullptr)
+		{
+			return std::vector<Tile>();
+		}
+
+		return m_lookupmap->GetTiles();
+	}
 
 	void Map::SaveMapComponent(MapComponent *component, const std::string &filePath, const char *message) const
 	{
@@ -194,5 +215,10 @@ namespace MapGenerator
 			component->Clear();
 		else
 			std::cout << "ERROR - clear " << message << std::endl;
+	}
+
+	bool Map::IsValid() const
+	{
+		return m_lookupmap != nullptr && m_lookupmap->GetTiles().size() > 0;
 	}
 }

@@ -1,7 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Asset/MapAssetActor.h"
-
 #include "MapObject.h"
+#include "Materials/MaterialInstanceConstant.h"
+
+void AMapAsset::SetMaterial(UTexture2D* Texture, UMaterial* ParentMaterial)
+{
+	UMaterialInstanceConstant* MaterialInstance = NewObject<UMaterialInstanceConstant>();
+	MaterialInstance->SetParentEditorOnly(ParentMaterial);
+	MaterialInstance->SetTextureParameterValueEditorOnly(FName("DynamicTexture"), Texture);
+	MaterialInstance->SetTextureParameterValueEditorOnly(FName("LookupTexture"), Texture);
+	Material = UMaterialInstanceDynamic::Create(MaterialInstance, this);
+	MapMesh->SetMaterial(0, Material);
+}
 
 AMapAsset::AMapAsset()
 {
@@ -30,13 +40,9 @@ void AMapAsset::OnConstruction(const FTransform& Transform)
 		return;
 
 #if WITH_EDITOR
-	// if(MapObject->Mesh)
-	// {
-	// 	MapMesh->SetStaticMesh(MapObject->Mesh);
-	// }
-	if(MapObject->MaterialOverride)
+	if(MapObject->GetMaterialOverride())
 	{
-		Material = UMaterialInstanceDynamic::Create(MapObject->MaterialOverride, this);
+		Material = UMaterialInstanceDynamic::Create(MapObject->GetMaterialOverride(), this);
 		MapMesh->SetMaterial(0, Material);
 	}
 	

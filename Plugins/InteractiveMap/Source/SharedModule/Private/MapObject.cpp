@@ -10,7 +10,13 @@
 #include "UObject/ObjectSaveContext.h"
 #endif
 
+UMapObject::UMapObject(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	Map = MakeShareable(new MapGenerator::Map(1024, 1024));
+}
+
 #if WITH_EDITOR
+
 void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UObject::PostEditChangeProperty(PropertyChangedEvent);
@@ -28,21 +34,25 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
-		if(!StructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(StructType, FName("ID")))
 		{
-			// THROW ERROR AT USER  FACE
-			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
+			const FText Title = FText::FromString(TEXT("Error"));
+			const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+			// this should keep the previous values
 			StructType = nullptr;
 			this->PostEditChange();
 		}
 	}
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
 	{
-		if(!OceanStructType->IsChildOf(FBaseMapStruct::StaticStruct()))
+		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(OceanStructType, FName("ID")))
 		{
-			// THROW ERROR AT USER  FACE
-			UE_LOG(LogTemp, Error, TEXT("Struct type must inherit from FBaseMapStruct"));
-			StructType = nullptr;
+			const FText Title = FText::FromString(TEXT("Error"));
+			const FText Message = FText::FromString(TEXT("OceanStructType must have a numeric field named ID"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+			// this should keep the previous value
+			OceanStructType = nullptr;
 			this->PostEditChange();
 		}
 	}
@@ -51,7 +61,6 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	{
 		LoadLookupMap(LookupFilePath);
 	}
-
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertiesDT))
 	{
 		if(VisualPropertyTypesDT)
@@ -70,6 +79,135 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	OnObjectChanged.Broadcast();
 	// SetMapDataFilePath(FilePathMapData);	
 }
+TSharedPtr<MapGenerator::Map> UMapObject::GetMapGen() const
+{
+	return Map;
+}
+
+void UMapObject::SetMapGen(TSharedPtr<MapGenerator::Map> MapGen)
+{
+	Map = MapGen;
+}
+
+UTexture2D* UMapObject::GetRootTexture() const
+{
+	return OriginTexture;
+}
+
+void UMapObject::SetRootTexture(UTexture2D* texture)
+{
+	OriginTexture = texture;
+}
+
+FMapGenParams UMapObject::GetLastParamsUsed() const
+{
+	return  LastParamsUsedGen;
+}
+
+void UMapObject::SetLastParamsUsed(const FMapGenParams& Params)
+{
+	LastParamsUsedGen = Params;
+}
+
+bool UMapObject::IsMapSaved() const
+{
+	return bMapSaved;
+}
+
+void UMapObject::SetMapSaved(bool Saved)
+{
+	bMapSaved = Saved;
+}
+
+void UMapObject::SerializeMap(FArchive& Ar)
+{
+	int32 Version = 2;
+	Ar << Version;
+
+	if(Version >= 2)
+	{
+		unsigned width = Map->Width();  
+		unsigned height = Map->Height();
+		Ar << width;
+		Ar << height;
+		int32 NumThreads = 8;
+		Ar << NumThreads;
+
+		if(Ar.IsSaving())
+		{
+			std::vector<MapGenerator::Tile> tiles = Map->GetTiles();
+			int32 count = static_cast<int32>(tiles.size());
+			Ar << count;
+			
+			TArray<TArray<uint8>> ThreadBuffers;
+			ThreadBuffers.SetNum(NumThreads);
+			
+			SerializeParallel<FMemoryWriter>(NumThreads, ThreadBuffers, tiles);
+			for (int32 i = 0; i < NumThreads; ++i)
+			{
+				int32 Size = ThreadBuffers[i].Num();
+				Ar << Size;
+				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
+			}
+		}
+		else if(Ar.IsLoading())
+		{
+			int count = 0;
+			Ar << count;
+
+			std::vector<MapGenerator::Tile> tiles;
+			tiles.resize(count);
+
+			TArray<TArray<uint8>> ThreadBuffers;
+			ThreadBuffers.SetNum(NumThreads);
+
+			// Step 1: Read each chunk
+			for (int32 i = 0; i < NumThreads; ++i)
+			{
+				int32 Size = 0;
+				Ar << Size;
+				ThreadBuffers[i].SetNumUninitialized(Size);
+				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
+			}
+			SerializeParallel<FMemoryReader>(NumThreads, ThreadBuffers, tiles);
+			
+			Map->SetSize(width, height);
+			Map->SetLookupTileMap(tiles);
+		}
+	}
+}
+
+void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar)
+{
+	uint8 r, g, b, a;
+	int32 cx, cy;
+	int32 type = static_cast<int32>(Tile.type); // store enum as int
+
+	if (Ar.IsSaving())
+	{
+		r = Tile.color.R;
+		g = Tile.color.G;
+		b = Tile.color.B;
+		a = Tile.color.A;
+
+		cx = Tile.centroid.x;
+		cy = Tile.centroid.y;
+	}
+
+	Ar << r << g << b << a;
+	Ar << Tile.visited;
+	Ar << type;
+	Ar << Tile.isBorder;
+	Ar << cx << cy;
+
+	if (Ar.IsLoading())
+	{
+		Tile.color = MapGenerator::Color(r, g, b, a);
+		Tile.type = static_cast<MapGenerator::TileType>(type);
+		Tile.centroid = mygal::Vector2<int>(cx, cy);
+	}
+
+}
 
 #endif
 void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
@@ -86,8 +224,18 @@ void UMapObject::PostLoad()
 #if WITH_EDITOR
 	LoadLookupMap(LookupFilePath);
 	SetMapDataFilePath(FilePathMapData);
+	bMapSaved = true;
 #endif
 }
+
+void UMapObject::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+#if WITH_EDITOR
+	SerializeMap(Ar);
+#endif
+}
+
 
 const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapObject::GetVisualPropertiesMap() const
 {
@@ -222,24 +370,6 @@ TSet<FName> UMapObject::GetNamesOfVisualPropertiesInMapData() const
 	return Names;
 }
 
-// TMap<FName, TSet<FName>> UMapObject::VpMappedByType() const
-// {
-// 	TMap<FName, TSet<FName>> Map;
-// 	Map.Reserve(VisualPropertiesMap.Num());
-// 	for(const auto& [VpType, Property] : VisualPropertiesMap)
-// 	{
-// 		TSet<FName> Names;
-// 		Names.Reserve(Property.VisualProperties.Num());
-// 		for(const FVisualProperty& VisualProperty : Property.VisualProperties)
-// 		{
-// 			Names.Emplace(VisualProperty.Type);
-// 		}
-// 		Map.Emplace(VpType, Names);
-// 	}
-//
-// 	return Map;
-// }
-
 bool UMapObject::IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const
 {
 	if(const FInstancedStruct* Data = MapData.Find(ID))
@@ -353,6 +483,7 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	{
 		StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
+	TMap<int, FInstancedStruct> DataMap;
 	for(const auto& Data: StructData)
 	{
 		if(Data.IsValid())
@@ -361,10 +492,11 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 			int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(Data, "ID", bOutResult);
 			if(bOutResult)
 			{
-				MapData.Emplace(ID, Data);
+				DataMap.Emplace(ID, Data);
 			}
 		}
 	}
+	MapData = DataMap;
 }
 #endif
 
@@ -439,4 +571,20 @@ void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
 		}
 	}
 }
+
+void UMapObject::SetMaterialOverride(UMaterialInterface* MaterialInterface)
+{
+	MaterialOverride = MaterialInterface;
+}
+
+UMaterialInterface* UMapObject::GetMaterialOverride() const
+{
+	return MaterialOverride;
+}
+
+UDataTable* UMapObject::GetVisualPropertyTypes() const
+{
+	return VisualPropertyTypesDT;
+}
+
 #endif

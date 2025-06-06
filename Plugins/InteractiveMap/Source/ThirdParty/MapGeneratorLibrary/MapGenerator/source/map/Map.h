@@ -32,59 +32,12 @@ namespace MapGenerator
 		{
 			return m_lookupmap->GetTileMap();
 		}
-		// inline const sf::RenderTexture* HeightMapTexture() const
-		//{
-		//	if (m_heightmap)
-		//		return &m_heightmap->Texture();
-
-		//	return nullptr;
-		//}
-		// inline const sf::RenderTexture* TerrainMapTexture() const
-		//{
-		//	if (m_terrainmap)
-		//		return &m_terrainmap->Texture();
-
-		//	return nullptr;
-		//}
-		// inline const sf::RenderTexture* MapMaskTexture () const
-		//{
-		//	if (m_maskmap)
-		//		return &m_maskmap->Texture();
-
-		//	return nullptr;
-		//}
-		// inline const sf::RenderTexture* OceanMapMaskTexture() const
-		//{
-		//	if (m_oceanMask)
-		//		return &m_oceanMask->Texture();
-
-		//	return nullptr;
-		//}
-		// inline const sf::RenderTexture* LandMapMaskTexture() const
-		//{
-		//	if (m_landMask)
-		//		return &m_landMask->Texture();
-
-		//	return nullptr;
-		//}
-
-	inline const std::vector<double>
-	NoiseMap() const
+	inline const std::vector<double> NoiseMap() const
 	{
 		assert(m_heightmap != nullptr);
 		return m_heightmap->NoiseMap();
 	}
-
-	/*	inline void AddTerrainType(const TerrainType& type)
-		{
-			m_terrainTypes.push_back(type);
-		}
-
-		inline const std::vector<TerrainType>& TerrainTypes() const
-		{
-			return m_terrainTypes;
-		}*/
-
+		
 	void GenerateHeightMap(const NoiseMapData &data);
 	void GenerateHeightMapTectonic();
 	void GenerateHeightMapTectonic(const NoiseMapData &data);
@@ -118,6 +71,11 @@ namespace MapGenerator
 	void SaveMap(const std::string &filePath) const;
 	void Reset();
 
+	void SetSize(unsigned width, unsigned height);
+	void SetLookupTileMap(const std::vector<Tile>& tiles);
+	std::vector<Tile> GetTiles() const;
+
+	bool IsValid() const;
 
 private:
 	// void SaveMapComponent(MapComponent* component, const char* filePath, const char* message = "map component");
@@ -135,6 +93,6 @@ private:
 
 	float m_cutOffHeight = 0.001f;
 	// std::unique_ptr<Texture> m_lookUpTexture;
-	uint8* GetTileMapOfType(TileType type) const;
+	uint8_t* GetTileMapOfType(TileType type) const;
 };
 }

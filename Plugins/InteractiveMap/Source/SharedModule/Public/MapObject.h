@@ -9,10 +9,16 @@
 #else
 #include "InstancedStruct.h"
 #endif
+#include "MapGeneratorWrapper.h"
 #include "VisualProperties.h"
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
+#if WITH_EDITOR
+#include "source/map/Map.h"
+#include "MapGenParamStructs.h"
+#endif
+
 
 #include "MapObject.generated.h"
 USTRUCT(BlueprintType)
@@ -24,11 +30,11 @@ struct FBaseMapStruct
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 ID = -1;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Name = "NO NAME";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Area = "NO AREA";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Region = "NO REGION";
 
 	virtual FString ToString() const
@@ -70,16 +76,16 @@ struct FMapDataStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Population = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
 
 	virtual FString ToString() const override
@@ -102,22 +108,35 @@ struct FPopulation : public FBaseMapStruct
 	FName Culture = "BRA";
 };
 
+UENUM(BlueprintType)
+enum class EClimate : uint8
+{
+	Arctic,
+	Desert,
+	Jungle,
+	Swamp,
+	Savana,
+};
+
 USTRUCT(BlueprintType)
 struct FComplexMapDataStruct : public FBaseMapStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FPopulation Population;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Country = "POR";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Religion = "CAT";
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	FString Culture = "BAS";
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	EClimate Climate = EClimate::Arctic;
 
 	// virtual FString ToString() const override
 	// {
@@ -132,14 +151,50 @@ class SHAREDMODULE_API UMapObject : public UObject
 {
 	GENERATED_BODY()
 
+	UMapObject(const FObjectInitializer& ObjectInitializer);
 	// UObject Interface
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent &PropertyChangedEvent) override;
 #endif
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
+	virtual void Serialize(FArchive& Ar) override;
 	// ======================================================
+	
+#if WITH_EDITOR
 public:
+	TSharedPtr<MapGenerator::Map> GetMapGen() const;
+	void SetMapGen(TSharedPtr<MapGenerator::Map> MapGen);
+	UTexture2D*  GetRootTexture() const;
+	void SetRootTexture(UTexture2D* texture);
+	FMapGenParams GetLastParamsUsed() const;
+	void SetLastParamsUsed(const FMapGenParams& Params);
+	bool IsMapSaved() const;
+	void SetMapSaved(bool Saved);
+	// Map Gen serialization -> move somewhere else
+	void SerializeMap(FArchive& Ar);
+	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
+
+	void SaveData() const;
+	void LoadDataFromFile();
+	void SetLookupTexture(UTexture2D *Texture2D);
+	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetLookupFilePath(const FString &FilePath)
+	{
+		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
+		LoadLookupMap(FilePath);
+	}
+
+	// Update In Editor only, used in Map Object Display
+	void UpdateDataInEditor(const FInstancedStruct &NewData);
+	
+	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
+	UMaterialInterface* GetMaterialOverride() const;
+
+	UDataTable* GetVisualPropertyTypes() const;
+#endif
+	
+public:	
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
@@ -151,17 +206,6 @@ public:
 	bool IsStructValid(const FInstancedStruct &Struct) const;
 	bool IsStructValid(const UScriptStruct *Struct) const;
 
-#if WITH_EDITOR
-	void SaveData() const;
-	void LoadDataFromFile();
-	void SetLookupTexture(UTexture2D *Texture2D);
-	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
-	void SetLookupFilePath(const FString &FilePath)
-	{
-		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
-		LoadLookupMap(FilePath);
-	}
-#endif
 	void LoadLookupMap(const FString &FilePath);
 
 	FString GetFilePath() const
@@ -194,25 +238,9 @@ public:
 	{
 		return LookupTextureData;
 	}
-	// Update In Editor only, used in Map Object Display
-#if WITH_EDITOR
-	void UpdateDataInEditor(const FInstancedStruct &NewData);
-#endif
 	FColor GetColorFromUv(const FVector2D &Uv) const;
 
 public:
-#if WITH_EDITORONLY_DATA
-	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
-	UDataTable *VisualPropertyTypesDT;
-
-	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
-	class UDataTable *VisualPropertiesDT;
-	// Material used to apply to MapAsset in preview
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
-	class UMaterialInterface *MaterialOverride;
-#endif
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *StructType;
@@ -234,7 +262,7 @@ public:
 
 	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
 	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
-	// TMap<FName, TSet<FName>> VpMappedByType() const;
+	
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 
@@ -255,4 +283,52 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
+
+	// UPROPERTY
+#if WITH_EDITORONLY_DATA
+	/** Data table for visual property types */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
+	UDataTable *VisualPropertyTypesDT;
+
+	/** Data table for visual properties */
+	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
+	class UDataTable *VisualPropertiesDT;
+	// Material used to apply to MapAsset in preview
+	UPROPERTY(EditAnywhere, Category = "Lookup")
+	class UMaterialInterface *MaterialOverride;
+
+	// Used for Map Editor
+	UPROPERTY()
+	UTexture2D* OriginTexture;
+
+	UPROPERTY()
+	FMapGenParams LastParamsUsedGen;
+	
+	TSharedPtr<MapGenerator::Map> Map;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bMapSaved = true;
+#endif
+	
 };
+
+static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
+
+template <typename T>
+static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& ThreadBuffers, std::vector<MapGenerator::Tile>& tiles)
+{
+	ParallelFor(NumThreads, [&](int32 Index)
+	{
+		TArray<uint8>& Buffer = ThreadBuffers[Index];
+		T Target(Buffer);
+
+		int32 ChunkSize = tiles.size() / NumThreads;
+		int32 Start = Index * ChunkSize;
+		int32 End = (Index == NumThreads - 1) ? tiles.size() : Start + ChunkSize;
+
+		for (int32 i = Start; i < End; ++i)
+		{
+			SerializeTile(tiles[i], Target);  // Manual serialize per field
+		}
+	});
+}
