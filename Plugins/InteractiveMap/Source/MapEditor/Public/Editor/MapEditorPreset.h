@@ -86,9 +86,11 @@ public:
 	{
 		const uint32 Width = MapEditorDetails.OriginTexture->GetSizeX();
 		const uint32 Height = MapEditorDetails.OriginTexture->GetSizeY();
+		// flip cutoff height dependent on flag
+		const float CutOffHeight = MapEditorDetails.LandBelowCutoffHeight ? 1 - MapEditorDetails.CutoffHeight : MapEditorDetails.CutoffHeight;
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
 											Width, Height, MapEditorDetails.NoiseDetails.LineThickness,
-											MapEditorDetails.CutoffHeight);
+											CutOffHeight);
 	}
 
 	bool FromHeightMap() const

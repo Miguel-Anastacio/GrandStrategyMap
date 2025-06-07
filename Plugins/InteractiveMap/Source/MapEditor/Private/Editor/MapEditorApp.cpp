@@ -91,6 +91,10 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
 		{
 			Texture2D = GetBorderTexture();
 		}
+		else if(ID == FName("Visited"))
+		{
+			Texture2D = GetVisitedTilesTexture();
+		}
 		
 		if(Texture2D.IsValid())
 		{
@@ -127,8 +131,7 @@ void FMapEditorApp::GenerateMap()
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			//Call GenerateMap and pass the progress callback
-			const MapGenerator::MapModeGen GenType = MapGenPreset->FromHeightMap() ? MapGenerator::MapModeGen::FromHeightMap
-																						: MapGenerator::MapModeGen::FromMask;
+			const MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
 			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType, ProgressCallback);
 
 			// Update the preview textures
@@ -136,6 +139,7 @@ void FMapEditorApp::GenerateMap()
 			PreviewLookupTextureLand = CreateTexture(TempMapGenerator->GetLookupTileMap().GetLandTileMap(), Width, Height);
 			PreviewLookupTextureOcean = CreateTexture(TempMapGenerator->GetLookupTileMap().GetOceanTileMap(), Width, Height);
 			PreviewBorderTexture = CreateTexture(TempMapGenerator->GetLookupTileMap().GetBordersTileMap(), Width, Height);
+			PreviewVisitedTilesTexture = CreateTexture(TempMapGenerator->GetLookupTileMap().GetVisitedTileMap(), Width, Height);
 			PreviewRootTexture = Texture;
 			
 			if(UMapObject* MapObject = GetWorkingAsset())
@@ -165,6 +169,7 @@ void FMapEditorApp::RestoreTexturePreview() const
 								TPair<FName, UTexture2D*>(FName("LookupLand"), GetLookupLandTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("LookupOcean"), GetLookupOceanTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("Borders"), GetBorderTexture().Get()),
+								TPair<FName, UTexture2D*>(FName("Visited"), GetVisitedTilesTexture().Get()),
 								TPair<FName, UTexture2D*>(FName("HeightMap"), GetRootTexture().Get())
 							});
 	}
@@ -553,6 +558,7 @@ void FMapEditorApp::LoadPreviewTexturesFromMapMapObject(const UMapObject* MapObj
 		PreviewLookupTextureLand = CreateTexture(TileMap.GetLandTileMap(), TileMap.Width(), TileMap.Height());
 		PreviewLookupTextureOcean = CreateTexture(TileMap.GetOceanTileMap(), TileMap.Width(), TileMap.Height());
 		PreviewBorderTexture = CreateTexture(TileMap.GetBordersTileMap(), TileMap.Width(), TileMap.Height());
+		PreviewVisitedTilesTexture = CreateTexture(TileMap.GetVisitedTileMap(), TileMap.Width(), TileMap.Height());
 	}
 }
 
@@ -579,6 +585,11 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetRootTexture() const
 TWeakObjectPtr<UTexture2D> FMapEditorApp::GetBorderTexture() const
 {
 	return PreviewBorderTexture;
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetVisitedTilesTexture() const
+{
+	return PreviewVisitedTilesTexture;
 }
 
 void FMapEditorApp::UpdateEntrySelected(int32 Index) const

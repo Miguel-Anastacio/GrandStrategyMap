@@ -263,12 +263,20 @@ namespace MapGenerator
 		return GetTileMapOfType(TileType::WATER);
 	}
 	
-	uint8_t* TileMap::GetBordersTileMap(const data::Color borderColor, const data::Color notBorderColor) const
+	uint8_t* TileMap::GetBordersTileMap(const data::Color& borderColor, const data::Color& notBorderColor) const
 	{
 		return GetTileMap([](const Tile &tile)
 			{
 				return tile.isBorder;
 			}, borderColor, notBorderColor);
+	}
+	
+	uint8_t* TileMap::GetVisitedTileMap(const data::Color& visitedColor, const data::Color& notVisitedColor) const
+	{
+		return GetTileMap([](const Tile &tile)
+			{
+				return !tile.visited;
+			}, visitedColor, notVisitedColor);
 	}
 
 	uint8_t* TileMap::GetTileMapOfType(TileType type) const

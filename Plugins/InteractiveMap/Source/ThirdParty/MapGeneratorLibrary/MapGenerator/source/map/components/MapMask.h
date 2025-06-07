@@ -12,6 +12,7 @@ namespace MapGenerator
 	{
 	public:
 		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, float cutOffHeight, const bool mode = true);
+		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const bool mode = true);
 		// HeightMap(const Texture& texture, double noiseScale, const siv::PerlinNoise& noise, const NoiseSpecs& specs);
 
 		inline std::vector<double> MoveElevation()

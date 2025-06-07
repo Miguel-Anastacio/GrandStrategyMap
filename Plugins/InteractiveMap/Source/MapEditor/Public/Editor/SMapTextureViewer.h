@@ -53,7 +53,7 @@ private:
     const FSlateBrush* GetBrush(int index) const;
     TSharedRef<SButtonWithImage> CreateImagePreview(int index) const;
     
-    TStaticArray<TPair<FName, TSharedPtr<FSlateBrush>>, 5> BrushPairs;
+    TStaticArray<TPair<FName, TSharedPtr<FSlateBrush>>, 6> BrushPairs;
     FTextureChanged TextureSelected;
     
 };
