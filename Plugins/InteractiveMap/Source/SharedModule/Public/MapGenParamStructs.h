@@ -49,6 +49,10 @@ struct SHAREDMODULE_API FMapGenParams
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
 	UTexture2D* OriginTexture = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
+	bool UploadBorder = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition ="UploadBorder"))
+	UTexture2D* BorderTexture = nullptr;
 	
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
 	bool UseHeightMap = true;

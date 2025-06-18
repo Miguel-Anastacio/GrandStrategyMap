@@ -113,7 +113,36 @@ void FMapEditorApp::SaveAsset_Execute()
 
 void FMapEditorApp::GenerateMap()
 {
+	bool UserProvidedBorders = false;
+	if(MapGenPreset->UploadBorder())
+	{
+		// validate size
+		if(!MapGenPreset->BorderMatchesOriginTexture())
+		{
+			// throw error and return
+			const FText Title = FText::FromString(TEXT("Error - Texture Size does not match"));
+			const FText Message = FText::FromString(TEXT("Border Texture size must match Origin Texture"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+			return;
+		}
+		UserProvidedBorders = true;
+	}
 	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024));
+	
+	if(UserProvidedBorders)
+	{
+		UTexture2D* BorderTexture = MapGenPreset->MapEditorDetails.BorderTexture;
+		const uint32 height = BorderTexture->GetSizeY();
+		const uint32 width = BorderTexture->GetSizeX();
+		
+		const uint8* BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(BorderTexture);
+		if(!BufferData)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to read  Border texture"));
+			return;
+		}
+		TempMapGenerator->SetBorderUpload(BufferData, width, height);
+	}
 	
 	UTexture2D* Texture = MapGenPreset->MapEditorDetails.OriginTexture;
 	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);

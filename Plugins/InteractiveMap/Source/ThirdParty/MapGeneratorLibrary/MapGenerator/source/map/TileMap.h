@@ -92,6 +92,11 @@ namespace MapGenerator
 		{
 			return m_colors;
 		}
+		
+		void SetColors(const std::unordered_set<data::Color>& colors)
+		{
+			m_colors = colors;
+		}
 
 		bool IsTileOfType(TileType type, unsigned x, unsigned y) const
 		{
@@ -119,6 +124,8 @@ namespace MapGenerator
 			ComputeCells();
 			ComputeColorsInUse();
 		}
+
+		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor = data::Color(0, 0, 255, 255));
 	
 	private:
 		uint8_t* GetTileMapOfType(TileType type) const;
@@ -141,6 +148,20 @@ namespace MapGenerator
 		}
 
 		static void fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color);
+		template <typename Func>
+		void forEachTile(Func&& func)
+		{
+			for (unsigned i = 0; i < Height(); i++)
+			{
+				for (unsigned j = 0; j < Width(); j++)
+				{
+					const int tileIndex = (i * Width() + j);
+					const int index = tileIndex * 4;
+					func(m_tiles[tileIndex], index);
+				}
+			}
+		}
+		
 		template <typename Func>
 		void forEachTile(Func&& func) const
 		{

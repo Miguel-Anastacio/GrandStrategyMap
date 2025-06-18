@@ -7,6 +7,7 @@ namespace MapGenerator
 
 	Map::Map(unsigned width, unsigned height)
 		: Dimensions(width, height)
+		, m_uploadBorder(false)
 	{
 	}
 
@@ -56,7 +57,16 @@ namespace MapGenerator
 			progressCallback(10.0f, "Generated Land and Ocean Masks");
 		}
 		
-		m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), progressCallback);
+		if(m_uploadBorder)
+		{
+			m_lookupmap->SetBorderBufferRef(m_borderUploadedBuffer);
+			progressCallback(10.0f, "after set border ref");
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), TileMapGenType::UserUploadedBorderForLand, progressCallback);
+		}
+		else
+		{
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), progressCallback);
+		}
 		m_cutOffHeight = data.cutOffHeight;
 	}
 
@@ -220,5 +230,25 @@ namespace MapGenerator
 	bool Map::IsValid() const
 	{
 		return m_lookupmap != nullptr && m_lookupmap->GetTiles().size() > 0;
+	}
+
+	void Map::SetBorderUpload(const std::vector<uint8_t>& borderBuffer)
+	{
+		m_uploadBorder = true;
+		m_borderUploadedBuffer = std::make_shared<std::vector<uint8_t>>(borderBuffer);
+		std::cout << "size: ";
+		std::cout << borderBuffer.size() << std::endl;
+	}
+
+	void Map::SetBorderUpload(const uint8_t* borderBuffer, const unsigned width, const unsigned height)
+	{
+		SetBorderUpload(std::vector(&borderBuffer[0], &borderBuffer[width * height * 4]));
+	}
+
+	void Map::ClearBorderUpload()
+	{
+		m_uploadBorder = false;
+		m_borderUploadedBuffer->clear();
+		m_borderUploadedBuffer = nullptr;
 	}
 }
