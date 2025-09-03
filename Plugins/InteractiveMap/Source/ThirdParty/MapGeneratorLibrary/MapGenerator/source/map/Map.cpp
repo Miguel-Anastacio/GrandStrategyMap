@@ -125,7 +125,6 @@ namespace MapGenerator
 			progressCallback(0.0f, "GenerateMapFromHeigthMap");
 		}
 		
-		// m_maskmap = std::make_unique<MapMask>("LandmassMaskTest.png", textureBuffer, Width(), Height(), cutOffHeight);
 		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight);
 		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, false);
 		RegenerateMasks(data);

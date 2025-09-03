@@ -281,12 +281,42 @@ namespace MapGenerator
 			}, visitedColor, notVisitedColor);
 	}
 
+	uint8_t* TileMap::GetCentroidTileMap() const
+	{
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		forEachTile([&](const Tile& tile, unsigned bufferIndex)
+		{
+			auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
+			auto index = bufferIndex / 4;
+			
+			if(centroidIndex < m_tiles.size() && index == centroidIndex)
+			{
+				data::Color color(255, 0, 0, 255);
+				fillBufferPosWithColor(bufferIndex, buffer, color);
+			}
+			else
+			{
+				data::Color color(0, 0, 0, 255);
+				fillBufferPosWithColor(bufferIndex, buffer, color);
+			}
+		});
+		return buffer;
+	}
+
 	uint8_t* TileMap::GetTileMapOfType(TileType type) const
 	{
 		return GetTileMap([type](const Tile &tile)
 			{
 				return tile.type == type;
 			});
+	}
+	
+	uint8_t* TileMap::GetUndefinedTileMap(const data::Color& defined, const data::Color& undefined) const
+	{
+		return GetTileMap([](const Tile &tile)
+			{
+				return tile.type == TileType::UNDEFINED;
+			}, defined, undefined);
 	}
 
 	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
@@ -346,7 +376,6 @@ namespace MapGenerator
 				{
 					m_tiles[tileIndex].visited = true;
 					m_tiles[tileIndex].isBorder = true;
-					
 				}
 			}
 		}

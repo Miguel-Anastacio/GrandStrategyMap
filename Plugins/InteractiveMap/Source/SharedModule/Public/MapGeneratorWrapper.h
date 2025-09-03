@@ -23,14 +23,3 @@ struct SHAREDMODULE_API FTileIdData
 	}
 };
 
-UCLASS()
-class  UMapGeneratorWrapper : public UObject
-{
-	GENERATED_BODY()
-public:
-	// UMapGeneratorWrapper();
-	// MapGenerator::Map& GetMap();
-	
-private:
-	// MapGenerator::Map Map;
-};

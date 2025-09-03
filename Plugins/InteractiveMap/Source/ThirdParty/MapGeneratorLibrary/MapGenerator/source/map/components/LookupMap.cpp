@@ -107,45 +107,58 @@ namespace MapGenerator
 
 		const auto width = Width();
 		const auto height = Height();
-		if(progressCallback)
-		{
-			progressCallback(4.0f, "Start tile map from Diagram");
-		}
-		assert(diagram != nullptr);
 		
 		TileMap maskTileMap(width, height);
-		// Border mark approach
-		rasterizer::RasterizeDiagramToTileMap(*diagram, width, height, maskTileMap, noiseData, (double)borderThick);
-		///////////////////////////////////////////////////////////////
-		if(progressCallback)
+		// when map gen is done with one tile then the diagram is null
+		if(diagram != nullptr)
 		{
-			progressCallback(4.0f, "Rasterize Diagram");
-		}
+			// Border mark approach
+			rasterizer::RasterizeDiagramToTileMap(*diagram, width, height, maskTileMap, noiseData, (double)borderThick);
+			///////////////////////////////////////////////////////////////
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "Rasterize Diagram");
+			}
 
-		maskTileMap.MarkTilesNotInMaskAsVisited(mapMask->GetMask(), type);
-		if(progressCallback)
-		{
-			progressCallback(4.0f, "Mark Tiles as visited");
-		}
+			maskTileMap.MarkTilesNotInMaskAsVisited(mapMask->GetMask(), type);
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "Mark Tiles as visited");
+			}
 
-		// Flood fill approach
-		std::vector<mygal::Vector2<double>> centroids = geomt::GetCentroidsOfDiagram(*diagram);
-		maskTileMap.FloodFillTileMap(centroids, colors);
-		if(progressCallback)
-		{
-			progressCallback(4.0f, "Flood Fill");
-		}
+			// Flood fill approach
+			std::vector<mygal::Vector2<double>> centroids = geomt::GetCentroidsOfDiagram(*diagram);
+			maskTileMap.FloodFillTileMap(centroids, colors);
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "Flood Fill");
+			}
 
-		maskTileMap.FloodFillMissingTiles(searchRadiusBeforeNewTile);
-		if(progressCallback)
-		{
-			progressCallback(4.0f, "FloodFill MissingTiles");
+			maskTileMap.FloodFillMissingTiles(searchRadiusBeforeNewTile);
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "FloodFill MissingTiles");
+			}
+			////////////////////////////////////////////////////////////////////////
+			maskTileMap.ColorInBorders(mapMask->GetMask());
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "Color in borders");
+			}
 		}
-		////////////////////////////////////////////////////////////////////////
-		maskTileMap.ColorInBorders(mapMask->GetMask());
-		if(progressCallback)
+		else
 		{
-			progressCallback(4.0f, "Color in borders");
+			maskTileMap.MarkTilesNotInMaskAsVisited(mapMask->GetMask(), type);
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "Mark Tiles as visited");
+			}
+			
+			maskTileMap.FloodFillMissingTiles(Width() * Height());
+			if(progressCallback)
+			{
+				progressCallback(4.0f, "FloodFill MissingTiles");
+			}
 		}
 		return maskTileMap;
 	}
@@ -200,9 +213,17 @@ namespace MapGenerator
 		{
 			ProgressCallback(2.0f, "Before Point Generation");
 		}
-		auto pointsContr = geomt::generatePointsConstrained<double>(data.tiles, data.seed, true, mask->GetMask());
-		diagram = std::make_shared<Diagram>(geomt::generateDiagram(pointsContr));
-		geomt::lloydRelaxation(*diagram.get(), data.lloyd, mask->GetMask());
+		if(data.tiles > 1)
+		{
+			auto pointsContr = geomt::generatePointsConstrained<double>(data.tiles, data.seed, true, mask->GetMask());
+			diagram = std::make_shared<Diagram>(geomt::generateDiagram(pointsContr));
+			geomt::lloydRelaxation(*diagram.get(), data.lloyd, mask->GetMask());
+		}
+		else
+		{
+			diagram = nullptr;
+		}
+		
 		if(ProgressCallback)
 		{
 			// ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");

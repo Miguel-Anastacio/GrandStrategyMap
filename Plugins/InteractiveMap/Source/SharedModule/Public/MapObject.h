@@ -9,7 +9,6 @@
 #else
 #include "InstancedStruct.h"
 #endif
-#include "MapGeneratorWrapper.h"
 #include "VisualProperties.h"
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
@@ -171,6 +170,8 @@ public:
 	void SetLastParamsUsed(const FMapGenParams& Params);
 	bool IsMapSaved() const;
 	void SetMapSaved(bool Saved);
+	// counter of mapGens without saving 
+	void IncrementCounter();
 	// Map Gen serialization -> move somewhere else
 	void SerializeMap(FArchive& Ar);
 	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
@@ -308,6 +309,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bMapSaved = true;
+
+	// Used for undo to work
+	UPROPERTY(VisibleAnywhere)
+	int Counter = 0;
 #endif
 	
 };
