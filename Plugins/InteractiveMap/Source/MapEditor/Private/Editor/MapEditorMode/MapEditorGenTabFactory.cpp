@@ -55,20 +55,6 @@ TSharedRef<SWidget> FMapEditorGenTabFactory::CreateTabBody(const FWorkflowTabSpa
                     App.Pin().Get()->GenerateMap();
                     return FReply::Handled();
                 })
-            ]
-            + SVerticalBox::Slot()
-            .Padding(10.0f) // Add padding around the button
-            .HAlign(HAlign_Center) // Center the button horizontally
-            .VAlign(VAlign_Top)    // Align the button to the top of its slot
-            .AutoHeight()          // Let the button determine its own height
-            [
-                SNew(SButton)
-                .Text(FText::FromString("Save"))
-                .OnClicked_Lambda([this]() -> FReply
-                {
-                    App.Pin().Get()->SaveGeneratedMap();
-                    return FReply::Handled();
-                })
             ];
 }
 
