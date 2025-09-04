@@ -92,6 +92,11 @@ namespace MapGenerator
 		{
 			return m_colors;
 		}
+		
+		void SetColors(const std::unordered_set<data::Color>& colors)
+		{
+			m_colors = colors;
+		}
 
 		bool IsTileOfType(TileType type, unsigned x, unsigned y) const
 		{
@@ -110,7 +115,11 @@ namespace MapGenerator
 		
 		uint8_t* GetOceanTileMap() const;
 		uint8_t* GetLandTileMap() const;
-		uint8_t* GetBordersTileMap(const data::Color borderColor = data::Color(0, 0, 0, 255), const data::Color notBorderColor = data::Color(255, 255, 255, 255)) const;
+		uint8_t* GetBordersTileMap(const data::Color& borderColor = data::Color(0, 0, 0, 255), const data::Color& notBorderColor = data::Color(255, 255, 255, 255)) const;
+		uint8_t* GetVisitedTileMap(const data::Color& visitedColor = data::Color(255, 0, 0, 255), const data::Color& notVisitedColor = data::Color(255, 255, 255, 255)) const;
+		uint8_t* GetCentroidTileMap() const;
+		uint8_t* GetUndefinedTileMap(const data::Color& defined = data::Color(255, 0, 0, 255), const data::Color& Undefined = data::Color(255, 255, 255, 255)) const;
+		
 
 		void SetTiles(const std::vector<Tile>& tiles)
 		{
@@ -118,6 +127,8 @@ namespace MapGenerator
 			ComputeCells();
 			ComputeColorsInUse();
 		}
+
+		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor = data::Color(0, 0, 255, 255));
 	
 	private:
 		uint8_t* GetTileMapOfType(TileType type) const;
@@ -140,6 +151,20 @@ namespace MapGenerator
 		}
 
 		static void fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color);
+		template <typename Func>
+		void forEachTile(Func&& func)
+		{
+			for (unsigned i = 0; i < Height(); i++)
+			{
+				for (unsigned j = 0; j < Width(); j++)
+				{
+					const int tileIndex = (i * Width() + j);
+					const int index = tileIndex * 4;
+					func(m_tiles[tileIndex], index);
+				}
+			}
+		}
+		
 		template <typename Func>
 		void forEachTile(Func&& func) const
 		{

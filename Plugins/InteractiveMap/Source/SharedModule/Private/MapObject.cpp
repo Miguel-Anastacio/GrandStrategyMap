@@ -117,6 +117,15 @@ bool UMapObject::IsMapSaved() const
 void UMapObject::SetMapSaved(bool Saved)
 {
 	bMapSaved = Saved;
+	if(Saved)
+	{
+		Counter = 0;
+	}
+}
+
+void UMapObject::IncrementCounter()
+{
+	Counter++;
 }
 
 void UMapObject::SerializeMap(FArchive& Ar)

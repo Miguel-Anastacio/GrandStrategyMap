@@ -86,13 +86,40 @@ public:
 	{
 		const uint32 Width = MapEditorDetails.OriginTexture->GetSizeX();
 		const uint32 Height = MapEditorDetails.OriginTexture->GetSizeY();
+		// flip cutoff height dependent on flag
+		const float CutOffHeight = MapEditorDetails.LandBelowCutoffHeight ? 1 - MapEditorDetails.CutoffHeight : MapEditorDetails.CutoffHeight;
 		return MapGenerator::LookupMapData(GetNoiseData(), LandSettings(), OceanSettings(),
 											Width, Height, MapEditorDetails.NoiseDetails.LineThickness,
-											MapEditorDetails.CutoffHeight);
+											CutOffHeight);
+	}
+
+	UTexture2D* GetBorderTexture() const
+	{
+		return MapEditorDetails.BorderTexture;
 	}
 
 	bool FromHeightMap() const
 	{
 		return MapEditorDetails.UseHeightMap;
+	}
+	
+
+	bool UploadBorder() const
+	{
+		return (MapEditorDetails.BorderTexture != nullptr) && MapEditorDetails.UploadBorder;
+	}
+
+	bool BorderMatchesOriginTexture() const
+	{
+		if (MapEditorDetails.BorderTexture == nullptr || MapEditorDetails.OriginTexture == nullptr)
+			return false;
+		
+		const int32 sizeOriginX = MapEditorDetails.OriginTexture->GetSizeX();
+		const int32 sizeOriginY = MapEditorDetails.OriginTexture->GetSizeY();
+
+		const int32 sizeBorderX = MapEditorDetails.BorderTexture->GetSizeX();
+		const int32 sizeBorderY = MapEditorDetails.BorderTexture->GetSizeY();
+
+		return (sizeOriginX == sizeBorderX && sizeOriginY == sizeBorderY);
 	}
 };

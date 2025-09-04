@@ -187,6 +187,8 @@ namespace MapGenerator
 
 	bool TileMap::FindColorOfClosestTileOfSameType(int x, int y, int radius, data::Color &out_color) const
 	{
+		if (radius == 0)
+			return false;
 		auto width = Width();
 		auto height = Height();
 		std::unordered_set<mygal::Vector2<int>> tilesVisited;
@@ -263,12 +265,42 @@ namespace MapGenerator
 		return GetTileMapOfType(TileType::WATER);
 	}
 	
-	uint8_t* TileMap::GetBordersTileMap(const data::Color borderColor, const data::Color notBorderColor) const
+	uint8_t* TileMap::GetBordersTileMap(const data::Color& borderColor, const data::Color& notBorderColor) const
 	{
 		return GetTileMap([](const Tile &tile)
 			{
 				return tile.isBorder;
 			}, borderColor, notBorderColor);
+	}
+	
+	uint8_t* TileMap::GetVisitedTileMap(const data::Color& visitedColor, const data::Color& notVisitedColor) const
+	{
+		return GetTileMap([](const Tile &tile)
+			{
+				return !tile.visited;
+			}, visitedColor, notVisitedColor);
+	}
+
+	uint8_t* TileMap::GetCentroidTileMap() const
+	{
+		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		forEachTile([&](const Tile& tile, unsigned bufferIndex)
+		{
+			auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
+			auto index = bufferIndex / 4;
+			
+			if(centroidIndex < m_tiles.size() && index == centroidIndex)
+			{
+				data::Color color(255, 0, 0, 255);
+				fillBufferPosWithColor(bufferIndex, buffer, color);
+			}
+			else
+			{
+				data::Color color(0, 0, 0, 255);
+				fillBufferPosWithColor(bufferIndex, buffer, color);
+			}
+		});
+		return buffer;
 	}
 
 	uint8_t* TileMap::GetTileMapOfType(TileType type) const
@@ -277,6 +309,14 @@ namespace MapGenerator
 			{
 				return tile.type == type;
 			});
+	}
+	
+	uint8_t* TileMap::GetUndefinedTileMap(const data::Color& defined, const data::Color& undefined) const
+	{
+		return GetTileMap([](const Tile &tile)
+			{
+				return tile.type == TileType::UNDEFINED;
+			}, defined, undefined);
 	}
 
 	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
@@ -311,6 +351,34 @@ namespace MapGenerator
 			}
 		});
 		return buffer;
+	}
+
+	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor)
+	{
+		if(borderBuffer.size() != m_tiles.size() * 4)
+		{
+			std::cout << "border does not match tile size\n";
+			return;
+		}
+
+		for (unsigned i = 0; i < Height(); i++)
+		{
+			for (unsigned j = 0; j < Width(); j++)
+			{
+				const int tileIndex = (i * Width() + j);
+				const int index = tileIndex * 4;
+				const uint8_t r = borderBuffer[index];
+				const uint8_t g = borderBuffer[index + 1];
+				const uint8_t b = borderBuffer[index + 2];
+				const uint8_t a = borderBuffer[index + 3];
+				const data::Color &color = data::Color(r, g, b, a);
+				if(color != data::Color(255, 255, 255, 255))
+				{
+					m_tiles[tileIndex].visited = true;
+					m_tiles[tileIndex].isBorder = true;
+				}
+			}
+		}
 	}
 
 	void TileMap::PrintTileMapColors()

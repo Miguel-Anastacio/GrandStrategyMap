@@ -49,11 +49,18 @@ struct SHAREDMODULE_API FMapGenParams
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
 	UTexture2D* OriginTexture = nullptr;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
-	bool UseHeightMap = true;
+	bool UploadBorder = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition ="UploadBorder"))
+	UTexture2D* BorderTexture = nullptr;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition = "UseHeightMap", ClampMin=0, ClampMax=1))
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
+	bool UseHeightMap = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings")
+	bool LandBelowCutoffHeight = false;
+
+	// Value above which tiles are considered land/water (can be flipped with LandBelowCutoffHeight at true)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=(ClampMin=0, ClampMax=1))
 	float CutoffHeight = 0.001f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Land Settings")

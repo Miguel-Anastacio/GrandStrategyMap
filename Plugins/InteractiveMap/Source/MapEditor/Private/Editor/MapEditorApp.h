@@ -53,7 +53,7 @@ private:
 	void AddToolbarExtender();
 
 	// Map GEN section
-	TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
+	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 	static TObjectPtr<UTexture2D> CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height);
 	void SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
@@ -65,13 +65,17 @@ private:
 	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
 	// =====================================================
 	// TexturePreview
-	void LoadPreviewTexturesFromMapMapObject(const UMapObject* MapObject);
+	void LoadPreviewTexturesFromMapObject(const UMapObject* MapObject);
 	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	TWeakObjectPtr<UTexture2D> GetLookupLandTexture() const;
 	TWeakObjectPtr<UTexture2D> GetLookupOceanTexture() const;
 	TWeakObjectPtr<UTexture2D> GetRootTexture() const;
 	TWeakObjectPtr<UTexture2D> GetBorderTexture() const;
-	
+	TWeakObjectPtr<UTexture2D> GetVisitedTilesTexture() const;
+
+	void UpdatePreviewTextures(const MapGenerator::TileMap& TileMap);
+	TSharedPtr<MapGenerator::Map> GetLastMapCreated() const;
+	UTexture2D* GetLastRootTexture() const;
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
@@ -80,9 +84,24 @@ private:
 	UTexture2D* PreviewLookupTexture = nullptr;
 	UTexture2D* PreviewLookupTextureLand = nullptr;
 	UTexture2D* PreviewLookupTextureOcean = nullptr;
-	UTexture2D* PreviewBorderTexture = nullptr;
 	UTexture2D* PreviewRootTexture = nullptr;
+	UTexture2D* PreviewBorderTexture = nullptr;
+	UTexture2D* PreviewVisitedTilesTexture = nullptr;
 
 	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;
+
+	struct FMapPreview
+	{
+		TSharedPtr<MapGenerator::Map> Map;
+		UTexture2D* PreviewRootTexture;
+
+		FMapPreview(const TSharedPtr<MapGenerator::Map>& map, UTexture2D* rootTexture)
+			: Map(map), PreviewRootTexture(rootTexture)
+		{
+			
+		}
+	};
+
+	TArray<FMapPreview> TempPreviews;
 	
 };

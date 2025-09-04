@@ -13,31 +13,31 @@
 #include "components/LookupMap.h"
 namespace MapGenerator
 {
-	class Texture;
-	using namespace data;
-	enum class MapModeGen
-	{
-		FromHeightMap,
-		FromMask
-	};
+class Texture;
+using namespace data;
+enum class MapModeGen
+{
+	FromHeightMap,
+	FromMask
+};
 
-	
-	class Map : public Dimensions
-	{
-	public:
-		Map(unsigned width, unsigned height);
-		~Map();
 
-		const TileMap& GetLookupTileMap() const
-		{
-			return m_lookupmap->GetTileMap();
-		}
+class Map : public Dimensions
+{
+public:
+	Map(unsigned width, unsigned height);
+	~Map();
+
+	const TileMap& GetLookupTileMap() const
+	{
+		return m_lookupmap->GetTileMap();
+	}
 	inline const std::vector<double> NoiseMap() const
 	{
 		assert(m_heightmap != nullptr);
 		return m_heightmap->NoiseMap();
 	}
-		
+	
 	void GenerateHeightMap(const NoiseMapData &data);
 	void GenerateHeightMapTectonic();
 	void GenerateHeightMapTectonic(const NoiseMapData &data);
@@ -77,6 +77,10 @@ namespace MapGenerator
 
 	bool IsValid() const;
 
+	void SetBorderUpload(const std::vector<uint8_t>& borderBuffer);
+	void SetBorderUpload(const uint8_t* borderBufferm, const unsigned width, const unsigned height);
+	void ClearBorderUpload();
+
 private:
 	// void SaveMapComponent(MapComponent* component, const char* filePath, const char* message = "map component");
 	void SaveMapComponent(MapComponent *component, const std::string &filePath, const char *message = "map component") const;
@@ -92,6 +96,8 @@ private:
 	std::unique_ptr<MapMask> m_oceanMask;
 
 	float m_cutOffHeight = 0.001f;
+	bool m_uploadBorder;
+	std::shared_ptr<std::vector<uint8_t>> m_borderUploadedBuffer;	
 	// std::unique_ptr<Texture> m_lookUpTexture;
 	uint8_t* GetTileMapOfType(TileType type) const;
 };
