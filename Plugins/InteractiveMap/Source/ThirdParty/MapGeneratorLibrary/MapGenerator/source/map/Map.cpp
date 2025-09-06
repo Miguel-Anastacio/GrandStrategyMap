@@ -95,8 +95,7 @@ namespace MapGenerator
 		case MapModeGen::FromHeightMap:
 			GenerateMapFromHeigthMap(textureBuffer, data.cutOffHeight, data, progressCallback);
 			break;
-		case MapModeGen::FromMask:
-			GenerateMapFromMaskTexture(textureBuffer, data.cutOffHeight, data, progressCallback);
+		default:
 			break;
 		}
 	}
@@ -125,8 +124,8 @@ namespace MapGenerator
 			progressCallback(0.0f, "GenerateMapFromHeigthMap");
 		}
 		
-		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight);
-		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, false);
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight, !data.flipMask);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, data.flipMask);
 		RegenerateMasks(data);
 		
 		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
@@ -137,37 +136,12 @@ namespace MapGenerator
 
 	}
 
-	void Map::GenerateMapFromMaskTexture(const std::vector<uint8_t>& textureBuffer, float cutOffHeight,
-		const LookupMapData& data, std::function<void(float, std::string_view)> progressCallback)
-	{
-		if(progressCallback)
-		{
-			progressCallback(0.0f, "GenerateMapFromHeigthMap");
-		}
-		
-		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight);
-		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, false);
-		RegenerateMasks(textureBuffer);
-		
-		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
-		RegenerateLookUp(data, progressCallback);
-	}
-
 	void Map::RegenerateMasks(const LookupMapData& data)
 	{
 		if (std::abs(data.cutOffHeight - m_cutOffHeight) > 0.00001)
 		{
-			m_landMask->RegenerateMask(data.cutOffHeight, true);
-			m_oceanMask->RegenerateMask(data.cutOffHeight, false);
-		}
-	}
-
-	void Map::RegenerateMasks(const std::vector<uint8_t>& maskTextureBuffer)
-	{
-		if (maskTextureBuffer.size() > 0)
-		{
-			m_landMask->RegenerateMask(maskTextureBuffer, true);
-			m_oceanMask->RegenerateMask(maskTextureBuffer, false);
+			m_landMask->RegenerateMask(data.cutOffHeight, !data.flipMask);
+			m_oceanMask->RegenerateMask(data.cutOffHeight, data.flipMask);
 		}
 	}
 

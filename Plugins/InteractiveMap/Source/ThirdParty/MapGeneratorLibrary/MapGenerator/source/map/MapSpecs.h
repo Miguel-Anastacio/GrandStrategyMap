@@ -41,15 +41,17 @@ namespace MapGenerator
 		unsigned height = 10;
 		float borderLine = 3.0f;
 		float cutOffHeight = 0.001f;
+		bool flipMask = false;
 
 		LookupMapData(NoiseData noiseData, LookupFeatures landSpec, LookupFeatures oceanSpec, unsigned w, unsigned h,
-			float borderThick, float cutOff)
+			float borderThick, float cutOff, bool maskFlip = false)
 		:	borderNoise(noiseData),
 			land(landSpec),
 			ocean(oceanSpec),
 			width(w), height(h),
 			borderLine(borderThick),
-			cutOffHeight(cutOff)
+			cutOffHeight(cutOff),
+			flipMask(maskFlip)
 
 		{};
 

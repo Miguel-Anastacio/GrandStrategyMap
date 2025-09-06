@@ -20,7 +20,8 @@ public:
 	class UMapObject* GetWorkingAsset() const { return WorkingAsset; }
 	class UMapEditorPreset* GetMapGenPreset() const { return MapGenPreset; }
 
-	void OnTexturePreviewClicked(FName ID) const;
+	void OnTexturePreviewClicked(FName ID);
+	TArray<TPair<FName, UTexture2D*>> GetTexturesPairs() const;
 	
 public: // FAssetEditorToolkit interface
 	virtual FName GetToolkitFName() const override { return FName("MapEditorApp"); }
@@ -42,6 +43,14 @@ public: // FAssetEditorToolkit interface
 	void SaveGeneratedMap();
 	// MapDataEditor
 	void UpdateEntrySelected(int32 Index) const;
+	const UScriptStruct* GetFilterForDataList() const;
+
+	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
+
+	// ====================================================
+	// Update Viewport
+	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
+	void UpdateHighlightTexture(const TArray<int32>& IDs);
 	
 private:
 	/** FGCObject interface */
@@ -54,7 +63,6 @@ private:
 
 	// Map GEN section
 	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
-	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 	static TObjectPtr<UTexture2D> CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height);
 	void SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
                                													UMaterialInstanceConstant* Material) const;
@@ -63,6 +71,10 @@ private:
 	void OutputStubMapDataJson(const FString& FilePath) const;
 	UMaterialInstanceConstant* CreateMaterialInstanceAsset(UTexture2D* Texture, const FString& PackagePath) const;
 	UTexture2D* CreateLookupTextureAsset(const FString& PackagePath) const;
+
+	// =====================================
+	// Data Editor
+	void SetFilterForDataList(const UScriptStruct* Struct);
 	// =====================================================
 	// TexturePreview
 	void LoadPreviewTexturesFromMapObject(const UMapObject* MapObject);
@@ -87,6 +99,11 @@ private:
 	UTexture2D* PreviewRootTexture = nullptr;
 	UTexture2D* PreviewBorderTexture = nullptr;
 	UTexture2D* PreviewVisitedTilesTexture = nullptr;
+	TWeakObjectPtr<UTexture2D> CurrentTexture = nullptr;
+
+	// Highlight
+	UTexture2D* HighlightTexture = nullptr;
+	
 
 	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;
 
@@ -103,5 +120,7 @@ private:
 	};
 
 	TArray<FMapPreview> TempPreviews;
+
+	const UScriptStruct* DataListStructFilter = nullptr;
 	
 };

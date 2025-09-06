@@ -179,6 +179,7 @@ public:
 	void SaveData() const;
 	void LoadDataFromFile();
 	void SetLookupTexture(UTexture2D *Texture2D);
+	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
 	void SetLookupFilePath(const FString &FilePath)
 	{
@@ -193,6 +194,11 @@ public:
 	UMaterialInterface* GetMaterialOverride() const;
 
 	UDataTable* GetVisualPropertyTypes() const;
+
+	void AddTileSelected(int32 ID);
+	void RemoveTileSelected(int32 ID);
+	void ClearTilesSelected();
+	const TArray<int32>& GetTilesSelected() const;
 #endif
 	
 public:	
@@ -307,12 +313,16 @@ private:
 	
 	TSharedPtr<MapGenerator::Map> Map;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere) // temp visibility
 	bool bMapSaved = true;
 
 	// Used for undo to work
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere) // temp visibility
 	int Counter = 0;
+
+	// Tracks tiles selected by user in editor
+	UPROPERTY(VisibleAnywhere) // temp the visibility
+	TArray<int32> SelectedTiles;
 #endif
 	
 };

@@ -60,13 +60,9 @@ public:
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight);
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data,
 									std::function<void(float, std::string_view)> progressCallback = nullptr);
-
-	void GenerateMapFromMaskTexture(const std::vector<uint8_t> &maskTextureBuffer, float cutOffHeight,
-									const LookupMapData& data,
-									std::function<void(float, std::string_view)> progressCallback = nullptr);
+	
 
 	void RegenerateMasks(const LookupMapData& data);	
-	void RegenerateMasks(const std::vector<uint8_t> &maskTextureBuffer);	
 	// void SaveMap(const char* filePath);
 	void SaveMap(const std::string &filePath) const;
 	void Reset();

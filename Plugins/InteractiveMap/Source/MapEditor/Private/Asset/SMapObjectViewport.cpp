@@ -3,6 +3,7 @@
 #include "MapObject.h"
 #include "MapEditor.h"
 #include "Asset/MapAssetActor.h"
+#include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "Editor/MapEditorApp.h"
 #include "Math/Color.h"  
 #include "Kismet/GameplayStatics.h"
@@ -12,7 +13,7 @@ FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPrev
 {
 	
 }
-
+// TODO - refactor this function
 void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event,
 	uint32 HitX, uint32 HitY)
 {
@@ -21,15 +22,33 @@ void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProx
 		const int32 Index = GetIndexOfTileSelected(HitX, HitY);
 		if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
 		{
-			if(ViewportWidget->MapEditorApp.IsValid())
+			UMapObject* WorkingAsset = ViewportWidget->MapEditorApp.Pin().Get()->GetWorkingAsset();
+			if(ViewportWidget->MapEditorApp.IsValid() && Index != -1)
 			{
-				ViewportWidget->MapEditorApp.Pin().Get()->UpdateEntrySelected(Index);
+				// when not pressing shift clear 
+				const bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
+				if(!bShiftDown)
+				{
+					WorkingAsset->ClearTilesSelected();
+				}
+				
+				ViewportWidget->MapEditorApp.Pin()->UpdateEntrySelected(Index);
+				bTileSelected = true;
+				WorkingAsset->AddTileSelected(Index);
 			}
-			bTileSelected = true;
-		}
-		if(Index == -1)
-		{
-			bTileSelected = false;
+			// not clicking on a tile we clear list
+			if(Index == -1)
+			{
+				bTileSelected = false;
+				WorkingAsset->ClearTilesSelected();
+				ViewportWidget->MapEditorApp.Pin().Get()->UpdateHighlightTexture({});
+			}
+			else
+			{
+				
+				ViewportWidget->MapEditorApp.Pin()->UpdateHighlightTexture(WorkingAsset->GetTilesSelected());
+			}
+
 		}
 	}
 	
@@ -123,8 +142,7 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 Scre
 
 		if(MapAsset->Material)
 		{
-			MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
-			return MapAsset->MapObject->FindID(Color);
+			return  MapAsset->MapObject->FindID(Color);
 		}
 	}
 	return -1;
@@ -150,15 +168,15 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	MapAsset->RerunConstructionScripts();
 }
 
-void SMapObjectViewport::UpdatePreviewActor(int32 ID) const 
+void SMapObjectViewport::UpdatePreviewActor() const 
 {
-	const FColor Color = MapAsset->MapObject->GetColor(ID);
-	MapAsset->Material->SetVectorParameterValue("ProvinceHighlighted", Color);
+	MapAsset->Material->SetTextureParameterValue("TextureHighlight", MapEditorApp.Pin()->GetHighlightTexture().Get());
 }
 
 void SMapObjectViewport::UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const
 {
 	MapAsset->SetMaterial(Texture2D, ParentMaterial);
+	UpdatePreviewActor();
 }
 
 void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)

@@ -27,8 +27,10 @@ public:
 	TObjectPtr<class UInstancedStructWrapper> EntryWrapper = nullptr;
 
 	void UpdateMap(const FInstancedStruct& Data, int ID);
+	void SetFilter(const UScriptStruct* Type, bool RefreshList);
 protected:
 	void RefreshDataList();
+	bool IncludedInFilter(const UScriptStruct* Type) const;
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override
 	{
@@ -46,5 +48,6 @@ protected:
 	FWorkflowAllowedTabSet TabSet;
 	FName DataEditorListTabID;
 	FName DataEditorEntryTabID;
+	const UScriptStruct* ListFilterByType = nullptr;
 
 };

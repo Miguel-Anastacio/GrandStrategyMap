@@ -9,12 +9,16 @@ USTRUCT(BlueprintType)
 struct SHAREDMODULE_API FMapDetails
 {
 	GENERATED_BODY()
+	// Number of tiles that the algorithm will try to create the actual number might be lower or higher
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=100000), Category = "Map Details")
 	int32 NumberOfTiles = 10;
+	// seed to randomize starting tile centroids
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Map Details")
 	int32 Seed = 10;
+	// lloyd iterations performed to the voronoi diagram
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=20), Category = "Map Details")
 	int32 LloydIteration = 10;
+	// How far around the algo will search for a neighbouring tile before adding a new one
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=1000), Category = "Map Details")
 	int32 SearchRadiusBeforeNewTile = 100;
 };
@@ -46,16 +50,15 @@ USTRUCT(BlueprintType)
 struct SHAREDMODULE_API FMapGenParams
 {
 	GENERATED_BODY()
-	
+	// The starting texture, a black and white image (heightmap or mask map that you wish to use for your map)
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
 	UTexture2D* OriginTexture = nullptr;
+	// Set to true if you wish to upload a texture with the borders for your map, only possible to upload for either land or ocean
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
 	bool UploadBorder = false;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition ="UploadBorder"))
 	UTexture2D* BorderTexture = nullptr;
 	
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
-	bool UseHeightMap = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings")
 	bool LandBelowCutoffHeight = false;
 
@@ -68,7 +71,8 @@ struct SHAREDMODULE_API FMapGenParams
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Ocean Settings")
 	FMapDetails OceanDetails;
-	
+
+	// Settings of the noise that is applied to deform the borders between tiles
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Border Noise Settings")
 	FNoiseDetails NoiseDetails;
 	

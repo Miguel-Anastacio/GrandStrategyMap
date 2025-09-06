@@ -31,6 +31,8 @@ public:
     FName ID;
 };
 
+typedef TPair<FName, UTexture2D*> FTextureNamePair;
+typedef TArray<FTextureNamePair> FTextureArray;
 /**
  * Custom Editor Widget to manage texture selection, details, and display.
  */
@@ -41,6 +43,7 @@ public:
     SLATE_BEGIN_ARGS(STextureViewer)
     {}
         SLATE_EVENT(FTextureChanged, OnTextureSelected)
+        SLATE_ARGUMENT(FTextureArray, TexturePairs)
     SLATE_END_ARGS()
 
     /** Constructor and widget setup */

@@ -6,7 +6,6 @@ class FAdvancedPreviewScene;
 class UMapObject;
 class AMapAsset;
 
-DECLARE_DELEGATE_OneParam(FOnClickedOnMapSignature, uint32);
 class FMapObjectViewportClient : public FEditorViewportClient
 {
 public:
@@ -15,7 +14,6 @@ public:
 	virtual bool InputKey(const FInputKeyEventArgs& EventArgs) override;
 	virtual void Tick(float DeltaSeconds) override;
 	int32 GetIndexOfTileSelected(int32 ScreenX, int32 ScreenY);
-	FOnClickedOnMapSignature OnClickedOnMapDelegate;
 
 private:
 	UMapObject* MapObject;
@@ -36,7 +34,7 @@ public:
 SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
-	void UpdatePreviewActor(int32 ID) const;
+	void UpdatePreviewActor() const;
 	void UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;

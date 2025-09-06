@@ -10,6 +10,7 @@
 #include "Editor/MapViewportTabFactory.h"
 #include "Editor/NameDefines.h"
 #include "Editor/MapEditorApp.h"
+#include "Editor/MapEditorTexturePreviewFactory.h"
 
 FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 	: FApplicationMode(MapDataEditorModeName), App(app)
@@ -18,18 +19,18 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 	
 	TabSet.RegisterFactory(MakeShareable(new FMapObjectDetailsTabFactory(app)));
 	TabSet.RegisterFactory(MakeShareable(new FMapViewportTabFactory(app)));
+	TabSet.RegisterFactory(MakeShareable(new FMapEditorTexturePreviewFactory(app)));
 	
 	Init();
-	TSharedPtr<FWorkflowTabFactory> Factory = MakeShareable(new FMapDataEditorTabFactory(app));
+	const TSharedPtr<FWorkflowTabFactory> Factory = MakeShareable(new FMapDataEditorTabFactory(app));
 	DataEditorListTabID = Factory->GetIdentifier();
 	TabSet.RegisterFactory(Factory);
 
-	TSharedPtr<FWorkflowTabFactory> FactoryDatEntry = MakeShareable(new FMapDataEntryEditorTabFactory(app));
+	const TSharedPtr<FWorkflowTabFactory> FactoryDatEntry = MakeShareable(new FMapDataEntryEditorTabFactory(app));
 	DataEditorEntryTabID = FactoryDatEntry->GetIdentifier();
 	TabSet.RegisterFactory(FactoryDatEntry);
 	
-	
-	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v1.2")
+	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v1.4")
 	->AddArea
 	(
 		FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
@@ -46,6 +47,12 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 						FTabManager::NewStack()
 						->SetSizeCoefficient(0.5f)
 						->AddTab(MapEditorViewportTabName, ETabState::OpenedTab)
+					)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.25f)
+						->AddTab(MapEditorPreviewTabName, ETabState::OpenedTab)
 					)
 				)
 				->Split
@@ -98,12 +105,18 @@ void FMapEditorDataAppMode::PostActivateMode()
 	TSharedPtr<FMapEditorApp> app = App.Pin();
 	app->RestoreTexturePreview();
 	Init();
+	const TArray<int32> Index = app->GetWorkingAsset()->GetTilesSelected();
+	if(!Index.IsEmpty())
+	{
+		app->UpdateEntrySelected(Index[0]);
+	}
 	
 	FApplicationMode::PostActivateMode();
 }
 
 void FMapEditorDataAppMode::Init()
 {
+	ListFilterByType = App.Pin().Get()->GetFilterForDataList();
 	RefreshDataList();
 	
 	TWeakObjectPtr<UMapObject> CustomObject = App.Pin().Get()->GetWorkingAsset();
@@ -123,6 +136,13 @@ void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data, int ID)
 	RefreshDataList();
 }
 
+void FMapEditorDataAppMode::SetFilter(const UScriptStruct* Type, bool RefreshList)
+{
+	ListFilterByType = Type;
+	if(RefreshList)
+		RefreshDataList();
+}
+
 void FMapEditorDataAppMode::RefreshDataList()
 {
 	MyListItems.Empty();
@@ -130,10 +150,22 @@ void FMapEditorDataAppMode::RefreshDataList()
 	TWeakObjectPtr<UMapObject> CustomObject = App.Pin().Get()->GetWorkingAsset();
 	for(const auto& Data : CustomObject.Get()->GetMapDataValue())
 	{
-		MyListItems.Emplace(MakeShared<FInstancedStruct>(Data));
+		if(IncludedInFilter(Data.GetScriptStruct()))
+		{
+			MyListItems.Emplace(MakeShared<FInstancedStruct>(Data));
+		}
 	}
 	if(EditableStructListDisplay)
 	{
 		EditableStructListDisplay->RefreshList();
 	}
 }
+
+bool FMapEditorDataAppMode::IncludedInFilter(const UScriptStruct* Type) const
+{
+	if(!ListFilterByType)
+		return true;
+
+	return ListFilterByType == Type;
+}	
+

@@ -31,12 +31,17 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 		{
 			app->GetWorkingAsset()->UpdateDataInEditor(Item);
 		})
-		.OnSelectionChanged_Lambda([this, app, appMode](const int32 ID)
+		.OnSelectionChanged_Lambda([this, app, appMode](const int32 ID, const ESelectInfo::Type type)
 		{
-			app->MapViewport->UpdatePreviewActor(ID);
-			FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
+			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
 			appMode->EntryWrapper->SetStructInstance(*Entry);
 			appMode->EntryWrapper->ID = ID;
+			// on mouse click on list clear tiles selected and update highlight texture
+			if(type == ESelectInfo::Type::OnMouseClick)
+			{
+				app->GetWorkingAsset()->ClearTilesSelected();
+				app->UpdateHighlightTexture({ID});
+			}
 		});
 }
 

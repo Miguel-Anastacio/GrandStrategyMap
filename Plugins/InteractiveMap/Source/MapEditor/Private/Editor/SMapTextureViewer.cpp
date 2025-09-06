@@ -10,36 +10,38 @@ void STextureViewer::Construct(const FArguments& InArgs)
         pair.Value = CreateBrush(nullptr, FVector2D(128, 128));
         pair.Key = FName(*FString::Printf(TEXT("Test%d"), test++));
     }
+    SetTextures(InArgs._TexturePairs);
+    
     ChildSlot
     [
-        SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
             CreateImagePreview(0)
         ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
             CreateImagePreview(1)
         ]
-        + SHorizontalBox::Slot()
-       .AutoWidth()
+        + SVerticalBox::Slot()
+       .AutoHeight()
        [
            CreateImagePreview(2)
        ]
-        + SHorizontalBox::Slot()
-       .AutoWidth()
+        + SVerticalBox::Slot()
+       .AutoHeight()
        [
           CreateImagePreview(3)
        ]
-        + SHorizontalBox::Slot()
-       .AutoWidth()
+        + SVerticalBox::Slot()
+       .AutoHeight()
        [
           CreateImagePreview(4)
        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
+        + SVerticalBox::Slot()
+        .AutoHeight()
         [
           CreateImagePreview(5)
         ]

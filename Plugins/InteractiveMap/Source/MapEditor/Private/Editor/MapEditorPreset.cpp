@@ -7,7 +7,7 @@
 #if WITH_EDITOR
 UMapEditorPreset::UMapEditorPreset()
 {
-	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialFinder(TEXT("/Script/Engine.Material'/InteractiveMap/GSMap/InteractiveMap/Material/Material/M_PoliticalMap.M_PoliticalMap'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialFinder(TEXT("/Script/Engine.Material'/InteractiveMap/GSMap/Editor/M_PoliticalMapEditor.M_PoliticalMapEditor'"));
 	if(MaterialFinder.Succeeded())
 	{
 		Material = MaterialFinder.Object;

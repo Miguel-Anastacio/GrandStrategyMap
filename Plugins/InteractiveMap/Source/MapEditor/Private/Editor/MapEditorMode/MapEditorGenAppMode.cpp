@@ -2,7 +2,7 @@
 #include "MapEditorGenAppMode.h"
 
 #include "MapEditorGenTabFactory.h"
-#include "MapEditorTexturePreviewFactory.h"
+#include "Editor/MapEditorTexturePreviewFactory.h"
 #include "MapObject.h"
 #include "Editor/MapViewportTabFactory.h"
 #include "Editor/NameDefines.h"
@@ -35,10 +35,9 @@ FMapEditorGenAppMode::FMapEditorGenAppMode(TSharedPtr<FMapEditorApp> app)
 					->Split
 					(
 						FTabManager::NewStack()
-						->SetSizeCoefficient(0.5f)
+						->SetSizeCoefficient(0.25f)
 						->AddTab(MapEditorPreviewTabName, ETabState::OpenedTab)
 					)
-					
 				)
 				->Split
 				(

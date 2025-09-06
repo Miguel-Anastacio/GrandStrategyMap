@@ -28,6 +28,9 @@ void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManage
 {
 	FWorkflowCentricApplication::RegisterTabSpawners(tabManager);
 	LoadPreviewTexturesFromMapObject(WorkingAsset);
+	CurrentTexture = WorkingAsset->GetLookupTexture();
+	WorkingAsset->ClearTilesSelected();
+	UpdateHighlightTexture({});
 }
 
 void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost,
@@ -36,7 +39,7 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 	GEditor->RegisterForUndo(this);
 	WorkingAsset = Cast<UMapObject>(InObject);
 	MapGenPreset = NewObject<UMapEditorPreset>();
-
+	
 	AddApplicationMode(MapEditorGenModeName, MakeShareable(new FMapEditorGenAppMode(SharedThis(this))));
 	AddApplicationMode(MapDataEditorModeName, MakeShareable(new FMapEditorDataAppMode(SharedThis(this))));
 	
@@ -70,41 +73,50 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 	}
 }
 
-void FMapEditorApp::OnTexturePreviewClicked(FName ID) const
+void FMapEditorApp::OnTexturePreviewClicked(FName ID)
 {
-	if(GetCurrentMode() == MapEditorGenModeName)
+	// if(GetCurrentMode() == MapEditorGenModeName)
+	// {
+	TWeakObjectPtr<UTexture2D> Texture2D = nullptr;
+	if(ID == FName("Lookup"))
 	{
-		TWeakObjectPtr<UTexture2D> Texture2D = nullptr;
-		if(ID == FName("Lookup"))
-		{
-			Texture2D = GetLookupTexture();
-		}
-		else if(ID == FName("LookupLand"))
-		{
-			Texture2D = GetLookupLandTexture();
-		}
-		else if(ID == FName("LookupOcean"))
-		{
-			Texture2D = GetLookupOceanTexture();
-		}
-		else if(ID == FName("HeightMap"))
-		{
-			Texture2D = GetRootTexture();
-		}
-		else if(ID == FName("Borders"))
-		{
-			Texture2D = GetBorderTexture();
-		}
-		else if(ID == FName("Visited"))
-		{
-			Texture2D = GetVisitedTilesTexture();
-		}
-		
-		if(Texture2D.IsValid())
-		{
-			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D.Get());
-		}
+		SetFilterForDataList(nullptr);
+		Texture2D = GetLookupTexture();
 	}
+	else if(ID == FName("LookupLand"))
+	{
+		SetFilterForDataList(WorkingAsset->StructType);
+		Texture2D = GetLookupLandTexture();
+	}
+	else if(ID == FName("LookupOcean"))
+	{
+		SetFilterForDataList(WorkingAsset->OceanStructType);
+		Texture2D = GetLookupOceanTexture();
+	}
+	else if(ID == FName("HeightMap"))
+	{
+		SetFilterForDataList(nullptr);
+		Texture2D = GetHighlightTexture();
+	}
+	else if(ID == FName("Borders"))
+	{
+		SetFilterForDataList(nullptr);
+		Texture2D = GetBorderTexture();
+	}
+	else if(ID == FName("Visited"))
+	{
+		SetFilterForDataList(nullptr);
+		Texture2D = GetVisitedTilesTexture();
+	}
+		
+	if(Texture2D.IsValid())
+	{
+		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D.Get());
+		CurrentTexture = Texture2D;
+	}
+
+	// MapDataEditorData that filter changed
+	
 }
 
 void FMapEditorApp::SaveAsset_Execute()
@@ -142,7 +154,11 @@ void FMapEditorApp::GenerateMap()
 		const uint8* BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(BorderTexture);
 		if(!BufferData)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to read  Border texture"));
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read  Border texture"));
+			// throw error and return
+			const FText Title = FText::FromString(TEXT("Error - Border Texture Settings"));
+			const FText Message = FText::FromString(TEXT("Check the Log for more details on the error"));
+			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 			return;
 		}
 		TempMapGenerator->SetBorderUpload(BufferData, width, height);
@@ -152,7 +168,11 @@ void FMapEditorApp::GenerateMap()
 	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
 	if(!Data)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to read Height Map texture"));
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read Height Map texture"));
+		// throw error and return
+		const FText Title = FText::FromString(TEXT("Error - Height Map Texture Settings"));
+		const FText Message = FText::FromString(TEXT("Check the Log for more details on the error"));
+		EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 		return;
 	}
 	 
@@ -164,7 +184,7 @@ void FMapEditorApp::GenerateMap()
 		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			//Call GenerateMap and pass the progress callback
-			const MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
+			constexpr MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
 			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType, ProgressCallback);
 
 			// Update the preview textures
@@ -183,6 +203,7 @@ void FMapEditorApp::GenerateMap()
 			}
 
 			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, PreviewLookupTexture);
+			CurrentTexture = PreviewLookupTexture;
 			
 			TempPreviews.Emplace(TempMapGenerator, PreviewLookupTexture);
 			RestoreTexturePreview();
@@ -195,19 +216,13 @@ void FMapEditorApp::RestoreTexturePreview() const
 		return;
 	if(MapTexturePreview)
 	{
-		MapTexturePreview->SetTextures(TArray
-							{
-								TPair<FName, UTexture2D*>(FName("Lookup"), GetLookupTexture().Get()),
-								TPair<FName, UTexture2D*>(FName("LookupLand"), GetLookupLandTexture().Get()),
-								TPair<FName, UTexture2D*>(FName("LookupOcean"), GetLookupOceanTexture().Get()),
-								TPair<FName, UTexture2D*>(FName("Borders"), GetBorderTexture().Get()),
-								TPair<FName, UTexture2D*>(FName("Visited"), GetVisitedTilesTexture().Get()),
-								TPair<FName, UTexture2D*>(FName("HeightMap"), GetRootTexture().Get())
-							});
+		MapTexturePreview->SetTextures(GetTexturesPairs());
 	}
 
-	if(WorkingAsset->IsMapSaved())	
-		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, GetLookupTexture().Get());
+	// if(WorkingAsset->IsMapSaved())
+	// {
+	MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, CurrentTexture.Get());
+	// }
 }
 
 void FMapEditorApp::RestoreMapGenPreset() const
@@ -308,9 +323,7 @@ void FMapEditorApp::AddToolbarExtender()
 				}),
 				FCanExecuteAction().CreateLambda([this]() -> bool
 				{
-					// TODO - check this
-					// return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
-					return true;
+					return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
 				}),
 				FIsActionChecked::CreateLambda([this]() -> bool
 				{
@@ -581,6 +594,64 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 	return Texture;
 }
 
+void FMapEditorApp::SetFilterForDataList(const UScriptStruct* Struct)
+{
+	DataListStructFilter = Struct;
+	TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+	if(AppMode)
+	{
+		AppMode->SetFilter(Struct, GetCurrentMode() == MapDataEditorModeName);
+		
+		const TArray<int32> Index = GetWorkingAsset()->GetTilesSelected();
+		if(!Index.IsEmpty())
+		{
+			UpdateEntrySelected(Index.Last());	
+		}
+	}
+}
+
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetHighlightTexture() const
+{
+	return HighlightTexture;
+}
+
+void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
+{
+	// get lookup texture buffer
+	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(GetLookupTexture().Get());
+	const int32 size = bufferTextureData.Num();
+	uint8_t* buffer = new uint8_t[size];
+	for(int i = 0; i < size; i+=4)
+	{
+		buffer[i + 0] = 0;
+		buffer[i + 1] = 0;
+		buffer[i + 2] = 0;
+		buffer[i + 3] = 0;
+		for(const auto id : IDs)
+		{
+			const FColor color = GetWorkingAsset()->GetColor(id);
+			if(UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(i, bufferTextureData) == color)
+			{
+				buffer[i + 0] = 255;
+				buffer[i + 1] = 255;
+				buffer[i + 2] = 255;
+				buffer[i + 3] = 255;
+			}
+		}
+	}
+	const int32 Width =  GetWorkingAsset()->GetLookupTexture().Get()->GetSizeX();
+	const int32 Height = GetWorkingAsset()->GetLookupTexture().Get()->GetSizeY();
+	HighlightTexture = CreateTexture(buffer, Width, Height);
+	if(buffer)
+	{
+		buffer = nullptr;
+		delete[] buffer;
+	}
+
+	if(MapViewport)
+		MapViewport->UpdatePreviewActor();
+}
+
 void FMapEditorApp::LoadPreviewTexturesFromMapObject(const UMapObject* MapObject)
 {
 	if(!MapObject)
@@ -627,15 +698,29 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetVisitedTilesTexture() const
 	return PreviewVisitedTilesTexture;
 }
 
+TArray<TPair<FName, UTexture2D*>> FMapEditorApp::GetTexturesPairs() const
+{
+	return TArray
+	{
+		TPair<FName, UTexture2D*>(FName("Lookup"), GetLookupTexture().Get()),
+		TPair<FName, UTexture2D*>(FName("LookupLand"), GetLookupLandTexture().Get()),
+		TPair<FName, UTexture2D*>(FName("LookupOcean"), GetLookupOceanTexture().Get()),
+		TPair<FName, UTexture2D*>(FName("Borders"), GetBorderTexture().Get()),
+		TPair<FName, UTexture2D*>(FName("Visited"), GetVisitedTilesTexture().Get()),
+		TPair<FName, UTexture2D*>(FName("HeightMap"), GetHighlightTexture().Get())
+	};
+}
+
 void FMapEditorApp::UpdatePreviewTextures(const MapGenerator::TileMap& TileMap)
 {
 	const unsigned width = TileMap.Width();
 	const unsigned height = TileMap.Height();
 	PreviewLookupTextureLand   = CreateTexture(TileMap.GetLandTileMap(), width, height);
 	PreviewLookupTextureOcean  = CreateTexture(TileMap.GetOceanTileMap(), width, height);
-	PreviewBorderTexture	   = CreateTexture(TileMap.GetBordersTileMap(), width, height);
-	PreviewVisitedTilesTexture = CreateTexture(TileMap.GetCentroidTileMap(), width, height);
 	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToRawBuffer(), width, height);
+	// Debug
+	PreviewVisitedTilesTexture = CreateTexture(TileMap.GetCentroidTileMap(), width, height);
+	PreviewBorderTexture	   = CreateTexture(TileMap.GetBordersTileMap(), width, height);
 }
 
 TSharedPtr<MapGenerator::Map> FMapEditorApp::GetLastMapCreated() const
@@ -667,4 +752,9 @@ void FMapEditorApp::UpdateEntrySelected(int32 Index) const
 			DataEditorMode->EditableStructListDisplay->SetSelection(Index);
 		}
 	}
+}
+
+const UScriptStruct* FMapEditorApp::GetFilterForDataList() const
+{
+	return DataListStructFilter;
 }

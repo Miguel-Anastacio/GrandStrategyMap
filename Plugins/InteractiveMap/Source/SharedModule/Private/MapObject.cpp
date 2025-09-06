@@ -484,6 +484,11 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 }
 
+TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
+{
+	return LookupTexture;
+}
+
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 {
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
@@ -594,6 +599,26 @@ UMaterialInterface* UMapObject::GetMaterialOverride() const
 UDataTable* UMapObject::GetVisualPropertyTypes() const
 {
 	return VisualPropertyTypesDT;
+}
+
+void UMapObject::AddTileSelected(int32 ID)
+{
+	SelectedTiles.Emplace(ID);
+}
+
+void UMapObject::RemoveTileSelected(int32 ID)
+{
+	SelectedTiles.Remove(ID);
+}
+
+void UMapObject::ClearTilesSelected()
+{
+	SelectedTiles.Empty();
+}
+
+const TArray<int32>& UMapObject::GetTilesSelected() const
+{
+	return SelectedTiles;
 }
 
 #endif

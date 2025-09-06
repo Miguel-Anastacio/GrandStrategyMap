@@ -48,7 +48,7 @@ TSharedRef<SWidget> FMapEditorGenTabFactory::CreateTabBody(const FWorkflowTabSpa
             .AutoHeight()          // Let the button determine its own height
             [
                 SNew(SButton)
-                .Text(FText::FromString("Click Me"))
+                .Text(FText::FromString("Generate Map"))
                 .OnClicked_Lambda([this]() -> FReply
                 {
                     // Button click handler logic
