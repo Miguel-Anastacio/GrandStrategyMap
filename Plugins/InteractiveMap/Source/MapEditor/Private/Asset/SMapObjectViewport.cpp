@@ -13,110 +13,103 @@ FMapObjectViewportClient::FMapObjectViewportClient(FAdvancedPreviewScene* InPrev
 {
 	
 }
-// TODO - refactor this function
 void FMapObjectViewportClient::ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event,
 	uint32 HitX, uint32 HitY)
 {
-	if (Key == EKeys::LeftMouseButton && Event == EInputEvent::IE_Released)
-	{
-		const int32 Index = GetIndexOfTileSelected(HitX, HitY);
-		if (const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get()))
-		{
-			UMapObject* WorkingAsset = ViewportWidget->MapEditorApp.Pin().Get()->GetWorkingAsset();
-			if(ViewportWidget->MapEditorApp.IsValid() && Index != -1)
-			{
-				// when not pressing shift clear 
-				const bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
-				if(!bShiftDown)
-				{
-					WorkingAsset->ClearTilesSelected();
-				}
-				
-				ViewportWidget->MapEditorApp.Pin()->UpdateEntrySelected(Index);
-				bTileSelected = true;
-				WorkingAsset->AddTileSelected(Index);
-			}
-			// not clicking on a tile we clear list
-			if(Index == -1)
-			{
-				bTileSelected = false;
-				WorkingAsset->ClearTilesSelected();
-				ViewportWidget->MapEditorApp.Pin().Get()->UpdateHighlightTexture({});
-			}
-			else
-			{
-				
-				ViewportWidget->MapEditorApp.Pin()->UpdateHighlightTexture(WorkingAsset->GetTilesSelected());
-			}
-
-		}
-	}
-	
+	ProcessMouseClick(View, Key, Event, HitX, HitY);
 	// Optionally, pass unhandled clicks to the base class
 	FEditorViewportClient::ProcessClick(View, HitProxy, Key, Event, HitX, HitY);
 }
 
+void FMapObjectViewportClient::ProcessMouseClick(FSceneView& View,FKey Key, EInputEvent Event,
+	uint32 HitX, uint32 HitY)
+{
+	if (!WasKeyReleased(Key, EKeys::LeftMouseButton, Event))
+	{
+		return;
+	}
+	
+	const SMapObjectViewport* ViewportWidget = static_cast<SMapObjectViewport*>(EditorViewportWidget.Pin().Get());
+	if (!ViewportWidget)
+	{
+		return;
+	}
+	if(!ViewportWidget->MapEditorApp.IsValid())
+	{
+		return;
+	}
+			
+	FMapEditorApp* App = ViewportWidget->MapEditorApp.Pin().Get();
+	UMapObject* WorkingAsset = App->GetWorkingAsset();
+	const int32 Index = GetIndexOfTileSelected(View, App, HitX, HitY); 
+	
+	// not clicking on a tile we clear list
+	if(Index == -1)
+	{
+		WorkingAsset->ClearTilesSelected();
+		App->UpdateHighlightTexture({});
+	}
+	else
+	{
+		// when not pressing shift clear current selected tiles
+		if(!IsShiftPressed())
+		{
+			WorkingAsset->ClearTilesSelected();
+		}
+
+		if(WorkingAsset->IsTileSelected(Index))
+		{
+			WorkingAsset->RemoveTileSelected(Index);
+			if(!WorkingAsset->GetTilesSelected().IsEmpty())
+			{
+				App->UpdateEntrySelected(WorkingAsset->GetTilesSelected().Last());
+			}
+			else
+			{
+				App->ClearSelection();
+			}
+		}
+		else
+		{
+			WorkingAsset->AddTileSelected(Index);
+			App->UpdateEntrySelected(Index);
+		}
+		
+		App->UpdateHighlightTexture(WorkingAsset->GetTilesSelected());
+	}
+}
+
 bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 {
-	if(EventArgs.Key == EKeys::M && EventArgs.Event == EInputEvent::IE_Released)
+	if(WasKeyReleased(EventArgs.Key, EKeys::M, EventArgs.Event))
 	{
 		if(MapObject)
 		{
 			MapObject->LogMapData();
 		}
 	}
-	if(EventArgs.Key == EKeys::L && EventArgs.Event == EInputEvent::IE_Released)
+	if(WasKeyReleased(EventArgs.Key, EKeys::L, EventArgs.Event))
 	{
 		if(MapObject)
 		{
 			MapObject->LogLookupTable();
 		}
-		
 	}
-	if(EventArgs.Key == EKeys::V && EventArgs.Event == EInputEvent::IE_Released)
+	if(WasKeyReleased(EventArgs.Key, EKeys::V, EventArgs.Event))
 	{
 		if(MapObject)
 		{
 			MapObject->LogVisualProperties();
 		}
-		
 	}
 	
 	return FEditorViewportClient::InputKey(EventArgs);
 }
 
-void FMapObjectViewportClient::Tick(float DeltaSeconds)
+int32 FMapObjectViewportClient::GetIndexOfTileSelected(const FSceneView& View, const FMapEditorApp* App, int32 ScreenX, int32 ScreenY)
 {
-	FIntPoint MousePos;
-	Viewport->GetMousePos(MousePos);
-	if(!bTileSelected)
-	{
-		// int32 Index = GetIndexOfTileSelected(MousePos.X, MousePos.Y);
-	}
-	
-	FEditorViewportClient::Tick(DeltaSeconds);
-}
-
-int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 ScreenY)
-{
-	if (!Viewport)
-	{
-		return -1;
-	}
-	// Create a scene view to perform the deprojection
-	FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
-		Viewport,
-		this->GetWorld()->Scene,
-		this->EngineShowFlags));
-     
-	FSceneView* SceneView = this->CalcSceneView(&ViewFamily);
-	if (!SceneView)
-	{
-		return -1;
-	}
-	// Deproject screen coordinates into world space
 	FVector WorldOrigin, WorldDirection;
-	SceneView->DeprojectFVector2D(FVector2D(ScreenX, ScreenY), WorldOrigin, WorldDirection);
+	View.DeprojectFVector2D(FVector2D(ScreenX, ScreenY), WorldOrigin, WorldDirection);
 
 	// Define a trace end point (far along the direction vector)
 	const FVector TraceEnd = WorldOrigin + (WorldDirection * 100000.0f);
@@ -138,7 +131,8 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 Scre
 		{
 			MapAssetRef = MapAsset;
 		}
-		const FColor Color = MapAsset->MapObject->GetColorFromUv(Uvs);
+		const TArray<uint8> buffer = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(App->GetCurrentTexture().Get());
+		const FColor Color = UAtkTextureUtilsFunctionLibrary::GetColorFromUV(App->GetCurrentTexture().Get(), Uvs, buffer);
 
 		if(MapAsset->Material)
 		{
@@ -146,6 +140,11 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(int32 ScreenX, int32 Scre
 		}
 	}
 	return -1;
+}
+
+bool FMapObjectViewportClient::WasKeyReleased(const FKey& Key,  const FKey& KeyQueried, const EInputEvent Event)
+{
+	return Key == KeyQueried && Event == EInputEvent::IE_Released;
 }
 
 void SMapObjectViewport::Construct(const FArguments& InArgs)
@@ -177,11 +176,6 @@ void SMapObjectViewport::UpdatePreviewActorMaterial(UMaterial* ParentMaterial, U
 {
 	MapAsset->SetMaterial(Texture2D, ParentMaterial);
 	UpdatePreviewActor();
-}
-
-void SMapObjectViewport::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-	SEditorViewport::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 }
 
 TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()

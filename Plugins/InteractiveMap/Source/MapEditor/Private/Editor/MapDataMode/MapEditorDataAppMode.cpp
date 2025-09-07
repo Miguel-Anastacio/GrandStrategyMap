@@ -30,7 +30,7 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 	DataEditorEntryTabID = FactoryDatEntry->GetIdentifier();
 	TabSet.RegisterFactory(FactoryDatEntry);
 	
-	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v1.4")
+	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v1.5")
 	->AddArea
 	(
 		FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
@@ -124,10 +124,10 @@ void FMapEditorDataAppMode::Init()
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
 }
 
-void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data, int ID) 
+void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data) 
 {
 	TSharedPtr<FMapEditorApp> app = App.Pin();
-	app->GetWorkingAsset()->SetTileData(Data, ID);
+	app->GetWorkingAsset()->UpdateDataInEditor(Data, app->GetWorkingAsset()->GetTilesSelected());
 	// mark asset as changed
 	if(!app->GetWorkingAsset()->GetPackage()->IsDirty())
 	{

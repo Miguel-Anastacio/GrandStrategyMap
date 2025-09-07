@@ -18,7 +18,7 @@ void UInstancedStructWrapper::PostEditChangeProperty(FPropertyChangedEvent& Prop
 	else if(AppMode.IsValid())
 	{
 		Previous = StructInstance;
-		AppMode.Pin().Get()->UpdateMap(StructInstance, ID);
+		AppMode.Pin().Get()->UpdateMap(StructInstance);
 	}
 }
 

@@ -572,17 +572,23 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 }
 
 #if WITH_EDITOR
-void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData)
+void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32 ID)
 {
-	if(NewData.GetScriptStruct()->IsChildOf(FBaseMapStruct::StaticStruct()))
+	if(FInstancedStruct* Data = GetTileData(ID))
 	{
-		bool bResult = false;
-		const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(NewData, "ID", bResult);
-		if(bResult)
+		if(Data->GetScriptStruct() == NewData.GetScriptStruct())
 		{
-			MapData[ID] = NewData;
-			MarkPackageDirty();
+			*Data = NewData;
+			UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(*Data, "ID", ID);
 		}
+	}
+}
+
+void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const TArray<int32>& IDs)
+{
+	for(const auto id : IDs)
+	{
+		UpdateDataInEditor(NewData, id);
 	}
 }
 
@@ -619,6 +625,11 @@ void UMapObject::ClearTilesSelected()
 const TArray<int32>& UMapObject::GetTilesSelected() const
 {
 	return SelectedTiles;
+}
+
+bool UMapObject::IsTileSelected(int32 ID) const
+{
+	return SelectedTiles.Find(ID) != INDEX_NONE;
 }
 
 #endif

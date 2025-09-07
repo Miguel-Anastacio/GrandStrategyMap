@@ -188,7 +188,8 @@ public:
 	}
 
 	// Update In Editor only, used in Map Object Display
-	void UpdateDataInEditor(const FInstancedStruct &NewData);
+	void UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
+	void UpdateDataInEditor(const FInstancedStruct &NewData, const TArray<int32>& IDs);
 	
 	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
 	UMaterialInterface* GetMaterialOverride() const;
@@ -199,6 +200,7 @@ public:
 	void RemoveTileSelected(int32 ID);
 	void ClearTilesSelected();
 	const TArray<int32>& GetTilesSelected() const;
+	bool IsTileSelected(int32 ID) const;
 #endif
 	
 public:	

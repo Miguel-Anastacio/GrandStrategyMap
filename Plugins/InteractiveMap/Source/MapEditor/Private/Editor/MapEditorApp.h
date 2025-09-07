@@ -43,6 +43,7 @@ public: // FAssetEditorToolkit interface
 	void SaveGeneratedMap();
 	// MapDataEditor
 	void UpdateEntrySelected(int32 Index) const;
+	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
 
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
@@ -51,7 +52,8 @@ public: // FAssetEditorToolkit interface
 	// Update Viewport
 	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
 	void UpdateHighlightTexture(const TArray<int32>& IDs);
-	
+	TWeakObjectPtr<UTexture2D> GetCurrentTexture() const;
+
 private:
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -84,7 +86,7 @@ private:
 	TWeakObjectPtr<UTexture2D> GetRootTexture() const;
 	TWeakObjectPtr<UTexture2D> GetBorderTexture() const;
 	TWeakObjectPtr<UTexture2D> GetVisitedTilesTexture() const;
-
+	
 	void UpdatePreviewTextures(const MapGenerator::TileMap& TileMap);
 	TSharedPtr<MapGenerator::Map> GetLastMapCreated() const;
 	UTexture2D* GetLastRootTexture() const;

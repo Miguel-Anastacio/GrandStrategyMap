@@ -12,15 +12,14 @@ public:
 	FMapObjectViewportClient(FAdvancedPreviewScene* InPreviewScene, const TSharedRef<SEditorViewport>& InViewport, UMapObject* InMapObject);
 	virtual void ProcessClick(FSceneView& View, HHitProxy* HitProxy, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY) override;
 	virtual bool InputKey(const FInputKeyEventArgs& EventArgs) override;
-	virtual void Tick(float DeltaSeconds) override;
-	int32 GetIndexOfTileSelected(int32 ScreenX, int32 ScreenY);
 
 private:
+	void ProcessMouseClick(FSceneView& View, FKey Key, EInputEvent Event, uint32 HitX, uint32 HitY);
+	int32 GetIndexOfTileSelected(const FSceneView& View, const class FMapEditorApp* App, int32 ScreenX, int32 ScreenY);
+	static bool WasKeyReleased(const FKey& Key, const FKey& KeyQueried, const EInputEvent Event);
 	UMapObject* MapObject;
 	TWeakObjectPtr<AMapAsset> MapAssetRef;
-	bool bTileSelected = false;
 };
-
 
 
 class SMapObjectViewport: public SEditorViewport, public ICommonEditorViewportToolbarInfoProvider
@@ -36,8 +35,6 @@ SLATE_END_ARGS()
 	void Construct(const FArguments& InArgs);
 	void UpdatePreviewActor() const;
 	void UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const;
-
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	
 	//Toolbar interface
 	virtual TSharedRef<SEditorViewport> GetViewportWidget() override {return SharedThis(this);}

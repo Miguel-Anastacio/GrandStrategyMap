@@ -1,6 +1,7 @@
 // Copyright 2025 An@stacioDev All rights reserved.
 #include "MapDataEditorTabFactory.h"
 
+#include "MapEditor.h"
 #include "Editor/InstancedStructWrapper.h"
 #include "MapEditorDataAppMode.h"
 #include "Asset/SCustomInstancedStructList.h"
@@ -29,8 +30,9 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 		.MapObject(app->GetWorkingAsset())
 		.OnItemChanged_Lambda([this, app](const FInstancedStruct& Item)
 		{
-			app->GetWorkingAsset()->UpdateDataInEditor(Item);
-		})
+			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Update Data"));
+			// app->GetWorkingAsset()->UpdateDataInEditor(Item, app->GetWorkingAsset()->GetTilesSelected());
+		})	
 		.OnSelectionChanged_Lambda([this, app, appMode](const int32 ID, const ESelectInfo::Type type)
 		{
 			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
@@ -40,6 +42,7 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 			if(type == ESelectInfo::Type::OnMouseClick)
 			{
 				app->GetWorkingAsset()->ClearTilesSelected();
+				app->GetWorkingAsset()->AddTileSelected(ID);
 				app->UpdateHighlightTexture({ID});
 			}
 		});

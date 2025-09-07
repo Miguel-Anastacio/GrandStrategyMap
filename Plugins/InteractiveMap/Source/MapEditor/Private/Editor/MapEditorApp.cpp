@@ -617,8 +617,10 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetHighlightTexture() const
 
 void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 {
+	if(!CurrentTexture.IsValid())
+		return;
 	// get lookup texture buffer
-	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(GetLookupTexture().Get());
+	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
 	const int32 size = bufferTextureData.Num();
 	uint8_t* buffer = new uint8_t[size];
 	for(int i = 0; i < size; i+=4)
@@ -639,8 +641,8 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 			}
 		}
 	}
-	const int32 Width =  GetWorkingAsset()->GetLookupTexture().Get()->GetSizeX();
-	const int32 Height = GetWorkingAsset()->GetLookupTexture().Get()->GetSizeY();
+	const int32 Width =  CurrentTexture.Get()->GetSizeX();
+	const int32 Height = CurrentTexture.Get()->GetSizeY();
 	HighlightTexture = CreateTexture(buffer, Width, Height);
 	if(buffer)
 	{
@@ -698,6 +700,11 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetVisitedTilesTexture() const
 	return PreviewVisitedTilesTexture;
 }
 
+TWeakObjectPtr<UTexture2D> FMapEditorApp::GetCurrentTexture() const
+{
+	return CurrentTexture;
+}
+
 TArray<TPair<FName, UTexture2D*>> FMapEditorApp::GetTexturesPairs() const
 {
 	return TArray
@@ -750,6 +757,19 @@ void FMapEditorApp::UpdateEntrySelected(int32 Index) const
 		if(DataEditorMode.IsValid())
 		{
 			DataEditorMode->EditableStructListDisplay->SetSelection(Index);
+		}
+	}
+}
+
+void FMapEditorApp::ClearSelection() const
+{
+	const FName ModeName = GetCurrentMode();
+	if(ModeName == MapDataEditorModeName)
+	{
+		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+		if(DataEditorMode.IsValid())
+		{
+			DataEditorMode->EditableStructListDisplay->ClearSelection();
 		}
 	}
 }

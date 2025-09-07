@@ -26,7 +26,7 @@ public:
 	
 	TObjectPtr<class UInstancedStructWrapper> EntryWrapper = nullptr;
 
-	void UpdateMap(const FInstancedStruct& Data, int ID);
+	void UpdateMap(const FInstancedStruct& Data);
 	void SetFilter(const UScriptStruct* Type, bool RefreshList);
 protected:
 	void RefreshDataList();
