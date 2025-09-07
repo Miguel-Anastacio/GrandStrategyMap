@@ -28,6 +28,8 @@ public:
 
 	void UpdateMap(const FInstancedStruct& Data);
 	void SetFilter(const UScriptStruct* Type, bool RefreshList);
+	void Refresh();
+	void UpdateDataEntryEditor(const FInstancedStruct& Data, int32 ID) const;
 protected:
 	void RefreshDataList();
 	bool IncludedInFilter(const UScriptStruct* Type) const;

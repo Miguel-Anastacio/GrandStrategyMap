@@ -9,13 +9,15 @@ class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoCli
 {
 public:
 	
-	virtual ~FMapEditorApp();
+	virtual ~FMapEditorApp() override;
 	// FWorkflowCentricApplication interface
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& tabManager) override;
 	void InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost, UObject* InObject);
+	// ====================================================
 
 	// FEditorUndoClient interface
 	virtual void PostUndo(bool bSuccess) override;
+	// ====================================================
 
 	class UMapObject* GetWorkingAsset() const { return WorkingAsset; }
 	class UMapEditorPreset* GetMapGenPreset() const { return MapGenPreset; }
@@ -32,6 +34,7 @@ public: // FAssetEditorToolkit interface
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>& Toolkit) override {}
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) override {}
 	virtual void SaveAsset_Execute() override;
+	// ====================================================
 	
 	TSharedPtr<class STextureViewer> MapTexturePreview = nullptr;
 	TSharedPtr<class SMapObjectViewport> MapViewport = nullptr;
@@ -45,14 +48,16 @@ public: // FAssetEditorToolkit interface
 	void UpdateEntrySelected(int32 Index) const;
 	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
+	void UpdateMapData(const struct FInstancedStruct& Data) const;
+	// ====================================================
 
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 
-	// ====================================================
 	// Update Viewport
 	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
 	void UpdateHighlightTexture(const TArray<int32>& IDs);
 	TWeakObjectPtr<UTexture2D> GetCurrentTexture() const;
+	// ====================================================
 
 private:
 	/** FGCObject interface */
@@ -61,6 +66,7 @@ private:
 	{
 		return TEXT("FMapEditorApp");
 	}
+	// ====================================================
 	void AddToolbarExtender();
 
 	// Map GEN section

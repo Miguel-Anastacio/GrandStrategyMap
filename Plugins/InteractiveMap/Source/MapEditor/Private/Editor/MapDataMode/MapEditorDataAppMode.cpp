@@ -108,7 +108,11 @@ void FMapEditorDataAppMode::PostActivateMode()
 	const TArray<int32> Index = app->GetWorkingAsset()->GetTilesSelected();
 	if(!Index.IsEmpty())
 	{
-		app->UpdateEntrySelected(Index[0]);
+		app->UpdateEntrySelected(Index.Last());
+	}
+	else
+	{
+		app->ClearSelection();
 	}
 	
 	FApplicationMode::PostActivateMode();
@@ -126,13 +130,7 @@ void FMapEditorDataAppMode::Init()
 
 void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data) 
 {
-	TSharedPtr<FMapEditorApp> app = App.Pin();
-	app->GetWorkingAsset()->UpdateDataInEditor(Data, app->GetWorkingAsset()->GetTilesSelected());
-	// mark asset as changed
-	if(!app->GetWorkingAsset()->GetPackage()->IsDirty())
-	{
-		app->GetWorkingAsset()->Modify();
-	}
+	App.Pin()->UpdateMapData(Data);
 	RefreshDataList();
 }
 
@@ -141,6 +139,33 @@ void FMapEditorDataAppMode::SetFilter(const UScriptStruct* Type, bool RefreshLis
 	ListFilterByType = Type;
 	if(RefreshList)
 		RefreshDataList();
+}
+
+void FMapEditorDataAppMode::Refresh()
+{
+	RefreshDataList();
+
+	const TArray<int32> tilesSelected = App.Pin()->GetWorkingAsset()->GetTilesSelected();
+	if(tilesSelected.IsEmpty())
+	{
+		EditableStructListDisplay->ClearSelection();
+	}
+	else
+	{
+		const int32 selectedTile= tilesSelected.Last();
+		const FInstancedStruct* data = App.Pin()->GetWorkingAsset()->GetTileData(selectedTile);
+		if(data)
+		{
+			UpdateDataEntryEditor(*data, selectedTile);
+		}
+	}
+
+}
+
+void FMapEditorDataAppMode::UpdateDataEntryEditor(const FInstancedStruct& Data, int32 ID) const
+{
+	EntryWrapper->SetStructInstance(Data);
+	EntryWrapper->ID = ID;
 }
 
 void FMapEditorDataAppMode::RefreshDataList()

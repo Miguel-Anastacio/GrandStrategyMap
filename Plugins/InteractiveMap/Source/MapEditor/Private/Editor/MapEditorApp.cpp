@@ -18,6 +18,7 @@
 #include "Asset/SCustomInstancedStructList.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
+#include "Editor/Transactor.h"
 
 FMapEditorApp::~FMapEditorApp()
 {
@@ -62,14 +63,25 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 	FEditorUndoClient::PostUndo(bSuccess);
 	if(bSuccess)
 	{
-		if(!TempPreviews.IsEmpty())
+        if(GetCurrentMode() == MapEditorGenModeName)
+        {
+			if(!TempPreviews.IsEmpty())
+			{
+				TempPreviews.Pop();
+			}
+			TempMapGenerator = GetLastMapCreated();
+			UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
+			PreviewRootTexture = GetLastRootTexture();
+			RestoreTexturePreview();
+        }
+		else if(GetCurrentMode() == MapDataEditorModeName)
 		{
-			TempPreviews.Pop();
+			TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+			if(AppMode)
+			{
+				AppMode->Refresh();
+			}
 		}
-		TempMapGenerator = GetLastMapCreated();
-		UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
-		PreviewRootTexture = GetLastRootTexture();
-		RestoreTexturePreview();
 	}
 }
 
@@ -777,4 +789,13 @@ void FMapEditorApp::ClearSelection() const
 const UScriptStruct* FMapEditorApp::GetFilterForDataList() const
 {
 	return DataListStructFilter;
+}
+
+void FMapEditorApp::UpdateMapData(const FInstancedStruct& Data) const
+{
+	const FScopedTransaction Transaction(NSLOCTEXT("MapDataEditor", "UndoEditMapData", "Map Data Changed"));
+	WorkingAsset->Modify();
+	WorkingAsset->UpdateDataInEditor(Data, GetWorkingAsset()->GetTilesSelected());
+	WorkingAsset->IncrementCounter();
+	WorkingAsset->MarkPackageDirty();
 }

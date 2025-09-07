@@ -323,7 +323,7 @@ private:
 	int Counter = 0;
 
 	// Tracks tiles selected by user in editor
-	UPROPERTY(VisibleAnywhere) // temp the visibility
+	// UPROPERTY(VisibleAnywhere) // temp the visibility
 	TArray<int32> SelectedTiles;
 #endif
 	

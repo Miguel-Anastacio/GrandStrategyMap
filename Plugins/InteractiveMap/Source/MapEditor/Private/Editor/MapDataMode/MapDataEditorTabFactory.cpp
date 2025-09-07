@@ -36,8 +36,7 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 		.OnSelectionChanged_Lambda([this, app, appMode](const int32 ID, const ESelectInfo::Type type)
 		{
 			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
-			appMode->EntryWrapper->SetStructInstance(*Entry);
-			appMode->EntryWrapper->ID = ID;
+			appMode->UpdateDataEntryEditor(*Entry, ID);
 			// on mouse click on list clear tiles selected and update highlight texture
 			if(type == ESelectInfo::Type::OnMouseClick)
 			{
