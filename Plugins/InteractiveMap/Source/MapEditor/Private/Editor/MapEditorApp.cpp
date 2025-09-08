@@ -18,7 +18,6 @@
 #include "Asset/SCustomInstancedStructList.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
-#include "Editor/Transactor.h"
 
 FMapEditorApp::~FMapEditorApp()
 {
@@ -40,6 +39,16 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 	GEditor->RegisterForUndo(this);
 	WorkingAsset = Cast<UMapObject>(InObject);
 	MapGenPreset = NewObject<UMapEditorPreset>();
+	WorkingAsset->OnMapDetailsChange.BindLambda([this]()
+	{
+		if(GetCurrentMode() == MapDataEditorModeName)
+		{
+			if(const TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr()))
+			{
+				AppMode->Refresh();
+			}
+		}
+	});
 	
 	AddApplicationMode(MapEditorGenModeName, MakeShareable(new FMapEditorGenAppMode(SharedThis(this))));
 	AddApplicationMode(MapDataEditorModeName, MakeShareable(new FMapEditorDataAppMode(SharedThis(this))));

@@ -33,29 +33,34 @@ TSharedRef<SWidget> FMapEditorGenTabFactory::CreateTabBody(const FWorkflowTabSpa
     const FMapEditorApp* app = App.Pin().Get();
     DetailsView->SetObjects(TArray<UObject*>{app->GetMapGenPreset()});
 
-	return SNew(SVerticalBox)
-            // Add the Details View at the top
-            + SVerticalBox::Slot()
-            .AutoHeight() // Let the Details View determine its own height
-            [
-                DetailsView
-            ]
-            // Add a Button Below
-            + SVerticalBox::Slot()
-            .Padding(10.0f) // Add padding around the button
-            .HAlign(HAlign_Center) // Center the button horizontally
-            .VAlign(VAlign_Top)    // Align the button to the top of its slot
-            .AutoHeight()          // Let the button determine its own height
-            [
-                SNew(SButton)
-                .Text(FText::FromString("Generate Map"))
-                .OnClicked_Lambda([this]() -> FReply
-                {
-                    // Button click handler logic
-                    App.Pin().Get()->GenerateMap();
-                    return FReply::Handled();
-                })
-            ];
+	return	SNew(SScrollBox)
+			.Orientation(Orient_Vertical)
+			+ SScrollBox::Slot()
+			[
+				SNew(SVerticalBox)
+	            // Add the Details View at the top
+	            + SVerticalBox::Slot()
+	            .AutoHeight() // Let the Details View determine its own height
+	            [
+	                DetailsView
+	            ]
+	            // Add a Button Below
+	            + SVerticalBox::Slot()
+	            .Padding(10.0f) // Add padding around the button
+	            .HAlign(HAlign_Center) // Center the button horizontally
+	            .VAlign(VAlign_Top)    // Align the button to the top of its slot
+	            .AutoHeight()          // Let the button determine its own height
+	            [
+	                SNew(SButton)
+	                .Text(FText::FromString("Generate Map"))
+	                .OnClicked_Lambda([this]() -> FReply
+	                {
+	                    // Button click handler logic
+	                    App.Pin().Get()->GenerateMap();
+	                    return FReply::Handled();
+	                })
+	            ]
+	        ];    
 }
 
 FText FMapEditorGenTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

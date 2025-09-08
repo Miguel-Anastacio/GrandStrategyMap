@@ -25,20 +25,26 @@ TSharedRef<SWidget> FMapDataEntryEditorTabFactory::CreateTabBody(const FWorkflow
 		DetailsViewArgs.NotifyHook = nullptr;
 		DetailsViewArgs.bShowOptions = true;
 		DetailsViewArgs.bShowModifiedPropertiesOption = false;
-		DetailsViewArgs.bShowScrollBar = false;
+		DetailsViewArgs.bShowScrollBar = true;
 	}
     
 	const TSharedRef<IDetailsView> DetailsView = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor").CreateDetailView(DetailsViewArgs);
 	FMapEditorDataAppMode* appMode = AppMode.Pin().Get();
 	DetailsView->SetObjects(TArray<UObject*>{appMode->EntryWrapper});
 
-	return SNew(SVerticalBox)
-			// Add the Details View at the top
-			+ SVerticalBox::Slot()
-			.AutoHeight() // Let the Details View determine its own height
+	return	SNew(SScrollBox)
+			.Orientation(Orient_Vertical)
+			+ SScrollBox::Slot()
 			[
-				DetailsView
+				SNew(SVerticalBox)
+				// Add the Details View at the top
+				+ SVerticalBox::Slot()
+				.AutoHeight() // Let the Details View determine its own height
+				[
+					DetailsView
+				]
 			];
+		
 }
 
 FText FMapDataEntryEditorTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

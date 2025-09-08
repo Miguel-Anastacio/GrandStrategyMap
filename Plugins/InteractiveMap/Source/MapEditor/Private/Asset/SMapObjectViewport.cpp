@@ -86,7 +86,7 @@ bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 		if(MapObject)
 		{
 			MapObject->LogMapData();
-		}
+		}  
 	}
 	if(WasKeyReleased(EventArgs.Key, EKeys::L, EventArgs.Event))
 	{

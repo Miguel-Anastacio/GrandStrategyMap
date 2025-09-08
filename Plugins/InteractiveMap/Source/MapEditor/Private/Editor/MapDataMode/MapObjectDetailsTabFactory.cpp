@@ -33,41 +33,32 @@ TSharedRef<SWidget> FMapObjectDetailsTabFactory::CreateTabBody(const FWorkflowTa
     const FMapEditorApp* app = App.Pin().Get();
     DetailsView->SetObjects(TArray<UObject*>{app->GetWorkingAsset()});
 
-	return SNew(SVerticalBox)
-            // Add the Details View at the top
-            + SVerticalBox::Slot()
-            .AutoHeight() // Let the Details View determine its own height
-            [
-                DetailsView
-            ]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			.Padding(5)
+	return	SNew(SScrollBox)
+			.Orientation(Orient_Vertical)
+			+ SScrollBox::Slot()
 			[
-				SNew(SButton)
-				.Text(FText::FromString("Load Data file"))
-				.OnClicked_Lambda([this]() -> FReply
-				{
-					// OnLoadFile();
-					return FReply::Handled();
-				})
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.VAlign(VAlign_Top)
-			.HAlign(HAlign_Left)
-			.Padding(5)
-			[
-				SNew(SButton)
-				.Text(FText::FromString("Save to file"))
-				.OnClicked_Lambda([this]() -> FReply
-				{
-					// this->CustomObject->SaveData();
-					return FReply::Handled();
-				})
-			];
+				 SNew(SVerticalBox)
+	            // Add the Details View at the top
+	            + SVerticalBox::Slot()
+	            .AutoHeight() // Let the Details View determine its own height
+	            [
+	                DetailsView
+	            ]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				.VAlign(VAlign_Top)
+				.HAlign(HAlign_Left)
+				.Padding(5)
+				[
+					SNew(SButton)
+					.Text(FText::FromString("Load Data file"))
+					.OnClicked_Lambda([this]() -> FReply
+					{
+						// OnLoadFile();
+						return FReply::Handled();
+					})
+				]
+			];	
 }
 
 FText FMapObjectDetailsTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

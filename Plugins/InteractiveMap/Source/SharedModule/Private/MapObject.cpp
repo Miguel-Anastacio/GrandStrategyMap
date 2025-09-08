@@ -25,42 +25,22 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		return;
 	
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-	
-	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupTexture))
-	{
-		LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
-		LoadLookupMap(LookupFilePath);
-	}
-	
+
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
-		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(StructType, FName("ID")))
+		if(ValidateStructChange(StructType, StructTypePrevious))
 		{
-			const FText Title = FText::FromString(TEXT("Error"));
-			const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
-			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
-			// this should keep the previous values
-			StructType = nullptr;
-			this->PostEditChange();
+			ProcessStructChange(StructType, StructTypePrevious);
 		}
 	}
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
 	{
-		if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(OceanStructType, FName("ID")))
+		if(ValidateStructChange(OceanStructType, OceanStructTypePrevious))
 		{
-			const FText Title = FText::FromString(TEXT("Error"));
-			const FText Message = FText::FromString(TEXT("OceanStructType must have a numeric field named ID"));
-			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
-			// this should keep the previous value
-			OceanStructType = nullptr;
-			this->PostEditChange();
+			ProcessStructChange(OceanStructType, OceanStructTypePrevious);
 		}
 	}
-
-	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, LookupFilePath))
-	{
-		LoadLookupMap(LookupFilePath);
-	}
+	
 	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertiesDT))
 	{
 		if(VisualPropertyTypesDT)
@@ -234,6 +214,8 @@ void UMapObject::PostLoad()
 	LoadLookupMap(LookupFilePath);
 	SetMapDataFilePath(FilePathMapData);
 	bMapSaved = true;
+	StructTypePrevious = StructType;
+	OceanStructTypePrevious = OceanStructType;
 #endif
 }
 
@@ -630,6 +612,53 @@ const TArray<int32>& UMapObject::GetTilesSelected() const
 bool UMapObject::IsTileSelected(int32 ID) const
 {
 	return SelectedTiles.Find(ID) != INDEX_NONE;
+}
+
+void UMapObject::ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
+{
+	// const FScopedTransaction Transaction(NSLOCTEXT("MapObject", "UndoChangeStruct", "Change Struct Type"));
+	// Modify();
+	for(auto& [id, data] : MapData)
+	{
+		if(data.GetScriptStruct() == OldStruct)
+		{
+			data = FInstancedStruct(NewStruct);
+			UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(data, FString("ID"), id);
+		}
+	}
+}
+
+bool UMapObject::ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
+{
+	if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(NewStruct, FName("ID")))
+	{
+		const FText Title = FText::FromString(TEXT("Error"));
+		const FText Message = FText::FromString(TEXT("Struct type must have a numeric field named ID"));
+		EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
+		NewStruct = OldStruct;
+		this->PostEditChange();
+		return false;
+	}
+	return true;
+}
+
+void UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
+{
+	// replace all data that used this struct type with the new data
+	const FText Title = FText::FromString(TEXT("Struct Type Replacing"));
+	const FText Message = FText::FromString(TEXT("This will replace all entries in MapData with the default for this new Struct. Do you wish to continue?"));
+	EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::YesNo, Message, Title);
+	if(Result == EAppReturnType::Yes)
+	{
+		ReplaceDataMap(NewStruct, OldStruct);
+		OldStruct = NewStruct;
+		OnMapDetailsChange.ExecuteIfBound();
+	}
+	else
+	{
+		NewStruct = OldStruct;
+		this->PostEditChange();
+	}
 }
 
 #endif

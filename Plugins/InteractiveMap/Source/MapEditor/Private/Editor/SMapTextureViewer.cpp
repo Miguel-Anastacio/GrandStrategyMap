@@ -14,37 +14,42 @@ void STextureViewer::Construct(const FArguments& InArgs)
     
     ChildSlot
     [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SScrollBox)
+        .Orientation(Orient_Vertical)
+        + SScrollBox::Slot()
         [
-            CreateImagePreview(0)
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            CreateImagePreview(1)
-        ]
-        + SVerticalBox::Slot()
-       .AutoHeight()
-       [
-           CreateImagePreview(2)
-       ]
-        + SVerticalBox::Slot()
-       .AutoHeight()
-       [
-          CreateImagePreview(3)
-       ]
-        + SVerticalBox::Slot()
-       .AutoHeight()
-       [
-          CreateImagePreview(4)
-       ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-          CreateImagePreview(5)
-        ]
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                CreateImagePreview(0)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                CreateImagePreview(1)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+               CreateImagePreview(2)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+              CreateImagePreview(3)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+              CreateImagePreview(4)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+             CreateImagePreview(5)
+            ]
+       ]     
     ];
 }
 

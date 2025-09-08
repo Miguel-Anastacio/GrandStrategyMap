@@ -144,7 +144,7 @@ struct FComplexMapDataStruct : public FBaseMapStruct
 };
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
-
+DECLARE_DELEGATE(FOnMapDetailsChange);
 UCLASS()
 class SHAREDMODULE_API UMapObject : public UObject
 {
@@ -201,6 +201,10 @@ public:
 	void ClearTilesSelected();
 	const TArray<int32>& GetTilesSelected() const;
 	bool IsTileSelected(int32 ID) const;
+
+	void ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
+	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
+	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 #endif
 	
 public:	
@@ -255,10 +259,12 @@ public:
 	UScriptStruct *StructType;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *OceanStructType;
-
+#if WITH_EDITORONLY_DATA
 	FOnAssetChanged OnObjectChanged;
+	FOnMapDetailsChange OnMapDetailsChange;
+#endif
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Lookup")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Lookup")
 	class UTexture2D *LookupTexture;
 
 	const TMap<FVisualPropertyType, FArrayOfVisualProperties> &GetVisualPropertiesMap() const;
@@ -303,9 +309,14 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
 	class UDataTable *VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
-	UPROPERTY(EditAnywhere, Category = "Lookup")
+	UPROPERTY(VisibleAnywhere)
 	class UMaterialInterface *MaterialOverride;
-
+	
+	UPROPERTY(VisibleAnywhere, Category = "Debug")
+	UScriptStruct *StructTypePrevious;
+	UPROPERTY(VisibleAnywhere, Category = "Debug")
+	UScriptStruct *OceanStructTypePrevious;
+	
 	// Used for Map Editor
 	UPROPERTY()
 	UTexture2D* OriginTexture;
