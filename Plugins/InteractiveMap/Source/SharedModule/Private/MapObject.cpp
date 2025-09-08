@@ -479,8 +479,13 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	{
 		StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	}
-	TMap<int, FInstancedStruct> DataMap;
-	for(const auto& Data: StructData)
+	SetMapData(StructData);
+}
+
+void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
+{
+	TMap<int32, FInstancedStruct> DataMap;
+	for(const auto& Data: NewData)
 	{
 		if(Data.IsValid())
 		{

@@ -54,7 +54,7 @@ TSharedRef<SWidget> FMapObjectDetailsTabFactory::CreateTabBody(const FWorkflowTa
 					.Text(FText::FromString("Load Data file"))
 					.OnClicked_Lambda([this]() -> FReply
 					{
-						// OnLoadFile();
+						App.Pin()->LoadMapDataFromFile();
 						return FReply::Handled();
 					})
 				]

@@ -51,6 +51,11 @@ public: // FAssetEditorToolkit interface
 	void UpdateMapData(const struct FInstancedStruct& Data) const;
 	// ====================================================
 
+	// Update MapData FilePath
+	void LoadMapDataFromFile() const;
+	static bool IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType);
+	//==================================
+
 	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
 
 	// Update Viewport

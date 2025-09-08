@@ -181,6 +181,7 @@ public:
 	void SetLookupTexture(UTexture2D *Texture2D);
 	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	void SetLookupFilePath(const FString &FilePath)
 	{
 		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
