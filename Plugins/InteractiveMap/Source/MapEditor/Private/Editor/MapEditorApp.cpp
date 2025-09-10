@@ -645,22 +645,30 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
 	const int32 size = bufferTextureData.Num();
 	uint8_t* buffer = new uint8_t[size];
+
+	TSet<FColor> Colors;
+	Colors.Reserve(IDs.Num());
+	for(const int32 ID : IDs)
+	{
+		Colors.Add(GetWorkingAsset()->GetColor(ID));
+	}
+	
 	for(int i = 0; i < size; i+=4)
 	{
-		buffer[i + 0] = 0;
-		buffer[i + 1] = 0;
-		buffer[i + 2] = 0;
-		buffer[i + 3] = 0;
-		for(const auto id : IDs)
+		const FColor color = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(i, bufferTextureData);
+		if(Colors.Contains(color))
 		{
-			const FColor color = GetWorkingAsset()->GetColor(id);
-			if(UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(i, bufferTextureData) == color)
-			{
-				buffer[i + 0] = 255;
-				buffer[i + 1] = 255;
-				buffer[i + 2] = 255;
-				buffer[i + 3] = 255;
-			}
+			buffer[i + 0] = 255;
+			buffer[i + 1] = 255;
+			buffer[i + 2] = 255;
+			buffer[i + 3] = 255;
+		}
+		else
+		{
+			buffer[i + 0] = 0;
+			buffer[i + 1] = 0;
+			buffer[i + 2] = 0;
+			buffer[i + 3] = 0;
 		}
 	}
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
@@ -668,8 +676,8 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 	HighlightTexture = CreateTexture(buffer, Width, Height);
 	if(buffer)
 	{
-		buffer = nullptr;
 		delete[] buffer;
+		buffer = nullptr;
 	}
 
 	if(MapViewport)

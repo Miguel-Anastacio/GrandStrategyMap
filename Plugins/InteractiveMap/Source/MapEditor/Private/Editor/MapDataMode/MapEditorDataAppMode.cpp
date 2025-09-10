@@ -30,7 +30,7 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 	DataEditorEntryTabID = FactoryDatEntry->GetIdentifier();
 	TabSet.RegisterFactory(FactoryDatEntry);
 	
-	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v1.5")
+	TabLayout = FTabManager::NewLayout("MapEditorDataAppMode_Layout_v2.4")
 	->AddArea
 	(
 		FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
@@ -41,18 +41,18 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 				->Split
 				(
 					FTabManager::NewSplitter()
-					->SetOrientation(Orient_Vertical)
+					->SetOrientation(Orient_Horizontal)
+					->Split
+					(
+						FTabManager::NewStack()
+						->SetSizeCoefficient(0.12f)
+						->AddTab(MapEditorPreviewTabName, ETabState::OpenedTab)
+					)
 					->Split
 					(
 						FTabManager::NewStack()
 						->SetSizeCoefficient(0.5f)
 						->AddTab(MapEditorViewportTabName, ETabState::OpenedTab)
-					)
-					->Split
-					(
-						FTabManager::NewStack()
-						->SetSizeCoefficient(0.25f)
-						->AddTab(MapEditorPreviewTabName, ETabState::OpenedTab)
 					)
 				)
 				->Split
