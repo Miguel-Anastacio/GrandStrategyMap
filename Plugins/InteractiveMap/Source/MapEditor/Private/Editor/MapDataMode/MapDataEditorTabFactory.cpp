@@ -33,16 +33,22 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Update Data"));
 			// app->GetWorkingAsset()->UpdateDataInEditor(Item, app->GetWorkingAsset()->GetTilesSelected());
 		})	
-		.OnSelectionChanged_Lambda([this, app, appMode](const int32 ID, const ESelectInfo::Type type)
+		.OnSelectionChanged_Lambda([this, app, appMode](const TArray<int32>& IDs, const ESelectInfo::Type type)
 		{
-			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(ID);
-			appMode->UpdateDataEntryEditor(*Entry, ID);
+			if(IDs.IsEmpty() && type == ESelectInfo::Type::OnMouseClick)
+			{
+				app->GetWorkingAsset()->ClearTilesSelected();
+				return;
+			}
+	
+			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(IDs.Last());
+			appMode->UpdateDataEntryEditor(*Entry, IDs.Last());
 			// on mouse click on list clear tiles selected and update highlight texture
 			if(type == ESelectInfo::Type::OnMouseClick)
 			{
 				app->GetWorkingAsset()->ClearTilesSelected();
-				app->GetWorkingAsset()->AddTileSelected(ID);
-				app->UpdateHighlightTexture({ID});
+				app->GetWorkingAsset()->AddTilesSelected(IDs);
+				app->UpdateHighlightTexture(IDs);
 			}
 		});
 }

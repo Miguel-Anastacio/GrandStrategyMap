@@ -126,7 +126,7 @@ protected:
  * Display a collection of InstancedStructs as a list a structure to view.
  * Allows the structs to be edited, and some properties can be marked as not editable
  */
-DECLARE_DELEGATE_TwoParams(FSelectionChanged, const int32, const ESelectInfo::Type);
+DECLARE_DELEGATE_TwoParams(FSelectionChanged, const TArray<int32>&, const ESelectInfo::Type);
 class SCustomInstancedStructList : public SInstancedStructList
 {
 public:
@@ -181,9 +181,14 @@ public:
         if (!Selection.IsValid())
             return;
         bool bOutResult;
-        const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*Selection, "ID", bOutResult);
+        TArray<int32> SelectedIDs;
+        for(const auto& item : ListView->GetSelectedItems())
+        {
+            const int32 ID = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(*item, "ID", bOutResult);
+            SelectedIDs.Add(ID);
+        }
         if (bOutResult)
-            OnSelectionChanged.ExecuteIfBound(ID, SelectInfo);
+            OnSelectionChanged.ExecuteIfBound(SelectedIDs, SelectInfo);
     }
 
 protected:

@@ -181,6 +181,7 @@ public:
 	void SetLookupTexture(UTexture2D *Texture2D);
 	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetFilePathMapData(const FString &FilePath);
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	void SetLookupFilePath(const FString &FilePath)
 	{
@@ -198,6 +199,7 @@ public:
 	UDataTable* GetVisualPropertyTypes() const;
 
 	void AddTileSelected(int32 ID);
+	void AddTilesSelected(const TArray<int32>& IDs);
 	void RemoveTileSelected(int32 ID);
 	void ClearTilesSelected();
 	const TArray<int32>& GetTilesSelected() const;

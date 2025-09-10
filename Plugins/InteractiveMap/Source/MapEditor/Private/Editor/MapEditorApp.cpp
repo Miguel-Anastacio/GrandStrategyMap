@@ -624,10 +624,10 @@ void FMapEditorApp::SetFilterForDataList(const UScriptStruct* Struct)
 	{
 		AppMode->SetFilter(Struct, GetCurrentMode() == MapDataEditorModeName);
 		
-		const TArray<int32> Index = GetWorkingAsset()->GetTilesSelected();
-		if(!Index.IsEmpty())
+		const TArray<int32> TilesSelected = GetWorkingAsset()->GetTilesSelected();
+		if(!TilesSelected.IsEmpty())
 		{
-			UpdateEntrySelected(Index.Last());	
+			UpdateEntriesSelected(TilesSelected);	
 		}
 	}
 }
@@ -770,7 +770,7 @@ UTexture2D* FMapEditorApp::GetLastRootTexture() const
 	return TempPreviews.Last().PreviewRootTexture;
 }
 
-void FMapEditorApp::UpdateEntrySelected(int32 Index) const
+void FMapEditorApp::UpdateEntriesSelected(const TArray<int32>& Indexes) const
 {
 	const FName ModeName = GetCurrentMode();
 	if(ModeName == MapDataEditorModeName)
@@ -778,7 +778,7 @@ void FMapEditorApp::UpdateEntrySelected(int32 Index) const
 		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 		if(DataEditorMode.IsValid())
 		{
-			DataEditorMode->EditableStructListDisplay->SetSelection(Index);
+			DataEditorMode->EditableStructListDisplay->SetSelection(Indexes);
 		}
 	}
 }
@@ -826,28 +826,37 @@ void FMapEditorApp::LoadMapDataFromFile() const
 	{
 		if(!Struct)
 		{
-			// error please define struct types first
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Please define struct types first")) 
+            const FText Message = FText::FromString(TEXT("Please define struct types first"));
+			ErrorOnLoadMapDataFilePath(Message);
 			return;
 		}
 	}
 	// Read file
-	const TArray<FInstancedStruct> NewMapData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePath, StructTypes);	
+	const TArray<FInstancedStruct> NewMapData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePath, StructTypes);
+	
 	// Validate file entries number and IDs
 	if(NewMapData.Num() != WorkingAsset->GetLookupTable().Num())
 	{
 		// error map data does not match size of lookup table
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Map data does not match lookup table")) 
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Entries in LookupTable %d, Entries in map file %d"),WorkingAsset->GetLookupTable().Num(),  NewMapData.Num());
+		const FText Message = FText::FromString(FilePath + TEXT("has a different number of entries compared to lookup"));
+		ErrorOnLoadMapDataFilePath(Message);
 		return;
 	}
+	
 	// Validate that all entries structs have StructType or OceanStructType and IDs are unique and in order
 	int32 expectedId = 0;
 	for(const auto& InstancedStruct : NewMapData)
 	{
+		// Will never execute most likely, keep for debug and logging purposes anyway might be useful
 		if(!IsStructTypeValid(StructTypes, InstancedStruct.GetScriptStruct()))
 		{
 			// error struct type not valid
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("struct type not valid"))
+			bool bResult = false;
+			const int32 errorId = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(InstancedStruct, "ID", bResult);
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("ID of struct: %d"), errorId);
+			const FText Message = FText::FromString(TEXT("Data entry in file ") + FilePath + TEXT("is not of type StructType nor OceanStructType"));
+			ErrorOnLoadMapDataFilePath(Message);
 			return;
 		}
 
@@ -856,26 +865,34 @@ void FMapEditorApp::LoadMapDataFromFile() const
 		const int32 id = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<int32>(InstancedStruct, "ID", bResult);
 		if(!bResult || expectedId != id)
 		{
-			// error ID is either not in struct or not in order
-			UE_LOG(LogInteractiveMapEditor, Error, TEXT("IDs not in order"))
+			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Expected ID %d got id %d"), expectedId, id);
+			const FText Message = FText::FromString(TEXT("Data entries in file ") + FilePath + TEXT(" are not ordered by ID"));
+			ErrorOnLoadMapDataFilePath(Message);
 			return;
 		}
 		expectedId++;
 	}
 
 	// Present UI to user to confirm
-	// On yes replace MapData of WorkingAsset and create a transaction
 	const FText Title = FText::FromString(TEXT("Changing Map Data file"));
 	const FText Message = FText::FromString(TEXT("This will replace all entries in MapData with the contents of file path: ") + FilePath);
 	EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::YesNo, Message, Title);
+	// On yes replace MapData of WorkingAsset and create a transaction
 	if(Result == EAppReturnType::Yes)
 	{
 		const FScopedTransaction Transaction(NSLOCTEXT("MapDetailsChange", "UndoMapDataFilePathChange", "Map Data File Path Change"));
 		WorkingAsset->Modify();
 		WorkingAsset->SetMapData(NewMapData);
+		WorkingAsset->SetFilePathMapData(FilePath);
 		WorkingAsset->OnMapDetailsChange.ExecuteIfBound();
 		WorkingAsset->MarkPackageDirty();
 	}
+}
+
+void FMapEditorApp::ErrorOnLoadMapDataFilePath(const FText& Message)
+{
+	const FText Title = FText::FromString(TEXT("Error on load Map Data File"));
+	FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 }
 
 bool FMapEditorApp::IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType)

@@ -60,21 +60,13 @@ void FMapObjectViewportClient::ProcessMouseClick(FSceneView& View,FKey Key, EInp
 		if(WorkingAsset->IsTileSelected(Index))
 		{
 			WorkingAsset->RemoveTileSelected(Index);
-			if(!WorkingAsset->GetTilesSelected().IsEmpty())
-			{
-				App->UpdateEntrySelected(WorkingAsset->GetTilesSelected().Last());
-			}
-			else
-			{
-				App->ClearSelection();
-			}
 		}
 		else
 		{
 			WorkingAsset->AddTileSelected(Index);
-			App->UpdateEntrySelected(Index);
 		}
 		
+		App->UpdateEntriesSelected(WorkingAsset->GetTilesSelected());
 		App->UpdateHighlightTexture(WorkingAsset->GetTilesSelected());
 	}
 }

@@ -45,7 +45,7 @@ public: // FAssetEditorToolkit interface
 
 	void SaveGeneratedMap();
 	// MapDataEditor
-	void UpdateEntrySelected(int32 Index) const;
+	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
 	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
 	void UpdateMapData(const struct FInstancedStruct& Data) const;
@@ -53,6 +53,7 @@ public: // FAssetEditorToolkit interface
 
 	// Update MapData FilePath
 	void LoadMapDataFromFile() const;
+	static void ErrorOnLoadMapDataFilePath(const FText& Message);
 	static bool IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType);
 	//==================================
 

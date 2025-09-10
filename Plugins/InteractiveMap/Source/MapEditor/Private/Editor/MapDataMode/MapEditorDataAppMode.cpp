@@ -108,7 +108,7 @@ void FMapEditorDataAppMode::PostActivateMode()
 	const TArray<int32> Index = app->GetWorkingAsset()->GetTilesSelected();
 	if(!Index.IsEmpty())
 	{
-		app->UpdateEntrySelected(Index.Last());
+		app->UpdateEntriesSelected(Index);
 	}
 	else
 	{

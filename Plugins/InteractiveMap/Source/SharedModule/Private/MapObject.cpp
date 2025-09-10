@@ -482,6 +482,11 @@ void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
 	SetMapData(StructData);
 }
 
+void UMapObject::SetFilePathMapData(const FString& FilePath)
+{
+	FilePathMapData = FilePath;
+}
+
 void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 {
 	TMap<int32, FInstancedStruct> DataMap;
@@ -597,6 +602,11 @@ UDataTable* UMapObject::GetVisualPropertyTypes() const
 void UMapObject::AddTileSelected(int32 ID)
 {
 	SelectedTiles.Emplace(ID);
+}
+
+void UMapObject::AddTilesSelected(const TArray<int32>& IDs)
+{
+	SelectedTiles.Append(IDs);
 }
 
 void UMapObject::RemoveTileSelected(int32 ID)
