@@ -55,14 +55,15 @@ namespace MapGenerator
 				auto index = y * width + x;
 				if (!m_tiles[index].visited)
 				{
-					data::Color color;
-					if (FindColorOfClosestTileOfSameType(x, y, radius, color))
+					Tile tile;
+					if (FindClosestTileOfSameType(x, y, radius, tile))
 					{
-						algo::fill(x, y, m_tiles, color, width, height);
+						m_tiles[index].centroid = tile.centroid;
+						algo::fill(x, y, m_tiles, tile.color, width, height, true);
 					}
 					else
 					{
-						color = data::GetRandomColorNotInSet(m_colors);
+						const data::Color color = data::GetRandomColorNotInSet(m_colors);
 
 						mygal::Vector2<int> point = algo::fillGetCentroidOfPoints(x, y, m_tiles, color, width, height);
 					}
@@ -175,6 +176,10 @@ namespace MapGenerator
 				{
 					newTiles[index] = tiles2[index];
 				}
+				else
+				{
+					// newTiles[index] = tiles1[index];
+				}
 			}
 		}
 
@@ -185,7 +190,7 @@ namespace MapGenerator
 		return newTileMap;
 	}
 
-	bool TileMap::FindColorOfClosestTileOfSameType(int x, int y, int radius, data::Color &out_color) const
+	bool TileMap::FindClosestTileOfSameType(int x, int y, int radius, Tile &out_tile) const
 	{
 		if (radius == 0)
 			return false;
@@ -212,7 +217,7 @@ namespace MapGenerator
 
 			if (tile.type == targetType && (tile.visited) && (!tile.isBorder))
 			{
-				out_color = tile.color;
+				out_tile = tile;
 				return true;
 			}
 			else
@@ -245,10 +250,11 @@ namespace MapGenerator
 				auto index = y * width + x;
 				if (m_tiles[index].isBorder && mask.isInMask(x, y))
 				{
-					data::Color color;
-					if (FindColorOfClosestTileOfSameType(x, y, width, color))
+					Tile tile;
+					if (FindClosestTileOfSameType(x, y, width, tile))
 					{
-						m_tiles[index].color = color;
+						m_tiles[index].color = tile.color;
+						m_tiles[index].centroid = tile.centroid;
 					}
 				}
 			}
@@ -288,17 +294,34 @@ namespace MapGenerator
 		{
 			auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
 			auto index = bufferIndex / 4;
-			
-			if(centroidIndex < m_tiles.size() && index == centroidIndex)
+
+			// DEBUG STUFF
+			if(tile.type == TileType::LAND && centroidIndex < m_tiles.size() && centroidIndex >= 0)
+			{
+				data::Color centroidColor = m_tiles[centroidIndex].color;
+				fillBufferPosWithColor(bufferIndex, buffer, centroidColor);
+			}
+			else if (centroidIndex > m_tiles.size() || centroidIndex < 0)
 			{
 				data::Color color(255, 0, 0, 255);
 				fillBufferPosWithColor(bufferIndex, buffer, color);
 			}
 			else
 			{
-				data::Color color(0, 0, 0, 255);
+				data::Color color(0, 0, 0, 0);
 				fillBufferPosWithColor(bufferIndex, buffer, color);
 			}
+			
+			// if(centroidIndex < m_tiles.size() && index == centroidIndex)
+			// {
+			// 	data::Color color(255, 0, 0, 255);
+			// 	fillBufferPosWithColor(bufferIndex, buffer, color);
+			// }
+			// else
+			// {
+			// 	data::Color color(0, 0, 0, 255);
+			// 	fillBufferPosWithColor(bufferIndex, buffer, color);
+			// }
 		});
 		return buffer;
 	}
@@ -316,7 +339,7 @@ namespace MapGenerator
 		return GetTileMap([](const Tile &tile)
 			{
 				return tile.type == TileType::UNDEFINED;
-			}, defined, undefined);
+			}, undefined, defined);
 	}
 
 	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const

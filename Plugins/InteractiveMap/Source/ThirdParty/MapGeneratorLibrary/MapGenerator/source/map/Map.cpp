@@ -118,7 +118,6 @@ namespace MapGenerator
 	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight,
 		const LookupMapData& data,std::function<void(float, std::string_view)> progressCallback)
 	{
-		// cutOffHeight = 0.001f;
 		if(progressCallback)
 		{
 			progressCallback(0.0f, "GenerateMapFromHeigthMap");

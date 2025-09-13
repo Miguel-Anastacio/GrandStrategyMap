@@ -314,6 +314,24 @@ public:
         return success;
     }
 
+    static Vector2<T> computeCentroidOfFace(const Face& face)
+    {
+        auto area = static_cast<T>(0.0);
+        auto centroid = Vector2<T>();
+        auto halfEdge = face.outerComponent;
+        // Compute centroid of the face
+        do
+        {
+            auto det = halfEdge->origin->point.getDet(halfEdge->destination->point);
+            area += det;
+            centroid += (halfEdge->origin->point + halfEdge->destination->point) * det;
+            halfEdge = halfEdge->next;
+        } while (halfEdge != face.outerComponent);
+        area *= 0.5;
+        centroid *= 1.0 / (6.0 * area);
+
+        return centroid;
+    }
     // Lloyd's relaxation
 
     /**
@@ -330,20 +348,7 @@ public:
         auto sites = std::vector<Vector2<T>>();
         for (const auto& face : mFaces)
         {
-            auto area = static_cast<T>(0.0);
-            auto centroid = Vector2<T>();
-            auto halfEdge = face.outerComponent;
-            // Compute centroid of the face
-            do
-            {
-                auto det = halfEdge->origin->point.getDet(halfEdge->destination->point);
-                area += det;
-                centroid += (halfEdge->origin->point + halfEdge->destination->point) * det;
-                halfEdge = halfEdge->next;
-            } while (halfEdge != face.outerComponent);
-            area *= 0.5;
-            centroid *= 1.0 / (6.0 * area);
-            sites.push_back(centroid);
+            sites.push_back(computeCentroidOfFace(face));
         }
         return sites;
     }

@@ -16,6 +16,17 @@ namespace MapGenerator
                 return false;
             }
 
+            mygal::Vector2<int> centroid;
+            // if original point has a centroid itself mark the centroid otherwise use the original point(x,y)
+            if(tileMap[index].centroid.x != -1 && tileMap[index].centroid.y != -1)
+            {
+                centroid = tileMap[index].centroid;
+            }
+            else 
+            {
+                centroid = mygal::Vector2(x, y);
+            }
+
             // Stack for iterative approach
             std::stack<std::pair<int, int>> stack;
             stack.push({x, y});
@@ -36,11 +47,12 @@ namespace MapGenerator
                 if (tile.type != tileType)
                     continue;
 
+                if(markCentroid)
+                    tile.centroid = centroid;
+
                 // Mark tile as visited and set its color
                 tile.color = newColor;
                 tile.visited = true;
-                if(markCentroid)
-                    tile.centroid = mygal::Vector2(x, y);
 
                 // Push neighboring tiles onto the stack
                 stack.push({cx + 1, cy});
@@ -110,20 +122,6 @@ namespace MapGenerator
             return centroid;
         }
 
-        void markCentroids(int centrooidX, int centrooidY, std::vector<Tile> &tileMap, const data::Color &newColor, unsigned width, unsigned height)
-        {
-            for (unsigned y = 0; y < height; y++)
-            {
-                for (unsigned x = 0; x < width; x++)
-                {
-                    auto index = y * width + x;
-                    if (tileMap[index].color == newColor)
-                    {
-                        tileMap[index].centroid = mygal::Vector2(centrooidX, centrooidY);
-                    }
-                }
-            }
-        }
 
         void floodFill(std::vector<Tile> &tileMap, const std::vector<mygal::Vector2<double>> &centroids,
                        std::unordered_set<data::Color> &colorsInUse,
@@ -142,7 +140,6 @@ namespace MapGenerator
                 if (fill(x, y, tileMap, color, width, height, true))
                 {
                     colorsInUse.insert(color);
-                    // markCentroids(x, y, tileMap, color, width, height);
                 }
             }
         }

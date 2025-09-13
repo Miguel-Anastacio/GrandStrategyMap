@@ -109,7 +109,7 @@ namespace MapGenerator
 
 		static TileMap BlendTileMap(const TileMap &tileMap1, TileType type1, const TileMap &tileMap2, TileType type2);
 
-		bool FindColorOfClosestTileOfSameType(int x, int y, int radius, data::Color &out_color) const;
+		bool FindClosestTileOfSameType(int x, int y, int radius, Tile &out_color) const;
 
 		void ColorInBorders(const Mask &mask);
 		
@@ -118,7 +118,7 @@ namespace MapGenerator
 		uint8_t* GetBordersTileMap(const data::Color& borderColor = data::Color(0, 0, 0, 255), const data::Color& notBorderColor = data::Color(255, 255, 255, 255)) const;
 		uint8_t* GetVisitedTileMap(const data::Color& visitedColor = data::Color(255, 0, 0, 255), const data::Color& notVisitedColor = data::Color(255, 255, 255, 255)) const;
 		uint8_t* GetCentroidTileMap() const;
-		uint8_t* GetUndefinedTileMap(const data::Color& defined = data::Color(255, 0, 0, 255), const data::Color& Undefined = data::Color(255, 255, 255, 255)) const;
+		uint8_t* GetUndefinedTileMap(const data::Color& undefined = data::Color(255, 0, 0, 255), const data::Color& defined = data::Color(0, 0, 0, 255)) const;
 		
 
 		void SetTiles(const std::vector<Tile>& tiles)

@@ -16,7 +16,7 @@ struct SHAREDMODULE_API FMapDetails
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Map Details")
 	int32 Seed = 10;
 	// lloyd iterations performed to the voronoi diagram
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=20), Category = "Map Details")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=20), Category = "Map Details")
 	int32 LloydIteration = 10;
 	// How far around the algo will search for a neighbouring tile before adding a new one
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=1000), Category = "Map Details")

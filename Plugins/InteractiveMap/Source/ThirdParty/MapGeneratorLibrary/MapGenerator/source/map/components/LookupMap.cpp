@@ -226,7 +226,7 @@ namespace MapGenerator
 		
 		if(ProgressCallback)
 		{
-			// ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");
+			ProgressCallback(20.0f, "Generated Lloyd Diagram from Mask");
 		}
 
 	}
