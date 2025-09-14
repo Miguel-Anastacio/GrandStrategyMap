@@ -5,8 +5,8 @@
 // #include "Renderer.h"
 namespace MapGenerator
 {
-	TerrainMap::TerrainMap(const char *name, const std::vector<double> &data, unsigned width, unsigned height)
-		: MapComponent(width, height, name)
+	TerrainMap::TerrainMap(const char *name, const std::vector<double> &data, unsigned width, unsigned height, ALogger::Logger &logger)
+		: MapComponent(width, height, name, logger)
 	{
 		/*	m_terrainTypes.push_back(TerrainType(0.5, sf::Color::Blue, "Water"));
 			m_terrainTypes.push_back(TerrainType(0.85, sf::Color::Green, "Grass"));
@@ -14,8 +14,8 @@ namespace MapGenerator
 		RegenerateTerrain(data);
 	}
 
-	TerrainMap::TerrainMap(const char *name, const std::vector<double> &data, unsigned width, unsigned height, const std::vector<TerrainType> &terrain)
-		: MapComponent(width, height, name), m_terrainTypes(terrain)
+	TerrainMap::TerrainMap(const char *name, const std::vector<double> &data, unsigned width, unsigned height, const std::vector<TerrainType> &terrain, ALogger::Logger &logger)
+		: MapComponent(width, height, name, logger), m_terrainTypes(terrain)
 	{
 		RegenerateTerrain(data);
 	}

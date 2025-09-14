@@ -44,6 +44,7 @@ public: // FAssetEditorToolkit interface
 	void RestoreMapGenPreset() const;
 
 	void SaveGeneratedMap();
+	bool GetWorkingAssetDir(FString& OutPath) const;
 	// MapDataEditor
 	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
 	void ClearSelection() const;

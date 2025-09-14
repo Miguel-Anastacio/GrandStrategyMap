@@ -11,8 +11,8 @@
 #include "../../utils/VectorWrapper.h"
 namespace MapGenerator
 {
-	LookupMap::LookupMap(const char *name, unsigned width, unsigned height)
-		: MapComponent(width, height, name)
+	LookupMap::LookupMap(const char *name, unsigned width, unsigned height, ALogger::Logger& logger)
+		: MapComponent(width, height, name, logger)
 	{
 	}
 
@@ -38,7 +38,7 @@ namespace MapGenerator
 	{
 		const auto width = Width();
 		const auto height = Height();
-
+		LOG_INFO(m_logger, "Regenerating lookup map");
 		switch (tileMapGenType)
 		{
 		case TileMapGenType::UserUploadedBorderForLand:
@@ -209,6 +209,7 @@ namespace MapGenerator
 	{
 		const auto width = Width();
 		const auto height = Height();
+		LOG_INFO(m_logger, "Computing Diagram from Mask: " + std::string(mask->Name()));
 		if(ProgressCallback)
 		{
 			ProgressCallback(2.0f, "Before Point Generation");

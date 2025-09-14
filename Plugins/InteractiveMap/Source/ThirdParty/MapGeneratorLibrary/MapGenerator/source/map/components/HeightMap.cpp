@@ -10,16 +10,16 @@
 #include "../../utils/ComputeGeometry.h"
 namespace MapGenerator
 {
-	HeightMap::HeightMap(const char *name, const NoiseMapData &data)
-		: MapComponent(1024, 512, name)
+	HeightMap::HeightMap(const char *name, const NoiseMapData &data, ALogger::Logger &logger)
+		: MapComponent(1024, 512, name, logger)
 	{
 		// RegenerateHeightMap(data);
 		CreateHeightTectonicPlates(data);
 		// rend::drawBuffer(CreateBuffer(), m_texture, this->Width(), this->Height());
 	}
 
-	HeightMap::HeightMap(const char *name, unsigned width, unsigned height, std::vector<double> &&elevation)
-		: MapComponent(width, height, name)
+	HeightMap::HeightMap(const char *name, unsigned width, unsigned height, std::vector<double> &&elevation, ALogger::Logger &logger)
+		: MapComponent(width, height, name, logger)
 	{
 		SetNoiseMap(std::move(elevation));
 		CreateHeightTectonicPlates();

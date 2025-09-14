@@ -4,6 +4,7 @@
 #include "../data/Color.h"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <unordered_map>
 #include "../../thirdParty/MyGAL/Diagram.h"
 #include "MapSpecs.h"
@@ -11,6 +12,8 @@
 #include "components/TerrainMap.h"
 #include "components/MapMask.h"
 #include "components/LookupMap.h"
+#include "../utils/Logger/FileLogger.h"
+
 namespace MapGenerator
 {
 class Texture;
@@ -25,7 +28,7 @@ enum class MapModeGen
 class Map : public Dimensions
 {
 public:
-	Map(unsigned width, unsigned height);
+	Map(unsigned width, unsigned height, const std::filesystem::path &path);
 	~Map();
 
 	const TileMap& GetLookupTileMap() const
@@ -45,6 +48,11 @@ public:
 	void GenerateTerrainMap(const std::vector<double> &noiseMap);
 	void GenerateTerrainMap(const std::vector<double> &noiseMap, const std::vector<TerrainType> &types);
 
+	void SetLogFilePath(const std::filesystem::path &path);
+	void SetLog(bool state)
+	{
+		m_fileLogger.SetLogState(state);
+	};
 	// void SaveLookupMapToFile() const;
 	// void SaveLookupMapToFile(const char* filename) const;
 	// void SaveHeightMapToFile(const char* filename) const;
@@ -96,5 +104,8 @@ private:
 	std::shared_ptr<std::vector<uint8_t>> m_borderUploadedBuffer;	
 	// std::unique_ptr<Texture> m_lookUpTexture;
 	uint8_t* GetTileMapOfType(TileType type) const;
+
+	std::filesystem::path m_logFilePath;
+	ALogger::FileLogger m_fileLogger;
 };
 }

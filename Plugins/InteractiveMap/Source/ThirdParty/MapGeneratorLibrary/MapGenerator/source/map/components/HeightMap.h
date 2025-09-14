@@ -12,8 +12,8 @@ namespace MapGenerator
 	class HeightMap : public MapComponent
 	{
 	public:
-		HeightMap(const char *name, const NoiseMapData &data);
-		HeightMap(const char *name, unsigned width, unsigned height, std::vector<double> &&elevation);
+		HeightMap(const char *name, const NoiseMapData &data, ALogger::Logger &logger);
+		HeightMap(const char *name, unsigned width, unsigned height, std::vector<double> &&elevation, ALogger::Logger &logger);
 		// HeightMap(const Texture& texture, double noiseScale, const siv::PerlinNoise& noise, const NoiseSpecs& specs);
 		~HeightMap();
 

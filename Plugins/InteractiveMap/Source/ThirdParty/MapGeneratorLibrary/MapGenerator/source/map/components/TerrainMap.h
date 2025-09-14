@@ -20,8 +20,8 @@ namespace MapGenerator
 	class TerrainMap : public MapComponent
 	{
 	public:
-		TerrainMap(const char *name, const std::vector<double> &noiseValues, unsigned width, unsigned height);
-		TerrainMap(const char *name, const std::vector<double> &noiseValues, unsigned width, unsigned height, const std::vector<TerrainType> &terrains);
+		TerrainMap(const char *name, const std::vector<double> &noiseValues, unsigned width, unsigned height, ALogger::Logger &logger);
+		TerrainMap(const char *name, const std::vector<double> &noiseValues, unsigned width, unsigned height, const std::vector<TerrainType> &terrains, ALogger::Logger &logger);
 		// HeightMap(const Texture& texture, double noiseScale, const siv::PerlinNoise& noise, const NoiseSpecs& specs);
 
 		void RegenerateTerrain(const std::vector<double> &noiseValues);

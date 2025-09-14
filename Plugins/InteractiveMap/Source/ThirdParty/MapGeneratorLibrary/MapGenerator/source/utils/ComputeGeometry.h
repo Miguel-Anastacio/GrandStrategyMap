@@ -11,10 +11,13 @@
 #include <iostream>
 #include "../../ThirdParty/fastNoiseLite/FastNoiseLite.h"
 #include "VectorWrapper.h"
+#include "Logger/FileLogger.h"
+
 namespace MapGenerator
 {
-	namespace geomt
+	class geomt
 	{
+	public:
 		// ------------------------ MYGAL
 		template <typename T>
 		static std::vector<mygal::Vector2<T>> generatePoints(int nbPoints)
@@ -264,24 +267,31 @@ namespace MapGenerator
 		    int index = 0;
 			for (const typename mygal::Diagram<T>::Face& face : faces)
 			{
-				std::cout << "Face: " << index++ << std::endl;
 				mygal::Vector2<T> maskedCentroid = computeGridSampledCentroid<T>(face, mask);
-				std::cout << "Centroid: " << maskedCentroid.x << ":" << maskedCentroid.y << std::endl;
-				std::cout << "-----------------" << std::endl;
+				const std::string message = "Face: " + std::to_string(index++) + " - Centroid: " + mygal::ToString(maskedCentroid);
+				LOG_DEBUG(*m_logger, message);
 				sites.push_back(maskedCentroid);
 			}
+			
 			return sites;
 		}
 
 		template <typename T>
 		static void lloydRelaxation(mygal::Diagram<T> &diagram, int iterations, const Mask &mask)
 		{
+			std::vector<mygal::Vector2<T>> centroids;
 			for (int i = 0; i < iterations; i++)
 			{
-				// std::vector<mygal::Vector2<T>> centroids = computeMaskedLloydRelaxation<T>(mask, diagram);
-				std::vector<mygal::Vector2<T>> centroids = computeMaskedLloydRelaxation<T>(mask, diagram);
-				// std::vector<mygal::Vector2<T>> centroids = diagram.computeLloydRelaxation();
+				LOG_DEBUG(*m_logger, "Masked Lloyd Relaxation: " + std::to_string(i));
+				centroids = computeMaskedLloydRelaxation<T>(mask, diagram);
 				diagram = std::move(geomt::generateDiagram(centroids));
+			}
+
+			LOG_INFO(*m_logger, "Diagram final centroids: ");
+			for(auto point : centroids)
+			{
+				const std::string message = "Centroid: " + mygal::ToString(point);
+				LOG_INFO(*m_logger, message);
 			}
 		}
 
@@ -386,5 +396,7 @@ namespace MapGenerator
 			// Step 3: Map circle noise to a fault line
 			applyNoiseToLine(circleNoise, line, cutPointIndex, noiseScale, thickness);
 		}
-	}
+
+		inline static ALogger::Logger* m_logger = nullptr;
+	};
 }

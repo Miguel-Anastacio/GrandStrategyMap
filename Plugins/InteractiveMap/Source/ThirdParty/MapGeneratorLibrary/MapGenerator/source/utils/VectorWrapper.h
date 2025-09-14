@@ -42,6 +42,12 @@ namespace mygal
 	{
 		return mygal::Vector2<T>(og.x * xScale, og.y * yScale);
 	}
+
+	template <typename T>
+	inline std::string ToString(const mygal::Vector2<T>& point)
+	{
+		return std::to_string(point.x) + ";" + std::to_string(point.y);
+	}
 }
 
 namespace std

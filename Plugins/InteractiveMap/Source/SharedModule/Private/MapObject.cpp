@@ -12,7 +12,7 @@
 
 UMapObject::UMapObject(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Map = MakeShareable(new MapGenerator::Map(1024, 1024));
+	Map = MakeShareable(new MapGenerator::Map(1024, 1024, "MapGenLog.txt"));
 }
 
 #if WITH_EDITOR

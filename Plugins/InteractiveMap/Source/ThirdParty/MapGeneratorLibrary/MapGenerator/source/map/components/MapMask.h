@@ -11,9 +11,8 @@ namespace MapGenerator
 	class MapMask : public MapComponent
 	{
 	public:
-		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, float cutOffHeight, const bool mode = true);
-		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, const bool mode = true);
-		// HeightMap(const Texture& texture, double noiseScale, const siv::PerlinNoise& noise, const NoiseSpecs& specs);
+		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, ALogger::Logger &logger, float cutOffHeight, const bool mode = true);
+		MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, ALogger::Logger &logger, const bool mode = true);
 
 		inline std::vector<double> MoveElevation()
 		{
@@ -38,7 +37,6 @@ namespace MapGenerator
 		}
 
 	private:
-		// std::vector<double> CreateHeightMap(const NoiseMapData& data) const;
 		std::vector<double> ExtractHeightMapFromTexture(const std::vector<uint8_t> &buffer, unsigned width, unsigned height) const;
 		std::vector<uint8_t> CreateBuffer(const std::vector<double> &data, float cutOffHeight, bool mode, uint8_t alpha = 0U) const;
 		std::vector<uint8_t> CreateBuffer(const std::vector<uint8_t> &buffer, bool mode, uint8_t alpha = 0U) const;

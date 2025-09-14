@@ -5,10 +5,13 @@
 namespace MapGenerator
 {
 
-	Map::Map(unsigned width, unsigned height)
+	Map::Map(unsigned width, unsigned height, const std::filesystem::path &path)
 		: Dimensions(width, height)
 		, m_uploadBorder(false)
+		, m_fileLogger(path)
 	{
+		m_fileLogger.SetMinLogLevel(ALogger::LogLevel::INFO);
+		geomt::m_logger = &m_fileLogger;
 	}
 
 	Map::~Map()
@@ -21,31 +24,36 @@ namespace MapGenerator
 
 	void Map::GenerateHeightMap(const NoiseMapData &data)
 	{
-		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data);
-		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), data.width, data.height, m_terrainTypes);
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data, m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), data.width, data.height, m_terrainTypes, m_fileLogger);
 	}
 
 	void Map::GenerateHeightMapTectonic()
 	{
-		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", NoiseMapData());
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", NoiseMapData(), m_fileLogger);
 	}
 
 	void Map::GenerateHeightMapTectonic(const NoiseMapData &data)
 	{
-		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data);
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data, m_fileLogger);
 	}
 
 	void Map::GenerateTerrainMap(const std::vector<double> &noiseMap)
 	{
-		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), m_terrainTypes);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), m_terrainTypes, m_fileLogger);
 	}
 
 	void Map::GenerateTerrainMap(const std::vector<double> &noiseMap, const std::vector<TerrainType> &types)
 	{
 		m_terrainTypes = types;
-		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), types);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), types, m_fileLogger);
 	}
 
+	// void Map::SetLogFilePath(const std::filesystem::path &path)
+	// {
+	// 	m_logFilePath = path;
+	// 	m_fileLogger = ALogger::FileLogger(path);
+	// }
 	void Map::RegenerateLookUp(const LookupMapData &data, std::function<void(float, std::string_view)> progressCallback)
 	{
 		assert(m_lookupmap != nullptr);
@@ -104,15 +112,15 @@ namespace MapGenerator
 	{
 		cutOffHeight = 0.001f;
 		// m_maskmap = std::make_unique<MapMask>("LandmassMaskTest.png", textureBuffer, Width(), Height(), cutOffHeight);
-		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight);
-		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, false);
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, false);
 		RegenerateMasks(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, cutOffHeight));
 		
-		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
 		RegenerateLookUp(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, cutOffHeight));
 
-		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation());
-		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes);
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation(), m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);
 	}
 
 	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight,
@@ -123,15 +131,15 @@ namespace MapGenerator
 			progressCallback(0.0f, "GenerateMapFromHeigthMap");
 		}
 		
-		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), cutOffHeight, !data.flipMask);
-		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), cutOffHeight, data.flipMask);
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, !data.flipMask);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, data.flipMask);
 		RegenerateMasks(data);
 		
-		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
 		RegenerateLookUp(data, progressCallback);
 
-		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation());
-		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes);
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation(), m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);
 
 	}
 
@@ -169,7 +177,7 @@ namespace MapGenerator
 	}
 	void Map::SetLookupTileMap(const std::vector<Tile>& tiles)
 	{
-		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height());
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
 		m_lookupmap->SetTileMap(tiles);
 	}
 	
@@ -210,6 +218,8 @@ namespace MapGenerator
 		m_borderUploadedBuffer = std::make_shared<std::vector<uint8_t>>(borderBuffer);
 		std::cout << "size: ";
 		std::cout << borderBuffer.size() << std::endl;
+		LOG_INFO(m_fileLogger, "Set user border upload");
+		LOG_INFO(m_fileLogger, "Border upload size: " + std::to_string(m_borderUploadedBuffer->size()));
 	}
 
 	void Map::SetBorderUpload(const uint8_t* borderBuffer, const unsigned width, const unsigned height)
@@ -219,6 +229,7 @@ namespace MapGenerator
 
 	void Map::ClearBorderUpload()
 	{
+		LOG_INFO(m_fileLogger, "Clearing User Uploaded Borders");
 		m_uploadBorder = false;
 		m_borderUploadedBuffer->clear();
 		m_borderUploadedBuffer = nullptr;

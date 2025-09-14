@@ -165,7 +165,12 @@ void FMapEditorApp::GenerateMap()
 		}
 		UserProvidedBorders = true;
 	}
-	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024));
+	// Convert to filesystem path
+	FString AssetDirectory;
+	GetWorkingAssetDir(AssetDirectory); 
+	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*AssetDirectory));
+	const std::filesystem::path MapGenLogPath = AssetDir / "MapGenLog.txt";
+	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024, MapGenLogPath));
 	
 	if(UserProvidedBorders)
 	{
@@ -259,7 +264,7 @@ void FMapEditorApp::RestoreMapGenPreset() const
 void FMapEditorApp::SaveGeneratedMap()
 {
 	TempPreviews.Empty();
-	
+	// TODO - refactor this
 	FString AssetPath = WorkingAsset->GetPathName();
 	FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
 	FString DirPath = FPaths::GetPath(FullPath);
@@ -312,6 +317,22 @@ void FMapEditorApp::SaveGeneratedMap()
 	
 	// FString Message;
 	UEditorLoadingAndSavingUtils::SavePackages({TextureAsset->GetPackage(), Material->GetPackage()}, true);
+}
+
+bool FMapEditorApp::GetWorkingAssetDir(FString& OutPath) const
+{
+	const FString AssetPath = WorkingAsset->GetPathName();
+	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
+	FString DirPath = FPaths::GetPath(FullPath);
+	FPaths::NormalizeDirectoryName(DirPath);
+	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
+	{
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
+		return false;
+	}
+	
+	OutPath = FPaths::CreateStandardFilename(DirPath);
+	return true;
 }
 
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)

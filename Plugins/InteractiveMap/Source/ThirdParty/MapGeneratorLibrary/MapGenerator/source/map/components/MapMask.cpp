@@ -5,8 +5,9 @@
 
 namespace MapGenerator
 {
-	MapMask::MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, float cutOffHeight, bool mode)
-		: MapComponent(width, height, name), mask(width, height)
+	MapMask::MapMask(const char *name, const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height, ALogger::Logger& logger,
+		float cutOffHeight, bool mode)
+		: MapComponent(width, height, name, logger), mask(width, height)
 	{
 		m_elevation = ExtractHeightMapFromTexture(textureBuffer, width, height);
 		m_maskBuffer = CreateBuffer(m_elevation, cutOffHeight, mode);

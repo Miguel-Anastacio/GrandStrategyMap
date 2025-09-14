@@ -24,7 +24,7 @@ namespace MapGenerator
 		using Diagram = mygal::Diagram<double>;
 
 	public:
-		LookupMap(const char *name, unsigned width, unsigned height);
+		LookupMap(const char *name, unsigned width, unsigned height, ALogger::Logger& logger);
 
 		void RegenerateLookUp(const LookupMapData &data, MapMask *landMask, MapMask *oceanMask,  std::function<void(float, std::string_view)> progressCallback = nullptr);
 		void RegenerateLookUp(const LookupMapData &data, MapMask *landMask, MapMask *oceanMask,
