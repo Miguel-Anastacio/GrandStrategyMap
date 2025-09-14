@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #include "MapObject.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
@@ -12,7 +12,9 @@
 
 UMapObject::UMapObject(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+#if WITH_EDITOR
 	Map = MakeShareable(new MapGenerator::Map(1024, 1024, "MapGenLog.txt"));
+#endif
 }
 
 #if WITH_EDITOR
@@ -254,6 +256,7 @@ FColor UMapObject::GetPropertyColorFromInstancedStruct(const FInstancedStruct& I
 	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
 }
 
+# if WITH_EDITOR
 void UMapObject::ReadDataTables()
 {
 	if(!VisualPropertiesDT|| !VisualPropertyTypesDT)
@@ -283,6 +286,7 @@ void UMapObject::ReadDataTables()
 		VisualPropertiesMap.Emplace(*Type, ArrayOf);
 	}
 }
+#endif
 
 FVisualProperty UMapObject::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
 {

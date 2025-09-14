@@ -78,7 +78,6 @@ private:
 
 	// Map GEN section
 	static TObjectPtr<UTexture2D> CreateLookupTexture(const MapGenerator::TileMap& TileMap);
-	static TObjectPtr<UTexture2D> CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height);
 	void SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Texture, const FString& LookupFilePath, const FString& MapDataFilePath,
                                													UMaterialInstanceConstant* Material) const;
 	void OutputLookupJson(const FString& FilePath) const;

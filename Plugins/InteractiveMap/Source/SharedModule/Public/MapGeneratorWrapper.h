@@ -1,6 +1,7 @@
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
-#include "source/map/components/LookupMap.h"
+#include "Dom/JsonObject.h"
 #include "MapGeneratorWrapper.generated.h"
 
 USTRUCT(NotBlueprintType)

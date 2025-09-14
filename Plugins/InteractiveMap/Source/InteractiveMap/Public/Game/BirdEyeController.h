@@ -134,7 +134,7 @@ protected:
     FVector2D ViewportCenter;
 
     /** Reference to the interactive map. */
-    UPROPERTY(Transient, BlueprintReadOnly)
+    UPROPERTY(Transient, BlueprintReadOnly, Category="Map")
     class AClickableMap *Map;
 
     /** Reference to the map pawn. */

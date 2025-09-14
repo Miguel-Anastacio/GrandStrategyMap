@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2024 An@stacioDev All rights reserved.
 
 #pragma once
 
@@ -13,6 +13,7 @@
 #include "UObject/Object.h"
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
+#include "UObject/ObjectSaveContext.h"
 #if WITH_EDITOR
 #include "source/map/Map.h"
 #include "MapGenParamStructs.h"
@@ -208,6 +209,7 @@ public:
 	void ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
+	void ReadDataTables();
 #endif
 	
 public:	
@@ -274,7 +276,6 @@ public:
 	TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
 
 	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
-	void ReadDataTables();
 	FVisualProperty GetVisualProperty(const FName &Type, const FName &Tag, bool &OutResult) const;
 	FVisualProperty GetVisualProperty(const FVisualPropertyType &Type, const FName &Tag, bool &OutResult) const;
 
@@ -312,7 +313,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
 	class UDataTable *VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Debug")
 	class UMaterialInterface *MaterialOverride;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Debug")
@@ -329,11 +330,11 @@ private:
 	
 	TSharedPtr<MapGenerator::Map> Map;
 
-	UPROPERTY(VisibleAnywhere) // temp visibility
+	UPROPERTY(VisibleAnywhere, Category = "Debug") // temp visibility
 	bool bMapSaved = true;
 
 	// Used for undo to work
-	UPROPERTY(VisibleAnywhere) // temp visibility
+	UPROPERTY(VisibleAnywhere, Category = "Debug") // temp visibility
 	int Counter = 0;
 
 	// Tracks tiles selected by user in editor
@@ -343,6 +344,7 @@ private:
 	
 };
 
+#if WITH_EDITOR
 static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 template <typename T>
@@ -363,3 +365,4 @@ static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& Threa
 		}
 	});
 }
+#endif

@@ -1,5 +1,5 @@
+// Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
-
 #include "CoreMinimal.h"
 #include "MapGenParamStructs.generated.h"
 
@@ -51,13 +51,13 @@ struct SHAREDMODULE_API FMapGenParams
 {
 	GENERATED_BODY()
 	// The starting texture, a black and white image (heightmap or mask map that you wish to use for your map)
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings" )
-	UTexture2D* OriginTexture = nullptr;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings")
+	class UTexture2D* OriginTexture = nullptr;
 	// Set to true if you wish to upload a texture with the borders for your map, only possible to upload for either land or ocean
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings", meta = (InlineEditConditionToggle))
 	bool UploadBorder = false;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "General Settings", meta=( EditCondition ="UploadBorder"))
-	UTexture2D* BorderTexture = nullptr;
+	class UTexture2D* BorderTexture = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "General Settings")
 	bool LandBelowCutoffHeight = false;

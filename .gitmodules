@@ -1,3 +1,6 @@
-[submodule "Plugins/DataBasedWidget/Source/Utils"]
-	path = Plugins/DataBasedWidget/Source/Utils
+[submodule "Plugins/InteractiveMap/Source/Utils"]
+	path = Plugins/InteractiveMap/Source/Utils
 	url = https://github.com/Miguel-Anastacio/UtilityPlugin.git
+[submodule "Plugins/InteractiveMap/Source/PropertyDisplayGenerator"]
+	path = Plugins/InteractiveMap/Source/PropertyDisplayGenerator
+	url = https://github.com/Miguel-Anastacio/PropertyDiplayGenerator.git

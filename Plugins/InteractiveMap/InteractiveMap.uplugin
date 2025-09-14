@@ -16,6 +16,47 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "UtilityModule",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"Engine",
+				"UMG"
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "UtilityModuleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit",
+			"AdditionalDependencies": [
+				"Engine"
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "DataBasedWidget",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+			],
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
+			"Name": "DataBasedWidgetEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			]
+		},
+		{
 			"Name": "SharedModule",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
@@ -56,10 +97,6 @@
 		},
 		{
 			"Name": "StructUtils",
-			"Enabled": true
-		},
-		{
-			"Name": "PropertyDisplayGenerator",
 			"Enabled": true
 		}
 	]
