@@ -49,31 +49,29 @@ namespace MapGenerator
 		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), types, m_fileLogger);
 	}
 
-	// void Map::SetLogFilePath(const std::filesystem::path &path)
-	// {
-	// 	m_logFilePath = path;
-	// 	m_fileLogger = ALogger::FileLogger(path);
-	// }
-	void Map::RegenerateLookUp(const LookupMapData &data, std::function<void(float, std::string_view)> progressCallback)
+	void Map::SetProgressCallback(const std::function<void(float, std::string_view)>& progressCallback)
+	{
+		m_progressCallback = progressCallback;
+	}
+	void Map::RegenerateLookUp(const LookupMapData &data)
 	{
 		assert(m_lookupmap != nullptr);
 		assert(m_landMask != nullptr);
 		assert(m_oceanMask != nullptr);
 		
-		if(progressCallback)
+		if(m_progressCallback)
 		{
-			progressCallback(10.0f, "Generated Land and Ocean Masks");
+			m_progressCallback(10.0f, "Generated Land and Ocean Masks");
 		}
 		
 		if(m_uploadBorder)
 		{
 			m_lookupmap->SetBorderBufferRef(m_borderUploadedBuffer);
-			progressCallback(10.0f, "after set border ref");
-			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), TileMapGenType::UserUploadedBorderForLand, progressCallback);
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), TileMapGenType::UserUploadedBorderForLand);
 		}
 		else
 		{
-			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), progressCallback);
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get());
 		}
 		m_cutOffHeight = data.cutOffHeight;
 	}
@@ -94,14 +92,13 @@ namespace MapGenerator
 	}
 
 	void Map::GenerateMap(const std::vector<uint8_t>& textureBuffer, unsigned width, unsigned height,
-		const LookupMapData& data, const MapModeGen mode,
-		std::function<void(float, std::string_view)> progressCallback)
+		const LookupMapData& data, const MapModeGen mode)
 	{
 		setDimensions(width, height);
 		switch (mode)
 		{
 		case MapModeGen::FromHeightMap:
-			GenerateMapFromHeigthMap(textureBuffer, data.cutOffHeight, data, progressCallback);
+			GenerateMapFromHeigthMap(textureBuffer, data.cutOffHeight, data);
 			break;
 		default:
 			break;
@@ -123,12 +120,11 @@ namespace MapGenerator
 		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);
 	}
 
-	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight,
-		const LookupMapData& data,std::function<void(float, std::string_view)> progressCallback)
+	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight, const LookupMapData& data)
 	{
-		if(progressCallback)
+		if(m_progressCallback)
 		{
-			progressCallback(0.0f, "GenerateMapFromHeigthMap");
+			m_progressCallback(0.0f, "GenerateMapFromHeigthMap");
 		}
 		
 		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, !data.flipMask);
@@ -136,7 +132,7 @@ namespace MapGenerator
 		RegenerateMasks(data);
 		
 		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
-		RegenerateLookUp(data, progressCallback);
+		RegenerateLookUp(data);
 
 		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation(), m_fileLogger);
 		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);

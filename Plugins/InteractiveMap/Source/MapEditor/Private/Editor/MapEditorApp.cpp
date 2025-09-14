@@ -212,7 +212,8 @@ void FMapEditorApp::GenerateMap()
 		{
 			//Call GenerateMap and pass the progress callback
 			constexpr MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
-			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType, ProgressCallback);
+			TempMapGenerator->SetProgressCallback(ProgressCallback);
+			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
 
 			// Update the preview textures
 			PreviewLookupTexture = CreateLookupTexture(TempMapGenerator->GetLookupTileMap());
@@ -246,10 +247,7 @@ void FMapEditorApp::RestoreTexturePreview() const
 		MapTexturePreview->SetTextures(GetTexturesPairs());
 	}
 
-	// if(WorkingAsset->IsMapSaved())
-	// {
 	MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, CurrentTexture.Get());
-	// }
 }
 
 void FMapEditorApp::RestoreMapGenPreset() const
@@ -451,35 +449,6 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	
 	// Update the texture to reflect changes
 	NewTexture->PostEditChange();
-
-	// TODO - CHANGE THIS This function should not manage the buffer memory
-	//Since we don't need access to the pixel data anymore free the memory
-	delete[] Buffer;
-	Buffer = nullptr;
-	
-	return NewTexture;
-}
-
-/**
- * NOT USED 
- */
-TObjectPtr<UTexture2D> FMapEditorApp::CreateTextureSimple(uint8* Buffer, unsigned Width, unsigned Height)
-{
-	if(!Buffer)
-		return nullptr;
-	
-	TObjectPtr<UTexture2D> NewTexture = NewObject<UTexture2D>();
-	
-	// Set texture properties
-	NewTexture->Source.Init(Width, Height, 1, 1, TSF_BGRA8);
-	// Lock the mipmap and write the buffer data
-	uint8* MipData = NewTexture->Source.LockMip(0);
-	int32 BufferSize = Width * Height * 4; // BGRA8 format
-	FMemory::Memcpy(MipData, Buffer, BufferSize);
-	NewTexture->Source.UnlockMip(0);
-
-	NewTexture->CompressionSettings = TC_EditorIcon;
-	NewTexture->MipGenSettings = TMGS_NoMipmaps;
 
 	// TODO - CHANGE THIS This function should not manage the buffer memory
 	//Since we don't need access to the pixel data anymore free the memory

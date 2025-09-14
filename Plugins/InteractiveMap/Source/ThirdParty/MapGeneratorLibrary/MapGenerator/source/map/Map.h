@@ -48,26 +48,25 @@ public:
 	void GenerateTerrainMap(const std::vector<double> &noiseMap);
 	void GenerateTerrainMap(const std::vector<double> &noiseMap, const std::vector<TerrainType> &types);
 
-	void SetLogFilePath(const std::filesystem::path &path);
 	void SetLog(bool state)
 	{
 		m_fileLogger.SetLogState(state);
 	};
+
+	void SetProgressCallback(const std::function<void(float, std::string_view)>& progressCallback);
 	// void SaveLookupMapToFile() const;
 	// void SaveLookupMapToFile(const char* filename) const;
 	// void SaveHeightMapToFile(const char* filename) const;
 
-	void RegenerateLookUp(const LookupMapData &data, std::function<void(float, std::string_view)> progressCallback = nullptr);
+	void RegenerateLookUp(const LookupMapData &data);
 	void RegenerateLookupBorders(const LookupMapData &data);
 
 	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height);
 	void GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height,
-						const LookupMapData& data, const MapModeGen mode = MapModeGen::FromHeightMap,
-						std::function<void(float, std::string_view)> progressCallback = nullptr);
+						const LookupMapData& data, const MapModeGen mode = MapModeGen::FromHeightMap);
 
 	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight);
-	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data,
-									std::function<void(float, std::string_view)> progressCallback = nullptr);
+	void GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight, const LookupMapData& data);
 	
 
 	void RegenerateMasks(const LookupMapData& data);	
@@ -107,5 +106,6 @@ private:
 
 	std::filesystem::path m_logFilePath;
 	ALogger::FileLogger m_fileLogger;
+	std::function<void(float, std::string_view)> m_progressCallback;
 };
 }
