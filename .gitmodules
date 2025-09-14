@@ -1,3 +1,3 @@
-[submodule "Plugins/DataBasedWidget/Source/Utils"]
-	path = Plugins/DataBasedWidget/Source/Utils
+[submodule "Plugins/InteractiveMap/Source/DataBasedWidget/Utils"]
+	path = Plugins/InteractiveMap/Source/DataBasedWidget/Utils
 	url = https://github.com/Miguel-Anastacio/UtilityPlugin.git
