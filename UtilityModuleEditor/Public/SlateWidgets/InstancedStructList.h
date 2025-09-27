@@ -13,7 +13,7 @@
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/SListView.h"
 #include "Misc/EngineVersionComparison.h"
-#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/InstancedStruct.h"
 #else
 #include "InstancedStruct.h"
