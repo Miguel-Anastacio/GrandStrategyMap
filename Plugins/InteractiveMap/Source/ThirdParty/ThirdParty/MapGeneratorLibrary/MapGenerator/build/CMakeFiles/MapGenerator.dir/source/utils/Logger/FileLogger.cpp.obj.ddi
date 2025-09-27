@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\MapGenerator.dir\\source\\utils\\Logger\\FileLogger.cpp.obj",
+            "outputs": [
+                "CMakeFiles\\MapGenerator.dir\\source\\utils\\Logger\\FileLogger.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}

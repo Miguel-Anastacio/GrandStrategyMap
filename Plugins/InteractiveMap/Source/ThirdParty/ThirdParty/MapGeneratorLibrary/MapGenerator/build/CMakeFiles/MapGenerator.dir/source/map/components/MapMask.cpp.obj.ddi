@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "CMakeFiles\\MapGenerator.dir\\source\\map\\components\\MapMask.cpp.obj",
+            "outputs": [
+                "CMakeFiles\\MapGenerator.dir\\source\\map\\components\\MapMask.cpp.obj.ddi"
+            ],
+            "requires": []
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+ninja_dyndep_version = 1.0
+build CMakeFiles\MapGenerator.dir\source\data\Color.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\data\Mask.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\data\Utils.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\graphics\Rasterizer.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\Map.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\MapComponent.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\TileMap.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\components\HeightMap.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\components\LookupMap.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\components\MapMask.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\map\components\TerrainMap.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\utils\Algo.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\utils\Logger\FileLogger.cpp.obj: dyndep
+
+build CMakeFiles\MapGenerator.dir\source\utils\Logger\Logger.cpp.obj: dyndep
+
