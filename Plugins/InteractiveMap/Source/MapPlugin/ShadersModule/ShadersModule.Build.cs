@@ -1,3 +1,4 @@
+using System.IO;
 using UnrealBuildTool; 
 
 public class ShadersModule: ModuleRules 
@@ -9,11 +10,17 @@ public class ShadersModule: ModuleRules
 	{
 		PublicDependencyModuleNames.AddRange(new string[] { "UtilityModule" });
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
 		PrivateIncludePaths.AddRange(new string[] 
 		{
-			"ShadersModule/Private"
+			Path.Combine(ModuleDirectory, "Private")
 		});
+		
+		// PublicIncludePaths.AddRange(new string[] 
+		// {
+		// 	Path.Combine(ModuleDirectory, "Public")
+		// });
+		
 		if (Target.bBuildEditor == true)
 		{
 			PrivateDependencyModuleNames.Add("TargetPlatform");

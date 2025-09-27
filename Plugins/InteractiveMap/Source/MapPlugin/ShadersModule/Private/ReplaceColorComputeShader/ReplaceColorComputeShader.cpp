@@ -1,4 +1,5 @@
-#include "ReplaceColorComputeShader.h"
+#include "ReplaceColorComputeShader/ReplaceColorComputeShader.h"
+#include "ReplaceColorComputeShaderDefines.h"
 #include "PixelShaderUtils.h"
 #include "MeshPassProcessor.inl"
 #include "StaticMeshResources.h"
@@ -73,7 +74,7 @@ void FReplaceColorComputeShaderInterface::DispatchRenderThread(FRHICommandListIm
 
 	{
 		SCOPE_CYCLE_COUNTER(STAT_ReplaceColorComputeShader_Execute);
-		DECLARE_GPU_STAT(ReplaceColorComputeShader)
+		DECLARE_GPU_STAT(ReplaceColorComputeShader);
 		RDG_EVENT_SCOPE(GraphBuilder, "ReplaceColorComputeShader");
 		RDG_GPU_STAT_SCOPE(GraphBuilder, ReplaceColorComputeShader);
 		

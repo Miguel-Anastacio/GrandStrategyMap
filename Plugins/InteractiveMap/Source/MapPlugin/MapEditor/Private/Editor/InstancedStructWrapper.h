@@ -1,7 +1,11 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 #include "CoreMinimal.h"
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
+#include "StructUtils/InstancedStruct.h"
+#else
 #include "InstancedStruct.h"
+#endif
 #include "InstancedStructWrapper.generated.h"
 UCLASS()
 class UInstancedStructWrapper : public UObject
