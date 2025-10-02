@@ -742,6 +742,7 @@ void FMapEditorApp::UpdatePreviewTextures(const MapGenerator::TileMap& TileMap)
 {
 	const unsigned width = TileMap.Width();
 	const unsigned height = TileMap.Height();
+	// Checks is TileMap Valid here?
 	PreviewLookupTextureLand   = CreateTexture(TileMap.GetLandTileMap(), width, height);
 	PreviewLookupTextureOcean  = CreateTexture(TileMap.GetOceanTileMap(), width, height);
 	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToRawBuffer(), width, height);
