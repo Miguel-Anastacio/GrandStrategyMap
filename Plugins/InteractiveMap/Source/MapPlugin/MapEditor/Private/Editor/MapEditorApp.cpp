@@ -46,7 +46,7 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 		{
 			if(const TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr()))
 			{
-				AppMode->Refresh();
+				AppMode->Refresh(false);
 			}
 		}
 	});
@@ -88,7 +88,7 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 			TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 			if(AppMode)
 			{
-				AppMode->Refresh();
+				AppMode->Refresh(true);
 			}
 		}
 	}
@@ -768,7 +768,7 @@ void FMapEditorApp::UpdateEntriesSelected(const TArray<int32>& Indexes) const
 		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 		if(DataEditorMode.IsValid())
 		{
-			DataEditorMode->EditableStructListDisplay->SetSelection(Indexes);
+			DataEditorMode->UpdateEntriesSelected(Indexes);
 		}
 	}
 }
@@ -793,11 +793,24 @@ const UScriptStruct* FMapEditorApp::GetFilterForDataList() const
 
 void FMapEditorApp::UpdateMapData(const FInstancedStruct& Data) const
 {
-	const FScopedTransaction Transaction(NSLOCTEXT("MapDataEditor", "UndoEditMapData", "Map Data Changed"));
-	WorkingAsset->Modify();
-	WorkingAsset->UpdateDataInEditor(Data, GetWorkingAsset()->GetTilesSelected());
-	WorkingAsset->IncrementCounter();
-	WorkingAsset->MarkPackageDirty();
+	{
+		const FScopedTransaction Transaction(NSLOCTEXT("MapDataEditor", "UndoEditMapData", "Map Data Changed"));
+		WorkingAsset->Modify();
+		WorkingAsset->UpdateDataInEditor(Data, GetWorkingAsset()->GetTilesSelected());
+		WorkingAsset->IncrementCounter();
+		WorkingAsset->MarkPackageDirty();
+	}
+
+	const FName ModeName = GetCurrentMode();
+	if(ModeName == MapDataEditorModeName)
+	{
+		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+		if(DataEditorMode.IsValid())
+		{
+			DataEditorMode->Refresh(true);
+		}
+	}
+	
 }
 
 void FMapEditorApp::LoadMapDataFromFile() const

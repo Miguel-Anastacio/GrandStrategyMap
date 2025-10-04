@@ -18,14 +18,14 @@ public:
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	void SetAppMode(TWeakPtr<class FMapEditorDataAppMode> appMode); 
+	void SetApp(TWeakPtr<class FMapEditorApp> appMode); 
 	void SetStructInstance(const FInstancedStruct& Struct);
 #endif
 	
 #if WITH_EDITORONLY_DATA
 	int ID = -1;
 private:	
-	TWeakPtr<class FMapEditorDataAppMode> AppMode;
+	TWeakPtr<class FMapEditorApp> App;
 #endif
 
 	FInstancedStruct Previous;

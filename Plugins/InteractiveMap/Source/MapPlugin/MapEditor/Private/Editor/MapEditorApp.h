@@ -50,6 +50,7 @@ public: // FAssetEditorToolkit interface
 	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
 	void UpdateMapData(const struct FInstancedStruct& Data) const;
+	void UpdateMap(const FInstancedStruct& Data);
 	// ====================================================
 
 	// Update MapData FilePath
