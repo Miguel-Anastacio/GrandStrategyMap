@@ -27,12 +27,7 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 		.StructTypes(&appMode->StructTypes)
 		.NotEditableProperties(&appMode->PropertyNamesNotEditable)
 		.PropertiesWithDropdown(&appMode->PropertiesWithDropDown)
-		.MapObject(app->GetWorkingAsset())
-		.OnItemChanged_Lambda([this, app](const FInstancedStruct& Item)
-		{
-			UE_LOG(LogInteractiveMapEditor, Warning, TEXT("Update Data"));
-			// app->GetWorkingAsset()->UpdateDataInEditor(Item, app->GetWorkingAsset()->GetTilesSelected());
-		})	
+		.MapObject(app->GetWorkingAsset())	
 		.OnSelectionChanged_Lambda([this, app, appMode](const TArray<int32>& IDs, const ESelectInfo::Type type)
 		{
 			if(IDs.IsEmpty() && type == ESelectInfo::Type::OnMouseClick)

@@ -153,8 +153,11 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Editing asset is null"));
 		return;
 	}
-
 	MapAsset = GetWorld()->SpawnActor<AMapAsset>();
+#if UE_VERSION_NEWER_THAN(5, 5, 9)
+	MapAsset->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
+#else
+#endif		
 	MapAsset->MapObject = CustomObject.Get();
 	MapAsset->RerunConstructionScripts();
 }
@@ -177,8 +180,13 @@ TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 	LevelViewportClient->ViewportType = LVT_OrthoXY;
 	LevelViewportClient->bSetListenerPosition = false;
 	LevelViewportClient->SetRealtime(true);
+
+	// disable auto exposure
+	LevelViewportClient->EngineShowFlags.EyeAdaptation = 0;
+	LevelViewportClient->EngineShowFlags.SetEyeAdaptation(false);
 	
 	LevelViewportClient->SetViewLocationForOrbiting(FVector(200, -150, 400));
+
 	
 	return LevelViewportClient.ToSharedRef();
 }

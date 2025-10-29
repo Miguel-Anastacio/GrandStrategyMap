@@ -30,23 +30,6 @@ struct FTilePair
 	FInstancedStruct Data;
 };
 
-struct FColorPair
-{
-	FColor Color;
-	FColor OldColor;
-	FColorPair(const FColor &Color, const FColor &OldColor) : Color(Color), OldColor(OldColor) {}
-	FColorPair() : Color(FColor::White), OldColor(FColor::White) {}
-
-	bool operator==(const FColorPair &Other) const
-	{
-		return Other.Color == Color && Other.OldColor == OldColor;
-	}
-	friend uint32 GetTypeHash(const FColorPair &Other)
-	{
-		return GetTypeHash(Other.Color) + GetTypeHash(Other.OldColor);
-	}
-};
-
 USTRUCT()
 struct FPositions
 {
@@ -118,7 +101,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	void SetBorderVisibility(bool status);
 
-	UFUNCTION(CallInEditor, Category = "Map")
+	// UFUNCTION(CallInEditor, Category = "Map")
 	void FillPixelMap();
 
 public:
@@ -152,7 +135,6 @@ protected:
 	void CreateDynamicTextures(const TArray<FVisualPropertyType> &VisualPropertyTypes);
 	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties> &VisualProperties, const TArray<uint8> &LookupTextureData);
 
-	TArray<uint8> GetPixelsToEditMarked(UDynamicTexture *Texture, const TArray<int> &IDs, uint8 MarkerValue);
 	void MarkPixelsToEdit(TArray<uint8> &PixelBuffer, const TArray<int> &IDs, uint8 MarkerValue) const;
 	// #endif
 protected:

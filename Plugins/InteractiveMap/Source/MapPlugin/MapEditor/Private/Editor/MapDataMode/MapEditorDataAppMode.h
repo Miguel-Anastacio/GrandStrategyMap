@@ -26,10 +26,10 @@ public:
 	
 	TObjectPtr<class UInstancedStructWrapper> EntryWrapper = nullptr;
 
-	void UpdateMap(const FInstancedStruct& Data);
 	void SetFilter(const UScriptStruct* Type, bool RefreshList);
-	void Refresh();
+	void Refresh(const bool KeepSelection);
 	void UpdateDataEntryEditor(const FInstancedStruct& Data, int32 ID) const;
+	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
 protected:
 	void RefreshDataList();
 	bool IncludedInFilter(const UScriptStruct* Type) const;

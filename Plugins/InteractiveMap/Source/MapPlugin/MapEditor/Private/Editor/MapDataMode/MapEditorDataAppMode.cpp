@@ -82,7 +82,7 @@ FMapEditorDataAppMode::FMapEditorDataAppMode(TSharedPtr<FMapEditorApp> app)
 void FMapEditorDataAppMode::RegisterTabFactories(TSharedPtr<FTabManager> InTabManager)
 {
 	TSharedPtr<FMapEditorApp> app = App.Pin();
-	EntryWrapper->SetAppMode(SharedThis(this));
+	EntryWrapper->SetApp(app);
 	
 	const TSharedPtr<FMapDataEditorTabFactory> Factory = StaticCastSharedPtr<FMapDataEditorTabFactory>(TabSet.GetFactory(DataEditorListTabID));
 	Factory->SetAppMode(SharedThis(this));
@@ -108,11 +108,11 @@ void FMapEditorDataAppMode::PostActivateMode()
 	const TArray<int32> Index = app->GetWorkingAsset()->GetTilesSelected();
 	if(!Index.IsEmpty())
 	{
-		app->UpdateEntriesSelected(Index);
+		UpdateEntriesSelected(Index);
 	}
 	else
 	{
-		app->ClearSelection();
+		EditableStructListDisplay->ClearSelection();
 	}
 	
 	FApplicationMode::PostActivateMode();
@@ -128,12 +128,6 @@ void FMapEditorDataAppMode::Init()
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);
 }
 
-void FMapEditorDataAppMode::UpdateMap(const FInstancedStruct& Data) 
-{
-	App.Pin()->UpdateMapData(Data);
-	RefreshDataList();
-}
-
 void FMapEditorDataAppMode::SetFilter(const UScriptStruct* Type, bool RefreshList)
 {
 	ListFilterByType = Type;
@@ -141,18 +135,23 @@ void FMapEditorDataAppMode::SetFilter(const UScriptStruct* Type, bool RefreshLis
 		RefreshDataList();
 }
 
-void FMapEditorDataAppMode::Refresh()
+void FMapEditorDataAppMode::Refresh(const bool KeepSelection)
 {
 	RefreshDataList();
 
 	const TArray<int32> tilesSelected = App.Pin()->GetWorkingAsset()->GetTilesSelected();
-	if(tilesSelected.IsEmpty())
+	if(KeepSelection)
 	{
-		EditableStructListDisplay->ClearSelection();
+		UpdateEntriesSelected(tilesSelected);
 	}
 	else
 	{
-		const int32 selectedTile= tilesSelected.Last();
+		EditableStructListDisplay->ClearSelection();
+	}
+	
+	if(!tilesSelected.IsEmpty())
+	{
+		const int32 selectedTile = tilesSelected.Last();
 		const FInstancedStruct* data = App.Pin()->GetWorkingAsset()->GetTileData(selectedTile);
 		if(data)
 		{
@@ -166,6 +165,21 @@ void FMapEditorDataAppMode::UpdateDataEntryEditor(const FInstancedStruct& Data, 
 {
 	EntryWrapper->SetStructInstance(Data);
 	EntryWrapper->ID = ID;
+}
+
+void FMapEditorDataAppMode::UpdateEntriesSelected(const TArray<int32>& Indexes) const
+{
+	if(EditableStructListDisplay)
+	{
+		if(!Indexes.IsEmpty())
+		{
+			EditableStructListDisplay->SetSelection(Indexes);
+		}
+		else
+		{
+			EditableStructListDisplay->ClearSelection();
+		}
+	}
 }
 
 void FMapEditorDataAppMode::RefreshDataList()

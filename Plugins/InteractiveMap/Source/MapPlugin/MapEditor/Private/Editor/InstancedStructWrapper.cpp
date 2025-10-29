@@ -2,7 +2,7 @@
 #include "Editor/InstancedStructWrapper.h"
 
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
-#include "MapDataMode/MapEditorDataAppMode.h"
+#include "MapEditorApp.h"
 
 void UInstancedStructWrapper::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -15,16 +15,16 @@ void UInstancedStructWrapper::PostEditChangeProperty(FPropertyChangedEvent& Prop
 		const FText Message = FText::FromString(TEXT("Type of struct of data of entry cannot be changed after creation"));
 		EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 	}
-	else if(AppMode.IsValid())
+	else if(App.IsValid())
 	{
 		Previous = StructInstance;
-		AppMode.Pin().Get()->UpdateMap(StructInstance);
+		App.Pin().Get()->UpdateMapData(StructInstance);
 	}
 }
 
-void UInstancedStructWrapper::SetAppMode(TWeakPtr<class FMapEditorDataAppMode> appMode)
+void UInstancedStructWrapper::SetApp(TWeakPtr<class FMapEditorApp> app)
 {
-	AppMode = appMode;
+	App = app;
 }
 
 void UInstancedStructWrapper::SetStructInstance(const FInstancedStruct& Struct)
