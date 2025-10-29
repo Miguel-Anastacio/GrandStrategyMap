@@ -28,7 +28,8 @@ public class UtilityModule : ModuleRules
 			{
 				"Core",
 				"RHI",
-				"RenderCore"
+				"RenderCore",
+				"StructUtils"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -58,10 +59,6 @@ public class UtilityModule : ModuleRules
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		if (Target.Version.MajorVersion <= 5 && Target.Version.MinorVersion <= 4)
-		{
-			PublicDependencyModuleNames.Add("StructUtils");
-		}
 
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]

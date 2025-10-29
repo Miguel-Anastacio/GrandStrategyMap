@@ -169,6 +169,7 @@ void UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(const FStri
 	if(!bResult)
 	{
 		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array: %s"), *OutInfoMessage);
+		UE_LOG(LogUtilityModule, Error, TEXT("Failed to Save Instanced Struct Array, filePath: %s"), *FilePath);
 	}
 }
 
