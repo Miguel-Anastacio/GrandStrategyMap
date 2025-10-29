@@ -7,30 +7,30 @@ public class DataBasedWidgetEditor : ModuleRules
 	public DataBasedWidgetEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
 			}
 			);
-				
-		
+
+
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
 			}
 			);
-			
-		
+
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				// ... add other public dependencies that you statically link with here ...
 				"Core",
-				 
+				"StructUtils"
 			}
 			);
-		
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -39,14 +39,14 @@ public class DataBasedWidgetEditor : ModuleRules
 				"InputCore",
 				"Slate",
 				"SlateCore",
-				"UMG", 
+				"UMG",
 				"UMGEditor",
-				"DataBasedWidget", 
+				"DataBasedWidget",
 				"UtilityModule",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
-		
+
 		if (Target.bBuildEditor)
 		{
 			PrivateDependencyModuleNames.AddRange(
@@ -63,8 +63,8 @@ public class DataBasedWidgetEditor : ModuleRules
 				}
 			);
 		}
-		
-		
+
+
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{

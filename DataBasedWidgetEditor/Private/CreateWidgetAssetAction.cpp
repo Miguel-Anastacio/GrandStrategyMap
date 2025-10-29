@@ -10,7 +10,7 @@
 #include "Engine/UserDefinedStruct.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Misc/EngineVersionComparison.h"
-#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/UserDefinedStruct.h"
 #endif
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
