@@ -29,9 +29,9 @@ void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManage
 {
 	FWorkflowCentricApplication::RegisterTabSpawners(tabManager);
 	LoadPreviewTexturesFromMapObject(WorkingAsset);
-	CurrentTexture = WorkingAsset->GetLookupTexture();
+	UpdateCurrentTexture(GetLookupTexture());
+	TempMapGenerator = WorkingAsset->GetLastMapGen();
 	WorkingAsset->ClearTilesSelected();
-	UpdateHighlightTexture({});
 }
 
 void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost,
@@ -40,15 +40,21 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 	GEditor->RegisterForUndo(this);
 	WorkingAsset = Cast<UMapObject>(InObject);
 	MapGenPreset = NewObject<UMapEditorPreset>();
+	
 	WorkingAsset->OnMapDetailsChange.BindLambda([this]()
 	{
-		if(GetCurrentMode() == MapDataEditorModeName)
-		{
-			if(const TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr()))
-			{
-				AppMode->Refresh(false);
-			}
-		}
+		RefreshMapDataEditor(false);
+	});
+	
+	WorkingAsset->OnTilesSelectedChanged.BindLambda([this](const TArray<int32>& tiles)
+	{
+		UpdateHighlightTexture(tiles);
+		UpdateEntriesSelected(tiles);
+	});
+	
+	WorkingAsset->OnMapDataChanged.BindLambda([this]()
+	{
+		RefreshMapDataEditor(true);
 	});
 	
 	AddApplicationMode(MapEditorGenModeName, MakeShareable(new FMapEditorGenAppMode(SharedThis(this))));
@@ -80,17 +86,10 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 		TempMapGenerator = GetLastMapCreated();
 		UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
 		PreviewRootTexture = GetLastRootTexture();
-		CurrentTexture = GetLookupTexture();
+		UpdateCurrentTexture(GetLookupTexture());
 		RestoreTexturePreview();
-		
-		if(GetCurrentMode() == MapDataEditorModeName)
-		{
-			TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-			if(AppMode)
-			{
-				AppMode->Refresh(true);
-			}
-		}
+
+		RefreshMapDataEditor(true);
 	}
 }
 
@@ -130,8 +129,7 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID)
 		
 	if(Texture2D.IsValid())
 	{
-		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D.Get());
-		CurrentTexture = Texture2D;
+		UpdateCurrentTexture(Texture2D);
 	}
 }
 
@@ -143,9 +141,11 @@ void FMapEditorApp::SaveAsset_Execute()
 	FWorkflowCentricApplication::SaveAsset_Execute();
 }
 
+// TODO - add comments or some sort of sigfincance describing each step of map gen
 void FMapEditorApp::GenerateMap()
 {
 	bool UserProvidedBorders = false;
+	// Validate user uploaded borders
 	if(MapGenPreset->UploadBorder())
 	{
 		// validate size
@@ -165,7 +165,8 @@ void FMapEditorApp::GenerateMap()
 	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*AssetDirectory));
 	const std::filesystem::path MapGenLogPath = AssetDir / "MapGenLog.txt";
 	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024, MapGenLogPath));
-	
+
+	// Handle user uploaded borders
 	if(UserProvidedBorders)
 	{
 		UTexture2D* BorderTexture = MapGenPreset->MapEditorDetails.BorderTexture;
@@ -184,7 +185,8 @@ void FMapEditorApp::GenerateMap()
 		}
 		TempMapGenerator->SetBorderUpload(BufferData, width, height);
 	}
-	
+
+	// Check if origin texture is valid
 	UTexture2D* Texture = MapGenPreset->MapEditorDetails.OriginTexture;
 	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
 	if(!Data)
@@ -198,6 +200,7 @@ void FMapEditorApp::GenerateMap()
 	}
 	 
 	// TODO - improve this, adjust MapGeneratorLib
+	// Do actual map gen
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
 	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
@@ -208,9 +211,9 @@ void FMapEditorApp::GenerateMap()
 			constexpr MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
 			TempMapGenerator->SetProgressCallback(ProgressCallback);
 			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
+			WorkingAsset->SetLastMapGen(TempMapGenerator);
 
 			// Update the preview textures
-			PreviewLookupTexture = CreateLookupTexture(TempMapGenerator->GetLookupTileMap());
 			UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
 			PreviewRootTexture = Texture;
 			
@@ -223,25 +226,21 @@ void FMapEditorApp::GenerateMap()
 				MapObject->IncrementCounter();
 				MapObject->MarkPackageDirty();
 			}
-
-			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, PreviewLookupTexture);
-			CurrentTexture = PreviewLookupTexture;
 			
 			TempPreviews.Emplace(TempMapGenerator, PreviewLookupTexture);
+			
+			UpdateCurrentTexture(GetLookupTexture());
+			ClearHighlightTexture();
 			RestoreTexturePreview();
 		});
 }
 
 void FMapEditorApp::RestoreTexturePreview() const
 {
-	if(!WorkingAsset)
-		return;
 	if(MapTexturePreview)
 	{
 		MapTexturePreview->SetTextures(GetTexturesPairs());
 	}
-	
-	MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, CurrentTexture.Get());
 }
 
 void FMapEditorApp::RestoreMapGenPreset() const
@@ -357,11 +356,11 @@ void FMapEditorApp::AddToolbarExtender()
 				}),
 				FCanExecuteAction().CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
+					return !IsModeCurrent(MapDataEditorModeName) && WorkingAsset->IsMapSaved();
 				}),
 				FIsActionChecked::CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() == MapDataEditorModeName;
+					return IsModeCurrent(MapDataEditorModeName);
 				})
 			),
 			NSLOCTEXT("MapEditor", "MapDataTabLabel", "Details"),
@@ -398,14 +397,10 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateLookupTexture(const MapGenerator::Ti
 	const int Width = TileMap.Width();
 	const int Height = TileMap.Height();
 	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
-	// if(buffer)
-	// {
-	// 	delete buffer;
-	// 	buffer = nullptr;
-	// }
 	return Texture;
 }
 
+// This is completely external to the app, TODO - move from here
 TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
 {
 	if(!Buffer)
@@ -444,8 +439,7 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 
 	// TODO - CHANGE THIS This function should not manage the buffer memory
 	//Since we don't need access to the pixel data anymore free the memory
-	delete[] Buffer;
-	Buffer = nullptr;
+	FMemory::Free(Buffer);
 	
 	return NewTexture;
 }
@@ -603,7 +597,7 @@ void FMapEditorApp::SetFilterForDataList(const UScriptStruct* Struct)
 	TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 	if(AppMode)
 	{
-		AppMode->SetFilter(Struct, GetCurrentMode() == MapDataEditorModeName);
+		AppMode->SetFilter(Struct, IsModeCurrent(MapDataEditorModeName));
 		
 		const TArray<int32> TilesSelected = GetWorkingAsset()->GetTilesSelected();
 		if(!TilesSelected.IsEmpty())
@@ -622,7 +616,14 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 {
 	if(!CurrentTexture.IsValid())
 		return;
-	// get lookup texture buffer
+	
+	if(IDs.IsEmpty())
+	{
+		ClearHighlightTexture();
+		return;
+	}
+	
+	// get current texture buffer
 	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
 	const int32 size = bufferTextureData.Num();
 	uint8_t* buffer = new uint8_t[size];
@@ -655,14 +656,7 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
 	const int32 Height = CurrentTexture.Get()->GetSizeY();
 	HighlightTexture = CreateTexture(buffer, Width, Height);
-	if(buffer)
-	{
-		delete[] buffer;
-		buffer = nullptr;
-	}
-
-	if(MapViewport)
-		MapViewport->UpdatePreviewActor();
+	OnHighlightChanged.Broadcast(HighlightTexture);
 }
 
 void FMapEditorApp::LoadPreviewTexturesFromMapObject(const UMapObject* MapObject)
@@ -670,11 +664,16 @@ void FMapEditorApp::LoadPreviewTexturesFromMapObject(const UMapObject* MapObject
 	if(!MapObject)
 		return;
 
-	PreviewLookupTexture = MapObject->LookupTexture;
 	PreviewRootTexture = MapObject->GetRootTexture();
 	
+	const TSharedPtr<MapGenerator::Map> LastMapGen = MapObject->GetLastMapGen();
 	const TSharedPtr<MapGenerator::Map> MapGen = MapObject->GetMapGen();
-	if(MapGen->IsValid())
+	if(LastMapGen.IsValid())
+	{
+		const MapGenerator::TileMap& TileMap = LastMapGen->GetLookupTileMap();
+		UpdatePreviewTextures(TileMap);
+	}
+	else if(MapGen.IsValid() && MapGen->IsValid())
 	{
 		const MapGenerator::TileMap& TileMap = MapGen->GetLookupTileMap();
 		UpdatePreviewTextures(TileMap);
@@ -714,6 +713,33 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetVisitedTilesTexture() const
 TWeakObjectPtr<UTexture2D> FMapEditorApp::GetCurrentTexture() const
 {
 	return CurrentTexture;
+}
+
+void FMapEditorApp::UpdateCurrentTexture(const TWeakObjectPtr<UTexture2D> Texture)
+{
+	CurrentTexture = Texture;
+	OnCurrentTextureChanged.Broadcast(Texture);
+}
+
+void FMapEditorApp::ClearHighlightTexture()
+{
+	if(!CurrentTexture.IsValid())
+		return;
+	// get current texture buffer
+	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
+	const int32 Width =  CurrentTexture.Get()->GetSizeX();
+	const int32 Height = CurrentTexture.Get()->GetSizeY();
+	const int32 size = Width * Height * 4;
+	uint8_t* buffer = new uint8_t[size];
+	for(int i = 0; i < size; i+=4)
+	{
+		buffer[i + 0] = 0;
+		buffer[i + 1] = 0;
+		buffer[i + 2] = 0;
+		buffer[i + 3] = 0;
+	}
+	HighlightTexture = CreateTexture(buffer, Width, Height);
+	OnHighlightChanged.Broadcast(HighlightTexture);
 }
 
 TArray<TPair<FName, UTexture2D*>> FMapEditorApp::GetTexturesPairs() const
@@ -762,26 +788,12 @@ UTexture2D* FMapEditorApp::GetLastRootTexture() const
 
 void FMapEditorApp::UpdateEntriesSelected(const TArray<int32>& Indexes) const
 {
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
+	if(IsModeCurrent(MapDataEditorModeName))
 	{
 		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 		if(DataEditorMode.IsValid())
 		{
 			DataEditorMode->UpdateEntriesSelected(Indexes);
-		}
-	}
-}
-
-void FMapEditorApp::ClearSelection() const
-{
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
-	{
-		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-		if(DataEditorMode.IsValid())
-		{
-			DataEditorMode->EditableStructListDisplay->ClearSelection();
 		}
 	}
 }
@@ -800,19 +812,21 @@ void FMapEditorApp::UpdateMapData(const FInstancedStruct& Data) const
 		WorkingAsset->IncrementCounter();
 		WorkingAsset->MarkPackageDirty();
 	}
-
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
-	{
-		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-		if(DataEditorMode.IsValid())
-		{
-			DataEditorMode->Refresh(true);
-		}
-	}
-	
 }
 
+void FMapEditorApp::RefreshMapDataEditor(const bool keepSelection) const
+{
+	if(IsModeCurrent(MapDataEditorModeName))
+	{
+		TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+		if(AppMode)
+		{
+			AppMode->Refresh(keepSelection);
+		}
+	}
+}
+
+// TODO - rewrite this function, it is too big
 void FMapEditorApp::LoadMapDataFromFile() const
 {
 	TArray<FString> FilePaths;

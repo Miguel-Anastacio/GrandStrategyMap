@@ -14,17 +14,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapAsset")
 	UStaticMeshComponent* MapMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapAsset")
-	UMapObject* MapObject;
-
 	UPROPERTY()
 	UMaterialInstanceDynamic* Material;
 
 	void SetMaterial(UTexture2D* Texture, UMaterial* ParentMaterial);
+	void SetBind(TWeakPtr<class FMapEditorApp> app);
+	void OnTextureChanged(const TWeakObjectPtr<UTexture2D> CurrentTexture) const;
+	void OnHighlightUpdate(const TWeakObjectPtr<UTexture2D> HighlightTexture) const;
 protected:
 	AMapAsset();
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Destroyed() override;
 
 };

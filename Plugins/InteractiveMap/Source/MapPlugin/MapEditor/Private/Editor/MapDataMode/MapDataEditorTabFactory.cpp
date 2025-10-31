@@ -41,9 +41,8 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 			// on mouse click on list clear tiles selected and update highlight texture
 			if(type == ESelectInfo::Type::OnMouseClick)
 			{
-				app->GetWorkingAsset()->ClearTilesSelected();
+				app->GetWorkingAsset()->ClearTilesSelected(false);
 				app->GetWorkingAsset()->AddTilesSelected(IDs);
-				app->UpdateHighlightTexture(IDs);
 			}
 		});
 }

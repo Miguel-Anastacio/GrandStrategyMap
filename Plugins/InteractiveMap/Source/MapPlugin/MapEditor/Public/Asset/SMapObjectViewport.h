@@ -33,8 +33,6 @@ public:
 SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs);
-	void UpdatePreviewActor() const;
-	void UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const;
 	
 	//Toolbar interface
 	virtual TSharedRef<SEditorViewport> GetViewportWidget() override {return SharedThis(this);}

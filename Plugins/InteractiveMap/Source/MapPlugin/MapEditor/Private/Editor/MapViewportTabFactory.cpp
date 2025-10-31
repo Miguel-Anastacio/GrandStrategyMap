@@ -17,9 +17,11 @@ FMapViewportTabFactory::FMapViewportTabFactory(TSharedPtr<FMapEditorApp> app)
 // Set the contents of the tab
 TSharedRef<SWidget> FMapViewportTabFactory::CreateTabBody(const FWorkflowTabSpawnInfo& Info) const
 {
-	if(!App.IsValid())
+	if (!App.IsValid())
+	{
 		return SNew(SOverlay);
-	
+	}
+    
 	return SNew(SOverlay)
 	+ SOverlay::Slot()
 	[

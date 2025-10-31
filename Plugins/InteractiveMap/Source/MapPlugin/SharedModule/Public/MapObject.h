@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/EngineVersionComparison.h"
-#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/InstancedStruct.h"
 #else
 #include "InstancedStruct.h"
@@ -146,6 +146,7 @@ struct FComplexMapDataStruct : public FBaseMapStruct
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 DECLARE_DELEGATE(FOnMapDetailsChange);
+DECLARE_DELEGATE_OneParam(FOnTilesSelectedChanged, const TArray<int32>&);
 UCLASS()
 class SHAREDMODULE_API UMapObject : public UObject
 {
@@ -165,10 +166,16 @@ class SHAREDMODULE_API UMapObject : public UObject
 public:
 	TSharedPtr<MapGenerator::Map> GetMapGen() const;
 	void SetMapGen(TSharedPtr<MapGenerator::Map> MapGen);
+	
 	UTexture2D*  GetRootTexture() const;
 	void SetRootTexture(UTexture2D* texture);
+
+	TSharedPtr<MapGenerator::Map> GetLastMapGen() const;
+	void SetLastMapGen(const TSharedPtr<MapGenerator::Map>& MapGen);
+	
 	FMapGenParams GetLastParamsUsed() const;
 	void SetLastParamsUsed(const FMapGenParams& Params);
+	
 	bool IsMapSaved() const;
 	void SetMapSaved(bool Saved);
 	// counter of mapGens without saving 
@@ -178,7 +185,6 @@ public:
 	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 	void SaveData() const;
-	void LoadDataFromFile();
 	void SetLookupTexture(UTexture2D *Texture2D);
 	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
@@ -191,7 +197,6 @@ public:
 	}
 
 	// Update In Editor only, used in Map Object Display
-	void UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
 	void UpdateDataInEditor(const FInstancedStruct &NewData, const TArray<int32>& IDs);
 	
 	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
@@ -202,7 +207,7 @@ public:
 	void AddTileSelected(int32 ID);
 	void AddTilesSelected(const TArray<int32>& IDs);
 	void RemoveTileSelected(int32 ID);
-	void ClearTilesSelected();
+	void ClearTilesSelected(const bool triggerNotification = true);
 	const TArray<int32>& GetTilesSelected() const;
 	bool IsTileSelected(int32 ID) const;
 
@@ -265,8 +270,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *OceanStructType;
 #if WITH_EDITORONLY_DATA
-	FOnAssetChanged OnObjectChanged;
 	FOnMapDetailsChange OnMapDetailsChange;
+	FOnTilesSelectedChanged OnTilesSelectedChanged;
+	FOnMapDetailsChange OnMapDataChanged;
 #endif
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Lookup")
@@ -284,7 +290,9 @@ public:
 	
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
-
+#if WITH_EDITOR
+	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
+#endif
 	UPROPERTY()
 	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
 
@@ -327,8 +335,12 @@ private:
 
 	UPROPERTY()
 	FMapGenParams LastParamsUsedGen;
+
+	// Keeps ref to last saved map gen object
+	TSharedPtr<MapGenerator::Map> MapGenSaved;
 	
-	TSharedPtr<MapGenerator::Map> Map;
+	// Keeps ref to last created map gen object
+	TSharedPtr<MapGenerator::Map> LastMapGen;
 
 	UPROPERTY(VisibleAnywhere, Category = "Debug") // temp visibility
 	bool bMapSaved = true;

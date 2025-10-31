@@ -13,7 +13,7 @@
 UMapObject::UMapObject(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 #if WITH_EDITOR
-	Map = MakeShareable(new MapGenerator::Map(1024, 1024, "MapGenLog.txt"));
+	MapGenSaved = MakeShareable(new MapGenerator::Map(1024, 1024, "MapGenLog.txt"));
 #endif
 }
 
@@ -58,17 +58,26 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		}
 	}
 	
-	OnObjectChanged.Broadcast();
 	// SetMapDataFilePath(FilePathMapData);	
 }
 TSharedPtr<MapGenerator::Map> UMapObject::GetMapGen() const
 {
-	return Map;
+	return MapGenSaved;
 }
 
 void UMapObject::SetMapGen(TSharedPtr<MapGenerator::Map> MapGen)
 {
-	Map = MapGen;
+	MapGenSaved = MapGen;
+}
+
+TSharedPtr<MapGenerator::Map> UMapObject::GetLastMapGen() const
+{
+	return LastMapGen;
+}
+
+void UMapObject::SetLastMapGen(const TSharedPtr<MapGenerator::Map>& MapGen)
+{
+	LastMapGen = MapGen;
 }
 
 UTexture2D* UMapObject::GetRootTexture() const
@@ -117,8 +126,8 @@ void UMapObject::SerializeMap(FArchive& Ar)
 
 	if(Version >= 2)
 	{
-		unsigned width = Map->Width();  
-		unsigned height = Map->Height();
+		unsigned width = MapGenSaved->Width();  
+		unsigned height = MapGenSaved->Height();
 		Ar << width;
 		Ar << height;
 		int32 NumThreads = 8;
@@ -126,7 +135,7 @@ void UMapObject::SerializeMap(FArchive& Ar)
 
 		if(Ar.IsSaving())
 		{
-			std::vector<MapGenerator::Tile> tiles = Map->GetTiles();
+			std::vector<MapGenerator::Tile> tiles = MapGenSaved->GetTiles();
 			int32 count = static_cast<int32>(tiles.size());
 			Ar << count;
 			
@@ -162,8 +171,8 @@ void UMapObject::SerializeMap(FArchive& Ar)
 			}
 			SerializeParallel<FMemoryReader>(NumThreads, ThreadBuffers, tiles);
 			
-			Map->SetSize(width, height);
-			Map->SetLookupTileMap(tiles);
+			MapGenSaved->SetSize(width, height);
+			MapGenSaved->SetLookupTileMap(tiles);
 		}
 	}
 }
@@ -444,23 +453,6 @@ void UMapObject::SaveData() const
 	UAtkDataManagerFunctionLibrary::WriteInstancedStructArrayToJson(FilePathMapData, Values);
 }
 
-void UMapObject::LoadDataFromFile()
-{
-	TArray<FString> FilesNames;
-	UAtkFilePickerFunctionLibrary::OpenFileDialogJson(FPaths::ProjectDir(), FilesNames);
-	if(FilesNames.IsEmpty())
-	{
-		// UE_LOG(LogInteractiveMapEditor, Warning, TEXT("No file selected"));
-		return;
-	}
-	if(!StructType)
-	{
-		// UE_LOG(LogInteractiveMapEditor, Error, TEXT("Struct Data Type not selected"));
-		return;
-	}
-	
-	SetMapDataFilePath(FilesNames[0]);
-}
 void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 {
 	if(!Texture2D)
@@ -568,7 +560,7 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 }
 
 #if WITH_EDITOR
-void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32 ID)
+bool UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32 ID)
 {
 	if(FInstancedStruct* Data = GetTileData(ID))
 	{
@@ -576,15 +568,23 @@ void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32
 		{
 			*Data = NewData;
 			UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(*Data, "ID", ID);
+			return true;
 		}
 	}
+	return false;
 }
 
 void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const TArray<int32>& IDs)
 {
+	bool update = false;
 	for(const auto id : IDs)
 	{
-		UpdateDataInEditor(NewData, id);
+		update |= UpdateDataInEditor(NewData, id);
+	}
+	
+	if(update)
+	{
+		OnMapDataChanged.ExecuteIfBound();
 	}
 }
 
@@ -606,21 +606,28 @@ UDataTable* UMapObject::GetVisualPropertyTypes() const
 void UMapObject::AddTileSelected(int32 ID)
 {
 	SelectedTiles.Emplace(ID);
+	OnTilesSelectedChanged.ExecuteIfBound(SelectedTiles);
 }
 
 void UMapObject::AddTilesSelected(const TArray<int32>& IDs)
 {
 	SelectedTiles.Append(IDs);
+	OnTilesSelectedChanged.ExecuteIfBound(SelectedTiles);
 }
 
 void UMapObject::RemoveTileSelected(int32 ID)
 {
 	SelectedTiles.Remove(ID);
+	OnTilesSelectedChanged.ExecuteIfBound(SelectedTiles);
 }
 
-void UMapObject::ClearTilesSelected()
+void UMapObject::ClearTilesSelected(const bool triggerNotification)
 {
 	SelectedTiles.Empty();
+	if(triggerNotification)
+	{
+		OnTilesSelectedChanged.ExecuteIfBound(SelectedTiles);
+	}
 }
 
 const TArray<int32>& UMapObject::GetTilesSelected() const
@@ -635,8 +642,6 @@ bool UMapObject::IsTileSelected(int32 ID) const
 
 void UMapObject::ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
 {
-	// const FScopedTransaction Transaction(NSLOCTEXT("MapObject", "UndoChangeStruct", "Change Struct Type"));
-	// Modify();
 	for(auto& [id, data] : MapData)
 	{
 		if(data.GetScriptStruct() == OldStruct)

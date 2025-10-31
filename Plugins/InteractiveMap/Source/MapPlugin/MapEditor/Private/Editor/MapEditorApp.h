@@ -3,8 +3,10 @@
 #include "CoreMinimal.h"
 #include "MapGenerator/source/map/Map.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
+// TODO - move static functions to separate libs grouped by subject
 
 // Application that owns the editor window
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentTextureChanged, TWeakObjectPtr<UTexture2D>);
 class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook, public FGCObject
 {
 public:
@@ -47,10 +49,9 @@ public: // FAssetEditorToolkit interface
 	bool GetWorkingAssetDir(FString& OutPath) const;
 	// MapDataEditor
 	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
-	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
 	void UpdateMapData(const struct FInstancedStruct& Data) const;
-	void UpdateMap(const FInstancedStruct& Data);
+	void RefreshMapDataEditor(const bool keepSelection) const;
 	// ====================================================
 
 	// Update MapData FilePath
@@ -65,6 +66,12 @@ public: // FAssetEditorToolkit interface
 	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
 	void UpdateHighlightTexture(const TArray<int32>& IDs);
 	TWeakObjectPtr<UTexture2D> GetCurrentTexture() const;
+	void UpdateCurrentTexture(const TWeakObjectPtr<UTexture2D> Texture);
+
+	void ClearHighlightTexture();
+
+	FOnCurrentTextureChanged OnCurrentTextureChanged;
+	FOnCurrentTextureChanged OnHighlightChanged;
 	// ====================================================
 
 private:
@@ -119,7 +126,6 @@ private:
 	// Highlight
 	UTexture2D* HighlightTexture = nullptr;
 	
-
 	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;
 
 	struct FMapPreview
