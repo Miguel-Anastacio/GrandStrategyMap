@@ -107,11 +107,12 @@ FProperty* UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName(const UStru
 {
 	if(!Struct)
 		return nullptr;
-	
+
+	const FString DisplayString = DisplayName.ToString();
 	for (FProperty* DisplayProperty = Struct->PropertyLink; DisplayProperty != nullptr; DisplayProperty = DisplayProperty->PropertyLinkNext)
 	{
 		const FString StaticPropertyName = DisplayProperty->GetName();
-		if (StaticPropertyName.Contains(DisplayName.ToString()))
+		if (StaticPropertyName.Contains(DisplayString))
 		{
 			return DisplayProperty;
 		}
@@ -175,7 +176,7 @@ TArray<const FProperty*> UAtkStructUtilsFunctionLibrary::GetOrderedProperties(co
 	OrderedProperties.Append(ParentProperties);
 	OrderedProperties.Append(ChildProperties);
 
-	// Put ID property at the beggining
+	// Put ID property at the beginning
 	for (int32 i = 0; i < OrderedProperties.Num(); ++i)
 	{
 		const FProperty* IDProp = ParentProperties[i];

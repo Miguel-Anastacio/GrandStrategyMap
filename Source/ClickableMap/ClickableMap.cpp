@@ -9,7 +9,8 @@ void FShaderBitsModule::StartupModule()
 {
 	//#if (ENGINE_MINOR_VERSION >= 21)
 	FString ShaderDirectory = FPaths::Combine(FPaths::ProjectDir(), TEXT("Shaders")); // add this!
-	AddShaderSourceDirectoryMapping("/Project", ShaderDirectory);
+	
+	// AddShaderSourceDirectoryMapping("/Project", ShaderDirectory);
 	//#endif
 
 }

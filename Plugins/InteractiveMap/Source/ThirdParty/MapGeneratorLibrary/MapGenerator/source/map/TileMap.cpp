@@ -344,6 +344,7 @@ namespace MapGenerator
 
 	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
 	{
+		// TODO - Fix this
 		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
 		forEachTile([&](const Tile& tile, unsigned bufferIndex)
 		{

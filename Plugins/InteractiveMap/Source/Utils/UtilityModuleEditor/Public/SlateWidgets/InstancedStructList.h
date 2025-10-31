@@ -196,7 +196,17 @@ public:
                 }
             }
         }
-
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
+        ListView = SNew(SListView<TSharedPtr<FInstancedStruct>>)
+               .ListItemsSource(List)
+               .OnGenerateRow(this, &SInstancedStructList::OnGenerateRow)
+               .OnSelectionChanged(this, &SInstancedStructList::HandleSelectionChanged)
+               .OnMouseButtonDoubleClick(this, &SInstancedStructList::HandleMouseButtonDoubleClick)
+               .OnContextMenuOpening(this, &SInstancedStructList::HandleContextMenuOpening)
+               .SelectionMode(ESelectionMode::Multi)
+               .HeaderRow(HeaderRow);
+        
+#else
         ListView = SNew(SListView<TSharedPtr<FInstancedStruct>>)
                        .ItemHeight(20.0f)
                        .ListItemsSource(List)
@@ -206,7 +216,7 @@ public:
                        .OnContextMenuOpening(this, &SInstancedStructList::HandleContextMenuOpening)
                        .SelectionMode(ESelectionMode::Multi)
                        .HeaderRow(HeaderRow);
-
+#endif
         // construct the list view
         ChildSlot.AttachWidget(ListView.ToSharedRef());
     }
