@@ -3,7 +3,6 @@
 #include "Map/ClickableMap.h"
 #include "InteractiveMap.h"
 #include "MapObject.h"
-#include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
 #include "UI/Widgets/CustomButtonWidget.h"
@@ -64,31 +63,23 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 	AssetGridPanel->ClearChildren();
 	AssetGridPanel->Modify();
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
-	TArray<FVisualPropertyType*> PropTypes;
-	if(UAtkDataManagerFunctionLibrary::ReadDataTableToArray(MapObject->GetVisualPropertyTypes(), PropTypes))
+	int RowIndex = 0;
+	int ColumnIndex = 0;
+	for(const auto& Property : MapObject->GetVisualProperties())
 	{
-		int RowIndex = 0;
-		int ColumnIndex = 0;
-		for(const auto& Type : PropTypes)
+		if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*MapModeSelectButton))
 		{
-			if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*MapModeSelectButton))
+			NewWidget->Rename(*(Property->Name));
+			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
+			ColumnIndex++;
+			if(ColumnIndex >= Columns)
 			{
-				NewWidget->Rename(*(Type->Type.ToString()));
-				AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
-				ColumnIndex++;
-				if(ColumnIndex >= Columns)
-				{
-					ColumnIndex = 0;
-					RowIndex++;
-				}
+				ColumnIndex = 0;
+				RowIndex++;
 			}
 		}
 	}
-	else
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Map Object Visual Property Types are Null"));
-		return;
-	}
+	
 
 	AssetGridPanel->Modify();
 	MainAsset->Modify();

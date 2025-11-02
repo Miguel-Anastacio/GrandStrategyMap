@@ -27,7 +27,7 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		return;
 	
 	const FName PropertyName =  PropertyChangedEvent.Property->GetFName();
-
+	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
 		if(ValidateStructChange(StructType, StructTypePrevious))
@@ -40,21 +40,6 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		if(ValidateStructChange(OceanStructType, OceanStructTypePrevious))
 		{
 			ProcessStructChange(OceanStructType, OceanStructTypePrevious);
-		}
-	}
-	
-	if(PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertiesDT))
-	{
-		if(VisualPropertyTypesDT)
-		{
-			ReadDataTables();
-		}
-	}
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, VisualPropertyTypesDT))
-	{
-		if(VisualPropertiesDT)
-		{
-			ReadDataTables();
 		}
 	}
 	
@@ -82,7 +67,11 @@ void UMapObject::SetLastMapGen(const TSharedPtr<MapGenerator::Map>& MapGen)
 
 UTexture2D* UMapObject::GetRootTexture() const
 {
-	return OriginTexture;
+	if (!OriginTexture.Get())
+	{
+		return OriginTexture.LoadSynchronous();
+	}
+	return OriginTexture.Get();
 }
 
 void UMapObject::SetRootTexture(UTexture2D* texture)
@@ -119,8 +108,15 @@ void UMapObject::IncrementCounter()
 	Counter++;
 }
 
+// Lag probably due to this
 void UMapObject::SerializeMap(FArchive& Ar)
 {
+	// Skip serialization during editor operations that don't need it
+	if (Ar.IsTransacting() || Ar.IsPersistent() == false)
+	{
+		return; // Don't serialize during undo/redo or temporary operations
+	}
+	
 	int32 Version = 2;
 	Ar << Version;
 
@@ -239,62 +235,37 @@ void UMapObject::Serialize(FArchive& Ar)
 }
 
 
-const TMap<FVisualPropertyType, FArrayOfVisualProperties>& UMapObject::GetVisualPropertiesMap() const
+TArray<TObjectPtr<UVisualProperty>> UMapObject::GetVisualProperties()
 {
-	return VisualPropertiesMap;
-}
-
-TMap<FName, FArrayOfVisualProperties> UMapObject::GetVisualPropertyNameMap() const
-{
-	TMap<FName, FArrayOfVisualProperties> VisualPropertiesNameMap;
-	for(auto& VpType : VisualPropertiesMap)
+	if(VisualPropertyInstances.IsEmpty())
 	{
-		VisualPropertiesNameMap.Emplace(VpType.Key.Type, VpType.Value);		
+		for(const TSubclassOf<UVisualProperty> VisualPropertyClass : VisualProperties)
+		{
+			if (UVisualProperty* Instance = NewObject<UVisualProperty>(this, VisualPropertyClass))
+			{
+				VisualPropertyInstances.Add(Instance);
+			}
+		}
 	}
-	return VisualPropertiesNameMap;
+	return VisualPropertyInstances;
 }
 
 FColor UMapObject::GetPropertyColorFromInstancedStruct(const FInstancedStruct& InstancedStruct,
                                                        const FName& PropertyName, bool& OutResult) const
 {
-	const FString PropertyValue = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(InstancedStruct, PropertyName.ToString(), OutResult);
-
-	if (!OutResult)
-		return FColor::Black;
-		
-	return GetVisualProperty(PropertyName, FName(*PropertyValue), OutResult).Color;
+	for(const auto& Property : VisualPropertyInstances)
+	{
+		if(Property->Name == PropertyName)
+		{
+			OutResult = true;
+			return Property->GetColorForProperty(InstancedStruct);
+		}
+	}
+	OutResult = false;
+	return FColor::Black;
 }
 
 # if WITH_EDITOR
-void UMapObject::ReadDataTables()
-{
-	if(!VisualPropertiesDT|| !VisualPropertyTypesDT)
-	{
-		// UE_LOG(LogInteractiveMap, Warning, TEXT("ReadDataTables() failed - null datatables"));
-		return;
-	}
-	
-	VisualPropertiesMap.Empty();	
-	TArray<FVisualPropertyType*> AllTypes;
-	if(UAtkDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertyTypesDT, AllTypes))
-	{
-	}
-	TArray<FVisualProperty*> VisualProperties;
-	UAtkDataManagerFunctionLibrary::ReadDataTableToArray(VisualPropertiesDT, VisualProperties);
-	
-	for(const auto& Type : AllTypes)
-	{
-		FArrayOfVisualProperties ArrayOf;
-		for(const auto& Property : VisualProperties)
-		{
-			if(Type->Type == Property->Type)
-			{
-				ArrayOf.VisualProperties.Emplace(*Property);
-			}
-		}
-		VisualPropertiesMap.Emplace(*Type, ArrayOf);
-	}
-}
 
 void UMapObject::InitLandStructType(UScriptStruct* NewStruct)
 {
@@ -308,83 +279,6 @@ void UMapObject::InitOceanStructType(UScriptStruct* NewStruct)
 	OceanStructTypePrevious = OceanStructType;
 }
 #endif
-
-FVisualProperty UMapObject::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
-}
-
-FVisualProperty UMapObject::GetVisualProperty(const FVisualPropertyType& Type, const FName& Tag, bool& OutResult) const
-{
-	OutResult = false;
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
-	if(!PropertiesOfType)
-	{
-		return FVisualProperty();
-	}
-	
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		if(VisualProperty.Tag == Tag)
-		{
-			OutResult = true;
-			return VisualProperty;
-		}
-	}
-
-	return FVisualProperty();
-}
-
-TArray<FName> UMapObject::GetVisualPropertiesNamesOfType(const FName& Type) const
-{
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
-	if(!PropertiesOfType)
-	{
-		return TArray<FName>();
-	}
-	
-	TArray<FName> Names;
-	Names.Reserve(PropertiesOfType->VisualProperties.Num());
-	for(const FVisualProperty& VisualProperty : PropertiesOfType->VisualProperties)
-	{
-		Names.Emplace(VisualProperty.Tag);	
-	}
-	return Names;
-}
-
-TSet<FName> UMapObject::GetNamesOfVisualPropertiesInMapData() const
-{
-	TSet<FName> Names;
-	Names.Reserve(VisualPropertiesMap.Num());
-	for(const auto& [VpType, Properties] : VisualPropertiesMap)
-	{
-		if(const FProperty* Property = UAtkStructUtilsFunctionLibrary::FindPropertyByDisplayName({OceanStructType, StructType}, VpType.Type))
-		{
-			// check if property is not numeric
-			if(!Property->IsA(FNumericProperty::StaticClass()))
-			{
-				Names.Emplace(VpType.Type);
-			}
-		}
-	}
-	return Names;
-}
 
 bool UMapObject::IsTileOfType(int32 ID, const UScriptStruct* ScriptStruct) const
 {
@@ -445,16 +339,15 @@ void UMapObject::LogMapData() const
 
 void UMapObject::LogVisualProperties() const
 {
-	for(const auto& [PropertyType, Properties] : VisualPropertiesMap)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Property Type %s"), *PropertyType.Type.ToString());
-		for(const auto& Property : Properties.VisualProperties)
-		{
-			UE_LOG(LogTemp, Display, TEXT("%s"), *Property.Tag.ToString());
-		}
-	}
+	// for(const auto& [PropertyType, Properties] : VisualPropertiesMap)
+	// {
+	// 	UE_LOG(LogTemp, Display, TEXT("Property Type %s"), *PropertyType.Type.ToString());
+	// 	for(const auto& Property : Properties.VisualProperties)
+	// 	{
+	// 		UE_LOG(LogTemp, Display, TEXT("%s"), *Property.Tag.ToString());
+	// 	}
+	// }
 }
-
 
 #if WITH_EDITOR
 
@@ -476,7 +369,11 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 
 TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
 {
-	return LookupTexture;
+	if (!LookupTexture.Get())
+	{
+		return LookupTexture.LoadSynchronous();
+	}
+	return LookupTexture.Get();
 }
 
 void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
@@ -567,7 +464,7 @@ TArray<uint8> UMapObject::GetLookupTextureData()
 
 void UMapObject::LoadLookupTextureData()
 {
-	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(GetLookupTexture().Get());
 }
 
 void UMapObject::LoadLookupMap(const FString& FilePath)
@@ -619,10 +516,6 @@ UMaterialInterface* UMapObject::GetMaterialOverride() const
 	return MaterialOverride;
 }
 
-UDataTable* UMapObject::GetVisualPropertyTypes() const
-{
-	return VisualPropertyTypesDT;
-}
 
 void UMapObject::AddTileSelected(int32 ID)
 {

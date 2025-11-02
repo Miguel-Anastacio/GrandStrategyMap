@@ -152,10 +152,8 @@ void AClickableMap::BeginPlay()
 
 void AClickableMap::CreateMapModes()
 {
-	TArray<FVisualPropertyType> Types;
-	MapAsset->GetVisualPropertiesMap().GetKeys(Types);
-	CreateDynamicTextures(Types);
-	FillDynamicTextures(MapAsset->GetVisualPropertyNameMap(), MapAsset->GetLookupTextureData());
+	CreateDynamicTextures(MapAsset->GetVisualProperties());
+	FillDynamicTextures(MapAsset->GetLookupTextureData());
 }
 
 void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)
@@ -164,9 +162,9 @@ void AClickableMap::UpdateTileData(const FInstancedStruct& Data, int ID)
 	MapTileChangedDelegate.Broadcast({ID});
 }
 
-void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& VisualPropertyTypes)
+void AClickableMap::CreateDynamicTextures(const TArray<TObjectPtr<UVisualProperty>>& VisualPropertyTypes)
 {
-	MapLookUpTexture = MapAsset->LookupTexture;
+	MapLookUpTexture = MapAsset->GetLookupTexture().Get();
 	if(!MapLookUpTexture)
 		return;
 	const int32 Width = MapLookUpTexture->GetSizeX();
@@ -177,13 +175,13 @@ void AClickableMap::CreateDynamicTextures( const TArray<FVisualPropertyType>& Vi
 	{
 		UDynamicTexture* DynamicTexture = NewObject<UDynamicTexture>();
 		DynamicTexture->InitializeDynamicTexture(Width, Height);
-		DynamicTexture->InitMaterial(UMaterialInstanceDynamic::Create(VisualPropertyType.MaterialInstance, this),
+		DynamicTexture->InitMaterial(UMaterialInstanceDynamic::Create(VisualPropertyType->GetMaterial(), this),
 										MapLookUpTexture, 1.0f);
-		MapModeDynamicTextures.Emplace(VisualPropertyType.Type, DynamicTexture);
+		MapModeDynamicTextures.Emplace(VisualPropertyType->Name, DynamicTexture);
 	}
 }
 
-void AClickableMap::FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties>& VisualProperties, const TArray<uint8>& LookupTextureData)
+void AClickableMap::FillDynamicTextures(const TArray<uint8>& LookupTextureData)
 {
 	FillPixelMap();
 	const int32 Width = MapLookUpTexture->GetSizeX();
@@ -364,7 +362,7 @@ void AClickableMap::LoadMapAsset(UMapObject* MapObject)
 		UE_LOG(LogInteractiveMap, Error, TEXT("Map Object is NULL, please provide a Map Object"));
 		return;
 	}
-	MapLookUpTexture = MapObject->LookupTexture;
+	MapLookUpTexture = MapObject->GetLookupTexture().Get();
 	MapColorCodeTextureData = MapObject->GetLookupTextureData();
 	
 	// Load Data

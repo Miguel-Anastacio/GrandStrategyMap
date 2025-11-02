@@ -12,7 +12,6 @@
 #include "VisualProperties.h"
 #include "ClickableMap.generated.h"
 
-struct FArrayOfVisualProperties;
 class UDynamicTexture;
 class UMapObject;
 class UTextureRenderTarget2D;
@@ -132,8 +131,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Map Data")
 	void UpdateTileData(const FInstancedStruct &Data, int ID);
 
-	void CreateDynamicTextures(const TArray<FVisualPropertyType> &VisualPropertyTypes);
-	void FillDynamicTextures(const TMap<FName, FArrayOfVisualProperties> &VisualProperties, const TArray<uint8> &LookupTextureData);
+	void CreateDynamicTextures(const TArray<TObjectPtr<UVisualProperty>>& VisualPropertyTypes);
+	void FillDynamicTextures(const TArray<uint8> &LookupTextureData);
 
 	void MarkPixelsToEdit(TArray<uint8> &PixelBuffer, const TArray<int> &IDs, uint8 MarkerValue) const;
 	// #endif

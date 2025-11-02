@@ -84,7 +84,10 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 			TempPreviews.Pop();
 		}
 		TempMapGenerator = GetLastMapCreated();
-		UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
+		if(TempMapGenerator)
+		{
+			UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
+		}
 		PreviewRootTexture = GetLastRootTexture();
 		UpdateCurrentTexture(GetLookupTexture());
 		RestoreTexturePreview();

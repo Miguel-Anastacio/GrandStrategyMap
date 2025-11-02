@@ -56,6 +56,7 @@ FString UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(const
 	
 	if(const FProperty* Property = FindPropertyByDisplayName(InstancedStruct.GetScriptStruct(), FName(*PropertyName)))
 	{
+		OutResult = true;
 		return GetPropertyValueAsString(Property, InstancedStruct.GetMemory());
 	}
 	

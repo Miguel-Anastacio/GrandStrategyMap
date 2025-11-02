@@ -39,25 +39,6 @@ public:
     SLATE_END_ARGS()
 
 public:
-    virtual TSharedRef<SWidget> DisplayDropdownProperty(const FProperty *Property)
-    {
-        const TArray<FName> AvailableTagsOfType = MapObject->GetVisualPropertiesNamesOfType(Property->GetFName());
-        return SNew(SBox)
-            .Padding(FMargin(4.0f, 0.0f))
-            .VAlign(VAlign_Center)
-                [SNew(SDropDownSelectorWidget)
-                     .AvailableTags(AvailableTagsOfType)
-                     .OnTagChanged_Lambda([this](const FName &Name, const FName &NewTag)
-                                          {
-                                             if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
-                                             {
-                                                 ItemChanged.ExecuteIfBound(*Item);
-                                             }
-                                          })
-                     .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-                     .PropertyName(Property->GetFName())];
-    }
-
     void Construct(const FArguments &InArgs, const TSharedRef<STableViewBase> &InOwnerTableView)
     {
         if (InArgs._PropertiesNotEditable)

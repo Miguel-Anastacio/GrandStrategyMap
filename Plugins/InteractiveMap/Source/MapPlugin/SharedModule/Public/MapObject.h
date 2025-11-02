@@ -108,16 +108,6 @@ struct FPopulation : public FBaseMapStruct
 	FName Culture = "BRA";
 };
 
-UENUM(BlueprintType)
-enum class EClimate : uint8
-{
-	Arctic,
-	Desert,
-	Jungle,
-	Swamp,
-	Savana,
-};
-
 USTRUCT(BlueprintType)
 struct FComplexMapDataStruct : public FBaseMapStruct
 {
@@ -202,7 +192,6 @@ public:
 	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
 	UMaterialInterface* GetMaterialOverride() const;
 
-	UDataTable* GetVisualPropertyTypes() const;
 
 	void AddTileSelected(int32 ID);
 	void AddTilesSelected(const TArray<int32>& IDs);
@@ -214,7 +203,6 @@ public:
 	void ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	void ReadDataTables();
 
 	void InitLandStructType(UScriptStruct* NewStruct);
 	void InitOceanStructType(UScriptStruct* NewStruct);
@@ -276,27 +264,22 @@ public:
 #endif
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Lookup")
-	class UTexture2D *LookupTexture;
+	TSoftObjectPtr<UTexture2D> LookupTexture;
 
-	const TMap<FVisualPropertyType, FArrayOfVisualProperties> &GetVisualPropertiesMap() const;
-	TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
+	TArray<TObjectPtr<UVisualProperty>> GetVisualProperties();
 
 	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
-	FVisualProperty GetVisualProperty(const FName &Type, const FName &Tag, bool &OutResult) const;
-	FVisualProperty GetVisualProperty(const FVisualPropertyType &Type, const FName &Tag, bool &OutResult) const;
 
-	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
-	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
-	
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 #if WITH_EDITOR
 	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
 #endif
-	
-	UPROPERTY()
-	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
 
+	UPROPERTY(EditAnywhere, Category="Visual Property")
+	TArray<TSubclassOf<UVisualProperty>> VisualProperties;
+	UPROPERTY()
+	TArray<TObjectPtr<UVisualProperty>> VisualPropertyInstances;
 	UPROPERTY()
 	TMap<int32, FInstancedStruct> MapData;
 
@@ -312,13 +295,6 @@ private:
 	TArray<uint8> LookupTextureData;
 
 #if WITH_EDITORONLY_DATA
-	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
-	UDataTable *VisualPropertyTypesDT;
-
-	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
-	class UDataTable *VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
 	UPROPERTY(VisibleAnywhere, Category = "Debug")
 	class UMaterialInterface *MaterialOverride;
@@ -330,7 +306,7 @@ private:
 	
 	// Used for Map Editor
 	UPROPERTY()
-	UTexture2D* OriginTexture;
+	TSoftObjectPtr<UTexture2D> OriginTexture;
 
 	UPROPERTY()
 	FMapGenParams LastParamsUsedGen;
