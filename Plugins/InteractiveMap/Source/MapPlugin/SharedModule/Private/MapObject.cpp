@@ -295,6 +295,18 @@ void UMapObject::ReadDataTables()
 		VisualPropertiesMap.Emplace(*Type, ArrayOf);
 	}
 }
+
+void UMapObject::InitLandStructType(UScriptStruct* NewStruct)
+{
+	StructType = NewStruct;
+	StructTypePrevious = StructType;
+}
+
+void UMapObject::InitOceanStructType(UScriptStruct* NewStruct)
+{
+	OceanStructType = NewStruct;
+	OceanStructTypePrevious = OceanStructType;
+}
 #endif
 
 FVisualProperty UMapObject::GetVisualProperty(const FName& Type, const FName& Tag, bool& OutResult) const
@@ -341,7 +353,7 @@ FVisualProperty UMapObject::GetVisualProperty(const FVisualPropertyType& Type, c
 
 TArray<FName> UMapObject::GetVisualPropertiesNamesOfType(const FName& Type) const
 {
-	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(Type);
+	const FArrayOfVisualProperties* PropertiesOfType = VisualPropertiesMap.Find(FVisualPropertyType(Type));
 	if(!PropertiesOfType)
 	{
 		return TArray<FName>();
@@ -459,7 +471,7 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 		return;
 
 	LookupTexture = Texture2D;
-	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
+	LoadLookupTextureData();
 }
 
 TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
@@ -544,9 +556,18 @@ FInstancedStruct* UMapObject::GetTileData(int32 ID)
 	return  MapData.Find(ID);
 }
 
-FColor UMapObject::GetColorFromUv(const FVector2D& Uv) const 
+TArray<uint8> UMapObject::GetLookupTextureData()
 {
-	return UAtkTextureUtilsFunctionLibrary::GetColorFromUV(LookupTexture, Uv, LookupTextureData);
+	if(LookupTextureData.IsEmpty())
+	{
+		LoadLookupTextureData();
+	}
+	return LookupTextureData;
+}
+
+void UMapObject::LoadLookupTextureData()
+{
+	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture);
 }
 
 void UMapObject::LoadLookupMap(const FString& FilePath)
@@ -666,7 +687,7 @@ bool UMapObject::ValidateStructChange(const UScriptStruct* NewStruct, const UScr
 	return true;
 }
 
-void UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
+void UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)	
 {
 	// replace all data that used this struct type with the new data
 	const FText Title = FText::FromString(TEXT("Struct Type Replacing"));

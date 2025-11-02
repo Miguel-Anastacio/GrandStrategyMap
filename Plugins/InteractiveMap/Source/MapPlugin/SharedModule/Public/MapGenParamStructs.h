@@ -12,10 +12,10 @@ struct SHAREDMODULE_API FMapDetails
 	// Number of tiles that the algorithm will try to create the actual number might be lower or higher
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=1, ClampMax=100000), Category = "Map Details")
 	int32 NumberOfTiles = 10;
-	// seed to randomize starting tile centroids
+	// Seed to randomize starting tile centroids
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Map Details")
 	int32 Seed = 10;
-	// lloyd iterations performed to the voronoi diagram
+	// Lloyd iterations performed to the voronoi diagram
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=20), Category = "Map Details")
 	int32 LloydIteration = 10;
 	// How far around the algo will search for a neighbouring tile before adding a new one
@@ -27,19 +27,20 @@ USTRUCT(BlueprintType)
 struct SHAREDMODULE_API FNoiseDetails
 {
 	GENERATED_BODY()
+	// Seed for noise
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Noise Details")
 	int32 Seed = 12002943;
-
+	// Number of Octaves
 	UPROPERTY(BlueprintReadWrite, EditAnywhere,meta=(ClampMin=0, ClampMax=16), Category = "Noise Details")
 	int32 Octaves = 4;
-	
+	// Frequency of noise
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=1), Category = "Noise Details")
 	float Frequency = 0.05f;
-
+	// Amplitude of noise
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0.5, ClampMax=3), Category = "Noise Details")
 	float Scale = 1.0f;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Noise Details")
+	// UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Noise Details")
 	float Lacunarity = 2.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin=0, ClampMax=7), Category = "Noise Details")

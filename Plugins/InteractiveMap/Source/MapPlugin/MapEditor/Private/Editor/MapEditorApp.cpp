@@ -141,7 +141,7 @@ void FMapEditorApp::SaveAsset_Execute()
 	FWorkflowCentricApplication::SaveAsset_Execute();
 }
 
-// TODO - add comments or some sort of sigfincance describing each step of map gen
+// TODO - add comments or some sort of significance describing each step of map gen
 void FMapEditorApp::GenerateMap()
 {
 	bool UserProvidedBorders = false;
@@ -456,8 +456,8 @@ void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Te
 
 	if(MapGenPreset && MapGenPreset->TileDataStructType && MapGenPreset->OceanTileDataType)
 	{
-		MapObject->StructType = MapGenPreset->TileDataStructType;
-		MapObject->OceanStructType = MapGenPreset->OceanTileDataType;
+		MapObject->InitLandStructType(MapGenPreset->TileDataStructType);
+		MapObject->InitOceanStructType(MapGenPreset->OceanTileDataType);
 		MapObject->SetMapDataFilePath(MapDataFilePath);
 	}
 	MapObject->PostEditChange();

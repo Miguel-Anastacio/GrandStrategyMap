@@ -191,7 +191,7 @@ public:
                     const FName PropertyName(PropertyNameText.ToString());
                     if (!HeaderRow->IsColumnVisible(PropertyName))
                     {
-                        HeaderRow->AddColumn(SHeaderRow::Column(PropertyName).DefaultLabel(PropertyNameText));
+                        HeaderRow->AddColumn(SHeaderRow::Column(PropertyName).DefaultLabel(PropertyNameText).ManualWidth(100.0f));
                     }
                 }
             }

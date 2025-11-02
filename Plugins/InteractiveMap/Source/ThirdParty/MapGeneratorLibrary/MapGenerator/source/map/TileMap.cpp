@@ -381,7 +381,7 @@ namespace MapGenerator
 	{
 		if(borderBuffer.size() != m_tiles.size() * 4)
 		{
-			std::cout << "border does not match tile size\n";
+			// std::cout << "border does not match tile size\n";
 			return;
 		}
 

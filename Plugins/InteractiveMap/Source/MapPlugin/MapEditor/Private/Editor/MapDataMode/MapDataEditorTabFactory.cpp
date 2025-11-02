@@ -22,29 +22,40 @@ TSharedRef<SWidget> FMapDataEditorTabFactory::CreateTabBody(const FWorkflowTabSp
 {
 	FMapEditorDataAppMode* appMode = AppMode.Pin().Get();
 	FMapEditorApp* app = App.Pin().Get();
-	return SAssignNew(appMode->EditableStructListDisplay, SCustomInstancedStructList)
+
+	return SNew(SScrollBox)
+		.Orientation(Orient_Horizontal)
+		.OnUserScrolled_Lambda([](float ScrollOffset) 
+		{
+		// Don't do anything - effectively disables programmatic scrolling from mouse wheel
+		})
+		.ConsumeMouseWheel(EConsumeMouseWheel::Never)
+		+ SScrollBox::Slot()
+		[
+		SAssignNew(appMode->EditableStructListDisplay, SCustomInstancedStructList)
 		.ListSource(&appMode->MyListItems)
 		.StructTypes(&appMode->StructTypes)
 		.NotEditableProperties(&appMode->PropertyNamesNotEditable)
 		.PropertiesWithDropdown(&appMode->PropertiesWithDropDown)
-		.MapObject(app->GetWorkingAsset())	
+		.MapObject(app->GetWorkingAsset())
 		.OnSelectionChanged_Lambda([this, app, appMode](const TArray<int32>& IDs, const ESelectInfo::Type type)
 		{
-			if(IDs.IsEmpty() && type == ESelectInfo::Type::OnMouseClick)
-			{
-				app->GetWorkingAsset()->ClearTilesSelected();
-				return;
-			}
-	
-			const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(IDs.Last());
-			appMode->UpdateDataEntryEditor(*Entry, IDs.Last());
-			// on mouse click on list clear tiles selected and update highlight texture
-			if(type == ESelectInfo::Type::OnMouseClick)
-			{
-				app->GetWorkingAsset()->ClearTilesSelected(false);
-				app->GetWorkingAsset()->AddTilesSelected(IDs);
-			}
-		});
+		   if(IDs.IsEmpty() && type == ESelectInfo::Type::OnMouseClick)
+		   {
+			   app->GetWorkingAsset()->ClearTilesSelected();
+			   return;
+		   }
+
+		   const FInstancedStruct* Entry = app->GetWorkingAsset()->GetTileData(IDs.Last());
+		   appMode->UpdateDataEntryEditor(*Entry, IDs.Last());
+		   // on mouse click on list clear tiles selected and update highlight texture
+		   if(type == ESelectInfo::Type::OnMouseClick)
+		   {
+			   app->GetWorkingAsset()->ClearTilesSelected(false);
+			   app->GetWorkingAsset()->AddTilesSelected(IDs);
+		   }
+		})
+		];
 }
 
 FText FMapDataEditorTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

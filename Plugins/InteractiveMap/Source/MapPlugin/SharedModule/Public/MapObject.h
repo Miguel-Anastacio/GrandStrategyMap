@@ -215,9 +215,13 @@ public:
 	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 	void ReadDataTables();
+
+	void InitLandStructType(UScriptStruct* NewStruct);
+	void InitOceanStructType(UScriptStruct* NewStruct);
 #endif
 	
-public:	
+public:
+	
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
@@ -257,12 +261,8 @@ public:
 	{
 		return LookupTable;
 	};
-	const TArray<uint8> &GetLookupTextureData() const
-	{
-		return LookupTextureData;
-	}
-	FColor GetColorFromUv(const FVector2D &Uv) const;
-
+	TArray<uint8> GetLookupTextureData();
+	void LoadLookupTextureData();
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
@@ -293,6 +293,7 @@ private:
 #if WITH_EDITOR
 	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
 #endif
+	
 	UPROPERTY()
 	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
 
@@ -305,13 +306,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Lookup")
 	FString LookupFilePath;
 
-	UPROPERTY()
-	TArray<uint8> LookupTextureData;
-
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
+	
+	TArray<uint8> LookupTextureData;
 
-	// UPROPERTY
 #if WITH_EDITORONLY_DATA
 	/** Data table for visual property types */
 	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))

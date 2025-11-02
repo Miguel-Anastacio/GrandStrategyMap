@@ -23,7 +23,7 @@ namespace MapGenerator
 		static std::vector<mygal::Vector2<T>> generatePoints(int nbPoints)
 		{
 			auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-			std::cout << "seed: " << seed << '\n';
+			// std::cout << "seed: " << seed << '\n';
 			auto generator = std::default_random_engine(seed);
 			auto distribution = std::uniform_real_distribution<T>(0.0, 1.0);
 
@@ -36,7 +36,7 @@ namespace MapGenerator
 		template <typename T>
 		static std::vector<mygal::Vector2<T>> generatePoints(int nbPoints, int seedValue)
 		{
-			std::cout << "seed: " << seedValue << '\n';
+			// std::cout << "seed: " << seedValue << '\n';
 			auto generator = std::default_random_engine(seedValue);
 			auto distribution = std::uniform_real_distribution<T>(0.0, 1.0);
 
@@ -51,7 +51,7 @@ namespace MapGenerator
 		static std::vector<mygal::Vector2<T>> generatePointsConstrained(int nbPoints, int seedValue, bool state, const Mask &mask)
 		{
 			// Timer
-			std::cout << "seed: " << seedValue << '\n';
+			// std::cout << "seed: " << seedValue << '\n';
 			std::default_random_engine generator(seedValue);
 			std::uniform_real_distribution<T> distribution(0.0, 1.0);
 
@@ -226,13 +226,13 @@ namespace MapGenerator
 
 			if (totalWeight > 0 && pointInside)
 			{
-				std::cout << "Point in face and mask, weight: "<< totalWeight << std::endl;
+				// std::cout << "Point in face and mask, weight: "<< totalWeight << std::endl;
 				return weightedCentroid / totalWeight;
 			}
 
 			// Fallback: return closest valid point to original centroid
 			auto originalCentroid = mygal::Diagram<T>::computeCentroidOfFace(face);
-			std::cout << "Point using fallback" << std::endl;
+			// std::cout << "Point using fallback" << std::endl;
 			return FindNearestValidPoint(originalCentroid, mask);
 		}
 		
