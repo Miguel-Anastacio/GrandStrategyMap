@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../../Map/MapEnums.h"
 #include "GrandStrategyHUDWidget.generated.h"
 
 /**

@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Map/MapEnums.h"
 #include "Components/SceneComponent.h"
 #include "MapVisualComponent.generated.h"
 
@@ -53,10 +52,6 @@ public:
     /** Updates the mesh material. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
     void UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat);
-
-    /** Gets the mesh component for a specific map mode. */
-    UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    virtual UStaticMeshComponent* GetMeshComponent(MapMode mode);
 
     /** Gets the map select mesh component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")

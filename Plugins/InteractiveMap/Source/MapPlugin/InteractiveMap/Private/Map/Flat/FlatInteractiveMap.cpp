@@ -32,7 +32,7 @@ void AFlatInteractiveMap::InitializeMap_Implementation()
 {
 	Super::InitializeMap_Implementation();
 	LeftMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
-	if (!MapLookUpTexture)
+	if (!GetLookupTexture())
 		return;
 	RightMapLimit->CreateVisualComponent(MapVisualComponent->GetClass());
 
@@ -64,10 +64,6 @@ void AFlatInteractiveMap::InitializeMap_Implementation()
 }
 
 UE_ENABLE_OPTIMIZATION
-void AFlatInteractiveMap::SetMapMode_Implementation(const FName& Mode )
-{
-	Super::SetMapMode_Implementation(Mode);
-}
 
 void AFlatInteractiveMap::UpdateLimits()
 {

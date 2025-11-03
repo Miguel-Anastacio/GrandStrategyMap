@@ -56,12 +56,6 @@ void UCombinedMapVisualComponent::UpdateVisualComponent(UMapVisualComponent* map
     SetMeshProperties(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
 }
 
-
-UStaticMeshComponent* UCombinedMapVisualComponent::GetMeshComponent(MapMode mode)
-{
-    return GameplayMapMesh;
-}
-
 UStaticMeshComponent* UCombinedMapVisualComponent::GetMapSelectMeshComponent()
 {
     return MapSelectMesh;

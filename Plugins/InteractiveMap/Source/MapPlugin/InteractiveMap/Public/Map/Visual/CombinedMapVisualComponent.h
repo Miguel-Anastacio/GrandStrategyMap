@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Map/MapEnums.h"
 #include "Map/MapVisualComponent.h"
 #include "CombinedMapVisualComponent.generated.h"
 
@@ -27,16 +26,14 @@ class INTERACTIVEMAP_API UCombinedMapVisualComponent : public UMapVisualComponen
     UCombinedMapVisualComponent();
 
     /** Attaches meshes to the root component. */
-    void AttachMeshes(USceneComponent* root) override;
+    virtual void AttachMeshes(USceneComponent* root) override;
     virtual void AttachMeshesOutsideConstructor(USceneComponent* root) override;
 
     /** Initializes the visual component from an original one. */
-    void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual) override;
+    virtual void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual) override;
 
     virtual void UpdateVisualComponent(UMapVisualComponent* mapVisual) override;
-
-    /** Gets the mesh component for a specific map mode. */
-    UStaticMeshComponent* GetMeshComponent(MapMode mode) override;
+    
     /** Gets the map select mesh component. */
     UStaticMeshComponent* GetMapSelectMeshComponent() override;
 

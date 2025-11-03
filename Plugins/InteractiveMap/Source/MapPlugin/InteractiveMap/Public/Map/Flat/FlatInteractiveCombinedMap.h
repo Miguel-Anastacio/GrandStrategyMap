@@ -19,16 +19,6 @@ public:
 	AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
 	virtual void SetMapMode_Implementation(const FName& mode) override;
 	virtual void InitializeMap_Implementation() override;
-	//virtual void UpdateProvinceHovered(const FColor& color) override;
-
-protected:
-	//void InitializeMap() override;
-
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UTexture2D> TerrainTexture;
-
-	//UPROPERTY(BlueprintReadWrite, Category = "Texture")
-	//UMaterialInstanceDynamic* TerrainDynamicMaterial;
 
 };
 

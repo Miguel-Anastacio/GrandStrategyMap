@@ -83,11 +83,6 @@ void UMapVisualComponent::UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate,
     meshToUpdate->SetMaterial(0, mat);
 }
 
-UStaticMeshComponent* UMapVisualComponent::GetMeshComponent(MapMode mode)
-{
-    return nullptr;
-}
-
 UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
 {
     return nullptr;

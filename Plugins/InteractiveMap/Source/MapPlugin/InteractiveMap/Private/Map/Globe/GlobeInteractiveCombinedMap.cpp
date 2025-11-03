@@ -4,6 +4,7 @@
 #include "Map/DynamicTextureComponent.h"
 #include "Kismet/KismetRenderingLibrary.h"
 #include "InteractiveMap.h"
+#include "MapObject.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Components/StaticMeshComponent.h"
@@ -17,33 +18,6 @@ AGlobeInteractiveCombinedMap::AGlobeInteractiveCombinedMap(const FObjectInitiali
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Script/Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_PoliticalMapWithTerrain.MI_PoliticalMapWithTerrain'"));
 	if (MaterialFinder.Succeeded())
 		GameplayMapMaterial = MaterialFinder.Object;
-}
-
-void AGlobeInteractiveCombinedMap::SetMapMode_Implementation(const FName& mode)
-{
-	Super::SetMapMode_Implementation(mode);
-	UStaticMeshComponent* mesh = MapVisualComponent->GetMapGameplayMeshComponent();
-	// switch (mode)
-	// {
-	// case MapMode::POLITICAL:
-	//
-	// 	break;
-	// case MapMode::RELIGIOUS:
-	//
-	// 	break;
-	// case MapMode::CULTURAL:
-	//
-	// 	break;
-	// case MapMode::TERRAIN:
-	//
-	// 	if (mesh)
-	// 	{
-	// 		mesh->SetMaterial(0, TerrainDynamicMaterial);
-	// 	}
-	// 	break;
-	// default:
-	// 	break;
-	// }
 }
 
 void AGlobeInteractiveCombinedMap::InitializeMap_Implementation()
@@ -63,7 +37,7 @@ void AGlobeInteractiveCombinedMap::InitializeMap_Implementation()
 
 
 	BorderDynamicMaterial = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-	BorderDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapLookUpTexture);
+	BorderDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapAsset->GetLookupTexture().Get());
 
 	BorderMaterialRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 2048, 1024, ETextureRenderTargetFormat::RTF_RGBA8, FLinearColor::White);
 	UpdateBorder(BorderDynamicMaterial, BorderMaterialRenderTarget);
