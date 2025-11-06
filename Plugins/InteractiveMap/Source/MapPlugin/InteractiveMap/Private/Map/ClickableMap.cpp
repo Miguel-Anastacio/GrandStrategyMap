@@ -135,6 +135,12 @@ void AClickableMap::InitializeMap_Implementation()
 		Player->SetInteractiveMap(this);
 	}
 }
+
+UMapObject* AClickableMap::GetMapObject() const
+{
+	return MapAsset;
+}
+
 // Called when the game starts or when spawned
 void AClickableMap::BeginPlay()
 {
@@ -216,7 +222,7 @@ void AClickableMap::MarkPixelsToEdit(TArray<uint8>& PixelBuffer, const TArray<in
 	}
 }
 
-TObjectPtr<UTexture2D> AClickableMap::GetLookupTexture() const
+UTexture2D* AClickableMap::GetLookupTexture() const
 {
 	return MapAsset->GetLookupTexture().Get();
 }
@@ -224,12 +230,6 @@ TObjectPtr<UTexture2D> AClickableMap::GetLookupTexture() const
 TArray<uint8> AClickableMap::GetLookupTextureData() const
 {
 	return MapAsset->GetLookupTextureData();
-}
-
-// Called every frame
-void AClickableMap::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 TMap<FColor, int> AClickableMap::GetLookUpTable() const

@@ -29,8 +29,6 @@ protected:
     UFUNCTION()
     void SetMapMode(UCustomButtonWidget* ButtonWidget);
 protected:
-    // UPROPERTY(EditAnywhere)
-    // uint8 Rows = 10;
     UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
     uint8 Columns = 5;
 

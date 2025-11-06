@@ -15,9 +15,6 @@
 AFlatInteractiveCombinedMap::AFlatInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCombinedMapVisualComponent>(TEXT("Map Visual")))
 {
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Script/Engine.MaterialInstanceConstant'/InteractiveMap/GSMap/InteractiveMap/Material/Instances/MI_PoliticalMapWithTerrain.MI_PoliticalMapWithTerrain'"));
-	if (MaterialFinder.Succeeded())
-		GameplayMapMaterial = MaterialFinder.Object;
 }
 
 void AFlatInteractiveCombinedMap::SetMapMode_Implementation(const FName& mode)

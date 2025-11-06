@@ -23,38 +23,18 @@ protected:
 	/** Native initialization override. */
 	virtual void NativeOnInitialized() override;
 
-	/** Sets the map mode based on the clicked button. */
-	UFUNCTION()
-	void SetMapMode(UCustomButtonWidget* button);
-
 	/** Saves the data to JSON format based on the clicked button. */
 	UFUNCTION()
 	void SaveDataToJson(UCustomButtonWidget* button);
 
 protected:
-	/** Button for saving general data. */
+	/** Widget to handle map mode selection */
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
 
 	/** Button for saving general data. */
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<UCustomButtonWidget> SaveDataButton;
-
-	/** Button for saving country-specific data. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> SaveCountryButton;
-
-	/** The directory path for saving province data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString DirectoryPath = FString("\\MapDataFiles\\");
-
-	/** The filename for saving province data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileName = FString("ProvinceCustom.json");
-
-	/** The filename for saving country data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileNameCountry = FString("CountryCustom.json");
 
 	/** Reference to the interactive map. */
 	UPROPERTY()

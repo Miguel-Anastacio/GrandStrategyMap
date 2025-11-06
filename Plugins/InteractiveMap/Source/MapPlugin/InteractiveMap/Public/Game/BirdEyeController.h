@@ -56,16 +56,24 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction *OpenCountryEditorAction;
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    // Debug actions
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input| Debug", meta = (AllowPrivateAccess = "true"))
     UInputAction *DisplayLookupTextureAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input| Debug", meta = (AllowPrivateAccess = "true"))
+    UInputAction *LogMapDataAction;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input| Debug", meta = (AllowPrivateAccess = "true"))
+    UInputAction *LogMapLookupTableAction;
 #endif
 
+    // Delegate that is broadcast whenever the user clicks on a tile
     UPROPERTY(BlueprintAssignable)
     FOnProvinceClickedSignature ProvinceClickedDelegate;
 
+    // Delegate that is broadcast whenever the user hovers tile
     UPROPERTY(BlueprintAssignable)
     FOnProvinceHoveredSignature ProvinceHoveredDelegate;
 
+    // Delegate that is broadcast whenever the user clicks on the map but not in any tile
     UPROPERTY(BlueprintAssignable)
     FOnMapClickedSignature MapClickedDelegate;
 
@@ -102,8 +110,13 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HighlightProvince(const FColor &Color);
 #if WITH_EDITOR
-    UFUNCTION(BlueprintCallable, Category = "Input Reactions")
+    // Debug helper to display lookup texture at runtime
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions Debug")
     void SetLookupTextureActive();
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions Debug")
+    void LogMapData();
+    UFUNCTION(BlueprintCallable, Category = "Input Reactions Debug")
+    void LogMapLookupTable();
 #endif
 
     class AClickableMap *PerformLineTraceToFindMap(FHitResult &OutHit, bool &OutResultUnderCursor) const;

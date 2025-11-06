@@ -316,7 +316,7 @@ void UMapObject::LogLookupTable() const
 	UE_LOG(LogTemp, Display, TEXT("LookupTable Entries %d"), LookupTable.Num());
 	for(const auto& [Color, ID]: LookupTable)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Key: %s ; ID: %d"), *Color.ToString(), ID);
+		UE_LOG(LogTemp, Display, TEXT("ID: %d Key: %s"), ID,  *Color.ToString());
 	}
 }
 
@@ -326,27 +326,8 @@ void UMapObject::LogMapData() const
 	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
 	for(const auto& [ID, Data] : MapData)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Struct Type %s"), *Data.GetScriptStruct()->GetName());
-		UAtkStructUtilsFunctionLibrary::ForEachProperty(Data, [&](const FProperty* Property)
-		{
-			const FString PropertyName = Property->GetAuthoredName();
-			bool bOutResult = false;
-			UE_LOG(LogTemp, Display, TEXT("Name: %s ; Value: %s"), *PropertyName,
-				*UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bOutResult));
-		});
+		UAtkStructUtilsFunctionLibrary::LogInstancedStruct(Data);
 	}
-}
-
-void UMapObject::LogVisualProperties() const
-{
-	// for(const auto& [PropertyType, Properties] : VisualPropertiesMap)
-	// {
-	// 	UE_LOG(LogTemp, Display, TEXT("Property Type %s"), *PropertyType.Type.ToString());
-	// 	for(const auto& Property : Properties.VisualProperties)
-	// 	{
-	// 		UE_LOG(LogTemp, Display, TEXT("%s"), *Property.Tag.ToString());
-	// 	}
-	// }
 }
 
 #if WITH_EDITOR

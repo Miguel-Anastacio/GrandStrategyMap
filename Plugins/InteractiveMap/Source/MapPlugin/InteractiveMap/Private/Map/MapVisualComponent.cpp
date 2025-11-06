@@ -75,13 +75,6 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     meshToUpdate->SetRelativeScale3D(original->GetRelativeScale3D());
     meshToUpdate->SetMaterial(0, original->GetMaterial(0));
 }
-void UMapVisualComponent::UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat)
-{
-    if (!meshToUpdate)
-        return;
-
-    meshToUpdate->SetMaterial(0, mat);
-}
 
 UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
 {
@@ -98,10 +91,6 @@ UStaticMeshComponent* UMapVisualComponent::GetMapBorderMeshComponent()
     return nullptr;
 }
 
-UStaticMeshComponent* UMapVisualComponent::GetMapTerrainMeshComponent()
-{
-    return nullptr;
-}
 
 FVector UMapVisualComponent::CalculateSizeOfMesh(UStaticMeshComponent* mesh) const
 {

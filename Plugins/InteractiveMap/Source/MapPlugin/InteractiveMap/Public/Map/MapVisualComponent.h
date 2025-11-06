@@ -49,10 +49,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
     void SetMeshProperties(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate);
 
-    /** Updates the mesh material. */
-    UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    void UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat);
-
     /** Gets the map select mesh component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
     virtual UStaticMeshComponent* GetMapSelectMeshComponent();
@@ -64,10 +60,6 @@ public:
     /** Gets the map border mesh component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
     virtual UStaticMeshComponent* GetMapBorderMeshComponent();
-
-    /** Gets the map terrain mesh component. */
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
-    virtual UStaticMeshComponent* GetMapTerrainMeshComponent();
 
     /** Calculates the size of the map. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")

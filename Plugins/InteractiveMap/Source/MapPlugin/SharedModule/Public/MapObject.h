@@ -213,7 +213,6 @@ public:
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
-	void LogVisualProperties() const;
 
 	// Get type of tiles, checks DataStruct used
 	bool IsTileWater(int32 ID) const;

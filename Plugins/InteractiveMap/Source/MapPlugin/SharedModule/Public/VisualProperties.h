@@ -47,7 +47,6 @@ protected:
 		const FString Key = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bResult);
 		if (!bResult)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to get property from struct"));
 			return DefaultColor;
 		}
 		const FColor* Color = Map.Find(Key);
@@ -67,7 +66,6 @@ FColor GetColorForPropertyFromMap(const FInstancedStruct& Data, const TMap<T, FC
 	const T Key = UAtkStructUtilsFunctionLibrary::GetPropertyValueFromStruct<T>(Data, PropertyName, bResult);
 	if (!bResult)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to get property from struct"));
 		return DefaultColor;
 	}
 	const FColor* Color = Map.Find(Key);

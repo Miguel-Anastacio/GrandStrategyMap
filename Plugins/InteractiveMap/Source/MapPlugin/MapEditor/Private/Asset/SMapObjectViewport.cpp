@@ -83,13 +83,6 @@ bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 			MapObject->LogLookupTable();
 		}
 	}
-	if(WasKeyReleased(EventArgs.Key, EKeys::V, EventArgs.Event))
-	{
-		if(MapObject)
-		{
-			MapObject->LogVisualProperties();
-		}
-	}
 	
 	return FEditorViewportClient::InputKey(EventArgs);
 }
