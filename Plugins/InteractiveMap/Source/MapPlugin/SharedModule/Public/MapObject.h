@@ -177,7 +177,7 @@ public:
 	void SaveData() const;
 	void SetLookupTexture(UTexture2D *Texture2D);
 	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
-	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetMapDataFilePath(const FString &FilePath);
 	void SetFilePathMapData(const FString &FilePath);
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	void SetLookupFilePath(const FString &FilePath)
@@ -201,8 +201,8 @@ public:
 	bool IsTileSelected(int32 ID) const;
 
 	void ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
+	bool ValidateStructChange(UScriptStruct* NewStruct, UScriptStruct* OldStruct);
+	bool ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
 
 	void InitLandStructType(UScriptStruct* NewStruct);
 	void InitOceanStructType(UScriptStruct* NewStruct);

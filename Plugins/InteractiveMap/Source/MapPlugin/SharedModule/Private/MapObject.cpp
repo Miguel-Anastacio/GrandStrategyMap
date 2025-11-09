@@ -5,8 +5,8 @@
 #include "BlueprintLibrary/TextureUtilsFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/MiscFunctionLibrary.h"
+#include "SharedModule.h"
 #if WITH_EDITOR
-#include "BlueprintLibrary/FilePickerFunctionLibrary.h"
 #include "UObject/ObjectSaveContext.h"
 #endif
 
@@ -30,20 +30,40 @@ void UMapObject::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, StructType))
 	{
+		bool bSuccess = false;
 		if(ValidateStructChange(StructType, StructTypePrevious))
 		{
-			ProcessStructChange(StructType, StructTypePrevious);
+			bSuccess = ProcessStructChange(StructType, StructTypePrevious);
+		}
+		
+		if(bSuccess)
+		{
+			StructTypePrevious = StructType;
+		}
+		else
+		{
+			StructType = StructTypePrevious;
+			this->PostEditChange();
 		}
 	}
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
+	else if (PropertyName == GET_MEMBER_NAME_CHECKED(UMapObject, OceanStructType))
 	{
+		bool bSuccess = false;
 		if(ValidateStructChange(OceanStructType, OceanStructTypePrevious))
 		{
-			ProcessStructChange(OceanStructType, OceanStructTypePrevious);
+			bSuccess = ProcessStructChange(OceanStructType, OceanStructTypePrevious);
+		}
+		
+		if(bSuccess)
+		{
+			OceanStructTypePrevious = OceanStructType;
+		}
+		else
+		{
+			OceanStructType = OceanStructTypePrevious;
+			this->PostEditChange();
 		}
 	}
-	
-	// SetMapDataFilePath(FilePathMapData);	
 }
 TSharedPtr<MapGenerator::Map> UMapObject::GetMapGen() const
 {
@@ -312,18 +332,18 @@ bool UMapObject::IsStructValid(const UScriptStruct* Struct) const
 
 void UMapObject::LogLookupTable() const
 {
-	UE_LOG(LogTemp, Display, TEXT("Logging %s LookupTable"), *GetName());
-	UE_LOG(LogTemp, Display, TEXT("LookupTable Entries %d"), LookupTable.Num());
+	UE_LOG(LogMapSharedModule, Display, TEXT("Logging %s LookupTable"), *GetName());
+	UE_LOG(LogMapSharedModule, Display, TEXT("LookupTable Entries %d"), LookupTable.Num());
 	for(const auto& [Color, ID]: LookupTable)
 	{
-		UE_LOG(LogTemp, Display, TEXT("ID: %d Key: %s"), ID,  *Color.ToString());
+		UE_LOG(LogMapSharedModule, Display, TEXT("ID: %d Key: %s"), ID,  *Color.ToString());
 	}
 }
 
 void UMapObject::LogMapData() const
 {
-	UE_LOG(LogTemp, Display, TEXT("Logging %s MapData"), *GetName());
-	UE_LOG(LogTemp, Display, TEXT("MapData Entries %d"), MapData.Num());
+	UE_LOG(LogMapSharedModule, Display, TEXT("Logging %s MapData"), *GetName());
+	UE_LOG(LogMapSharedModule, Display, TEXT("MapData Entries %d"), MapData.Num());
 	for(const auto& [ID, Data] : MapData)
 	{
 		UAtkStructUtilsFunctionLibrary::LogInstancedStruct(Data);
@@ -357,14 +377,10 @@ TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
 	return LookupTexture.Get();
 }
 
-void UMapObject::SetMapDataFilePath(const FString& FilePath, bool LoadFromFile)
+void UMapObject::SetMapDataFilePath(const FString& FilePath)
 {
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
-	TArray<FInstancedStruct> StructData;
-	if(LoadFromFile)
-	{
-		StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
-	}
+	const TArray<FInstancedStruct> StructData = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson(FilePathMapData, {StructType, OceanStructType});
 	SetMapData(StructData);
 }
 
@@ -389,6 +405,7 @@ void UMapObject::SetMapData(const TArray<FInstancedStruct>& NewData)
 		}
 	}
 	MapData = DataMap;
+	OnMapDataChanged.ExecuteIfBound();
 }
 #endif
 
@@ -537,17 +554,23 @@ bool UMapObject::IsTileSelected(int32 ID) const
 
 void UMapObject::ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
 {
+	bool Update = false;
 	for(auto& [id, data] : MapData)
 	{
 		if(data.GetScriptStruct() == OldStruct)
 		{
 			data = FInstancedStruct(NewStruct);
 			UAtkStructUtilsFunctionLibrary::SetPropertyValueInStruct(data, FString("ID"), id);
+			Update = true;
 		}
+	}
+	if(Update)
+	{
+		OnMapDataChanged.ExecuteIfBound();
 	}
 }
 
-bool UMapObject::ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)
+bool UMapObject::ValidateStructChange(UScriptStruct* NewStruct, UScriptStruct* OldStruct)
 {
 	if(!UAtkStructUtilsFunctionLibrary::StructHasPropertyOfTypeWithName<int>(NewStruct, FName("ID")))
 	{
@@ -561,7 +584,7 @@ bool UMapObject::ValidateStructChange(const UScriptStruct* NewStruct, const UScr
 	return true;
 }
 
-void UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)	
+bool UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct)	
 {
 	// replace all data that used this struct type with the new data
 	const FText Title = FText::FromString(TEXT("Struct Type Replacing"));
@@ -570,13 +593,11 @@ void UMapObject::ProcessStructChange(const UScriptStruct* NewStruct, const UScri
 	if(Result == EAppReturnType::Yes)
 	{
 		ReplaceDataMap(NewStruct, OldStruct);
-		OldStruct = NewStruct;
-		OnMapDetailsChange.ExecuteIfBound();
+		return true;
 	}
 	else
 	{
-		NewStruct = OldStruct;
-		this->PostEditChange();
+		return false;
 	}
 }
 

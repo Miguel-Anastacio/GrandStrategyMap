@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "Misc/EngineVersionComparison.h"
+#include "SharedModule.h"
 #if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/InstancedStruct.h"
 #else
@@ -40,23 +41,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual Property")
 	class UMaterialInterface* MaterialInstance = nullptr;
-
-	static FColor GetColorForPropertyFromMapString(const FInstancedStruct& Data, const TMap<FString, FColor>& Map, const FString& PropertyName, const FColor& DefaultColor)
-	{
-		bool bResult = false;
-		const FString Key = UAtkStructUtilsFunctionLibrary::GetPropertyValueAsStringFromStruct(Data, PropertyName, bResult);
-		if (!bResult)
-		{
-			return DefaultColor;
-		}
-		const FColor* Color = Map.Find(Key);
-		if(!Color)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Key not in ColorMap"));
-			return DefaultColor;
-		}
-		return *Color;
-	}
 };
 
 template<typename  T>
@@ -71,7 +55,7 @@ FColor GetColorForPropertyFromMap(const FInstancedStruct& Data, const TMap<T, FC
 	const FColor* Color = Map.Find(Key);
 	if(!Color)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Key not in ColorMap"));
+		UE_LOG(LogMapSharedModule, Warning, TEXT("Key not in ColorMap"));
 		return DefaultColor;
 	}
 	return *Color;
@@ -108,7 +92,7 @@ public:
 
 	virtual FColor GetColorForProperty_Implementation(const FInstancedStruct& Data) override
 	{
-		return 	GetColorForPropertyFromMapString(Data, PropertyColorMap, Name, DefaultColor);
+		return 	GetColorForPropertyFromMap(Data, PropertyColorMap, Name, DefaultColor);
 	}
 };
 

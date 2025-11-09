@@ -19,6 +19,13 @@ void UMapModeSelectorWidget::SetInteractiveMapReference(class AClickableMap* Map
 
 void UMapModeSelectorWidget::NativeOnInitialized()
 {
+	for(const auto& Widget : GridPanel->GetAllChildren())
+	{
+		if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
+		{
+			UserWidget->OnClickedDelegate.AddDynamic(this, &UMapModeSelectorWidget::SetMapMode);
+		}
+	}
 	Super::NativeOnInitialized();
 }
 
@@ -29,7 +36,6 @@ void UMapModeSelectorWidget::NativePreConstruct()
 	{
 		if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
 		{
-			UserWidget->OnClickedDelegate.AddDynamic(this, &UMapModeSelectorWidget::SetMapMode);
 			UserWidget->SetButtonText(FText::FromString(Widget->GetName()));
 		}
 	}
