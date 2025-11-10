@@ -36,7 +36,7 @@ void UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(const UObject* Obj
 	if (!MainAsset)
 		return;
 	MainAsset->Modify();
-	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+	// FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
 }
 
 

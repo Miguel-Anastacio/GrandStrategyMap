@@ -58,7 +58,11 @@ public class MapEditor : ModuleRules
 				"UnrealEd",
 				"EditorStyle",
 				"WorkspaceMenuStructure",
-				"PropertyEditor",
+				"PropertyEditor", 
+				"DataBasedWidgetEditor", 
+				"Blutility",
+				"DataBasedWidget",
+				"InteractiveMap",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

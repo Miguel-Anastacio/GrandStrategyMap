@@ -4,9 +4,9 @@
 #include "InteractiveMap.h"
 #include "MapObject.h"
 #include "Blueprint/WidgetTree.h"
+#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #include "Components/GridPanel.h"
 #include "UI/Widgets/CustomButtonWidget.h"
-
 #if WITH_EDITOR
 #include "WidgetBlueprint.h"
 #include "Kismet2/BlueprintEditorUtils.h"
@@ -32,29 +32,28 @@ void UMapModeSelectorWidget::NativeOnInitialized()
 void UMapModeSelectorWidget::NativePreConstruct()
 {
 	// Set text of Widgets
-	for(const auto& Widget : GridPanel->GetAllChildren())
+	if(GridPanel)
 	{
-		if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
+		for(const auto& Widget : GridPanel->GetAllChildren())
 		{
-			UserWidget->SetButtonText(FText::FromString(Widget->GetName()));
+			if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
+			{
+				UserWidget->SetButtonText(FText::FromString(Widget->GetCategoryName()));
+			}
 		}
 	}
 	Super::NativePreConstruct();
 }
 
 #if WITH_EDITOR
-void UMapModeSelectorWidget::CreatePanelSlots()
+void UMapModeSelectorWidget::CreatePanelSlots() const
 {
-	if (!GridPanel)
-		return;
-
-	const UWidgetBlueprintGeneratedClass* WidgetBlueprintGeneratedClass = Cast<UWidgetBlueprintGeneratedClass>(GetClass());
-	const UPackage* Package = WidgetBlueprintGeneratedClass->GetPackage();
-	UWidgetBlueprint* MainAsset = Cast<UWidgetBlueprint>(Package->FindAssetInPackage());
+	CreateMainPanel();
 
 	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
 	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	UGridPanel* AssetGridPanel = Cast<UGridPanel>(MainAsset->WidgetTree->FindWidget("GridPanel"));
+	UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("GridPanel")));
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
 	if(!AssetGridPanel)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Missing Grid Panel"));
@@ -65,17 +64,22 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 		UE_LOG(LogInteractiveMap, Error, TEXT("Please Set a MapObject"));
 		return;
 	}
+	if(!MainAssetWidgetTree)
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("Widget Tree is Null"));
+		return;
+	}
 	
 	AssetGridPanel->ClearChildren();
 	AssetGridPanel->Modify();
-	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 	int RowIndex = 0;
 	int ColumnIndex = 0;
 	for(const auto& Property : MapObject->GetVisualProperties())
 	{
-		if(UUserWidget* NewWidget = MainAsset->WidgetTree->ConstructWidget<UUserWidget>(*MapModeSelectButton))
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(*MapModeSelectButton))
 		{
-			NewWidget->Rename(*(Property->Name));
+			NewWidget->SetCategoryName(Property->Name);
 			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
 			ColumnIndex++;
 			if(ColumnIndex >= Columns)
@@ -86,15 +90,30 @@ void UMapModeSelectorWidget::CreatePanelSlots()
 		}
 	}
 	
-
-	AssetGridPanel->Modify();
-	MainAsset->Modify();
 	if(AssetGridPanel->GetChildrenCount() == 0)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Widget Type is not of type UUserWidget"));
 	}
 	
-	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(MainAsset);
+	AssetGridPanel->Modify();
+	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
+}
+
+void UMapModeSelectorWidget::CreateMainPanel() const
+{
+	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
+	if (!MainAssetWidgetTree)
+	{
+		UE_LOG(LogInteractiveMap, Error, TEXT("WidgetTree is null!"));
+		return;
+	}
+	
+	if (!MainAssetWidgetTree->RootWidget)
+	{
+		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("GridPanel"));
+		MainAssetWidgetTree->Modify();
+		UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
+	}
 }
 #endif
 

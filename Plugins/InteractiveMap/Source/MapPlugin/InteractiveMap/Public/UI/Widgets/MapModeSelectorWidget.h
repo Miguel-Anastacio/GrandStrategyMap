@@ -19,24 +19,28 @@ public:
     /** Sets the reference to the interactive map. */
     UFUNCTION(BlueprintCallable, Category = "MapModeSelectorWidget")
     void SetInteractiveMapReference(class AClickableMap* Map);
+#if WITH_EDITOR
+    UFUNCTION(CallInEditor, BlueprintCallable, Category = "MapModeSelectorWidget")
+    void CreatePanelSlots() const;
+    void CreateMainPanel() const;
+#endif
+public:
+#if WITH_EDITORONLY_DATA
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
+    UMapObject* MapObject;
+
+    UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
+    TSubclassOf<UUserWidget> MapModeSelectButton;
+#endif
+    
 protected:
     virtual void NativeOnInitialized() override;
     virtual void NativePreConstruct() override;
-#if WITH_EDITOR
-    UFUNCTION(CallInEditor, BlueprintCallable, Category = "MapModeSelectorWidget")
-    void CreatePanelSlots();
-#endif
     UFUNCTION()
     void SetMapMode(UCustomButtonWidget* ButtonWidget);
 protected:
     UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
     uint8 Columns = 5;
-
-    UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
-    TSubclassOf<UUserWidget> MapModeSelectButton;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
-    TSoftObjectPtr<UMapObject> MapObject;
     
     UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Grid Panel")
     class UGridPanel* GridPanel;
