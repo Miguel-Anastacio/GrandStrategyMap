@@ -82,6 +82,8 @@ protected:
     
     /** Creates the main grid panel for the widget */
     void CreateMainPanel() const;
+
+	void CleanupAllOrphanedGUIDs() const;
 #endif
 
     // IUserObjectListEntry interface implementation
