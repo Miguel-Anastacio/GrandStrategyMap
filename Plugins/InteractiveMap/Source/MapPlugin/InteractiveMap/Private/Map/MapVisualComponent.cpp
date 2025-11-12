@@ -58,7 +58,7 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     if (!original)
     {
         UE_LOG(LogInteractiveMap, Error, TEXT("Original Mesh is not valid"));
-        return;
+        return; 
     }
     if (!meshToUpdate)
     {

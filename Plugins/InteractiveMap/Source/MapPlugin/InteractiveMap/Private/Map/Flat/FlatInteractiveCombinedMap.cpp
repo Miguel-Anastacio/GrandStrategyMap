@@ -27,6 +27,12 @@ void AFlatInteractiveCombinedMap::InitializeMap_Implementation()
 {
 	Super::InitializeMap_Implementation();
 
+	if (!bUseBorderMesh)
+	{
+		MapInitializationDelegate.Broadcast(this);
+		return;
+	}
+
 	if (!BorderMaterial)
 	{
 		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border material is null"));

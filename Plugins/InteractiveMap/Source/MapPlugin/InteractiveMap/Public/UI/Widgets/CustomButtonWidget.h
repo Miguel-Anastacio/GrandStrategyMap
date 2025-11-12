@@ -31,12 +31,14 @@ public:
     virtual void NativeOnInitialized() override;
 
     UFUNCTION(BlueprintCallable, Category = "Button")
-	void SetButtonText(const FText& NewText) const;
+	void SetButtonText(const FString& NewText);
 
     /** Delegate for custom button clicked events. */
     UPROPERTY(BlueprintAssignable)
     FCustomButtonClickedSignature OnClickedDelegate;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	FString ButtonText;
 protected:
     /** Handles the button click event. */
     UFUNCTION()
@@ -48,6 +50,6 @@ protected:
 
     /** The rich text block displaying the button text. */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<class URichTextBlock> ButtonText;
+    TObjectPtr<class URichTextBlock> ButtonTextWidget;
 	
 };

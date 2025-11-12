@@ -37,7 +37,7 @@ void UMapModeSelectorWidget::NativePreConstruct()
 		{
 			if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
 			{
-				UserWidget->SetButtonText(FText::FromString(Widget->GetCategoryName()));
+				UserWidget->SetButtonText(Widget->GetCategoryName());
 			}
 		}
 	}

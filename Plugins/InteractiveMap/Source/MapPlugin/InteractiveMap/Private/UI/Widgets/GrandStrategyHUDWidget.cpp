@@ -23,33 +23,4 @@ void UGrandStrategyHUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	SetGameMapReference();
-
-	if (SaveDataButton)
-	{
-		SaveDataButton->OnClickedDelegate.AddDynamic(this, &UGrandStrategyHUDWidget::SaveDataToJson);
-	}
-}
-
-void UGrandStrategyHUDWidget::SaveDataToJson(UCustomButtonWidget* button)
-{
-	if (button == SaveDataButton)
-	{
-		// TMap<int, FInstancedStruct>* provinceMapData = GameMap->GetProvinceDataMap();
-		// if (!provinceMapData)
-		// 	return;
-		//
-		// bool result = false;
-		// FString outMessageInfo;
-		// FileName = FileName.EndsWith(FString(".json")) ? FileName : FileName.Append(TEXT(".json"));
-		//
-		// const FString dirPath = FPaths::ProjectDir() + DirectoryPath;
-		//
-		// // UDataManagerFunctionLibrary::WriteMapToJsonFile(dirPath + FileName, *provinceMapData, result, outMessageInfo);
-		// if (!result)
-		// {
-		// 	GEngine->AddOnScreenDebugMessage(4, 1.0f, FColor::Magenta, outMessageInfo);
-		// }
-		//
-		// return;
-	}
 }

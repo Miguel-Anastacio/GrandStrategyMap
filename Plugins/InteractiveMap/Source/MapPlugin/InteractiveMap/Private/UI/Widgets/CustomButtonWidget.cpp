@@ -6,6 +6,7 @@
 void UCustomButtonWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
+	SetButtonText(ButtonText);
 }
 
 void UCustomButtonWidget::NativeOnInitialized()
@@ -17,11 +18,12 @@ void UCustomButtonWidget::NativeOnInitialized()
 	}
 }
 
-void UCustomButtonWidget::SetButtonText(const FText& NewText) const
+void UCustomButtonWidget::SetButtonText(const FString& NewText)
 {
-	if (IsValid(ButtonText))
+	if (IsValid(ButtonTextWidget))
 	{
-		ButtonText->SetText(NewText);
+		ButtonText = NewText;
+		ButtonTextWidget->SetText(FText::FromString(NewText));
 	}
 }
 

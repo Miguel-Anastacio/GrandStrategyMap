@@ -172,7 +172,6 @@ public:
 	void IncrementCounter();
 	// Map Gen serialization -> move somewhere else
 	void SerializeMap(FArchive& Ar);
-	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 	void SaveData() const;
 	void SetLookupTexture(UTexture2D *Texture2D);
@@ -330,7 +329,6 @@ private:
 	
 };
 
-#if WITH_EDITOR
 static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 template <typename T>
@@ -351,4 +349,3 @@ static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& Threa
 		}
 	});
 }
-#endif

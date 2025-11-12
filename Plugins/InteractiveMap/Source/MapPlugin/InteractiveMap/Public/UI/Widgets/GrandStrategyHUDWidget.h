@@ -23,18 +23,10 @@ protected:
 	/** Native initialization override. */
 	virtual void NativeOnInitialized() override;
 
-	/** Saves the data to JSON format based on the clicked button. */
-	UFUNCTION()
-	void SaveDataToJson(UCustomButtonWidget* button);
-
 protected:
 	/** Widget to handle map mode selection */
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
-
-	/** Button for saving general data. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> SaveDataButton;
 
 	/** Reference to the interactive map. */
 	UPROPERTY()
