@@ -110,6 +110,8 @@ private:
 	void UpdatePreviewTextures(const MapGenerator::TileMap& TileMap);
 	TSharedPtr<MapGenerator::Map> GetLastMapCreated() const;
 	UTexture2D* GetLastRootTexture() const;
+
+	static void UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Data, int32 Width, int32 Height);
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
@@ -122,6 +124,7 @@ private:
 	UTexture2D* PreviewBorderTexture = nullptr;
 	UTexture2D* PreviewVisitedTilesTexture = nullptr;
 	TWeakObjectPtr<UTexture2D> CurrentTexture = nullptr;
+	TArray<uint8> BufferCurrentTextureData;
 
 	// Highlight
 	UTexture2D* HighlightTexture = nullptr;

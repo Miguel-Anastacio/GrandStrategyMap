@@ -622,9 +622,7 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 		return;
 	}
 	
-	// get current texture buffer
-	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
-	const int32 size = bufferTextureData.Num();
+	const int32 size = BufferCurrentTextureData.Num();
 	uint8_t* buffer = new uint8_t[size];
 
 	TSet<FColor> Colors;
@@ -634,27 +632,30 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 		Colors.Add(GetWorkingAsset()->GetColor(ID));
 	}
 	
-	for(int i = 0; i < size; i+=4)
+	const int32 NumPixels = size / 4;
+	for(int32 PixelIndex = 0; PixelIndex < NumPixels; ++PixelIndex)
 	{
-		const FColor color = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(i, bufferTextureData);
-		if(Colors.Contains(color))
-		{
-			buffer[i + 0] = 255;
-			buffer[i + 1] = 255;
-			buffer[i + 2] = 255;
-			buffer[i + 3] = 255;
-		}
-		else
-		{
-			buffer[i + 0] = 0;
-			buffer[i + 1] = 0;
-			buffer[i + 2] = 0;
-			buffer[i + 3] = 0;
-		}
+		const int32 ByteIndex = PixelIndex * 4;
+		const FColor PixelColor = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(ByteIndex, BufferCurrentTextureData);
+    
+		const uint8 Value = Colors.Contains(PixelColor) ? 255 : 0;
+		buffer[ByteIndex + 0] = Value;
+		buffer[ByteIndex + 1] = Value;
+		buffer[ByteIndex + 2] = Value;
+		buffer[ByteIndex + 3] = Value;
 	}
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
 	const int32 Height = CurrentTexture.Get()->GetSizeY();
-	HighlightTexture = CreateTexture(buffer, Width, Height);
+
+	if(!HighlightTexture)
+	{
+		HighlightTexture = CreateTexture(buffer, Width, Height);
+	}
+	else
+	{
+		UpdateTextureDataEditor(HighlightTexture, buffer, Width, Height);
+		FMemory::Free(buffer);
+	}
 	OnHighlightChanged.Broadcast(HighlightTexture);
 }
 
@@ -717,6 +718,7 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetCurrentTexture() const
 void FMapEditorApp::UpdateCurrentTexture(const TWeakObjectPtr<UTexture2D> Texture)
 {
 	CurrentTexture = Texture;
+	BufferCurrentTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
 	OnCurrentTextureChanged.Broadcast(Texture);
 }
 
@@ -724,8 +726,6 @@ void FMapEditorApp::ClearHighlightTexture()
 {
 	if(!CurrentTexture.IsValid())
 		return;
-	// get current texture buffer
-	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
 	const int32 Height = CurrentTexture.Get()->GetSizeY();
 	const int32 size = Width * Height * 4;
@@ -737,7 +737,15 @@ void FMapEditorApp::ClearHighlightTexture()
 		buffer[i + 2] = 0;
 		buffer[i + 3] = 0;
 	}
-	HighlightTexture = CreateTexture(buffer, Width, Height);
+
+	if(!HighlightTexture)
+	{
+		HighlightTexture = CreateTexture(buffer, Width, Height);
+	}
+	else
+	{
+		UpdateTextureDataEditor(HighlightTexture, buffer, Width, Height);
+	}
 	OnHighlightChanged.Broadcast(HighlightTexture);
 }
 
@@ -921,4 +929,25 @@ bool FMapEditorApp::IsStructTypeValid(const TArray<const UScriptStruct*>& Struct
 		}
 	}
 	return false;
+}
+
+
+void FMapEditorApp::UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Data, int32 Width, int32 Height)
+{
+	if (!Texture || !Data)
+	{
+		return;
+	}
+
+	// Lock the texture for editing
+	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
+	void* TextureData = Mip.BulkData.Lock(LOCK_READ_WRITE);
+    
+	// Copy the new data
+	const int32 DataSize = Width * Height * 4; // RGBA
+	FMemory::Memcpy(TextureData, Data, DataSize);
+    
+	// Unlock and update
+	Mip.BulkData.Unlock();
+	Texture->UpdateResource();
 }
