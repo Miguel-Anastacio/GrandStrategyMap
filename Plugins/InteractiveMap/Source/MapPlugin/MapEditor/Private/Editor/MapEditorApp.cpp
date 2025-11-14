@@ -258,26 +258,18 @@ void FMapEditorApp::RestoreMapGenPreset() const
 void FMapEditorApp::SaveGeneratedMap()
 {
 	TempPreviews.Empty();
-	// TODO - refactor this
 	const FString AssetPath = WorkingAsset->GetPathName();
-	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
-	FString DirPath = FPaths::GetPath(FullPath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
+	// Convert package path to filesystem path
+	FString AssetFilePath;
+	if (!FPackageName::TryConvertLongPackageNameToFilename(AssetPath, AssetFilePath, TEXT(".uasset")))
 	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
+		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to convert package name to file path"));
 		return;
 	}
 	
-	const FString ProjectContentsDir = FPaths::CreateStandardFilename(FPaths::ProjectContentDir());
-	FString CompleteDirPath =  FPaths::CreateStandardFilename(DirPath);
-
-	// already we are under content folder so if remove succeds then adapt package path
-	FString PackagePath = "/Game/";
-	if(DirPath.RemoveFromStart(ProjectContentsDir))
-	{
-		PackagePath += DirPath + "/";
-	}
+	// Convert filesystem path back to package path for asset creation
+	const FString PackagePath = FPackageName::GetLongPackagePath(AssetPath) + "/";
+	
 	UTexture2D* TextureAsset = CreateLookupTextureAsset(PackagePath);
 	if(!TextureAsset)
 	{
@@ -291,8 +283,12 @@ void FMapEditorApp::SaveGeneratedMap()
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create material Asset"));
 		// return;
 	}
-
-	CompleteDirPath = CompleteDirPath + "/" + TextureAsset->GetName();
+	
+	// Get the directory containing the asset
+	FString DirPath = FPaths::GetPath(AssetFilePath);
+	FPaths::NormalizeDirectoryName(DirPath);
+	const FString CompleteDirPath = FPaths::CreateStandardFilename(DirPath) + "/" + TextureAsset->GetName();
+	
 	const FString LookupFilePath = CompleteDirPath + + "_lookup.json";
 	OutputLookupJson(LookupFilePath);
 	
@@ -300,10 +296,10 @@ void FMapEditorApp::SaveGeneratedMap()
 	OutputStubMapDataJson(StubMapDataFilePath);
 	// Outputs the params and the results of the Map Lookup Created
 	const FString LookupGenResultsFilePath = CompleteDirPath + "_MapGenParamsResults.json";
-	OutputLookupGenFile(LookupGenResultsFilePath);	
+	OutputLookupGenFile(LookupGenResultsFilePath);
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
-
+	
 	WorkingAsset->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
 	WorkingAsset->SetRootTexture(PreviewRootTexture);
 	WorkingAsset->SetMapGen(TempMapGenerator);
