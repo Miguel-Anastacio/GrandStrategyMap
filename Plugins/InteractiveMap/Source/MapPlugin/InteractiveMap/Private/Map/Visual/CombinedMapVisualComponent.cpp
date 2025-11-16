@@ -9,23 +9,17 @@
 UCombinedMapVisualComponent::UCombinedMapVisualComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-    MapSelectMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Select"));
-    MapSelectMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
-    MapSelectMesh->bHiddenInGame = true;
-
     GameplayMapMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Map New Gameplay"));
-    GameplayMapMesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+    GameplayMapMesh->SetCollisionProfileName(TEXT("OverlapOnlyPawn"));
 }
 
 void UCombinedMapVisualComponent::AttachMeshes(USceneComponent* root)
 {
-    MapSelectMesh->SetupAttachment(root);
     GameplayMapMesh->SetupAttachment(root);
 }
 void UCombinedMapVisualComponent::AttachMeshesOutsideConstructor(USceneComponent* root)
 {
     FAttachmentTransformRules attachmentRules(EAttachmentRule::KeepRelative, true);
-    MapSelectMesh->AttachToComponent(root, attachmentRules);
     GameplayMapMesh->AttachToComponent(root, attachmentRules);
 
 }
@@ -38,7 +32,6 @@ void UCombinedMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComp
         return;
     }
 
-    MapSelectMesh = InitMeshComponent(combinedVisual->GetMapSelectMeshComponent());
     GameplayMapMesh = InitMeshComponent(combinedVisual->GetMapGameplayMeshComponent());
 }
 
@@ -52,15 +45,9 @@ void UCombinedMapVisualComponent::UpdateVisualComponent(UMapVisualComponent* map
         return;
     }
 
-    SetMeshProperties(mapVisual->GetMapSelectMeshComponent(), MapSelectMesh);
     SetMeshProperties(mapVisual->GetMapGameplayMeshComponent(), GameplayMapMesh);
 }
 
-UStaticMeshComponent* UCombinedMapVisualComponent::GetMapSelectMeshComponent()
-{
-    return MapSelectMesh;
-}
-//
 UStaticMeshComponent* UCombinedMapVisualComponent::GetMapGameplayMeshComponent()
 {
     return GameplayMapMesh;

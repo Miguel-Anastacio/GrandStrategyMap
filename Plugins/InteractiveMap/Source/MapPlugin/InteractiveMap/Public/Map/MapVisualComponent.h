@@ -9,12 +9,6 @@
 class UStaticMeshComponent;
 /**
  * Component for managing the visual representation of the map.
- * Map is made up of 4 meshes
- * If you wish to combine the borderMesh, GameplayMesh and TerrainMesh you have: 
- *  - create a material that blends all 3 textures
- *  - assign the material in a ClickableMap class (GameplayMapMaterial)
- *  - hide the terrain and border mesh 
- *  - override the set map mode function either in c++ or blueprint
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), NotBlueprintable)
 class INTERACTIVEMAP_API UMapVisualComponent : public USceneComponent
@@ -38,8 +32,7 @@ public:
 
     /** Initializes the mesh components. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    virtual void InitVisualComponents(UStaticMeshComponent* mapSelectMesh,
-        UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
+    virtual void InitVisualComponents(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
     /** Initializes a mesh component. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
@@ -48,10 +41,6 @@ public:
     /** Initializes the mesh property. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
     void SetMeshProperties(UStaticMeshComponent* original, UStaticMeshComponent* meshToUpdate);
-
-    /** Gets the map select mesh component. */
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
-    virtual UStaticMeshComponent* GetMapSelectMeshComponent();
 
     /** Gets the map gameplay mesh component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")

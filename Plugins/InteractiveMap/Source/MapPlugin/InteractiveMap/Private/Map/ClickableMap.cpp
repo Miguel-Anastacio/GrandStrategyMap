@@ -3,7 +3,6 @@
 #include "Map/ClickableMap.h"
 #include "VisualProperties.h"
 #include "Engine/Texture2D.h"
-#include "Kismet/KismetRenderingLibrary.h"
 #include "Map/DynamicTextureComponent.h"
 #include "Game/MapPawn.h"
 #include "Kismet/GameplayStatics.h"

@@ -21,8 +21,7 @@ public:
 
     /** Initializes the limit component. */
     UFUNCTION(BlueprintCallable, Category = "Limit")
-    void InitLimitComponent(UStaticMeshComponent* mapSelectMesh,
-        UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
+    void InitLimitComponent(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
     /** Gets the visual component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Visual")

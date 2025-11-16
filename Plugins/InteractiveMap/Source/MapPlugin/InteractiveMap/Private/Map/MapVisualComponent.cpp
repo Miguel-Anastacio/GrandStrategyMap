@@ -14,7 +14,7 @@ void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* m
     int a = 0;
 }
 
-void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
+void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
 
 }
@@ -74,11 +74,6 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     meshToUpdate->SetRelativeRotation(original->GetRelativeRotation());
     meshToUpdate->SetRelativeScale3D(original->GetRelativeScale3D());
     meshToUpdate->SetMaterial(0, original->GetMaterial(0));
-}
-
-UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
-{
-    return nullptr;
 }
 
 UStaticMeshComponent* UMapVisualComponent::GetMapGameplayMeshComponent()
