@@ -288,12 +288,6 @@ FInstancedStruct* AClickableMap::GetProvinceData(const int ID) const
 	return MapDataComponent->GetTileData(ID);
 }
 
-void AClickableMap::SetBorderVisibility(bool status)
-{
-	// if(bUseBorderMesh)
-		// MapVisualComponent->GetMapBorderMeshComponent()->SetVisibility(status);
-}
-
 void AClickableMap::FillPixelMap()
 {
 	PixelMap.Empty();
@@ -328,26 +322,9 @@ void AClickableMap::FillPixelMap()
 	}
 }
 
-
-void AClickableMap::UpdateBorder(UMaterialInstanceDynamic* material, UTextureRenderTarget2D* renderTarget)
-{
-	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), renderTarget, material);
-}
-
 FColor AClickableMap::GetColorFromLookUpTexture(const FVector2D& Uv) const
 {
 	return UAtkTextureUtilsFunctionLibrary::GetColorFromUV(GetLookupTexture(), Uv, GetLookupTextureData());
-}
-
-void AClickableMap::SetBorderLookUpTexture(UMaterialInstanceDynamic* borderMat, UDynamicTextureComponent* textureComponent)
-{
-	if (!textureComponent)
-	{
-		borderMat->SetTextureParameterValue("LookUpTexture", GetLookupTexture());
-		return;
-	}
-
-	borderMat->SetTextureParameterValue("LookUpTexture", textureComponent->GetTexture());
 }
 
 void AClickableMap::UpdateProvinceHovered(const FColor& Color)

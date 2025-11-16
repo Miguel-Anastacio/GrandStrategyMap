@@ -14,7 +14,7 @@ void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* m
     int a = 0;
 }
 
-void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
+void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
 
 }
@@ -85,12 +85,6 @@ UStaticMeshComponent* UMapVisualComponent::GetMapGameplayMeshComponent()
 {
     return nullptr;
 }
-
-UStaticMeshComponent* UMapVisualComponent::GetMapBorderMeshComponent()
-{
-    return nullptr;
-}
-
 
 FVector UMapVisualComponent::CalculateSizeOfMesh(UStaticMeshComponent* mesh) const
 {

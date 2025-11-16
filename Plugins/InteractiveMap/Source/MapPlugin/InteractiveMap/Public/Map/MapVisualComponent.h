@@ -38,7 +38,7 @@ public:
 
     /** Initializes the mesh components. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    virtual void InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder,
+    virtual void InitVisualComponents(UStaticMeshComponent* mapSelectMesh,
         UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
     /** Initializes a mesh component. */
@@ -56,10 +56,6 @@ public:
     /** Gets the map gameplay mesh component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
     virtual UStaticMeshComponent* GetMapGameplayMeshComponent();
-
-    /** Gets the map border mesh component. */
-    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")
-    virtual UStaticMeshComponent* GetMapBorderMeshComponent();
 
     /** Calculates the size of the map. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "MapVisual")

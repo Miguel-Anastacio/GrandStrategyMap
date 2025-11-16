@@ -20,25 +20,5 @@ AGlobeInteractiveCombinedMap::AGlobeInteractiveCombinedMap(const FObjectInitiali
 void AGlobeInteractiveCombinedMap::InitializeMap_Implementation()
 {
 	Super::InitializeMap_Implementation();
-
-	if (!bUseBorderMesh)
-	{
-		MapInitializationDelegate.Broadcast(this);
-		return;
-	}
-
-	if (!BorderMaterial)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Use border set to true but border material is null"));
-	}
-	else
-	{
-		BorderDynamicMaterial = UMaterialInstanceDynamic::Create(BorderMaterial, this);
-		BorderDynamicMaterial->SetTextureParameterValue("LookUpTexture", MapAsset->GetLookupTexture().Get());
-
-		BorderMaterialRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(GetWorld(), 2048, 1024, ETextureRenderTargetFormat::RTF_RGBA8, FLinearColor::White);
-		UpdateBorder(BorderDynamicMaterial, BorderMaterialRenderTarget);
-	}
-	
 	MapInitializationDelegate.Broadcast(this);
 }

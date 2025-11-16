@@ -77,23 +77,9 @@ public:
 	void SetMapMode(const FName &Mode);
 	virtual void SetMapMode_Implementation(const FName &Mode);
 
-	UFUNCTION(BlueprintCallable, Category = "Map Border")
-	void UpdateBorder(UMaterialInstanceDynamic *material, UTextureRenderTarget2D *renderTarget);
-	/**
-	 * Set the a dynamic texture as the lookuptexture of the border material
-	 *
-	 * @param borderMat dynamic instance of the Border Material
-	 * @param textureComponent the dynamic texture component that owns the texture to use as lookup
-	 *		 by default pass null and use the MapLookUpTexture
-	 */
-	UFUNCTION(BlueprintCallable, Category = "Map Border")
-	void SetBorderLookUpTexture(UMaterialInstanceDynamic *bordeMat, UDynamicTextureComponent *textureComponent = nullptr);
-
 	//------------------------------- Visual ----------------------------------------
 	UFUNCTION(BlueprintCallable, Category = "Map Visual")
 	virtual void UpdateProvinceHovered(const FColor &color);
-	UFUNCTION(BlueprintCallable, Category = "Map Visual")
-	void SetBorderVisibility(bool status);
 
 	// UFUNCTION(CallInEditor, Category = "Map")
 	void FillPixelMap();
@@ -155,17 +141,6 @@ protected:
 	// The political map texture component.
 	UPROPERTY(EditAnywhere, Category = "Texture", BlueprintReadOnly)
 	TObjectPtr<UDynamicTextureComponent> DynamicTextureComponent;
-
-	// Border Material
-	UPROPERTY(EditAnywhere, Category = "Map|Border")
-	UMaterialInterface *BorderMaterial;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Map|Border|Material")
-	UMaterialInstanceDynamic *BorderDynamicMaterial;
-	UPROPERTY(BlueprintReadWrite, Category = "Border")
-	UTextureRenderTarget2D *BorderMaterialRenderTarget;
-	UPROPERTY(EditAnywhere, Category = "Map|Border")
-	bool bUseBorderMesh = false;
 
 	//------------------------------- Data -----------------------------------------
 	// The map data component.
