@@ -199,7 +199,6 @@ namespace MapGenerator
 	{
 		if (component)
 			component->Clear();
-		else
 			// std::cout << "ERROR - clear " << message << std::endl;
 	}
 

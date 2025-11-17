@@ -144,7 +144,6 @@ void FMapEditorApp::SaveAsset_Execute()
 	FWorkflowCentricApplication::SaveAsset_Execute();
 }
 
-// TODO - add comments or some sort of significance describing each step of map gen
 void FMapEditorApp::GenerateMap()
 {
 	bool UserProvidedBorders = false;
@@ -162,11 +161,12 @@ void FMapEditorApp::GenerateMap()
 		}
 		UserProvidedBorders = true;
 	}
+	
 	// Convert to filesystem path
-	FString AssetDirectory;
-	GetWorkingAssetDir(AssetDirectory); 
-	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*AssetDirectory));
+	const FString CompleteDirPath = GetAbsoluteDir(WorkingAsset);
+	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*CompleteDirPath));
 	const std::filesystem::path MapGenLogPath = AssetDir / "MapGenLog.txt";
+	
 	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024, MapGenLogPath));
 
 	// Handle user uploaded borders
@@ -175,9 +175,10 @@ void FMapEditorApp::GenerateMap()
 		UTexture2D* BorderTexture = MapGenPreset->MapEditorDetails.BorderTexture;
 		const uint32 height = BorderTexture->GetSizeY();
 		const uint32 width = BorderTexture->GetSizeX();
-		
-		const uint8* BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(BorderTexture);
-		if(!BufferData)
+
+		// TODO - Test this, should use a std::vector
+		const std::vector<uint8> BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(BorderTexture);
+		if(BufferData.empty())
 		{
 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read  Border texture"));
 			// throw error and return
@@ -186,13 +187,13 @@ void FMapEditorApp::GenerateMap()
 			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 			return;
 		}
-		TempMapGenerator->SetBorderUpload(BufferData, width, height);
+		TempMapGenerator->SetBorderUpload(BufferData);
 	}
 
 	// Check if origin texture is valid
 	UTexture2D* Texture = MapGenPreset->MapEditorDetails.OriginTexture;
-	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
-	if(!Data)
+	std::vector<uint8> Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(Texture);
+	if(Data.empty())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read Height Map texture"));
 		// throw error and return
@@ -202,18 +203,15 @@ void FMapEditorApp::GenerateMap()
 		return;
 	}
 	 
-	// TODO - improve this, adjust MapGeneratorLib
-	// Do actual map gen
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
-	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
 	UAtkMiscFunctionLibrary::ExecuteSlowTaskWithProgressBar(
-		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
+		[&, Data, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			//Call GenerateMap and pass the progress callback
 			constexpr MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
 			TempMapGenerator->SetProgressCallback(ProgressCallback);
-			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
+			TempMapGenerator->GenerateMap(Data, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
 			WorkingAsset->SetLastMapGen(TempMapGenerator);
 
 			// Update the preview textures
@@ -258,18 +256,8 @@ void FMapEditorApp::RestoreMapGenPreset() const
 void FMapEditorApp::SaveGeneratedMap()
 {
 	TempPreviews.Empty();
-	const FString AssetPath = WorkingAsset->GetPathName();
-	// Convert package path to filesystem path
-	FString AssetFilePath;
-	if (!FPackageName::TryConvertLongPackageNameToFilename(AssetPath, AssetFilePath, TEXT(".uasset")))
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to convert package name to file path"));
-		return;
-	}
-	
 	// Convert filesystem path back to package path for asset creation
-	const FString PackagePath = FPackageName::GetLongPackagePath(AssetPath) + "/";
-	
+	const FString PackagePath = FPackageName::GetLongPackagePath(WorkingAsset->GetPathName()) + "/";
 	UTexture2D* TextureAsset = CreateLookupTextureAsset(PackagePath);
 	if(!TextureAsset)
 	{
@@ -285,9 +273,7 @@ void FMapEditorApp::SaveGeneratedMap()
 	}
 	
 	// Get the directory containing the asset
-	FString DirPath = FPaths::GetPath(AssetFilePath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	const FString CompleteDirPath = FPaths::CreateStandardFilename(DirPath) + "/" + TextureAsset->GetName();
+	const FString CompleteDirPath = GetAbsoluteDir(WorkingAsset) + "/" + TextureAsset->GetName();
 	
 	const FString LookupFilePath = CompleteDirPath + + "_lookup.json";
 	OutputLookupJson(LookupFilePath);
@@ -306,22 +292,6 @@ void FMapEditorApp::SaveGeneratedMap()
 	WorkingAsset->SetMapSaved(true);
 	
 	UEditorLoadingAndSavingUtils::SavePackages({TextureAsset->GetPackage(), Material->GetPackage()}, true);
-}
-
-bool FMapEditorApp::GetWorkingAssetDir(FString& OutPath) const
-{
-	const FString AssetPath = WorkingAsset->GetPathName();
-	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
-	FString DirPath = FPaths::GetPath(FullPath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
-		return false;
-	}
-	
-	OutPath = FPaths::CreateStandardFilename(DirPath);
-	return true;
 }
 
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
@@ -392,20 +362,15 @@ void FMapEditorApp::AddToolbarExtender()
 
 TObjectPtr<UTexture2D> FMapEditorApp::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
 {
-	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
+	const std::vector<uint8_t> buffer = TileMap.ConvertTileMapToBuffer();
 	const int Width = TileMap.Width();
 	const int Height = TileMap.Height();
 	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
 	return Texture;
 }
 
-// This is completely external to the app, TODO - move from here
-TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
+TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(const std::vector<uint8>& Buffer, unsigned Width, unsigned Height)
 {
-	if(!Buffer)
-		return nullptr;
-
-	// TODO - CORRECT THIS FUNCTION 
 	//Create a string containing the texture's path
 	FString PackageName = TEXT("/Game/Preview/");
 	FString BaseTextureName = FString("PreviewTexture");
@@ -427,7 +392,7 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	// Lock the mipmap and write the buffer data
 	uint8* MipData = NewTexture->Source.LockMip(0);
 	int32 BufferSize = Width * Height * 4; // BGRA8 format
-	FMemory::Memcpy(MipData, Buffer, BufferSize);
+	FMemory::Memcpy(MipData, Buffer.data(), BufferSize);
 	NewTexture->Source.UnlockMip(0);
 
 	NewTexture->CompressionSettings = TC_EditorIcon;
@@ -436,10 +401,6 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	// Update the texture to reflect changes
 	NewTexture->PostEditChange();
 
-	// TODO - CHANGE THIS This function should not manage the buffer memory
-	//Since we don't need access to the pixel data anymore free the memory
-	FMemory::Free(Buffer);
-	
 	return NewTexture;
 }
 
@@ -567,11 +528,11 @@ UMaterialInstanceConstant* FMapEditorApp::CreateMaterialInstanceAsset(UTexture2D
 UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) const
 {
 	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
-	uint8_t* Buffer = Map->GetLookupTileMap().ConvertTileMapToRawBuffer();
+	std::vector<uint8_t> Buffer = Map->GetLookupTileMap().ConvertTileMapToBuffer();
 	
 	FString Message;
 	bool bResult = false;
-	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath, "LookupTexture", Buffer, Map->Width(), Map->Height(), bResult, Message);
+	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath, "LookupTexture", Buffer.data(), Map->Width(), Map->Height(), bResult, Message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 	
 	if(Texture)
@@ -579,12 +540,6 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 		Texture->CompressionSettings = TC_EditorIcon;
 		Texture->MipGenSettings = TMGS_NoMipmaps;
 		Texture->PostEditChange();
-	}
-	
-	if(Buffer)
-	{
-		delete[] Buffer;
-		Buffer = nullptr;
 	}
 	
 	return Texture;
@@ -623,7 +578,7 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 	}
 	
 	const int32 size = BufferCurrentTextureData.Num();
-	uint8_t* buffer = new uint8_t[size];
+	std::vector<uint8_t> buffer(size);
 
 	TSet<FColor> Colors;
 	Colors.Reserve(IDs.Num());
@@ -653,8 +608,7 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 	}
 	else
 	{
-		UpdateTextureDataEditor(HighlightTexture, buffer, Width, Height);
-		FMemory::Free(buffer);
+		UpdateTextureDataEditor(HighlightTexture, buffer.data(), Width, Height);
 	}
 	OnHighlightChanged.Broadcast(HighlightTexture);
 }
@@ -729,7 +683,7 @@ void FMapEditorApp::ClearHighlightTexture()
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
 	const int32 Height = CurrentTexture.Get()->GetSizeY();
 	const int32 size = Width * Height * 4;
-	uint8_t* buffer = new uint8_t[size];
+	std::vector<uint8_t> buffer(size);
 	for(int i = 0; i < size; i+=4)
 	{
 		buffer[i + 0] = 0;
@@ -744,7 +698,7 @@ void FMapEditorApp::ClearHighlightTexture()
 	}
 	else
 	{
-		UpdateTextureDataEditor(HighlightTexture, buffer, Width, Height);
+		UpdateTextureDataEditor(HighlightTexture, buffer.data(), Width, Height);
 	}
 	OnHighlightChanged.Broadcast(HighlightTexture);
 }
@@ -769,7 +723,7 @@ void FMapEditorApp::UpdatePreviewTextures(const MapGenerator::TileMap& TileMap)
 	// Maybe do not always create texture, do so only if it is null
 	PreviewLookupTextureLand   = CreateTexture(TileMap.GetLandTileMap(), width, height);
 	PreviewLookupTextureOcean  = CreateTexture(TileMap.GetOceanTileMap(), width, height);
-	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToRawBuffer(), width, height);
+	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToBuffer(), width, height);
 	// Debug
 	PreviewVisitedTilesTexture = CreateTexture(TileMap.GetCentroidTileMap(), width, height);
 	PreviewBorderTexture	   = CreateTexture(TileMap.GetBordersTileMap(), width, height);
@@ -950,4 +904,16 @@ void FMapEditorApp::UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Da
 	// Unlock and update
 	Mip.BulkData.Unlock();
 	Texture->UpdateResource();
+}
+
+FString FMapEditorApp::GetAbsoluteDir(const UObject* Asset)
+{
+	FString AssetDirectory;
+	const FString AssetPath = Asset->GetPathName();
+	// Convert package path to filesystem path
+	FString AssetFilePath;
+	FPackageName::TryConvertLongPackageNameToFilename(AssetPath, AssetFilePath, TEXT(".uasset"));
+	FString DirPath = FPaths::GetPath(AssetFilePath);
+	FPaths::NormalizeDirectoryName(DirPath);
+	return FPaths::CreateStandardFilename(DirPath);
 }

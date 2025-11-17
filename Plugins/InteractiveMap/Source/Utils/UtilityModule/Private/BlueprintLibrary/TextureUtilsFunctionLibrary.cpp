@@ -32,28 +32,36 @@ TArray<uint8> UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Te
 	return DataArray;
 }
 
-const uint8* UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(UTexture2D* Texture) 
+std::vector<uint8> UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(UTexture2D* Texture)
 {
-	if(!IsTextureValid(Texture))
-	{
-		UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Buffer not Valid Texture"));
-		return nullptr;
-	}
-#if WITH_EDITOR
-	FTextureCompilingManager::Get().FinishCompilation({Texture});
-#endif
-	
-	// Lock the texture for reading
-	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
-	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
-	const uint8* Data = static_cast<const uint8*>(TextureData);
-	// Unlock the texture
-	Mip.BulkData.Unlock();
-	return  Data;
+    if(!IsTextureValid(Texture))
+    {
+        UE_LOG(LogUtilityModule, Error, TEXT("Read Texture to Buffer not Valid Texture"));
+        return {};
+    }
+        
+    #if WITH_EDITOR
+        FTextureCompilingManager::Get().FinishCompilation({Texture});
+    #endif
+        
+        FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
+        
+        // Lock the texture
+        void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
+        const uint8* Data = static_cast<const uint8*>(TextureData);
+        
+        // Get size and copy data
+        const int32 DataSize = Mip.BulkData.GetBulkDataSize();
+        std::vector<uint8_t> buffer(Data, Data + DataSize);
+        
+        // Now safe to unlock
+        Mip.BulkData.Unlock();
+        
+        return buffer;
 }
 
 FColor UAtkTextureUtilsFunctionLibrary::GetColorFromUV(uint32 Width, uint32 Height, const FVector2D& Uv,
-	const TArray<uint8>& DataBuffer)
+                                                       const TArray<uint8>& DataBuffer)
 {
 	if(Width * Height * 4 != DataBuffer.Num())
 	{

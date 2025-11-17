@@ -46,7 +46,6 @@ public: // FAssetEditorToolkit interface
 	void RestoreMapGenPreset() const;
 
 	void SaveGeneratedMap();
-	bool GetWorkingAssetDir(FString& OutPath) const;
 	// MapDataEditor
 	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
 	const UScriptStruct* GetFilterForDataList() const;
@@ -60,7 +59,7 @@ public: // FAssetEditorToolkit interface
 	static bool IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType);
 	//==================================
 
-	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
+	static TObjectPtr<UTexture2D> CreateTexture(const std::vector<uint8>& Buffer, unsigned Width, unsigned Height);
 
 	// Update Viewport
 	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
@@ -112,6 +111,8 @@ private:
 	UTexture2D* GetLastRootTexture() const;
 
 	static void UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Data, int32 Width, int32 Height);
+	
+	static FString GetAbsoluteDir(const UObject* Asset);
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;

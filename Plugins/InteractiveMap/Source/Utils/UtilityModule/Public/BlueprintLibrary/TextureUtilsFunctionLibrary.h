@@ -1,6 +1,8 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #pragma once
 
+#include <vector>
+
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TextureUtilsFunctionLibrary.generated.h"
@@ -11,7 +13,7 @@ class UTILITYMODULE_API UAtkTextureUtilsFunctionLibrary : public UBlueprintFunct
 	GENERATED_BODY()
 
 public:
-	static const uint8* ReadTextureToBuffer(UTexture2D* Texture);
+	static std::vector<uint8> ReadTextureToVector(UTexture2D* Texture);
 	static TArray<uint8> ReadTextureToArray(UTexture2D* Texture);
 
 	static FColor GetColorFromUV(UTexture2D* Texture,const FVector2D& Uv, const TArray<uint8>& DataBuffer);
