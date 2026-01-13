@@ -172,7 +172,7 @@ namespace MapGenerator
 
 		TileMap maskTileMap(width, height);
 		maskTileMap.SetColors(colorsInUse);
-		maskTileMap.MarkBorderOnTileMap(borderDataBuffer);
+		maskTileMap.MarkBorderOnTileMap(borderDataBuffer, type);
 		if(progressCallback)
 		{
 			progressCallback(4.0f, "Mark Borders");

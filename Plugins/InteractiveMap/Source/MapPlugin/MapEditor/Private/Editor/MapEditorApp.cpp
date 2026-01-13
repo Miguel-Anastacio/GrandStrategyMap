@@ -173,10 +173,6 @@ void FMapEditorApp::GenerateMap()
 	if(UserProvidedBorders)
 	{
 		UTexture2D* BorderTexture = MapGenPreset->MapEditorDetails.BorderTexture;
-		const uint32 height = BorderTexture->GetSizeY();
-		const uint32 width = BorderTexture->GetSizeX();
-
-		// TODO - Test this, should use a std::vector
 		const std::vector<uint8> BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(BorderTexture);
 		if(BufferData.empty())
 		{

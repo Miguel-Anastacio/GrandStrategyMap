@@ -64,7 +64,6 @@ namespace MapGenerator
 					else
 					{
 						const data::Color color = data::GetRandomColorNotInSet(m_colors);
-
 						mygal::Vector2<int> point = algo::fillGetCentroidOfPoints(x, y, m_tiles, color, width, height);
 					}
 				}
@@ -238,6 +237,27 @@ namespace MapGenerator
 			}
 		}
 	}
+	void TileMap::ColorInBordersByType(const TileType type)
+	{
+		auto width = Width();
+		auto height = Height();
+		for (unsigned y = 0; y < height; y++)
+		{
+			for (unsigned x = 0; x < width; x++)
+			{
+				auto index = y * width + x;
+				if (m_tiles[index].isBorder && m_tiles[index].type == type)
+				{
+					Tile tile;
+					if (FindClosestTileOfSameType(x, y, width, tile))
+					{
+						m_tiles[index].color = tile.color;
+						m_tiles[index].centroid = tile.centroid;
+					}
+				}
+			}
+		}
+	}
 
 	std::vector<uint8_t> TileMap::GetLandTileMap() const
 	{
@@ -354,7 +374,7 @@ namespace MapGenerator
 		return buffer;
 	}
 
-	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor)
+	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer,  const TileType type, const data::Color& borderColor)
 	{
 		if(borderBuffer.size() != m_tiles.size() * 4)
 		{
@@ -377,6 +397,7 @@ namespace MapGenerator
 				{
 					m_tiles[tileIndex].visited = true;
 					m_tiles[tileIndex].isBorder = true;
+					// m_tiles[tileIndex].type = type;
 				}
 			}
 		}

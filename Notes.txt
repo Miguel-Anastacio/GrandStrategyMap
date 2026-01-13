@@ -1,0 +1,42 @@
+
+Problems:
+
+Really slow at updating struct when is defined in bp
+    ->Fixed
+Thirdparty folder not well setup in project output
+Replace all structs of type breaks filter in Data Editor (Maybe we need to update the filter here, filter worked actual replacement did not work)
+ -> Only id using it after map gen without loading
+ -> Fixed
+
+
+Improvements minor:
+Refactor file logger -> consider using spdlog
+What is the point of lacunarity?
+    -> removed
+Add tootips for other noise parameters
+    -> Done
+Data structs used add tootips
+    ->Done
+Add horizontal scroll bar to Data Editor
+    ->Done
+
+RuntimeMap Issues:
+Warning      LogRendererCore           D:\Dev\Unreal\PluginPackage\Plugins\InteractiveMap\Source\ShadersModule\Private\ReplaceColorComputeShader\ReplaceColorComputeShader.cpp(34): Shader parameter FParameters::PixelBuffer error:
+Warning      LogRendererCore           Unable to bind a shader parameter type RWStructuredBuffer<int> with a SHADER_PARAMETER_RDG_BUFFER_SRV.
+    -> Fixed
+
+Remove Lookuptexture field from map actor
+    ->Fixed
+Check logs in InteractiveMap runtime
+    Pixel Map does not match lookup
+
+LogInteractiveMap: Warning: Dynamic Texture tried to Update Texture but Data is Null
+LogInteractiveMap: Error: Pixel Map does not match lookup
+LogInteractiveMap: Warning: Property: Populatio
+
+LogInteractiveMap: Warning: Property: Country
+LogTemp: Warning: Dispatch Pass 0: Pixels per dispatch 8388480
+LogTemp: Warning: Dispatch Pass 1: Pixels per dispatch 8388480
+LogInteractiveMap: Warning: Dynamic Texture tried to Update Texture but Data is Null
+LogInteractiveMap: Warning: Dynamic Texture tried to Update Texture but Data is Null
+

@@ -1,0 +1,15 @@
+[2025-11-19 22:58:09] [INFO] Set user border upload
+[2025-11-19 22:58:09] [INFO] Border upload size: 21989840
+[2025-11-19 22:58:09] [INFO] Regenerating lookup map
+[2025-11-19 22:58:09] [INFO] Computing Diagram from Mask: oceamMask.png
+[2025-11-19 22:58:09] [INFO] Diagram final centroids: 
+[2025-11-19 22:58:09] [INFO] Centroid: 0.138148;0.506194
+[2025-11-19 22:58:09] [INFO] Centroid: 0.640893;0.901081
+[2025-11-19 22:58:09] [INFO] Centroid: 0.642014;0.083750
+[2025-11-19 22:58:09] [INFO] Centroid: 0.882793;0.746224
+[2025-11-19 22:58:09] [INFO] Centroid: 0.249677;0.926663
+[2025-11-19 22:58:09] [INFO] Centroid: 0.142500;0.125000
+[2025-11-19 22:58:09] [INFO] Centroid: 0.407719;0.345836
+[2025-11-19 22:58:09] [INFO] Centroid: 0.509264;0.643249
+[2025-11-19 22:58:09] [INFO] Centroid: 0.933965;0.308421
+[2025-11-19 22:58:09] [INFO] Centroid: 0.135455;0.755413

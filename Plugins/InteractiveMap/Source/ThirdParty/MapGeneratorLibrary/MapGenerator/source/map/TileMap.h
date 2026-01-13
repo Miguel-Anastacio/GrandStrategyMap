@@ -111,6 +111,7 @@ namespace MapGenerator
 		bool FindClosestTileOfSameType(int x, int y, int radius, Tile &out_color) const;
 
 		void ColorInBorders(const Mask &mask);
+		void ColorInBordersByType(const TileType type);
 		
 		std::vector<uint8_t> GetOceanTileMap() const;
 		std::vector<uint8_t> GetLandTileMap() const;
@@ -127,7 +128,7 @@ namespace MapGenerator
 			ComputeColorsInUse();
 		}
 
-		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor = data::Color(0, 0, 255, 255));
+		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const TileType type, const data::Color& borderColor = data::Color(0, 0, 255, 255));
 	
 	private:
 		std::vector<uint8_t> GetTileMapOfType(TileType type) const;
