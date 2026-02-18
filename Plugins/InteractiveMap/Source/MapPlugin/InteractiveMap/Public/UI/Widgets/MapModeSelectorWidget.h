@@ -30,14 +30,13 @@ public:
     UMapObject* MapObject;
 
     UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
-    TSubclassOf<UUserWidget> MapModeSelectButton;
+    TSubclassOf<UCustomButtonWidget> MapModeSelectButton;
 #endif
     
 protected:
     virtual void NativeOnInitialized() override;
-    virtual void NativePreConstruct() override;
     UFUNCTION()
-    void SetMapMode(UCustomButtonWidget* ButtonWidget);
+    void SetMapMode(const UCustomButtonWidget* ButtonWidget);
 protected:
     UPROPERTY(EditAnywhere, Category = "MapModeSelectorWidget")
     uint8 Columns = 5;

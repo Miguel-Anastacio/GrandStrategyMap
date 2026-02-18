@@ -12,7 +12,7 @@
  * Parameters:
  *    - Button: The custom button widget that was clicked.
  */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomButtonClickedSignature, class UCustomButtonWidget*, Button);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCustomButtonClickedSignature, const class UCustomButtonWidget*, Button);
 
 /**
  * Custom Button Widget - allows customization of button appearance and behavior.

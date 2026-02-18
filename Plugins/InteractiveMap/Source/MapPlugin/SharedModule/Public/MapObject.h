@@ -14,10 +14,12 @@
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Engine/Texture2D.h"
 #if WITH_EDITOR
 #include "source/map/Map.h"
 #include "MapGenParamStructs.h"
 #endif
+#include <vector>
 
 
 #include "MapObject.generated.h"
@@ -175,7 +177,6 @@ public:
 
 	void SaveData() const;
 	void SetLookupTexture(UTexture2D *Texture2D);
-	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	void SetMapDataFilePath(const FString &FilePath);
 	void SetFilePathMapData(const FString &FilePath);
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
@@ -208,6 +209,7 @@ public:
 #endif
 	
 public:
+	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
 	
 	// Logging
 	void LogLookupTable() const;
@@ -329,6 +331,7 @@ private:
 	
 };
 
+#if WITH_EDITOR
 static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 template <typename T>
@@ -349,3 +352,4 @@ static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& Threa
 		}
 	});
 }
+#endif

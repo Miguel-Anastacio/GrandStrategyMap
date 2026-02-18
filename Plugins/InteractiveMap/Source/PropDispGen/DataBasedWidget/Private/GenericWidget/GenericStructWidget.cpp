@@ -3,15 +3,15 @@
 #include "GenericWidget/GenericStructWidget.h"
 #include "UObject/Field.h"
 #include "DataBasedWidget.h"
-#include "WidgetBlueprint.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/GridPanel.h"
 #include "GenericWidget/DataDrivenUserWidgetInterface.h"
 #include "GenericWidget/GenericWidgetDataMap.h"
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #if WITH_EDITOR
+#include "Kismet2/BlueprintEditorUtils.h" 
+#include "WidgetBlueprint.h"
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #endif
 
@@ -136,7 +136,7 @@ void UWPropGenGeneric::InitializeWidgetFields()
 		FName FieldName(*Property->GetAuthoredName());
 		for(const auto& Widget : MainPanel->GetAllChildren())
 		{
-			if(FieldName == Widget->GetCategoryName())
+			if(Widget->GetName().StartsWith(FieldName.ToString()))
 			{
 				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
 				{

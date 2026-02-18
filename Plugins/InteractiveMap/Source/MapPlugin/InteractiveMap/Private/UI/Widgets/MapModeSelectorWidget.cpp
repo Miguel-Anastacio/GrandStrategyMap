@@ -28,22 +28,6 @@ void UMapModeSelectorWidget::NativeOnInitialized()
 	Super::NativeOnInitialized();
 }
 
-void UMapModeSelectorWidget::NativePreConstruct()
-{
-	// Set text of Widgets
-	if(GridPanel)
-	{
-		for(const auto& Widget : GridPanel->GetAllChildren())
-		{
-			if(UCustomButtonWidget* UserWidget = Cast<UCustomButtonWidget>(Widget))
-			{
-				UserWidget->SetButtonText(Widget->GetCategoryName());
-			}
-		}
-	}
-	Super::NativePreConstruct();
-}
-
 #if WITH_EDITOR
 void UMapModeSelectorWidget::CreatePanelSlots() const
 {
@@ -76,12 +60,12 @@ void UMapModeSelectorWidget::CreatePanelSlots() const
 	TArray<UWidget*> NewlyCreatedWidgets;
 	for(const auto& Property : MapObject->GetVisualProperties())
 	{
-		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(*MapModeSelectButton))
+		if(UCustomButtonWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UCustomButtonWidget>(*MapModeSelectButton))
 		{
 			FName UniqueName = MakeUniqueObjectName(MainAssetWidgetTree, MapModeSelectButton, FName(*Property->Name));
 			NewWidget->Rename(*UniqueName.ToString(), MainAssetWidgetTree, REN_DontCreateRedirectors);
 			
-			NewWidget->SetCategoryName(Property->Name);
+			NewWidget->SetButtonText(Property->Name);
 
 			// Add to grid (this makes it part of the widget tree)
 			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
@@ -101,7 +85,7 @@ void UMapModeSelectorWidget::CreatePanelSlots() const
 	UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(NewlyCreatedWidgets, WidgetBP);
 	if(AssetGridPanel->GetChildrenCount() == 0)
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("Widget Type is not of type UUserWidget"));
+		UE_LOG(LogInteractiveMap, Error, TEXT("Widget Type is not of type UCustomButtonWidget"));
 	}
 	
 	AssetGridPanel->Modify();
@@ -151,10 +135,10 @@ void UMapModeSelectorWidget::CreateMainPanel() const
 }
 #endif
 
-void UMapModeSelectorWidget::SetMapMode(UCustomButtonWidget* ButtonWidget)
+void UMapModeSelectorWidget::SetMapMode(const UCustomButtonWidget* ButtonWidget)
 {
 	if(GameMapReference.IsValid())
 	{
-		GameMapReference->SetMapMode(*ButtonWidget->GetCategoryName());
+		GameMapReference->SetMapMode(*ButtonWidget->ButtonText);
 	}
 }

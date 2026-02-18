@@ -1,6 +1,7 @@
 # InteractiveGrandStrategyMap Plugin - User Documentation
 
 ## Table of Contents
+TODO: Review at the end
 1. [Overview](#overview)
 2. [Features](#features)
 3. [Plugin Installation](#plugin-installation)
@@ -17,7 +18,7 @@
 The **InteractiveGrandStrategyMap** plugin provides a framework for creating interactive maps similar to those in grand strategy games like Europa Universalis 4 and Crusader Kings. It enables procedural map generation using Voronoi diagrams, interactive tile systems, dynamic textures, and data-driven gameplay.
 
 ### Supported Versions
-- **Unreal Engine:** 5.3+
+- **Unreal Engine:** 5.4+, 
 - **Platform:** Windows 64-bit
 
 ---
@@ -29,10 +30,7 @@ The **InteractiveGrandStrategyMap** plugin provides a framework for creating int
 - **Dynamic Textures** - Real-time texture updates via compute shaders
 - **Map Modes** - Switch between visual representations (Political, Terrain, etc.)
 - **Camera Controllers** - Pre-configured BirdEye and Globe controllers
-- **Data Management** - JSON save/load system
-- **Blueprint Integration** - Full Blueprint support for gameplay
-
----
+- **Blueprint Integration** - Full Blueprint support for integration into projects
 
 ---
 
@@ -70,7 +68,12 @@ Restart the editor to apply all changes and load the plugin fully.
 
 ## Map Generation Workflow
 
-This section covers the process of generating a map in the editor before integrating it into your game.
+This section covers the process of generating a map in the editor before integrating it into your game. This can be optional, if you already have the necessary files for the map to work. 
+These are: 
+- Lookup table, a json containing ids and unique color for each tile
+- Data table (json) holding the data for each tile in map form (id and data)
+- Lookup texture
+For information on how to set this check section X
 
 ### Prerequisites
 
@@ -105,16 +108,7 @@ Define what data each tile will contain:
    - **Color** (Color) - Visual representation
    - **Custom Fields** - Any other data relevant to your game
 
-Example structure setup:
-```
-S_ProvinceData
-├── Country (String)
-├── Population (Int32)
-├── Development (Float)
-├── TerrainType (Enum)
-├── Color (Color)
-└── [Your Custom Fields]
-```
+The structure can also be defined in c++
 
 ### Step 2: Create a Map Object Asset
 
@@ -130,6 +124,7 @@ The Map Object stores the generated map data:
 All map generation is controlled through parameters on the ClickableMap actor:
 
 #### General Settings
+TODO: review these params ranges
 
 | Parameter | Type | Default | Purpose |
 |-----------|------|---------|---------|
@@ -142,6 +137,8 @@ All map generation is controlled through parameters on the ClickableMap actor:
 #### Land Details
 
 Configure how land tiles are generated:
+
+TODO: review these params ranges
 
 | Parameter | Type | Range | Purpose |
 |-----------|------|-------|---------|
@@ -157,6 +154,8 @@ Same structure as Land Details, controls water tile generation separately. You c
 #### Border Noise Settings
 
 Controls the roughness and appearance of tile borders:
+
+TODO: review these params rangess
 
 | Parameter | Type | Range | Purpose |
 |-----------|------|-------|---------|
@@ -198,54 +197,20 @@ Visual Properties define how tile data is represented visually:
 
 Example Visual Property setup:
 ```
-Temperature Visual Property:
-  Input: Temperature (Float 0-40)
-  Output: Color
-  - 0°C   → Blue (Frozen)
-  - 10°C  → Cyan (Cold)
-  - 20°C  → Green (Temperate)
-  - 30°C  → Red (Hot)
-  
-This creates an automatic color gradient based on tile temperature
+TODO: Insert screenshot of example visual property
 ```
+---
+## Loading your own data files and lookup texture
+
+TODO: Add section here e
+
+---
 
 ---
 
 ## Integrating Map into Project
 
 ---
-
-## Plugin Hooks & Delegates
-
-### AClickableMap Delegates
-
-The map broadcasts these events that you can listen to:
-
-#### OnMapInitialized
-Fires when map generation completes and is ready for use.
-```
-Signature: void(AClickableMap* Map)
-Usage: Bind to this to know when map data is available
-```
-
-#### OnMapTileChanged
-Fires when one or more tiles are modified.
-```
-Signature: void(const TArray<int>& TileIDs)
-Usage: Bind to update UI or gameplay when provinces change
-Parameters: Array of tile IDs that were modified
-```
-
-#### OnMapModeChanged
-Fires when the map mode switches.
-```
-Signature: void(FName OldMode, FName NewMode)
-Usage: Bind to know when visualization changes
-Parameters: Old and new mode names
-```
-
-### Key Methods to Call
-
 
 ### Choosing Your Map Type
 
@@ -281,7 +246,7 @@ Set up your level to use the correct controller and pawn:
 
 1. Open your game level
 2. Go to **World Settings** (Details panel or Window menu)
-3. Under **Game Mode**, select or create a Game Mode Blueprint
+3. Under **Game Mode**, select one of the defined game modes or create a Game Mode Blueprint
 4. In the Game Mode settings:
    - **Player Controller Class:** Set to your desired controller
      - Use `BirdEyeController` for flat maps
@@ -294,9 +259,11 @@ Set up your level to use the correct controller and pawn:
 2. Ensure the **Map Object** property is set to your generated map asset
 3. The map will be ready to use at runtime
 
-
+For an example of a level where this is already setup please check the provided levels.
 
 ## Setting Up UI
+
+Explain integration with HUD to get started. Note you can adapt this after
 
 The plugin includes the **PropertyDisplayGenerator** plugin to automatically generate UI for your data structures.
 
@@ -314,6 +281,35 @@ When you have custom tile data structures, you can automatically generate UI:
 
 This sub-plugin creates UI components based on your data structure:
 
+For detailed information on PropertyDisplayGenerator, check [PropertyDisplayGenerator Doc](https://docs.google.com/document/d/1Atnt15vsg1AsZ2PlTOnDwjJgdw_dszwZl24JnJ3NNWo/edit?usp=sharing) 
 
-For detailed information on PropertyDisplayGenerator, check 
+## Plugin Hooks & Delegates
 
+### AClickableMap Delegates
+
+TODO: Review this
+
+The map broadcasts these events that you can listen to:
+
+#### OnMapInitialized
+Fires when map generation completes and is ready for use.
+```
+Signature: void(AClickableMap* Map)
+Usage: Bind to this to know when map data is available
+```
+
+#### OnMapTileChanged
+Fires when one or more tiles are modified.
+```
+Signature: void(const TArray<int>& TileIDs)
+Usage: Bind to update UI or gameplay when provinces change
+Parameters: Array of tile IDs that were modified
+```
+
+#### OnMapModeChanged
+Fires when the map mode switches.
+```
+Signature: void(FName OldMode, FName NewMode)
+Usage: Bind to know when visualization changes
+Parameters: Old and new mode names
+```
