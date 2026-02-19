@@ -20,9 +20,9 @@ void UCustomButtonWidget::NativeOnInitialized()
 
 void UCustomButtonWidget::SetButtonText(const FString& NewText)
 {
+	ButtonText = NewText;
 	if (IsValid(ButtonTextWidget))
 	{
-		ButtonText = NewText;
 		ButtonTextWidget->SetText(FText::FromString(NewText));
 	}
 }

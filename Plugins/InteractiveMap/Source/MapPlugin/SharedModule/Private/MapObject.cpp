@@ -254,17 +254,14 @@ void UMapObject::Serialize(FArchive& Ar)
 #endif
 }
 
-
 TArray<TObjectPtr<UVisualProperty>> UMapObject::GetVisualProperties()
 {
-	if(VisualPropertyInstances.IsEmpty())
+	VisualPropertyInstances.Empty();
+	for(const TSubclassOf<UVisualProperty> VisualPropertyClass : VisualProperties)
 	{
-		for(const TSubclassOf<UVisualProperty> VisualPropertyClass : VisualProperties)
+		if (UVisualProperty* Instance = NewObject<UVisualProperty>(this, VisualPropertyClass))
 		{
-			if (UVisualProperty* Instance = NewObject<UVisualProperty>(this, VisualPropertyClass))
-			{
-				VisualPropertyInstances.Add(Instance);
-			}
+			VisualPropertyInstances.Add(Instance);
 		}
 	}
 	return VisualPropertyInstances;
