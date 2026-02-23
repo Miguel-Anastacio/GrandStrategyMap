@@ -1,3 +1,4 @@
+@echo off
 REM ============================================================
 REM Run this script from the command line, providing the following parameters:
 REM 1. UE Engine Path (e.g. "D:\Programs\Unreal\UE_5.4")
@@ -9,7 +10,6 @@ REM It also includes a pre-step to build the MapGenerator static library, which 
 REM It will also correct the output structure to match what Epic expects regarding third-party dependencies.
 REM ============================================================
 
-@echo off
 setlocal enabledelayedexpansion
 
 REM Enhanced Plugin Build Script - Mimics Epic's Clean Build Environment

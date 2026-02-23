@@ -2,9 +2,6 @@
 Problems:
 Thirdparty folder not well setup in project output
 
-Improvements minor:
-Refactor file logger -> consider using spdlog
-
 RuntimeMap Issues:
 
 Check logs in InteractiveMap runtime
@@ -24,7 +21,14 @@ LogInteractiveMap: Warning: Dynamic Texture tried to Update Texture but Data is 
 TODO:
 Perform user test to fill out documentation steps
 Finish documentation	
-Update PropertyDisplayGenerator plugin
 Cleanup example structs
 Test packaged map
-Addres package warnings
+Address package warnings
+Update PropertyDisplayGenerator plugin
+Fix build for 5.5 and 5.4
+Cleanup files of plugin
+
+
+5.6
+User Test (write notes)
+Create package experience and test

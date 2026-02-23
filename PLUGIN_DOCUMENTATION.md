@@ -81,7 +81,7 @@ Before you can generate a map, you need to prepare the following assets:
 
 #### 1. Heightmap Texture (Required)
 A 2D grayscale texture that defines the land/water distribution:
-- **Format:** UTexture2D with R8 or RGBA8 format
+- **CompressionSettings**: UserInterface2D
 - **SRGB:** Disabled (unchecked in texture settings)
 - **Recommended Resolution:** 512×512 to 2048×2048
 - **Size:** Must be power of 2 (512, 1024, 2048, 4096)
@@ -100,21 +100,17 @@ Define what data each tile will contain:
 
 1. In Content Browser: **Right-click → Structure**
 2. Create a new Blueprint Structure (e.g., `S_ProvinceData`)
-3. Add properties your tiles will have:
-   - **Country** (String) - Nation that owns the tile
-   - **Population** (Integer) - Number of inhabitants
-   - **Development** (Float) - Economic development level
-   - **Terrain Type** (Enum) - Plains, Forest, Mountain, Water, etc.
-   - **Color** (Color) - Visual representation
-   - **Custom Fields** - Any other data relevant to your game
+3. Add propety ID (as an integer)
+4. Add any other properties your tiles will have
 
-The structure can also be defined in c++
+Define another struct if you wish for ocean tiles.
+These structures can also be defined in c++
 
 ### Step 2: Create a Map Object Asset
 
 The Map Object stores the generated map data:
 
-1. In Content Browser: **Right-click → Miscellaneous → Data Asset**
+1. In Content Browser: **Right-click → MapEditor**
 2. Select **Map Object** (class `UMapObject`) from the dropdown
 3. Name it (e.g., `DA_MyMapData`)
 4. Open the asset
@@ -124,7 +120,6 @@ The Map Object stores the generated map data:
 All map generation is controlled through parameters on the ClickableMap actor:
 
 #### General Settings
-TODO: review these params ranges
 
 | Parameter | Type | Default | Purpose |
 |-----------|------|---------|---------|
@@ -138,8 +133,6 @@ TODO: review these params ranges
 
 Configure how land tiles are generated:
 
-TODO: review these params ranges
-
 | Parameter | Type | Range | Purpose |
 |-----------|------|-------|---------|
 | **Number Of Tiles** | Int32 | 1-100000 | Target number of land tiles to generate |
@@ -151,11 +144,9 @@ TODO: review these params ranges
 
 Same structure as Land Details, controls water tile generation separately. You can have different numbers of land and ocean tiles.
 
-#### Border Noise Settings
+#### Noise Details
 
 Controls the roughness and appearance of tile borders:
-
-TODO: review these params rangess
 
 | Parameter | Type | Range | Purpose |
 |-----------|------|-------|---------|
