@@ -84,26 +84,35 @@ public:
      */
     virtual FText GetPropertyValueText(const FProperty *Property) const
     {
+        if (!Property->IsValidLowLevel())
+        {
+            return FText();
+        }
+        if (!Item.IsValid())
+        {
+            return FText();
+        }
         FString PropertyValueStr;
-        void *Data = Item.Get()->GetMutableMemory();
-        const uint8 *PropertyAddr = Property->ContainerPtrToValuePtr<uint8>(Data);
-        Property->ExportTextItem_Direct(PropertyValueStr, PropertyAddr, nullptr, nullptr, PPF_None);
+        const void *Data = Item.Get()->GetMemory();
+        Property->ExportTextItem_InContainer(PropertyValueStr, Data, nullptr, nullptr, PPF_None);
         return FText::FromString(PropertyValueStr);
     }
 
     virtual TSharedRef<SWidget> DisplayEditableProperty(const FProperty *Property)
     {
+        const FText Text = GetPropertyValueText(Property);
         return SNew(SBox)
             .Padding(FMargin(4.0f, 0.0f))
             .VAlign(VAlign_Center)
                 [SNew(SEditableTextCustom)
                      .OnPropertyEdited_Lambda([this](const FName &Name, const FText &Text)
-                                              {
-                   if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
-                   {
-                       ItemChanged.ExecuteIfBound(*Item);
-                   } })
-                     .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
+                     {
+                        if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), Text.ToString()))
+                        {
+                            ItemChanged.ExecuteIfBound(*Item);
+                        } 
+                     })
+                     .Text(Text)
                      .Name(Property->GetFName())
 
         ];
@@ -111,11 +120,12 @@ public:
 
     virtual TSharedRef<SWidget> DisplayNotEditableProperty(const FProperty *Property)
     {
+        const FText Text = GetPropertyValueText(Property);
         return SNew(SBox)
             .Padding(FMargin(4.0f, 0.0f))
             .VAlign(VAlign_Center)
                 [SNew(STextBlock)
-                     .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)];
+                     .Text(Text)];
     }
 
     /**
@@ -176,26 +186,15 @@ public:
             List = (InArgs._ListSource);
         }
         ItemUpdateDelegate = InArgs._OnItemChanged;
-
+        
         // create header
         HeaderRow = SNew(SHeaderRow);
         // Create columns dependent on struct data passed
         if (InArgs._StructTypes != nullptr)
         {
-            for (const auto &Struct : *InArgs._StructTypes)
-            {
-                TArray<const FProperty *> OrderedProperties = UAtkStructUtilsFunctionLibrary::GetOrderedProperties(Struct);
-                for (const FProperty *Property : OrderedProperties)
-                {
-                    const FText PropertyNameText = Property->GetDisplayNameText();
-                    const FName PropertyName(PropertyNameText.ToString());
-                    if (!HeaderRow->IsColumnVisible(PropertyName))
-                    {
-                        HeaderRow->AddColumn(SHeaderRow::Column(PropertyName).DefaultLabel(PropertyNameText).ManualWidth(100.0f));
-                    }
-                }
-            }
+            BuildColumns(*InArgs._StructTypes);
         }
+
 #if UE_VERSION_NEWER_THAN(5, 4, 4)
         ListView = SNew(SListView<TSharedPtr<FInstancedStruct>>)
                .ListItemsSource(List)
@@ -253,6 +252,37 @@ public:
             ListView->ClearSelection();
         }
     }
+    
+    virtual void RebuildColumns(const TArray<UScriptStruct *>& StructTypes)
+    {
+        if (!HeaderRow.IsValid())
+            return;
+
+        // Clear existing columns
+        HeaderRow->ClearColumns();
+
+        // Rebuild them
+        for (const auto &Struct : StructTypes)
+        {
+            const TArray<const FProperty *> OrderedProperties = UAtkStructUtilsFunctionLibrary::GetOrderedProperties(Struct);
+            for (const FProperty *Property : OrderedProperties)
+            {
+                const FText PropertyNameText = Property->GetDisplayNameText();
+                const FName PropertyName(PropertyNameText.ToString());
+                if (!HeaderRow->IsColumnVisible(PropertyName))
+                {
+                    HeaderRow->AddColumn(SHeaderRow::Column(PropertyName).DefaultLabel(PropertyNameText).ManualWidth(100.0f));
+                }
+            }
+        }
+        
+        // Force list refresh
+        if (ListView.IsValid())
+        {
+            ListView->RequestListRefresh();
+        }
+    }
+    
 
     virtual void SetSelection(const TArray<int32>& Indexes)
     {
@@ -280,6 +310,23 @@ public:
     }
 
 protected:
+    virtual void BuildColumns(const TArray<UScriptStruct *>& StructTypes)
+    {
+        for (const auto &Struct : StructTypes)
+        {
+            const TArray<const FProperty *> OrderedProperties = UAtkStructUtilsFunctionLibrary::GetOrderedProperties(Struct);
+            for (const FProperty *Property : OrderedProperties)
+            {
+                const FText PropertyNameText = Property->GetDisplayNameText();
+                const FName PropertyName(PropertyNameText.ToString());
+                if (!HeaderRow->IsColumnVisible(PropertyName))
+                {
+                    HeaderRow->AddColumn(SHeaderRow::Column(PropertyName).DefaultLabel(PropertyNameText).ManualWidth(100.0f));
+                }
+            }
+        }
+    }
+    
     TArray<TSharedPtr<FInstancedStruct>>* List;
     TSharedPtr<SListView<TSharedPtr<FInstancedStruct>>> ListView;
     TSharedPtr<SHeaderRow> HeaderRow;
