@@ -125,8 +125,6 @@ void AClickableMap::InitializeMap_Implementation()
 		DynamicTextureComponent->UpdateTexture();
 		DynamicTextureComponent->GetMaterialInstance()->SetTextureParameterValue("DynamicTexture", DynamicTextureComponent->GetTexture());
 	}
-
-	SetMapMode_Implementation(StartMapMode);
 	
 	// set reference in player class
 	if (AMapPawn* Player = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)))
@@ -143,8 +141,10 @@ UMapObject* AClickableMap::GetMapObject() const
 // Called when the game starts or when spawned
 void AClickableMap::BeginPlay()
 {
+	check(MapAsset != nullptr);
 	Super::BeginPlay();
 	InitializeMap_Implementation();
+	SetMapMode_Implementation(StartMapMode);
 }
 
 void AClickableMap::CreateMapModes()
