@@ -10,6 +10,7 @@
  * It provides functionality to interact with the game map and save data.
  */
 class UCustomButtonWidget;
+class UTileSelectedWidget;
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UGrandStrategyHUDWidget : public UUserWidget
 {
@@ -19,6 +20,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "HUD")
 	void SetGameMapReference();
 
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetTileSelectedWidgetData(const FInstancedStruct& Data);
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetTileSelectedVisibility(const ESlateVisibility Visible);
+	
 protected:
 	/** Native initialization override. */
 	virtual void NativeOnInitialized() override;
@@ -28,8 +35,9 @@ protected:
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
 	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
 
-	/** Reference to the interactive map. */
-	UPROPERTY()
-	class AClickableMap* GameMap;
-
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Widgets")
+	UNamedSlot* SelectedSlot;
+	
+	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (MustImplement = "WidgetDataInterface"))
+	TSubclassOf<UUserWidget> TileDisplayWidgetClass;
 };

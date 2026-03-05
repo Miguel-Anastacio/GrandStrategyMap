@@ -131,13 +131,7 @@ void ABirdEyeController::MouseClick()
 			if (Data)
 			{
 				ProvinceHoveredDelegate.Broadcast(Color, ID);
-
 				ProvinceClickedDelegate.Broadcast(ID, *Data);
-				AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
-				if (ManagerHUD)
-				{
-					ManagerHUD->SetInteractiveMapReference(Map);
-				}
 			}
 			else
 			{
@@ -185,7 +179,7 @@ void ABirdEyeController::HideHUD()
 	AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
 	if (ManagerHUD)
 	{
-		ManagerHUD->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+		ManagerHUD->SetTileSelectedWidgetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -194,8 +188,7 @@ void ABirdEyeController::ShowProvinceInfo(int Id, const FInstancedStruct& Data)
 	AManagerHUD* HUD = Cast<AManagerHUD>(GetHUD());
 	if (HUD)
 	{
-		HUD->SetInteractiveMapReference(Map);
-		HUD->DisplayProvinceEditorWidget(Data, Id);
+		HUD->DisplayTileSelectedWidget(Data);
 		bProvinceSelected = true;
 	}
 }
