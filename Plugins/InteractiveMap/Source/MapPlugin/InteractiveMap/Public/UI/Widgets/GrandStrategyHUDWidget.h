@@ -16,28 +16,44 @@ class INTERACTIVEMAP_API UGrandStrategyHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	/** Sets the reference to the game map. */
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetGameMapReference();
 
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetTileSelectedWidgetData(const FInstancedStruct& Data);
+	void SetTileSelectedWidgetData(const FInstancedStruct& Data) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetTileSelectedVisibility(const ESlateVisibility Visible);
+	void SetTileSelectedVisibility(const ESlateVisibility Visible) const;
+	
+#if WITH_EDITOR
+	void CreateHudElements();
+	void SetTileDisplayWidgetClass(const TSubclassOf<UUserWidget> Class);
+	void SeMapModeSelectorWidgetClass(const TSubclassOf<UUserWidget> Class);
+#endif	
 	
 protected:
 	/** Native initialization override. */
 	virtual void NativeOnInitialized() override;
-
+	
 protected:
-	/** Widget to handle map mode selection */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
-
 	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Widgets")
 	UNamedSlot* SelectedSlot;
 	
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Widgets")
+	UNamedSlot* MapModeSelectorSlot;
+	
 	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (MustImplement = "WidgetDataInterface"))
 	TSubclassOf<UUserWidget> TileDisplayWidgetClass;
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> MapModeSelectorWidgetClass;
+	
+	
+	/** Hold ref to widget to handle map mode selection */
+	UPROPERTY()
+	TWeakObjectPtr<class UMapModeSelectorWidget> MapModeSelectorWidgetRef;
+	
+private:
+#if WITH_EDITOR
+	UNamedSlot* CreateNamedSlot(const FString& SlotName) const;
+#endif	
+	
+	
 };

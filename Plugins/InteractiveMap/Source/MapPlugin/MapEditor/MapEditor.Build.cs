@@ -63,6 +63,7 @@ public class MapEditor : ModuleRules
 				"Blutility",
 				"DataBasedWidget",
 				"InteractiveMap",
+				"UMGEditor"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -111,43 +111,4 @@ void UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(const TArray<U
 	}
 }
 
-void UAtkWidgetEditorFunctionLibrary::ClearChildren(UWidgetBlueprint* WidgetBP, UGridPanel* GridPanel)
-{
-	if(!WidgetBP || !GridPanel)
-	{
-		return;
-	}
-    
-	// Get the widget tree
-	UWidgetTree* WidgetTree = WidgetBP->WidgetTree;
-	if(!WidgetTree)
-	{
-		return;
-	}
-    
-	// Remove GUIDs and remove from widget tree
-	for(UWidget* Child : GridPanel->GetAllChildren())
-	{
-		if(Child)
-		{
-			FName WidgetName = Child->GetFName();
-			WidgetBP->WidgetVariableNameToGuidMap.Remove(WidgetName);
-			// UE_LOG(LogUtilityModuleEditor, Log, TEXT("Removing GUID for: %s"), *WidgetName.ToString());
-
-			// IMPORTANT: Actually garbage collect the old widgets
-			Child->Rename(nullptr, GetTransientPackage(), REN_DontCreateRedirectors | REN_ForceNoResetLoaders);
-			Child->MarkAsGarbage();
-			
-			if(WidgetTree->RemoveWidget(Child))
-			{
-				// UE_LOG(LogUtilityModuleEditor, Log, TEXT("Removed widget %s from tree"), *WidgetName.ToString());
-			}
-		}
-	}
-    
-	// Now clear the panel (should already be empty, but just in case)
-	GridPanel->ClearChildren();
-	WidgetTree->Modify();
-}
-
 #endif

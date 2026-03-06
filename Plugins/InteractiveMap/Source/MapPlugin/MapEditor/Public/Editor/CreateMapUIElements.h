@@ -3,10 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Blueprint/WidgetTree.h"
+#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #include "Editor/Blutility/Classes/AssetActionUtility.h"
+#include "Editor/UMGEditor/Public/WidgetBlueprint.h"
 #include "CreateMapUIElements.generated.h"
 
 class UMapObject;
+
 /**
  * 
  */
@@ -15,6 +19,12 @@ class MAPEDITOR_API UCreateMapUIElements : public UAssetActionUtility
 {
 	GENERATED_BODY()
 	UCreateMapUIElements();
+
+	struct DataWidgetsBps
+	{
+		UBlueprint* BlueprintLand;
+		UBlueprint* BlueprintOcean;
+	};
 
 public:
 	/*
@@ -32,7 +42,8 @@ public:
 		UPARAM(meta = (AllowedClasses = "CustomButtonWidget"))
 			TSubclassOf<class UCustomButtonWidget>
 				DefaultWidgetForButtons = nullptr) const;
-
+	
+	
 	UFUNCTION(CallInEditor, Category = "Create Map UI Elements")
 	virtual void CreateAll(
 		UPARAM(meta = (AllowedClasses = "UserWidget", MustImplement = "/Script/DataBasedWidget.PropGenDataDrivenUserWidgetInterface"))
@@ -43,6 +54,33 @@ public:
 			DefaultWidgetForButtons = nullptr) const;
 
 protected:
-	static void CreateWidgetForStruct(UScriptStruct* Struct, const FString& PackagePath, TSubclassOf<UUserWidget> DefaultWidgetForFields = nullptr);
-	static void CreateMapModeWidget(UMapObject* MapObject,  const FString& PackagePath, TSubclassOf<class UCustomButtonWidget> DefaultWidgetForButtons = nullptr);
+	static DataWidgetsBps CreateMapDataWidgetsImpl(TSubclassOf<UUserWidget> DefaultWidgetForFields);
+	static UBlueprint* CreateWidgetForStruct(UScriptStruct* Struct, const FString& PackagePath, TSubclassOf<UUserWidget> DefaultWidgetForFields = nullptr);
+	
+	static UBlueprint* CreateMapModeSelectorWidgetImpl(TSubclassOf<class UCustomButtonWidget> DefaultWidgetForButtons);
+	static UBlueprint* CreateMapModeWidget(UMapObject* MapObject,  const FString& PackagePath, TSubclassOf<class UCustomButtonWidget> DefaultWidgetForButtons = nullptr);
+	
+	static UBlueprint* CreateTileSelectedWidget(UBlueprint* LandDataBp, UBlueprint* OceanDataBp);
+	static UBlueprint* CreateTileSelectedWidget(UMapObject* MapObject, const FString& PackagePath, UBlueprint* LandDataBp, UBlueprint* OceanDataBp);
+	static void AddDataWidgetsToMain(class UTileSelectedWidget* TileSelectedWidget, TSubclassOf<UUserWidget> LandWidget, TSubclassOf<UUserWidget> OceanWidget);
+	
+	static void CreateMapHUDWidget(UBlueprint* TileSelectedWidgetBp, UBlueprint* MapModeSelectorWidgetBlueprint);
+	static void CreateMapHUDWidget(UMapObject* MapObject, const FString& PackagePath, UBlueprint* TileSelectedWidgetBp, UBlueprint* MapModeSelectorWidgetBlueprint);
+	
+	
+	template <typename T>
+	static T* GetDefaultObject(UBlueprint *Blueprint)
+	{
+		if (!Blueprint)
+		{
+			return nullptr;
+		}
+		if (const UBlueprintGeneratedClass *BPGeneratedClass = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass))
+		{
+			 T *DefaultObject = Cast<T>(BPGeneratedClass->GetDefaultObject());
+			return DefaultObject;
+		}
+		return nullptr;
+	}
+
 };

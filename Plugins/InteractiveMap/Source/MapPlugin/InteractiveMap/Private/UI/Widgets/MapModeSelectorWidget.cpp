@@ -4,6 +4,7 @@
 #include "InteractiveMap.h"
 #include "MapObject.h"
 #include "Components/GridPanel.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/Widgets/CustomButtonWidget.h"
 #if WITH_EDITOR
 #include "Blueprint/WidgetTree.h"
@@ -11,9 +12,15 @@
 #include "WidgetBlueprint.h"
 #endif
 
-void UMapModeSelectorWidget::SetInteractiveMapReference(class AClickableMap* Map)
+void UMapModeSelectorWidget::SetInteractiveMapReference()
 {
-	GameMapReference = Map;
+	if (AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), AClickableMap::StaticClass()))
+	{
+		if(AClickableMap* GameMap = Cast<AClickableMap>(Actor))
+		{
+			GameMapReference = GameMap;
+		}
+	}
 }
 
 void UMapModeSelectorWidget::NativeOnInitialized()
@@ -25,6 +32,8 @@ void UMapModeSelectorWidget::NativeOnInitialized()
 			UserWidget->OnClickedDelegate.AddDynamic(this, &UMapModeSelectorWidget::SetMapMode);
 		}
 	}
+	
+	SetInteractiveMapReference();
 	Super::NativeOnInitialized();
 }
 

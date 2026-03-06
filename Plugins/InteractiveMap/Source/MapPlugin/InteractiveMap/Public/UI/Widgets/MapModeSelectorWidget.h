@@ -16,9 +16,6 @@ class INTERACTIVEMAP_API UMapModeSelectorWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-    /** Sets the reference to the interactive map. */
-    UFUNCTION(BlueprintCallable, Category = "MapModeSelectorWidget")
-    void SetInteractiveMapReference(class AClickableMap* Map);
 #if WITH_EDITOR
     UFUNCTION(CallInEditor, BlueprintCallable, Category = "MapModeSelectorWidget")
     void CreatePanelSlots() const;
@@ -34,6 +31,7 @@ public:
 #endif
     
 protected:
+    void SetInteractiveMapReference();
     virtual void NativeOnInitialized() override;
     UFUNCTION()
     void SetMapMode(const UCustomButtonWidget* ButtonWidget);
