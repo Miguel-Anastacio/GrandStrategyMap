@@ -19,7 +19,6 @@ public:
 	static class UPanelWidget* GetPanelWidget(const UUserWidget* Widget, const FName& Name);
 	static class UWidgetTree* GetWidgetTree(const UUserWidget* Widget);
 	static void MarkBlueprintAsModified(const UObject* Object);
-	static void CleanupAllOrphanedGUIDs(const UUserWidget* Object, class UWidgetBlueprint* WidgetBP);
 	static void RegisterNewlyCreatedWidgets(const TArray<class UWidget*>& NewlyCreatedWidgets, class UWidgetBlueprint* WidgetBP);
 	template <typename T>
 	static void ClearChildren(class UWidgetBlueprint* WidgetBP, T* GridPanel)

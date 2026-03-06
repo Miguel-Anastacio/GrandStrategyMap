@@ -215,9 +215,6 @@ void UWPropGenGeneric::CreatePanelSlots() const
 		}
     }
     
-    // Clean up any remaining orphaned GUIDs
-    // UAtkWidgetEditorFunctionLibrary::CleanupAllOrphanedGUIDs(this, WidgetBP);
-    
     // Register GUIDs for all newly created widgets
 	UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(NewlyCreatedWidgets, WidgetBP);
     

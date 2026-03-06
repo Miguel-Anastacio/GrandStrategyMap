@@ -54,49 +54,6 @@ class UWidgetTree* UAtkWidgetEditorFunctionLibrary::GetWidgetTree(const UUserWid
 	return MainAsset->WidgetTree;
 }
 
-void UAtkWidgetEditorFunctionLibrary::CleanupAllOrphanedGUIDs(const UUserWidget* UserWidget, UWidgetBlueprint* WidgetBP)
-{
-	const UWidgetTree* Tree = GetWidgetTree(UserWidget);
-    
-	if(!WidgetBP || !Tree)
-	{
-		return;
-	}
-    
-	// Collect all valid widget names currently in the widget tree
-	TSet<FName> ValidWidgetNames;
-	Tree->ForEachWidget([&ValidWidgetNames](const UWidget* Widget)
-	{
-		if(Widget)
-		{
-			ValidWidgetNames.Add(Widget->GetFName());
-		}
-	});
-    
-	// Find and remove all orphaned GUIDs
-	TArray<FName> OrphanedNames;
-	for(const auto& Pair : WidgetBP->WidgetVariableNameToGuidMap)
-	{
-		if(!ValidWidgetNames.Contains(Pair.Key))
-		{
-			OrphanedNames.Add(Pair.Key);
-		}
-	}
-    
-	// Remove all orphaned entries
-	for(const FName& OrphanedName : OrphanedNames)
-	{
-		WidgetBP->WidgetVariableNameToGuidMap.Remove(OrphanedName);
-		UE_LOG(LogUtilityModuleEditor, Log, TEXT("Cleaned up orphaned GUID for: %s"), *OrphanedName.ToString());
-	}
-    
-	if(OrphanedNames.Num() > 0)
-	{
-		WidgetBP->Modify();
-		UE_LOG(LogUtilityModuleEditor, Log, TEXT("Removed %d orphaned GUID entries"), OrphanedNames.Num());
-	}
-}
-
 void UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(const TArray<UWidget*>& NewlyCreatedWidgets,
 	UWidgetBlueprint* WidgetBP)
 {
