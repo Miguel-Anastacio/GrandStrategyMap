@@ -23,6 +23,6 @@ class IWidgetDataInterface
 
 public:
 	// Blueprint-callable AND overridable in BP
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="WidgetDataUpdate")
 	void SetData(const FInstancedStruct& Data);
 };
