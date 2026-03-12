@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-class FShaderBitsModule : public IModuleInterface
+class FClickableMapGameModule : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
