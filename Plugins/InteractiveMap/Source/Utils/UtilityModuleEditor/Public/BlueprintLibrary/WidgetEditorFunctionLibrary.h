@@ -19,7 +19,6 @@ public:
 	static class UPanelWidget* GetPanelWidget(const UUserWidget* Widget, const FName& Name);
 	static class UWidgetTree* GetWidgetTree(const UUserWidget* Widget);
 	static void MarkBlueprintAsModified(const UObject* Object);
-	static void CleanupAllOrphanedGUIDs(const UUserWidget* Object, class UWidgetBlueprint* WidgetBP);
 	static void RegisterNewlyCreatedWidgets(const TArray<class UWidget*>& NewlyCreatedWidgets, class UWidgetBlueprint* WidgetBP);
 	template <typename T>
 	static void ClearChildren(class UWidgetBlueprint* WidgetBP, T* GridPanel)
@@ -63,16 +62,18 @@ public:
 	
 	// T is type used for root widget
 	template <typename T>
-	static void CreateRootWidget(class UUserWidget* Widget, const FName MainPanelName)
+	static bool CreateRootWidget(const UUserWidget* Widget, const FName MainPanelName)
 	{
 		UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(Widget);
 		UWidgetBlueprint* WidgetBP = Cast<UWidgetBlueprint>(Widget->GetClass()->ClassGeneratedBy);
-    
+
+		if (!MainAssetWidgetTree || !WidgetBP) 
+			return false;
+
 		if (!MainAssetWidgetTree->RootWidget)
 		{
-			// Construct the root widget
 			T* NewRootWidget = MainAssetWidgetTree->ConstructWidget<T>(T::StaticClass(), MainPanelName);
-       
+
 			if (NewRootWidget)
 			{
 				// Generate and register a GUID for the root widget
@@ -81,8 +82,11 @@ public:
           
 				// Set as root widget
 				MainAssetWidgetTree->RootWidget = NewRootWidget;
+				return true;
 			}
 		}
+		
+		return false;
 	}
 	
 };

@@ -31,8 +31,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
 	TObjectPtr<class UMapLimitComponent> RightMapLimit;
 
-	/** The size of the box overlap on X as a percentage of the map size values between 0 a 0.5*/
-	UPROPERTY(EditAnywhere, Category = "Limit")
+	/** The size of the box overlap on X as a percentage of the map size values between 0 to 0.5*/
+	UPROPERTY(EditAnywhere, Category = "Limit", meta=(ClampMin=0.05, ClampMax=0.5))
 	float BoxPercentageOfMap = 0.1;
 };
 

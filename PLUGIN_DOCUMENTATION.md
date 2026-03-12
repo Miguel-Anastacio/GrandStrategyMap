@@ -173,7 +173,7 @@ After generation, you can edit individual tile data:
 2. The asset editor shows all tiles and their data
 3. Select individual tiles (through list or by clicking on tiles) and modify their properties, you can also select multiple and batch edit them
 
-### Step 7: Set Up Visual Properties (Optional)
+### Step 7: Set Up Visual Properties
 
 Visual Properties define how tile data is represented visually:
 
@@ -186,22 +186,42 @@ Visual Properties define how tile data is represented visually:
 3. Add these Visual Properties to your Map Object
 4. The system uses these to render tile colors and effects
 
-Example Visual Property setup:
-```
-TODO: Insert screenshot of example visual property
-```
+**IMPORTANT**: **You must add at least one visual property**
+
+Some common types are provided like a string to color map.
+
+#### Material Requirements
+
+When creating custom materials for visual properties, ensure they include the required parameters:
+
+**Required Parameters:**
+- **LookupTexture** - Reference texture used for tile data lookup
+- **Threshold** - Value threshold for visual representation
+
+**Optional Features:**
+- **Tile Highlighting** - To highlight hovered tiles, use the provided `MF_Highlight` material function. This enables visual feedback when the player hovers over tiles.
+- **Tile Borders** - Custom border visualization between tiles can be implemented using provided border functions. Refer to example materials for implementation patterns.
+
+**Dynamic Map Modes:**
+For materials intended for dynamic map modes (e.g., political maps that update at runtime), ensure they include:
+- **DynamicTexture** - Parameter for runtime texture updates via compute shaders
+
+Refer to the example materials provided in the plugin for proper usage patterns.
+
+#### Material Quality & Performance Note
+
+The example materials provided with this plugin are basic implementations offered as starting points. They prioritize functionality over visual polish or performance optimization. You are encouraged to create custom materials tailored to your project's visual requirements and performance targets. Modify these materials as needed while maintaining the required parameters mentioned above.
+
 ---
 ## Loading your own data files and lookup texture
 
-TODO: Add section here e
+TODO: Add section here
 
----
 
 ---
 
 ## Integrating Map into Project
 
----
 
 ### Choosing Your Map Type
 
@@ -219,6 +239,25 @@ The plugin supports two types of interactive maps:
 - **Best For:** Immersive 3D experiences
 - **Controller:** GlobeMapController
 
+### Step 1: Controller, Pawn, Hud and GameMode
+
+It is provided the following BPs:
+
+**HUD:** `BP_Core_HUD`
+
+#### Flat Map
+- **Controller:** `BP_BirdEyeController`
+- **GameMode** `BP_Core_FlatMapGameMode`
+- **Pawn** `BP_Core_MapPawn`
+
+#### Globe Map
+- **Controller:** `BP_GlobeMapController`
+- **GameMode** `BP_Core_GlobeMapGameMode`
+- **Pawn** `BP_Core_GlobePawn`
+
+Since this is provided as an engine plugin it is recommended to inherit from these, you can use the ones provided to get started.
+For the controllers, the relevant inputs can be found implemented via input actions in the folder Inputs.
+
 ### Step 1: Create a Runtime ClickableMap Blueprint
 
 Create the blueprint that will be used in your actual game levels:
@@ -230,13 +269,14 @@ Create the blueprint that will be used in your actual game levels:
 5. In the Details panel, under **Map Parameters**:
    - **Set Map Object:** Select your generated `DA_MyMapData` asset
    - This links your blueprint to the pre-generated map data
+6. Set your map mesh in MapNewGameplay (TODO: change this name)
+7. Set the start map mode name (IMPORTANT)
 
 ### Step 2: Configure Level Settings
 
 Set up your level to use the correct controller and pawn:
 
 1. Open your game level
-2. Go to **World Settings** (Details panel or Window menu)
 3. Under **Game Mode**, select one of the defined game modes or create a Game Mode Blueprint
 4. In the Game Mode settings:
    - **Player Controller Class:** Set to your desired controller
@@ -254,36 +294,42 @@ For an example of a level where this is already setup please check the provided 
 
 ## Setting Up UI
 
-Explain integration with HUD to get started. Note you can adapt this after
-
 The plugin includes the **PropertyDisplayGenerator** plugin to automatically generate UI for your data structures.
+For detailed information on PropertyDisplayGenerator, check [PropertyDisplayGenerator Doc](https://docs.google.com/document/d/1Atnt15vsg1AsZ2PlTOnDwjJgdw_dszwZl24JnJ3NNWo/edit?usp=sharing)
 
 ### Asset Actions for UI Generation
 
-When you have custom tile data structures, you can automatically generate UI:
+To quickly generate all UI widgets required for your interactive map, use the automated asset action:
 
-1. Select your data structure in Content Browser
+1. Select your `DA_MyMapData` in the Content Browser
 2. Right-click and look for **Asset Actions**
-3. Choose **Generate UI Widgets** or similar option
-4. The system generates Blueprint widgets that match your data structure
-5. These widgets automatically display and edit tile data
+3. Choose **Create Map UI Elements → Create All**
 
-## Using PropertyDisplayGenerator
+This will automatically create the following widgets using the PropertyDisplayGenerator plugin:
 
-This sub-plugin creates UI components based on your data structure:
+- **Data Display Widgets**: Two widgets (one for land tiles, one for ocean tiles) that display the properties of your custom data structures
+- **Tile Selected Widget**: A container widget that combines the land and ocean data displays for showing selected tile information
+- **Map Mode Selector Widget**: A widget for switching between different map visualization modes (based on your visual properties)
+- **HUD Widget**: A main HUD widget that integrates the map mode selector and tile selected widget
 
-For detailed information on PropertyDisplayGenerator, check [PropertyDisplayGenerator Doc](https://docs.google.com/document/d/1Atnt15vsg1AsZ2PlTOnDwjJgdw_dszwZl24JnJ3NNWo/edit?usp=sharing) 
+These widgets provide a complete starting point for your map's UI. You can customize them further by modifying the generated blueprints. For more information on customizing the data display widgets, refer to the PropertyDisplayGenerator documentation.
+
+Then open the HUD widget created via the action and set it's layout.
+
+To have the new UI widgets, just set field `Hud Widget Class` in your HUD class with the HUD widget created via the action.
+
+This UI setup is a quick starting point, if you wish you can completely ignore this and set up your own UI system. Since this is a very general solution, for your project you probably want something more customizable.
 
 ## Plugin Hooks & Delegates
 
-### AClickableMap Delegates
+Further integration and relevant events that can be useful to bind to.
 
-TODO: Review this
+### AClickableMap Delegates
 
 The map broadcasts these events that you can listen to:
 
 #### OnMapInitialized
-Fires when map generation completes and is ready for use.
+Fires when map initialization completes and is ready for use.
 ```
 Signature: void(AClickableMap* Map)
 Usage: Bind to this to know when map data is available
@@ -304,3 +350,5 @@ Signature: void(FName OldMode, FName NewMode)
 Usage: Bind to know when visualization changes
 Parameters: Old and new mode names
 ```
+
+TODO: Add events of controller

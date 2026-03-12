@@ -48,10 +48,6 @@ void UMapLimitComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAc
 
 }
 UE_ENABLE_OPTIMIZATION
-void UMapLimitComponent::InitLimitComponent(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
-{
-	MapVisualComponent->InitVisualComponents(gameplayMap, terrainMap);
-}
 
 UMapVisualComponent* UMapLimitComponent::GetVisualComponent()
 {

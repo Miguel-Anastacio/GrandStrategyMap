@@ -1,312 +1,241 @@
 @echo off
 REM ============================================================
-REM Run this script from the command line, providing the following parameters:
-REM 1. UE Engine Path (e.g. "D:\Programs\Unreal\UE_5.4")
-REM 2. Plugin .uplugin file path (e.g. "D:\MyPlugin\MyPlugin.uplugin")
-REM 3. Base output path for built plugin (e.g. "D:\BuiltPlugins\")
-REM This script performs an enhanced plugin build that mimics Epic's clean build environment. 
-REM It ensures all cached/intermediate files are removed before building, which is critical for passing Epic's technical review process. 
-REM It also includes a pre-step to build the MapGenerator static library, which is a dependency for the plugin.
-REM It will also correct the output structure to match what Epic expects regarding third-party dependencies.
+REM Enhanced Plugin Build Script - Multi-Version Support
+REM ============================================================
+REM USAGE:
+REM   PackagePluginAdv.bat [--skip-map-gen]
+REM
+REM CONFIG.YAML FORMAT:
+REM   plugin_path: "C:/Path/to/plugin.uplugin"
+REM   unreal_engine_paths:
+REM     - "C:/Programs/Unreal/UE_5.4"
+REM     - "C:/Programs/Unreal/UE_5.5"
+REM   output_directory: "C:/BuiltPlugins"
+REM   test_project_paths:
+REM     - "C:/Dev/TestProject54/Plugins/MyPlugin"
+REM     - "C:/Dev/TestProject55/Plugins/MyPlugin"
 REM ============================================================
 
 setlocal enabledelayedexpansion
 
-REM Enhanced Plugin Build Script - Mimics Epic's Clean Build Environment
-REM This script ensures a clean build by removing all cached/intermediate files
+set "SKIP_MAP_GEN=false"
+if "%~1"=="--skip-map-gen" set "SKIP_MAP_GEN=true"
 
-REM Get parameters from command line
-set "UE_PATH=%~1"
-set "PLUGIN_PATH=%~2"
-set "BASE_OUTPUT_PATH=%~3"
+set "CONFIG_PATH=config.yaml"
 
-REM Check if all parameters were provided
-if "%UE_PATH%"=="" (
-    echo Usage: %0 "UE_Path" "Plugin_Path" "Base_Output_Path"
-    echo Example: %0 "D:\Programs\Unreal\UE_5.4" "D:\MyPlugin\MyPlugin.uplugin" "D:\BuiltPlugins\"
+if not exist "%CONFIG_PATH%" (
+    echo Error: Config file not found at: %CONFIG_PATH%
     pause
     exit /b 1
 )
 
-if "%PLUGIN_PATH%"=="" (
-    echo Error: Plugin path is required
+echo ============================================================
+echo Plugin Package Build Script - Multi-Version Mode
+echo ============================================================
+echo Config File: %CONFIG_PATH%
+echo ============================================================
+echo.
+
+REM ============================================================
+REM Parse YAML configuration using inline PowerShell
+REM Parses: plugin_path, output_directory, unreal_engine_paths, test_project_paths
+REM Outputs prefixed lines: PLUGIN: OUTPUT: PATH: TEST:
+REM ============================================================
+echo Parsing configuration file...
+echo.
+
+set "UE_COUNT=0"
+set "TEST_COUNT=0"
+
+for /f "usebackq delims=" %%A in (`powershell -NoProfile -ExecutionPolicy Bypass -Command "$content = Get-Content '%CONFIG_PATH%' -Raw; $pluginMatch = [regex]::Match($content, 'plugin_path:\s*[\x27\x22]?([^\x27\x22\r\n]+)[\x27\x22]?'); $outputMatch = [regex]::Match($content, 'output_directory:\s*[\x27\x22]?([^\x27\x22\r\n]+)[\x27\x22]?'); if ($pluginMatch.Success) { 'PLUGIN:' + $pluginMatch.Groups[1].Value.Trim() }; if ($outputMatch.Success) { 'OUTPUT:' + $outputMatch.Groups[1].Value.Trim() }; $inUEPaths = $false; $inTestPaths = $false; foreach ($line in $content -split '\r?\n') { if ($line -match 'unreal_engine_paths\x3a') { $inUEPaths = $true; $inTestPaths = $false; continue }; if ($line -match 'test_project_paths\x3a') { $inTestPaths = $true; $inUEPaths = $false; continue }; if ($line -match '^\s*[a-zA-Z]') { $inUEPaths = $false; $inTestPaths = $false }; if ($inUEPaths -and $line -match '^\s*-\s*[\x27\x22]([^\x27\x22\r\n]+)[\x27\x22]') { 'PATH:' + $matches[1].Trim() }; if ($inTestPaths -and $line -match '^\s*-\s*[\x27\x22]([^\x27\x22\r\n]+)[\x27\x22]') { 'TEST:' + $matches[1].Trim() } }"`) do (
+    set "LINE=%%A"
+    if "!LINE:~0,7!"=="PLUGIN:" set "PLUGIN_PATH=!LINE:~7!"
+    if "!LINE:~0,7!"=="OUTPUT:" set "BASE_OUTPUT_PATH=!LINE:~7!"
+    if "!LINE:~0,5!"=="PATH:" (
+        set /a UE_COUNT+=1
+        set "UE_PATH_!UE_COUNT!=!LINE:~5!"
+    )
+    if "!LINE:~0,5!"=="TEST:" (
+        set /a TEST_COUNT+=1
+        set "TEST_PATH_!TEST_COUNT!=!LINE:~5!"
+    )
+)
+
+if not defined PLUGIN_PATH (
+    echo Error: Could not parse plugin_path from config file
+    pause
+    exit /b 1
+)
+if not exist "%PLUGIN_PATH%" (
+    echo Error: Plugin file not found at: %PLUGIN_PATH%
+    pause
+    exit /b 1
+)
+if not defined BASE_OUTPUT_PATH (
+    echo Error: Could not parse output_directory from config file
+    pause
+    exit /b 1
+)
+if %UE_COUNT%==0 (
+    echo Error: No unreal_engine_paths found in config file
     pause
     exit /b 1
 )
 
-if "%BASE_OUTPUT_PATH%"=="" (
-    echo Error: Base output path is required
-    pause
-    exit /b 1
-)
-
-REM Extract UE version from path
-for %%f in ("%UE_PATH%") do set "UE_VERSION=%%~nxf"
-
-REM Extract plugin name and directory
 for %%f in ("%PLUGIN_PATH%") do (
     set "PLUGIN_NAME=%%~nf"
     set "PLUGIN_DIR=%%~dpf"
 )
 
-REM Create the final output path
-set "OUTPUT_PATH=%BASE_OUTPUT_PATH%%UE_VERSION%\%PLUGIN_NAME%"
-
-echo ============================================================
-echo Enhanced Plugin Build Script - Clean Build Mode
-echo ============================================================
-echo UE Path: %UE_PATH%
-echo Plugin: %PLUGIN_PATH%
-echo Plugin Name: %PLUGIN_NAME%
-echo Plugin Dir: %PLUGIN_DIR%
-echo UE Version: %UE_VERSION%
-echo Output: %OUTPUT_PATH%
+echo Plugin Path:  %PLUGIN_PATH%
+echo Plugin Name:  %PLUGIN_NAME%
+echo Plugin Dir:   %PLUGIN_DIR%
+echo Output Dir:   %BASE_OUTPUT_PATH%
+echo.
+echo Found %UE_COUNT% Unreal Engine version(s):
+for /l %%i in (1, 1, %UE_COUNT%) do echo   [%%i] !UE_PATH_%%i!
+echo.
+echo Found %TEST_COUNT% test project path(s):
+for /l %%i in (1, 1, %TEST_COUNT%) do echo   [%%i] !TEST_PATH_%%i!
+echo.
 echo ============================================================
 echo.
 
 REM ============================================================
 REM PRE-STEP: Build the MapGenerator static library
 REM ============================================================
-echo.
-echo [PRE-STEP] Building MapGenerator static library...
+echo [PRE-STEP] Checking for MapGenerator static library...
 echo --------------------------------------------------------
+echo.
 
-REM Define the MapGenerator library path
-set "MAP_GEN_SETUP=%PLUGIN_DIR%Source\ThirdParty\MapGeneratorLibrary\MapGenerator\setup.bat"
-
-REM Check if the setup script exists
-if not exist "%MAP_GEN_SETUP%" (
-    echo ERROR: MapGenerator setup script not found at: %MAP_GEN_SETUP%
-    echo Please ensure the MapGenerator library is properly set up.
-    pause
-    exit /b 1
+if /i "%SKIP_MAP_GEN%"=="true" (
+    echo MapGenerator build skipped (--skip-map-gen flag passed)
+    echo.
+) else (
+    set "MAP_GEN_SETUP=%PLUGIN_DIR%Source\ThirdParty\MapGeneratorLibrary\MapGenerator\setup.bat"
+    if exist "!MAP_GEN_SETUP!" (
+        echo Running: !MAP_GEN_SETUP!
+        call "!MAP_GEN_SETUP!"
+        if errorlevel 1 (
+            echo ERROR: MapGenerator library build FAILED
+            pause
+            exit /b 1
+        )
+        echo [PRE-STEP] MapGenerator library built successfully!
+        echo.
+    ) else (
+        echo MapGenerator setup script not found, skipping.
+        echo.
+    )
 )
 
-REM Run the setup script to build the library
-echo Running: %MAP_GEN_SETUP%
-call "%MAP_GEN_SETUP%"
+REM ============================================================
+REM Main build loop
+REM ============================================================
+echo Starting build process for all versions...
+echo ============================================================
+echo.
 
-REM Check if the library build was successful
-if errorlevel 1 (
-    echo.
-    echo ============================================================
-    echo ERROR: MapGenerator library build FAILED
-    echo ============================================================
-    echo.
-    pause
-    exit /b 1
+set "TOTAL_SUCCESS=0"
+set "TOTAL_FAILED=0"
+
+for /l %%i in (1, 1, %UE_COUNT%) do (
+    set "CURRENT_TEST_PATH="
+    if %%i leq %TEST_COUNT% set "CURRENT_TEST_PATH=!TEST_PATH_%%i!"
+    call :build_version "!UE_PATH_%%i!" %%i "!CURRENT_TEST_PATH!"
 )
 
+goto :summary
+
+REM ============================================================
+REM Subroutine: build_version
+REM %1 = UE path, %2 = index, %3 = test project path (optional)
+REM ============================================================
+:build_version
+set "UE_PATH=%~1"
+set "BUILD_INDEX=%~2"
+set "TEST_PROJECT_PATH=%~3"
+
 echo.
-echo [PRE-STEP] MapGenerator library built successfully!
-echo.
-timeout /t 2 /nobreak >nul
+echo ============================================================
+echo [BUILD %BUILD_INDEX% of %UE_COUNT%] Processing: %UE_PATH%
+echo ============================================================
 echo.
 
-REM Validate paths exist
+for %%f in ("%UE_PATH%") do set "UE_VERSION=%%~nxf"
+
+REM Plugin output goes into: C:/Dev/TestScript/UE_5.4/PluginName/
+set "VERSION_OUTPUT_DIR=%BASE_OUTPUT_PATH%\%UE_VERSION%"
+set "OUTPUT_PATH=%VERSION_OUTPUT_DIR%\%PLUGIN_NAME%"
+
+echo UE Path:     %UE_PATH%
+echo UE Version:  %UE_VERSION%
+echo Output:      %OUTPUT_PATH%
+if not "%TEST_PROJECT_PATH%"=="" (
+    echo Test Deploy: %TEST_PROJECT_PATH%
+)
+echo.
+
 if not exist "%UE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" (
     echo ERROR: RunUAT.bat not found at: %UE_PATH%\Engine\Build\BatchFiles\RunUAT.bat
-    echo Please check your UE Engine path
-    pause
-    exit /b 1
+    echo This Unreal Engine version may not be installed correctly.
+    echo.
+    set /a TOTAL_FAILED+=1
+    exit /b 0
 )
 
-if not exist "%PLUGIN_PATH%" (
-    echo ERROR: Plugin file not found at: %PLUGIN_PATH%
-    pause
-    exit /b 1
-)
-
-REM ============================================================
-REM STEP 1: Clean cached files in source directory
-REM This prevents using stale intermediate files
-REM ============================================================
-echo.
+REM [STEP 1] Clean source directory
 echo [STEP 1] Cleaning cached files from source directory...
 echo --------------------------------------------------------
-
-REM Remove Binaries folder
-if exist "%PLUGIN_DIR%Binaries\" (
-    echo Removing Binaries folder...
-    rmdir "%PLUGIN_DIR%Binaries" /s /q 2>nul
-    if exist "%PLUGIN_DIR%Binaries\" (
-        echo WARNING: Could not fully remove Binaries folder
-    ) else (
-        echo   SUCCESS: Binaries removed
-    )
-)
-
-REM Remove Intermediate folder
-if exist "%PLUGIN_DIR%Intermediate\" (
-    echo Removing Intermediate folder...
-    rmdir "%PLUGIN_DIR%Intermediate" /s /q 2>nul
-    if exist "%PLUGIN_DIR%Intermediate\" (
-        echo WARNING: Could not fully remove Intermediate folder
-    ) else (
-        echo   SUCCESS: Intermediate removed
-    )
-)
-
-REM Remove Saved folder
-if exist "%PLUGIN_DIR%Saved\" (
-    echo Removing Saved folder...
-    rmdir "%PLUGIN_DIR%Saved" /s /q 2>nul
-    if exist "%PLUGIN_DIR%Saved\" (
-        echo WARNING: Could not fully remove Saved folder
-    ) else (
-        echo   SUCCESS: Saved removed
-    )
-)
-
-REM Remove .vs folder (Visual Studio cache)
-if exist "%PLUGIN_DIR%.vs\" (
-    echo Removing .vs folder...
-    rmdir "%PLUGIN_DIR%.vs" /s /q 2>nul
-    if exist "%PLUGIN_DIR%.vs\" (
-        echo WARNING: Could not fully remove .vs folder
-    ) else (
-        echo   SUCCESS: .vs removed
-    )
-)
-
-REM Remove DerivedDataCache if it exists
-if exist "%PLUGIN_DIR%DerivedDataCache\" (
-    echo Removing DerivedDataCache folder...
-    rmdir "%PLUGIN_DIR%DerivedDataCache" /s /q 2>nul
-    if exist "%PLUGIN_DIR%DerivedDataCache\" (
-        echo WARNING: Could not fully remove DerivedDataCache folder
-    ) else (
-        echo   SUCCESS: DerivedDataCache removed
-    )
-)
-
-REM Remove any .sln or .vcxproj files
-echo Removing project files...
+if exist "%PLUGIN_DIR%Binaries\"         rmdir "%PLUGIN_DIR%Binaries"         /s /q 2>nul
+if exist "%PLUGIN_DIR%Intermediate\"     rmdir "%PLUGIN_DIR%Intermediate"     /s /q 2>nul
+if exist "%PLUGIN_DIR%Saved\"            rmdir "%PLUGIN_DIR%Saved"            /s /q 2>nul
+if exist "%PLUGIN_DIR%.vs\"              rmdir "%PLUGIN_DIR%.vs"              /s /q 2>nul
+if exist "%PLUGIN_DIR%DerivedDataCache\" rmdir "%PLUGIN_DIR%DerivedDataCache" /s /q 2>nul
 del "%PLUGIN_DIR%*.sln" /q 2>nul
 del "%PLUGIN_DIR%*.vcxproj*" /q 2>nul
-echo   SUCCESS: Project files cleaned
-
+echo Cleaned!
 echo.
-echo Cached files cleaned successfully!
-echo Waiting 2 seconds to ensure file locks are released...
-timeout /t 2 /nobreak >nul
+timeout /t 1 /nobreak >nul
 
-REM ============================================================
-REM STEP 2: Clean output directory
-REM ============================================================
-echo.
+REM [STEP 2] Clean output directory
 echo [STEP 2] Preparing output directory...
 echo --------------------------------------------------------
-
-if exist "%OUTPUT_PATH%" (
-    echo Removing existing output directory...
-    rmdir "%OUTPUT_PATH%" /s /q 2>nul
-    if exist "%OUTPUT_PATH%" (
-        echo WARNING: Could not fully remove output directory
-    )
-)
-
-echo Creating fresh output directory: %OUTPUT_PATH%
+if exist "%OUTPUT_PATH%" rmdir "%OUTPUT_PATH%" /s /q 2>nul
 mkdir "%OUTPUT_PATH%" 2>nul
-
-REM ============================================================
-REM STEP 3: Build the plugin using RunUAT
-REM This uses the same command Epic uses for marketplace submissions
-REM ============================================================
+echo Created: %OUTPUT_PATH%
 echo.
-echo [STEP 3] Building plugin with RunUAT (Clean Build)...
+
+REM [STEP 3] Build plugin
+echo [STEP 3] Building plugin with RunUAT...
 echo --------------------------------------------------------
 echo This may take several minutes...
 echo.
 
-@REM REM Capture build output to a log file for analysis
-@REM set "BUILD_LOG=%OUTPUT_PATH%_BuildLog.txt"
-
-REM Use -Clean flag to force a clean build (no cached files)
 call "%UE_PATH%\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin -Plugin="%PLUGIN_PATH%" -Package="%OUTPUT_PATH%" -Rocket -TargetPlatforms=Win64 -Strict
 
-REM Store the error level before any other commands
-set BUILD_ERROR=%errorlevel%
-
-@REM REM Check for dependency warnings in the output
-@REM echo.
-@REM echo Checking build output for warnings...
-@REM findstr /C:"does not list plugin" "%BUILD_LOG%" >nul
-@REM if %errorlevel% equ 0 (
-@REM     echo.
-@REM     echo ============================================================
-@REM     echo WARNING: Plugin dependency issues detected!
-@REM     echo ============================================================
-@REM     echo.
-@REM     findstr /C:"does not list plugin" "%BUILD_LOG%"
-@REM     echo.
-@REM     echo These warnings indicate missing plugin dependencies in your .uplugin file.
-@REM     echo Epic's validation WILL FAIL if these are not fixed.
-@REM     echo.
-@REM     echo To fix: Add StructUtils to the "Plugins" array in your .uplugin file:
-@REM     echo   "Plugins": [
-@REM     echo       {
-@REM     echo           "Name": "StructUtils",
-@REM     echo           "Enabled": true
-@REM     echo       }
-@REM     echo   ]
-@REM     echo.
-@REM )
-
-REM Check if the build was successful
-if %BUILD_ERROR% neq 0 (
+if errorlevel 1 (
     echo.
-    echo ============================================================
-    echo ERROR: Plugin build FAILED with exit code %BUILD_ERROR%
-    echo ============================================================
+    echo ERROR: Plugin build FAILED for %UE_VERSION%
     echo.
-    echo This is the same error Epic would see during submission review.
-    echo Please check the build log for details: %BUILD_LOG%
-    echo.
-    echo Common issues:
-    echo - Missing module dependencies in .Build.cs
-    echo - Missing header includes
-    echo - Platform-specific code issues
-    echo - API changes between engine versions
-    echo.
-    pause
-    exit /b 1
+    set /a TOTAL_FAILED+=1
+    exit /b 0
 )
 
 echo.
-echo ============================================================
 echo [STEP 3] Build completed successfully!
-echo ============================================================
-
-REM ============================================================
-REM STEP 4: Verify the build compiled correctly
-REM ============================================================
 echo.
+
+REM [STEP 4] Verify build output
 echo [STEP 4] Verifying build output...
 echo --------------------------------------------------------
-
-REM Check if Binaries folder was created (indicates successful compilation)
-if not exist "%OUTPUT_PATH%\Binaries\" (
-    echo WARNING: No Binaries folder found - plugin may not have compiled
-    echo This would cause Epic's submission to fail
-    pause
-)
-
-REM List what was built
-echo.
-echo Build output contents:
+if not exist "%OUTPUT_PATH%\Binaries\" echo WARNING: No Binaries folder found
 dir "%OUTPUT_PATH%" /b
 echo.
 
-REM ============================================================
-REM STEP 5: Clean up source directory in output
-REM ============================================================
-echo.
+REM [STEP 5] Clean up output source directory
 echo [STEP 5] Cleaning up output source directory...
 echo --------------------------------------------------------
-
-REM Remove .git files
-echo Removing .git files...
 for /r "%OUTPUT_PATH%\Source\" %%f in (.git) do (
     if exist "%%f" (
         attrib -r -h -s "%%f" 2>nul
@@ -314,51 +243,43 @@ for /r "%OUTPUT_PATH%\Source\" %%f in (.git) do (
     )
 )
 
-REM Move subfolders
-echo Moving first-level subfolders...
 for /d %%d in ("%OUTPUT_PATH%\Source\*") do (
-    for /d %%s in ("%%d\*") do (
-        move "%%s" "%OUTPUT_PATH%\Source\%%~nxs" >nul 2>&1
+    if /i not "%%~nxd"=="ThirdParty" (
+        for /d %%s in ("%%d\*") do move "%%s" "%OUTPUT_PATH%\Source\%%~nxs" >nul 2>&1
+        if exist "%%d\*.*" move "%%d\*.*" "%OUTPUT_PATH%\Source\" >nul 2>&1
+        rmdir "%%d" 2>nul
     )
-    if exist "%%d\*.*" move "%%d\*.*" "%OUTPUT_PATH%\Source\" >nul 2>&1
-    rmdir "%%d" 2>nul
 )
 
-REM Clean up unwanted files
-echo Cleaning up unwanted files...
 del "%OUTPUT_PATH%\Source\*.md" /s /q 2>nul
 del "%OUTPUT_PATH%\Source\.gitignore" /s /q 2>nul
 del "%OUTPUT_PATH%\Source\.gitattributes" /s /q 2>nul
 del "%OUTPUT_PATH%\Source\.git" /s /q 2>nul
 del "%OUTPUT_PATH%\Source\LICENSE*" /s /q 2>nul
-
-for /f "delims=" %%d in ('dir "%OUTPUT_PATH%\Source\" /ad /b /s 2^>nul ^| findstr "\.git$"') do (
-    rmdir "%%d" /s /q 2>nul
-)
-
-REM ============================================================
-REM STEP 6: Create zip file (without Binaries/Intermediate)
-REM ============================================================
+echo Cleaned!
 echo.
+
+REM [STEP 6] Create zip — saved to VERSION folder, not inside plugin folder
+REM Result: C:/Dev/TestScript/UE_5.4/PluginName_UE_5.4.zip
 echo [STEP 6] Creating submission zip file...
 echo --------------------------------------------------------
-
 set "ZIP_NAME=%PLUGIN_NAME%_%UE_VERSION%.zip"
-set "ZIP_PATH=%OUTPUT_PATH%\%ZIP_NAME%"
-set "TEMP_ZIP_DIR=%TEMP%\%PLUGIN_NAME%_zip_temp"
+set "ZIP_PATH=%VERSION_OUTPUT_DIR%\%ZIP_NAME%"
+set "TEMP_ZIP_DIR=%TEMP%\%PLUGIN_NAME%_zip_%UE_VERSION%"
 
-echo Preparing zip contents...
 if exist "%TEMP_ZIP_DIR%" rmdir "%TEMP_ZIP_DIR%" /s /q 2>nul
 mkdir "%TEMP_ZIP_DIR%"
 
-REM Copy everything except Binaries and Intermediate
-echo Copying plugin files for zip...
+REM Copy plugin folder contents into a named subfolder inside the zip
+REM so zip extracts as PluginName/ rather than dumping files at root
+mkdir "%TEMP_ZIP_DIR%\%PLUGIN_NAME%"
+
 for /d %%d in ("%OUTPUT_PATH%\*") do (
     set "FOLDER_NAME=%%~nxd"
     if /i not "!FOLDER_NAME!"=="Binaries" (
         if /i not "!FOLDER_NAME!"=="Intermediate" (
             echo   Copying: !FOLDER_NAME!
-            robocopy "%%d" "%TEMP_ZIP_DIR%\!FOLDER_NAME!" /e /nfl /ndl /njh /njs
+            robocopy "%%d" "%TEMP_ZIP_DIR%\%PLUGIN_NAME%\!FOLDER_NAME!" /e /nfl /ndl /njh /njs
         ) else (
             echo   Skipping: !FOLDER_NAME!
         )
@@ -367,43 +288,85 @@ for /d %%d in ("%OUTPUT_PATH%\*") do (
     )
 )
 
-REM Copy loose files
 for %%f in ("%OUTPUT_PATH%\*.*") do (
-    set "FILE_NAME=%%~nxf"
-    if /i not "!FILE_NAME!"=="%ZIP_NAME%" (
-        copy "%%f" "%TEMP_ZIP_DIR%\" >nul 2>&1
-    )
+    copy "%%f" "%TEMP_ZIP_DIR%\%PLUGIN_NAME%\" >nul 2>&1
 )
 
 echo Creating zip: %ZIP_PATH%
 powershell -command "Compress-Archive -Path '%TEMP_ZIP_DIR%\*' -DestinationPath '%ZIP_PATH%' -Force"
-
-echo Cleaning up temporary files...
 rmdir "%TEMP_ZIP_DIR%" /s /q 2>nul
 
-REM ============================================================
-REM FINAL STATUS
-REM ============================================================
-echo.
-echo ============================================================
-echo BUILD COMPLETE!
-echo ============================================================
-echo.
-echo Output location: %OUTPUT_PATH%
+if exist "%ZIP_PATH%" (
+    echo   SUCCESS: Zip created at %ZIP_PATH%
+) else (
+    echo   ERROR: Failed to create zip
+    set /a TOTAL_FAILED+=1
+    exit /b 0
+)
 echo.
 
-if exist "%ZIP_PATH%" (
-    echo [SUCCESS] Submission zip created: %ZIP_NAME%
+REM [STEP 7] Deploy to test project (if configured)
+echo [STEP 7] Deploying to test project...
+echo --------------------------------------------------------
+if "%TEST_PROJECT_PATH%"=="" (
+    echo No test project configured for %UE_VERSION%, skipping.
     echo.
-    echo This build was performed with:
-    echo   - Clean intermediate files
-    echo   - Fresh compilation
-    echo   - Same tools Epic uses for review
-    echo.
-    echo If this build succeeded, your plugin should pass Epic's
-    echo technical review compilation step.
+    set /a TOTAL_SUCCESS+=1
+    exit /b 0
+)
+
+echo Deploying to: %TEST_PROJECT_PATH%
+echo Removing old plugin files...
+if exist "%TEST_PROJECT_PATH%" rmdir "%TEST_PROJECT_PATH%" /s /q 2>nul
+mkdir "%TEST_PROJECT_PATH%" 2>nul
+
+echo Copying new plugin files (without Binaries/Intermediate)...
+for /d %%d in ("%OUTPUT_PATH%\*") do (
+    set "FOLDER_NAME=%%~nxd"
+    if /i not "!FOLDER_NAME!"=="Binaries" (
+        if /i not "!FOLDER_NAME!"=="Intermediate" (
+            robocopy "%%d" "%TEST_PROJECT_PATH%\!FOLDER_NAME!" /e /nfl /ndl /njh /njs
+        )
+    )
+)
+for %%f in ("%OUTPUT_PATH%\*.*") do (
+    copy "%%f" "%TEST_PROJECT_PATH%\" >nul 2>&1
+)
+
+echo   SUCCESS: Plugin deployed to test project
+echo   NOTE: Open the project in %UE_VERSION% to recompile binaries
+echo.
+
+set /a TOTAL_SUCCESS+=1
+exit /b 0
+
+REM ============================================================
+:summary
+REM ============================================================
+echo.
+echo ============================================================
+echo FINAL BUILD SUMMARY
+echo ============================================================
+echo.
+echo Total Versions: %UE_COUNT%
+echo Successful:     %TOTAL_SUCCESS%
+echo Failed:         %TOTAL_FAILED%
+echo.
+echo Output structure:
+echo   %BASE_OUTPUT_PATH%\
+for /l %%i in (1, 1, %UE_COUNT%) do (
+    for %%f in ("!UE_PATH_%%i!") do (
+        echo     %%~nxf\
+        echo       %PLUGIN_NAME%\        (built plugin)
+        echo       %PLUGIN_NAME%_%%~nxf.zip  (submission zip)
+    )
+)
+echo.
+
+if %TOTAL_FAILED% equ 0 (
+    echo [SUCCESS] All versions built successfully!
 ) else (
-    echo [ERROR] Failed to create zip file
+    echo [WARNING] Some versions failed. See details above.
 )
 
 echo.

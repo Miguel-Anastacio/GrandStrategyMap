@@ -188,7 +188,7 @@ void UWPropGenGeneric::CreatePanelSlots() const
        UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Blueprint is Null"));
        return;
     }
-    
+	
     // Clean up GUIDs for widgets that will be removed
 	UAtkWidgetEditorFunctionLibrary::ClearChildren(WidgetBP, AssetGridPanel);
     
@@ -214,9 +214,6 @@ void UWPropGenGeneric::CreatePanelSlots() const
 			NewlyCreatedWidgets.Add(NewWidget);
 		}
     }
-    
-    // Clean up any remaining orphaned GUIDs
-    // UAtkWidgetEditorFunctionLibrary::CleanupAllOrphanedGUIDs(this, WidgetBP);
     
     // Register GUIDs for all newly created widgets
 	UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(NewlyCreatedWidgets, WidgetBP);
@@ -247,28 +244,7 @@ void UWPropGenGeneric::CreateMainPanel() const
 		UE_LOG(LogDataBasedWidget, Error, TEXT("WidgetBlueprint is null!"));
 		return;
 	}
-    
-	if (!MainAssetWidgetTree->RootWidget)
-	{
-		// Construct the root widget
-		UGridPanel* NewRootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
-       
-		if (NewRootWidget)
-		{
-			// Generate and register a GUID for the root widget
-			FGuid NewGuid = FGuid::NewGuid();
-			WidgetBP->WidgetVariableNameToGuidMap.Add(NewRootWidget->GetFName(), NewGuid);
-          
-			// Set as root widget
-			MainAssetWidgetTree->RootWidget = NewRootWidget;
-			// Mark as modified
-			UE_LOG(LogDataBasedWidget, Log, TEXT("Created MainPanel with GUID: %s"), *NewGuid.ToString());
-		}
-		else
-		{
-			UE_LOG(LogDataBasedWidget, Error, TEXT("Failed to construct MainPanel widget!"));
-		}
-	}
+	UAtkWidgetEditorFunctionLibrary::CreateRootWidget<UGridPanel>(this, FName("MainPanel"));
 }
 
 #endif
