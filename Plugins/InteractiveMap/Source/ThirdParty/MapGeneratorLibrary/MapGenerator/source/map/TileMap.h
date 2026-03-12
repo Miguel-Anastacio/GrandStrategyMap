@@ -68,7 +68,6 @@ namespace MapGenerator
 		}
 
 		std::vector<uint8_t> ConvertTileMapToBuffer() const;
-		uint8_t* ConvertTileMapToRawBuffer() const;
 		inline std::vector<Tile> &GetTilesRef()
 		{
 			return m_tiles;
@@ -112,13 +111,14 @@ namespace MapGenerator
 		bool FindClosestTileOfSameType(int x, int y, int radius, Tile &out_color) const;
 
 		void ColorInBorders(const Mask &mask);
+		void ColorInBordersByType(const TileType type);
 		
-		uint8_t* GetOceanTileMap() const;
-		uint8_t* GetLandTileMap() const;
-		uint8_t* GetBordersTileMap(const data::Color& borderColor = data::Color(0, 0, 0, 255), const data::Color& notBorderColor = data::Color(255, 255, 255, 255)) const;
-		uint8_t* GetVisitedTileMap(const data::Color& visitedColor = data::Color(255, 0, 0, 255), const data::Color& notVisitedColor = data::Color(255, 255, 255, 255)) const;
-		uint8_t* GetCentroidTileMap() const;
-		uint8_t* GetUndefinedTileMap(const data::Color& undefined = data::Color(255, 0, 0, 255), const data::Color& defined = data::Color(0, 0, 0, 255)) const;
+		std::vector<uint8_t> GetOceanTileMap() const;
+		std::vector<uint8_t> GetLandTileMap() const;
+		std::vector<uint8_t> GetBordersTileMap(const data::Color& borderColor = data::Color(0, 0, 0, 255), const data::Color& notBorderColor = data::Color(255, 255, 255, 255)) const;
+		std::vector<uint8_t> GetVisitedTileMap(const data::Color& visitedColor = data::Color(255, 0, 0, 255), const data::Color& notVisitedColor = data::Color(255, 255, 255, 255)) const;
+		std::vector<uint8_t> GetCentroidTileMap() const;
+		std::vector<uint8_t> GetUndefinedTileMap(const data::Color& undefined = data::Color(255, 0, 0, 255), const data::Color& defined = data::Color(0, 0, 0, 255)) const;
 		
 
 		void SetTiles(const std::vector<Tile>& tiles)
@@ -128,12 +128,12 @@ namespace MapGenerator
 			ComputeColorsInUse();
 		}
 
-		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor = data::Color(0, 0, 255, 255));
+		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const TileType type, const data::Color& borderColor = data::Color(0, 0, 255, 255));
 	
 	private:
-		uint8_t* GetTileMapOfType(TileType type) const;
-		uint8_t* GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const;
-		uint8_t* GetTileMap(std::function<bool(const Tile&)> predicate) const;
+		std::vector<uint8_t> GetTileMapOfType(TileType type) const;
+		std::vector<uint8_t> GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const;
+		std::vector<uint8_t> GetTileMap(std::function<bool(const Tile&)> predicate) const;
 		std::vector<Tile> m_tiles;
 		std::unordered_map<mygal::Vector2<int>, data::Color> m_cells;
 
@@ -150,7 +150,7 @@ namespace MapGenerator
 			return true;
 		}
 
-		static void fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color);
+		static void fillBufferPosWithColor(int index, std::vector<uint8_t>& buffer, const data::Color& color);
 		template <typename Func>
 		void forEachTile(Func&& func)
 		{

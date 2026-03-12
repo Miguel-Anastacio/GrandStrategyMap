@@ -87,9 +87,6 @@ protected:
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 private:
-	// Initialize the Dynamic Texture
-
-private:
 	UPROPERTY()
 	UDynamicTexture* DynamicTextureData;
 	// Texture Object

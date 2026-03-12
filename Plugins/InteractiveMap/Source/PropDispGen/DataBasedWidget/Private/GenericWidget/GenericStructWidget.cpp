@@ -10,6 +10,8 @@
 #include "BlueprintLibrary/ADStructUtilsFunctionLibrary.h"
 #include "CollectionViewWidgets/MutableCollectionObjectsView.h"
 #if WITH_EDITOR
+#include "Kismet2/BlueprintEditorUtils.h" 
+#include "WidgetBlueprint.h"
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #endif
 
@@ -134,8 +136,7 @@ void UWPropGenGeneric::InitializeWidgetFields()
 		FName FieldName(*Property->GetAuthoredName());
 		for(const auto& Widget : MainPanel->GetAllChildren())
 		{
-			// TODO - FIX THIS (widget names cannot be edited)
-			if(FieldName == Widget->GetName())
+			if(Widget->GetName().StartsWith(FieldName.ToString()))
 			{
 				if(UUserWidget* UserWidget = Cast<UUserWidget>(Widget))
 				{
@@ -156,74 +157,97 @@ void UWPropGenGeneric::CreateGenericWidget(UPropGenWidgetMapDataAsset* DataWidge
 
 void UWPropGenGeneric::CreatePanelSlots() const
 {
-	CreateMainPanel();
+    CreateMainPanel();
+    
+    UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("MainPanel")));
+    UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
+    UWidgetBlueprint* WidgetBP = Cast<UWidgetBlueprint>(GetClass()->ClassGeneratedBy);
+    
+    if(!AssetGridPanel)
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Missing Main Panel"));
+       return;
+    }
+    if(!IsValid(DataAssetWidgetMap))
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Please Set a DataAssetWidgetMap"));
+       return;
+    }
+    if(!DataAssetWidgetMap->IsValid())
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Please provide a valid DataAssetWidgetMap"));
+       return;
+    }
+    if(!MainAssetWidgetTree)
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Tree is Null"));
+       return;
+    }
+    if(!WidgetBP)
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Blueprint is Null"));
+       return;
+    }
 	
-	// We *cannot* use the BindWidget-marked GridPanel, instead we need to get the widget in the asset's widget tree.
-	// However thanks to the BindWidget, we can be relatively sure that FindWidget will be successful.
-	UGridPanel* AssetGridPanel = Cast<UGridPanel>(UAtkWidgetEditorFunctionLibrary::GetPanelWidget(this, FName("MainPanel")));
-	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
-	if(!AssetGridPanel)
-	{
-		UE_LOG(LogDataBasedWidget, Error, TEXT("Missing Main Panel"));
-		return;
-	}
-	if(!IsValid(DataAssetWidgetMap))
-	{
-		UE_LOG(LogDataBasedWidget, Error, TEXT("Please Set a DataAssetWidgetMap"));
-	}
-	if(!DataAssetWidgetMap->IsValid())
-	{
-		UE_LOG(LogDataBasedWidget, Error, TEXT("Please provide a valid DataAssetWidgetMap"));
-		return;
-	}
-	if(!MainAssetWidgetTree)
-	{
-		UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Tree is Null"));
-		return;
-	}
-	AssetGridPanel->ClearChildren();
-	AssetGridPanel->Modify();
-	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
-	
-	uint8 RowIndex = 0;
-	uint8 ColumnIndex = 0;
-	for(const auto& [PropertyName, WidgetType] : DataAssetWidgetMap->PropertyWidgetMap)
-	{
-		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType, PropertyName))
+    // Clean up GUIDs for widgets that will be removed
+	UAtkWidgetEditorFunctionLibrary::ClearChildren(WidgetBP, AssetGridPanel);
+    
+    // Create new widgets FIRST
+    uint8 RowIndex = 0;
+    uint8 ColumnIndex = 0;
+    TArray<UWidget*> NewlyCreatedWidgets;
+    for(const auto& [PropertyName, WidgetType] : DataAssetWidgetMap->PropertyWidgetMap)
+    {
+		if(UUserWidget* NewWidget = MainAssetWidgetTree->ConstructWidget<UUserWidget>(WidgetType))
 		{
+			// Generate unique name
+			FName UniqueName = MakeUniqueObjectName(MainAssetWidgetTree, WidgetType, FName(*PropertyName.ToString()));
+			NewWidget->Rename(*UniqueName.ToString(), MainAssetWidgetTree, REN_DontCreateRedirectors);
+
 			NewWidget->SetCategoryName(PropertyName.ToString());
+
+			// Add to grid (this makes it part of the widget tree)
 			AssetGridPanel->AddChildToGrid(NewWidget, RowIndex, ColumnIndex);
+			UpdateGridPosition(ColumnIndex, RowIndex);
+
+			// Store for GUID registration
+			NewlyCreatedWidgets.Add(NewWidget);
 		}
-		
-		UpdateGridPosition(ColumnIndex, RowIndex);
-	}
-	
-	if(AssetGridPanel->GetChildrenCount() == 0)
-	{
-		UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Type is not of type UUserWidget"));
-	}
-	
-	AssetGridPanel->Modify();
+    }
+    
+    // Register GUIDs for all newly created widgets
+	UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(NewlyCreatedWidgets, WidgetBP);
+    
+    if(AssetGridPanel->GetChildrenCount() == 0)
+    {
+       UE_LOG(LogDataBasedWidget, Error, TEXT("Widget Type is not of type UUserWidget"));
+    }
+    
+    AssetGridPanel->Modify();
+    MainAssetWidgetTree->Modify();
+    WidgetBP->Modify();
 	UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
 }
-
 void UWPropGenGeneric::CreateMainPanel() const
 {
 	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
+	UWidgetBlueprint* WidgetBP = Cast<UWidgetBlueprint>(GetClass()->ClassGeneratedBy);
+    
 	if (!MainAssetWidgetTree)
 	{
-		UE_LOG(LogTemp, Error, TEXT("WidgetTree is null!"));
+		UE_LOG(LogDataBasedWidget, Error, TEXT("WidgetTree is null!"));
 		return;
 	}
-	
-	if (!MainAssetWidgetTree->RootWidget)
+    
+	if (!WidgetBP)
 	{
-		MainAssetWidgetTree->RootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("MainPanel"));
-		MainAssetWidgetTree->Modify();
-		UAtkWidgetEditorFunctionLibrary::MarkBlueprintAsModified(this);
+		UE_LOG(LogDataBasedWidget, Error, TEXT("WidgetBlueprint is null!"));
+		return;
 	}
+	UAtkWidgetEditorFunctionLibrary::CreateRootWidget<UGridPanel>(this, FName("MainPanel"));
 }
 
+#endif
 void UWPropGenGeneric::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	InitFromObject(ListItemObject);
@@ -239,5 +263,4 @@ void UWPropGenGeneric::UpdateGridPosition(uint8& ColumnIndex, uint8& RowIndex) c
 		RowIndex++;
 	}
 }
-#endif
 

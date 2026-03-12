@@ -14,7 +14,7 @@ void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* m
     int a = 0;
 }
 
-void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder, UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
+void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
 {
 
 }
@@ -58,7 +58,7 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     if (!original)
     {
         UE_LOG(LogInteractiveMap, Error, TEXT("Original Mesh is not valid"));
-        return;
+        return; 
     }
     if (!meshToUpdate)
     {
@@ -75,35 +75,8 @@ void UMapVisualComponent::SetMeshProperties(UStaticMeshComponent* original, USta
     meshToUpdate->SetRelativeScale3D(original->GetRelativeScale3D());
     meshToUpdate->SetMaterial(0, original->GetMaterial(0));
 }
-void UMapVisualComponent::UpdateMeshMaterial(UStaticMeshComponent* meshToUpdate, UMaterialInterface* mat)
-{
-    if (!meshToUpdate)
-        return;
-
-    meshToUpdate->SetMaterial(0, mat);
-}
-
-UStaticMeshComponent* UMapVisualComponent::GetMeshComponent(MapMode mode)
-{
-    return nullptr;
-}
-
-UStaticMeshComponent* UMapVisualComponent::GetMapSelectMeshComponent()
-{
-    return nullptr;
-}
 
 UStaticMeshComponent* UMapVisualComponent::GetMapGameplayMeshComponent()
-{
-    return nullptr;
-}
-
-UStaticMeshComponent* UMapVisualComponent::GetMapBorderMeshComponent()
-{
-    return nullptr;
-}
-
-UStaticMeshComponent* UMapVisualComponent::GetMapTerrainMeshComponent()
 {
     return nullptr;
 }

@@ -64,7 +64,6 @@ namespace MapGenerator
 					else
 					{
 						const data::Color color = data::GetRandomColorNotInSet(m_colors);
-
 						mygal::Vector2<int> point = algo::fillGetCentroidOfPoints(x, y, m_tiles, color, width, height);
 					}
 				}
@@ -85,28 +84,6 @@ namespace MapGenerator
 
 		return buffer;
 	}
-
-	uint8_t* TileMap::ConvertTileMapToRawBuffer() const
-	{
-		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
-		
-		for (unsigned i = 0; i < Height(); i++)
-		{
-			for (unsigned j = 0; j < Width(); j++)
-			{
-				const int tileIndex = (i * Width() + j);
-				const int index = tileIndex * 4;
-				buffer[index] = m_tiles[tileIndex].color.B;
-				buffer[index + 1] = m_tiles[tileIndex].color.G;
-				buffer[index + 2] = m_tiles[tileIndex].color.R;
-				buffer[index + 3] = m_tiles[tileIndex].color.A;
-				
-			}
-		}
-
-		return buffer;
-	}
-
 	void TileMap::ComputeCells()
 	{
 		auto height = Height();
@@ -260,18 +237,39 @@ namespace MapGenerator
 			}
 		}
 	}
+	void TileMap::ColorInBordersByType(const TileType type)
+	{
+		auto width = Width();
+		auto height = Height();
+		for (unsigned y = 0; y < height; y++)
+		{
+			for (unsigned x = 0; x < width; x++)
+			{
+				auto index = y * width + x;
+				if (m_tiles[index].isBorder && m_tiles[index].type == type)
+				{
+					Tile tile;
+					if (FindClosestTileOfSameType(x, y, width, tile))
+					{
+						m_tiles[index].color = tile.color;
+						m_tiles[index].centroid = tile.centroid;
+					}
+				}
+			}
+		}
+	}
 
-	uint8_t* TileMap::GetLandTileMap() const
+	std::vector<uint8_t> TileMap::GetLandTileMap() const
 	{
 		return GetTileMapOfType(TileType::LAND);
 	}
 
-	uint8_t* TileMap::GetOceanTileMap() const
+	std::vector<uint8_t> TileMap::GetOceanTileMap() const
 	{
 		return GetTileMapOfType(TileType::WATER);
 	}
 	
-	uint8_t* TileMap::GetBordersTileMap(const data::Color& borderColor, const data::Color& notBorderColor) const
+	std::vector<uint8_t> TileMap::GetBordersTileMap(const data::Color& borderColor, const data::Color& notBorderColor) const
 	{
 		return GetTileMap([](const Tile &tile)
 			{
@@ -279,7 +277,7 @@ namespace MapGenerator
 			}, borderColor, notBorderColor);
 	}
 	
-	uint8_t* TileMap::GetVisitedTileMap(const data::Color& visitedColor, const data::Color& notVisitedColor) const
+	std::vector<uint8_t> TileMap::GetVisitedTileMap(const data::Color& visitedColor, const data::Color& notVisitedColor) const
 	{
 		return GetTileMap([](const Tile &tile)
 			{
@@ -287,9 +285,9 @@ namespace MapGenerator
 			}, visitedColor, notVisitedColor);
 	}
 
-	uint8_t* TileMap::GetCentroidTileMap() const
+	std::vector<uint8_t> TileMap::GetCentroidTileMap() const
 	{
-		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		std::vector<uint8_t> buffer(m_tiles.size() * 4);
 		forEachTile([&](const Tile& tile, unsigned bufferIndex)
 		{
 			auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
@@ -326,7 +324,7 @@ namespace MapGenerator
 		return buffer;
 	}
 
-	uint8_t* TileMap::GetTileMapOfType(TileType type) const
+	std::vector<uint8_t> TileMap::GetTileMapOfType(TileType type) const
 	{
 		return GetTileMap([type](const Tile &tile)
 			{
@@ -334,7 +332,7 @@ namespace MapGenerator
 			});
 	}
 	
-	uint8_t* TileMap::GetUndefinedTileMap(const data::Color& defined, const data::Color& undefined) const
+	std::vector<uint8_t> TileMap::GetUndefinedTileMap(const data::Color& defined, const data::Color& undefined) const
 	{
 		return GetTileMap([](const Tile &tile)
 			{
@@ -342,9 +340,9 @@ namespace MapGenerator
 			}, undefined, defined);
 	}
 
-	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
+	std::vector<uint8_t> TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
 	{
-		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		std::vector<uint8_t> buffer(m_tiles.size() * 4);
 		forEachTile([&](const Tile& tile, unsigned bufferIndex)
 		{
 			if (predicate(tile))
@@ -359,9 +357,9 @@ namespace MapGenerator
 		return buffer;
 	}
 
-	uint8_t* TileMap::GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const
+	std::vector<uint8_t> TileMap::GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const
 	{
-		uint8_t* buffer = new uint8_t[m_tiles.size() * 4];
+		std::vector<uint8_t> buffer(m_tiles.size() * 4);
 		forEachTile([&](const Tile& tile, unsigned bufferIndex)
 		{
 			if (predicate(tile))
@@ -376,11 +374,11 @@ namespace MapGenerator
 		return buffer;
 	}
 
-	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const data::Color& borderColor)
+	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer,  const TileType type, const data::Color& borderColor)
 	{
 		if(borderBuffer.size() != m_tiles.size() * 4)
 		{
-			std::cout << "border does not match tile size\n";
+			// std::cout << "border does not match tile size\n";
 			return;
 		}
 
@@ -399,6 +397,7 @@ namespace MapGenerator
 				{
 					m_tiles[tileIndex].visited = true;
 					m_tiles[tileIndex].isBorder = true;
+					// m_tiles[tileIndex].type = type;
 				}
 			}
 		}
@@ -417,7 +416,7 @@ namespace MapGenerator
 		}	*/
 	}
 
-	void TileMap::fillBufferPosWithColor(int index, uint8_t* buffer, const data::Color& color)
+	void TileMap::fillBufferPosWithColor(int index, std::vector<uint8_t>& buffer, const data::Color& color)
 	{
 		buffer[index]	  = color.B;
 		buffer[index + 1] = color.G;

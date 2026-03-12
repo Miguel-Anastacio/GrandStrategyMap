@@ -27,4 +27,4 @@ void FShadersModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FShadersModule, ShaderModule)
+IMPLEMENT_MODULE(FShadersModule, ShadersModule)

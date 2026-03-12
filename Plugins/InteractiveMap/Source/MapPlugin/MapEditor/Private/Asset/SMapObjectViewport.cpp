@@ -47,7 +47,6 @@ void FMapObjectViewportClient::ProcessMouseClick(FSceneView& View,FKey Key, EInp
 	if(Index == -1)
 	{
 		WorkingAsset->ClearTilesSelected();
-		App->UpdateHighlightTexture({});
 	}
 	else
 	{
@@ -65,9 +64,6 @@ void FMapObjectViewportClient::ProcessMouseClick(FSceneView& View,FKey Key, EInp
 		{
 			WorkingAsset->AddTileSelected(Index);
 		}
-		
-		App->UpdateEntriesSelected(WorkingAsset->GetTilesSelected());
-		App->UpdateHighlightTexture(WorkingAsset->GetTilesSelected());
 	}
 }
 
@@ -85,13 +81,6 @@ bool FMapObjectViewportClient::InputKey(const FInputKeyEventArgs& EventArgs)
 		if(MapObject)
 		{
 			MapObject->LogLookupTable();
-		}
-	}
-	if(WasKeyReleased(EventArgs.Key, EKeys::V, EventArgs.Event))
-	{
-		if(MapObject)
-		{
-			MapObject->LogVisualProperties();
 		}
 	}
 	
@@ -128,7 +117,7 @@ int32 FMapObjectViewportClient::GetIndexOfTileSelected(const FSceneView& View, c
 
 		if(MapAsset->Material)
 		{
-			return  MapAsset->MapObject->FindID(Color);
+			return MapObject->FindID(Color);
 		}
 	}
 	return -1;
@@ -158,19 +147,7 @@ void SMapObjectViewport::Construct(const FArguments& InArgs)
 	MapAsset->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 #else
 #endif		
-	MapAsset->MapObject = CustomObject.Get();
-	MapAsset->RerunConstructionScripts();
-}
-
-void SMapObjectViewport::UpdatePreviewActor() const 
-{
-	MapAsset->Material->SetTextureParameterValue("TextureHighlight", MapEditorApp.Pin()->GetHighlightTexture().Get());
-}
-
-void SMapObjectViewport::UpdatePreviewActorMaterial(UMaterial* ParentMaterial, UTexture2D* Texture2D) const
-{
-	MapAsset->SetMaterial(Texture2D, ParentMaterial);
-	UpdatePreviewActor();
+	MapAsset->SetBind(MapEditorApp);
 }
 
 TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
@@ -186,7 +163,6 @@ TSharedRef<FEditorViewportClient> SMapObjectViewport::MakeEditorViewportClient()
 	LevelViewportClient->EngineShowFlags.SetEyeAdaptation(false);
 	
 	LevelViewportClient->SetViewLocationForOrbiting(FVector(200, -150, 400));
-
 	
 	return LevelViewportClient.ToSharedRef();
 }

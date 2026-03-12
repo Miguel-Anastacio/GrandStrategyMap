@@ -29,9 +29,9 @@ void FMapEditorApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManage
 {
 	FWorkflowCentricApplication::RegisterTabSpawners(tabManager);
 	LoadPreviewTexturesFromMapObject(WorkingAsset);
-	CurrentTexture = WorkingAsset->GetLookupTexture();
+	UpdateCurrentTexture(GetLookupTexture());
+	TempMapGenerator = WorkingAsset->GetLastMapGen();
 	WorkingAsset->ClearTilesSelected();
-	UpdateHighlightTexture({});
 }
 
 void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<class IToolkitHost>& InitToolkitHost,
@@ -40,15 +40,21 @@ void FMapEditorApp::InitEditor(const EToolkitMode::Type Mode, const TSharedPtr<c
 	GEditor->RegisterForUndo(this);
 	WorkingAsset = Cast<UMapObject>(InObject);
 	MapGenPreset = NewObject<UMapEditorPreset>();
+	
 	WorkingAsset->OnMapDetailsChange.BindLambda([this]()
 	{
-		if(GetCurrentMode() == MapDataEditorModeName)
-		{
-			if(const TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr()))
-			{
-				AppMode->Refresh(false);
-			}
-		}
+		RefreshMapDataEditor(false);
+	});
+	
+	WorkingAsset->OnTilesSelectedChanged.BindLambda([this](const TArray<int32>& tiles)
+	{
+		UpdateHighlightTexture(tiles);
+		UpdateEntriesSelected(tiles);
+	});
+	
+	WorkingAsset->OnMapDataChanged.BindLambda([this]()
+	{
+		RefreshMapDataEditor(true);
 	});
 	
 	AddApplicationMode(MapEditorGenModeName, MakeShareable(new FMapEditorGenAppMode(SharedThis(this))));
@@ -78,19 +84,15 @@ void FMapEditorApp::PostUndo(bool bSuccess)
 			TempPreviews.Pop();
 		}
 		TempMapGenerator = GetLastMapCreated();
-		UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
-		PreviewRootTexture = GetLastRootTexture();
-		CurrentTexture = GetLookupTexture();
-		RestoreTexturePreview();
-		
-		if(GetCurrentMode() == MapDataEditorModeName)
+		if(TempMapGenerator)
 		{
-			TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-			if(AppMode)
-			{
-				AppMode->Refresh(true);
-			}
+			UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
 		}
+		PreviewRootTexture = GetLastRootTexture();
+		UpdateCurrentTexture(GetLookupTexture());
+		RestoreTexturePreview();
+
+		RefreshMapDataEditor(true);
 	}
 }
 
@@ -130,8 +132,7 @@ void FMapEditorApp::OnTexturePreviewClicked(FName ID)
 		
 	if(Texture2D.IsValid())
 	{
-		MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, Texture2D.Get());
-		CurrentTexture = Texture2D;
+		UpdateCurrentTexture(Texture2D);
 	}
 }
 
@@ -146,6 +147,7 @@ void FMapEditorApp::SaveAsset_Execute()
 void FMapEditorApp::GenerateMap()
 {
 	bool UserProvidedBorders = false;
+	// Validate user uploaded borders
 	if(MapGenPreset->UploadBorder())
 	{
 		// validate size
@@ -159,21 +161,20 @@ void FMapEditorApp::GenerateMap()
 		}
 		UserProvidedBorders = true;
 	}
-	// Convert to filesystem path
-	FString AssetDirectory;
-	GetWorkingAssetDir(AssetDirectory); 
-	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*AssetDirectory));
-	const std::filesystem::path MapGenLogPath = AssetDir / "MapGenLog.txt";
-	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024, MapGenLogPath));
 	
+	// Convert to filesystem path
+	const FString CompleteDirPath = GetAbsoluteDir(WorkingAsset);
+	const std::filesystem::path AssetDir(TCHAR_TO_UTF8(*CompleteDirPath));
+	const std::filesystem::path MapGenLogPath = AssetDir / "MapGenLog.txt";
+	
+	TempMapGenerator = MakeShareable(new MapGenerator::Map(1024, 1024, MapGenLogPath));
+
+	// Handle user uploaded borders
 	if(UserProvidedBorders)
 	{
 		UTexture2D* BorderTexture = MapGenPreset->MapEditorDetails.BorderTexture;
-		const uint32 height = BorderTexture->GetSizeY();
-		const uint32 width = BorderTexture->GetSizeX();
-		
-		const uint8* BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(BorderTexture);
-		if(!BufferData)
+		const std::vector<uint8> BufferData =  UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(BorderTexture);
+		if(BufferData.empty())
 		{
 			UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read  Border texture"));
 			// throw error and return
@@ -182,12 +183,13 @@ void FMapEditorApp::GenerateMap()
 			EAppReturnType::Type Result = FMessageDialog::Open(EAppMsgType::Ok, Message, Title);
 			return;
 		}
-		TempMapGenerator->SetBorderUpload(BufferData, width, height);
+		TempMapGenerator->SetBorderUpload(BufferData);
 	}
-	
+
+	// Check if origin texture is valid
 	UTexture2D* Texture = MapGenPreset->MapEditorDetails.OriginTexture;
-	const uint8* Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToBuffer(Texture);
-	if(!Data)
+	std::vector<uint8> Data = UAtkTextureUtilsFunctionLibrary::ReadTextureToVector(Texture);
+	if(Data.empty())
 	{
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to read Height Map texture"));
 		// throw error and return
@@ -197,20 +199,18 @@ void FMapEditorApp::GenerateMap()
 		return;
 	}
 	 
-	// TODO - improve this, adjust MapGeneratorLib
 	const uint32 Height = Texture->GetSizeY();
 	const uint32 Width = Texture->GetSizeX();
-	const std::vector<uint8_t> vector = std::vector(&Data[0], &Data[Width * Height * 4]);
 	UAtkMiscFunctionLibrary::ExecuteSlowTaskWithProgressBar(
-		[&, vector, this](TFunction<void(float, std::string_view)> ProgressCallback)
+		[&, Data, this](TFunction<void(float, std::string_view)> ProgressCallback)
 		{
 			//Call GenerateMap and pass the progress callback
 			constexpr MapGenerator::MapModeGen GenType = MapGenerator::MapModeGen::FromHeightMap;
 			TempMapGenerator->SetProgressCallback(ProgressCallback);
-			TempMapGenerator->GenerateMap(vector, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
+			TempMapGenerator->GenerateMap(Data, Width, Height, MapGenPreset->GetLookupMapData(), GenType);
+			WorkingAsset->SetLastMapGen(TempMapGenerator);
 
 			// Update the preview textures
-			PreviewLookupTexture = CreateLookupTexture(TempMapGenerator->GetLookupTileMap());
 			UpdatePreviewTextures(TempMapGenerator->GetLookupTileMap());
 			PreviewRootTexture = Texture;
 			
@@ -223,25 +223,21 @@ void FMapEditorApp::GenerateMap()
 				MapObject->IncrementCounter();
 				MapObject->MarkPackageDirty();
 			}
-
-			MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, PreviewLookupTexture);
-			CurrentTexture = PreviewLookupTexture;
 			
 			TempPreviews.Emplace(TempMapGenerator, PreviewLookupTexture);
+			
+			UpdateCurrentTexture(GetLookupTexture());
+			ClearHighlightTexture();
 			RestoreTexturePreview();
 		});
 }
 
 void FMapEditorApp::RestoreTexturePreview() const
 {
-	if(!WorkingAsset)
-		return;
 	if(MapTexturePreview)
 	{
 		MapTexturePreview->SetTextures(GetTexturesPairs());
 	}
-	
-	MapViewport->UpdatePreviewActorMaterial(MapGenPreset->Material, CurrentTexture.Get());
 }
 
 void FMapEditorApp::RestoreMapGenPreset() const
@@ -256,26 +252,8 @@ void FMapEditorApp::RestoreMapGenPreset() const
 void FMapEditorApp::SaveGeneratedMap()
 {
 	TempPreviews.Empty();
-	// TODO - refactor this
-	const FString AssetPath = WorkingAsset->GetPathName();
-	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
-	FString DirPath = FPaths::GetPath(FullPath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
-		return;
-	}
-	
-	const FString ProjectContentsDir = FPaths::CreateStandardFilename(FPaths::ProjectContentDir());
-	FString CompleteDirPath =  FPaths::CreateStandardFilename(DirPath);
-
-	// already we are under content folder so if remove succeds then adapt package path
-	FString PackagePath = "/Game/";
-	if(DirPath.RemoveFromStart(ProjectContentsDir))
-	{
-		PackagePath += DirPath + "/";
-	}
+	// Convert filesystem path back to package path for asset creation
+	const FString PackagePath = FPackageName::GetLongPackagePath(WorkingAsset->GetPathName()) + "/";
 	UTexture2D* TextureAsset = CreateLookupTextureAsset(PackagePath);
 	if(!TextureAsset)
 	{
@@ -289,8 +267,10 @@ void FMapEditorApp::SaveGeneratedMap()
 		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Failed to create material Asset"));
 		// return;
 	}
-
-	CompleteDirPath = CompleteDirPath + "/" + TextureAsset->GetName();
+	
+	// Get the directory containing the asset
+	const FString CompleteDirPath = GetAbsoluteDir(WorkingAsset) + "/" + TextureAsset->GetName();
+	
 	const FString LookupFilePath = CompleteDirPath + + "_lookup.json";
 	OutputLookupJson(LookupFilePath);
 	
@@ -298,32 +278,16 @@ void FMapEditorApp::SaveGeneratedMap()
 	OutputStubMapDataJson(StubMapDataFilePath);
 	// Outputs the params and the results of the Map Lookup Created
 	const FString LookupGenResultsFilePath = CompleteDirPath + "_MapGenParamsResults.json";
-	OutputLookupGenFile(LookupGenResultsFilePath);	
+	OutputLookupGenFile(LookupGenResultsFilePath);
 	
 	SetMapObjectProperties(WorkingAsset, TextureAsset, LookupFilePath, StubMapDataFilePath, Material);
-
+	
 	WorkingAsset->SetLastParamsUsed(MapGenPreset->MapEditorDetails);
 	WorkingAsset->SetRootTexture(PreviewRootTexture);
 	WorkingAsset->SetMapGen(TempMapGenerator);
 	WorkingAsset->SetMapSaved(true);
 	
 	UEditorLoadingAndSavingUtils::SavePackages({TextureAsset->GetPackage(), Material->GetPackage()}, true);
-}
-
-bool FMapEditorApp::GetWorkingAssetDir(FString& OutPath) const
-{
-	const FString AssetPath = WorkingAsset->GetPathName();
-	const FString FullPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() + AssetPath.Replace(TEXT("/Game/"), TEXT("")) + TEXT(".uasset"));
-	FString DirPath = FPaths::GetPath(FullPath);
-	FPaths::NormalizeDirectoryName(DirPath);
-	if(!FPaths::IsUnderDirectory(DirPath, FPaths::ProjectContentDir()))
-	{
-		UE_LOG(LogInteractiveMapEditor, Error, TEXT("Folder to save Map Object must be inside project content"));
-		return false;
-	}
-	
-	OutPath = FPaths::CreateStandardFilename(DirPath);
-	return true;
 }
 
 void FMapEditorApp::AddReferencedObjects(FReferenceCollector& Collector)
@@ -357,11 +321,11 @@ void FMapEditorApp::AddToolbarExtender()
 				}),
 				FCanExecuteAction().CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() != MapDataEditorModeName && WorkingAsset->IsMapSaved();
+					return !IsModeCurrent(MapDataEditorModeName) && WorkingAsset->IsMapSaved();
 				}),
 				FIsActionChecked::CreateLambda([this]() -> bool
 				{
-					return GetCurrentMode() == MapDataEditorModeName;
+					return IsModeCurrent(MapDataEditorModeName);
 				})
 			),
 			NSLOCTEXT("MapEditor", "MapDataTabLabel", "Details"),
@@ -394,24 +358,15 @@ void FMapEditorApp::AddToolbarExtender()
 
 TObjectPtr<UTexture2D> FMapEditorApp::CreateLookupTexture(const MapGenerator::TileMap& TileMap)
 {
-	uint8_t* buffer = TileMap.ConvertTileMapToRawBuffer();
+	const std::vector<uint8_t> buffer = TileMap.ConvertTileMapToBuffer();
 	const int Width = TileMap.Width();
 	const int Height = TileMap.Height();
 	TObjectPtr<UTexture2D> Texture = CreateTexture(buffer, Width, Height);
-	// if(buffer)
-	// {
-	// 	delete buffer;
-	// 	buffer = nullptr;
-	// }
 	return Texture;
 }
 
-TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Width, unsigned Height)
+TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(const std::vector<uint8>& Buffer, unsigned Width, unsigned Height)
 {
-	if(!Buffer)
-		return nullptr;
-
-	// TODO - CORRECT THIS FUNCTION 
 	//Create a string containing the texture's path
 	FString PackageName = TEXT("/Game/Preview/");
 	FString BaseTextureName = FString("PreviewTexture");
@@ -433,7 +388,7 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	// Lock the mipmap and write the buffer data
 	uint8* MipData = NewTexture->Source.LockMip(0);
 	int32 BufferSize = Width * Height * 4; // BGRA8 format
-	FMemory::Memcpy(MipData, Buffer, BufferSize);
+	FMemory::Memcpy(MipData, Buffer.data(), BufferSize);
 	NewTexture->Source.UnlockMip(0);
 
 	NewTexture->CompressionSettings = TC_EditorIcon;
@@ -442,11 +397,6 @@ TObjectPtr<UTexture2D> FMapEditorApp::CreateTexture(uint8* Buffer, unsigned Widt
 	// Update the texture to reflect changes
 	NewTexture->PostEditChange();
 
-	// TODO - CHANGE THIS This function should not manage the buffer memory
-	//Since we don't need access to the pixel data anymore free the memory
-	delete[] Buffer;
-	Buffer = nullptr;
-	
 	return NewTexture;
 }
 
@@ -462,8 +412,8 @@ void FMapEditorApp::SetMapObjectProperties(UMapObject* MapObject, UTexture2D* Te
 
 	if(MapGenPreset && MapGenPreset->TileDataStructType && MapGenPreset->OceanTileDataType)
 	{
-		MapObject->StructType = MapGenPreset->TileDataStructType;
-		MapObject->OceanStructType = MapGenPreset->OceanTileDataType;
+		MapObject->InitLandStructType(MapGenPreset->TileDataStructType);
+		MapObject->InitOceanStructType(MapGenPreset->OceanTileDataType);
 		MapObject->SetMapDataFilePath(MapDataFilePath);
 	}
 	MapObject->PostEditChange();
@@ -574,11 +524,11 @@ UMaterialInstanceConstant* FMapEditorApp::CreateMaterialInstanceAsset(UTexture2D
 UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) const
 {
 	TSharedPtr<MapGenerator::Map> Map = TempMapGenerator;
-	uint8_t* Buffer = Map->GetLookupTileMap().ConvertTileMapToRawBuffer();
+	std::vector<uint8_t> Buffer = Map->GetLookupTileMap().ConvertTileMapToBuffer();
 	
 	FString Message;
 	bool bResult = false;
-	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath, "LookupTexture", Buffer, Map->Width(), Map->Height(), bResult, Message);
+	UTexture2D* Texture = UAtkAssetCreatorFunctionLibrary::CreateTextureAssetFromBuffer(PackagePath, "LookupTexture", Buffer.data(), Map->Width(), Map->Height(), bResult, Message);
 	UE_LOG(LogInteractiveMapEditor, Warning, TEXT("%s"), *Message);
 	
 	if(Texture)
@@ -586,12 +536,6 @@ UTexture2D* FMapEditorApp::CreateLookupTextureAsset(const FString& PackagePath) 
 		Texture->CompressionSettings = TC_EditorIcon;
 		Texture->MipGenSettings = TMGS_NoMipmaps;
 		Texture->PostEditChange();
-	}
-	
-	if(Buffer)
-	{
-		delete[] Buffer;
-		Buffer = nullptr;
 	}
 	
 	return Texture;
@@ -603,7 +547,7 @@ void FMapEditorApp::SetFilterForDataList(const UScriptStruct* Struct)
 	TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 	if(AppMode)
 	{
-		AppMode->SetFilter(Struct, GetCurrentMode() == MapDataEditorModeName);
+		AppMode->SetFilter(Struct, IsModeCurrent(MapDataEditorModeName));
 		
 		const TArray<int32> TilesSelected = GetWorkingAsset()->GetTilesSelected();
 		if(!TilesSelected.IsEmpty())
@@ -622,10 +566,15 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 {
 	if(!CurrentTexture.IsValid())
 		return;
-	// get lookup texture buffer
-	const TArray<uint8> bufferTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
-	const int32 size = bufferTextureData.Num();
-	uint8_t* buffer = new uint8_t[size];
+	
+	if(IDs.IsEmpty())
+	{
+		ClearHighlightTexture();
+		return;
+	}
+	
+	const int32 size = BufferCurrentTextureData.Num();
+	std::vector<uint8_t> buffer(size);
 
 	TSet<FColor> Colors;
 	Colors.Reserve(IDs.Num());
@@ -634,35 +583,30 @@ void FMapEditorApp::UpdateHighlightTexture(const TArray<int32>& IDs)
 		Colors.Add(GetWorkingAsset()->GetColor(ID));
 	}
 	
-	for(int i = 0; i < size; i+=4)
+	const int32 NumPixels = size / 4;
+	for(int32 PixelIndex = 0; PixelIndex < NumPixels; ++PixelIndex)
 	{
-		const FColor color = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(i, bufferTextureData);
-		if(Colors.Contains(color))
-		{
-			buffer[i + 0] = 255;
-			buffer[i + 1] = 255;
-			buffer[i + 2] = 255;
-			buffer[i + 3] = 255;
-		}
-		else
-		{
-			buffer[i + 0] = 0;
-			buffer[i + 1] = 0;
-			buffer[i + 2] = 0;
-			buffer[i + 3] = 0;
-		}
+		const int32 ByteIndex = PixelIndex * 4;
+		const FColor PixelColor = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(ByteIndex, BufferCurrentTextureData);
+    
+		const uint8 Value = Colors.Contains(PixelColor) ? 255 : 0;
+		buffer[ByteIndex + 0] = Value;
+		buffer[ByteIndex + 1] = Value;
+		buffer[ByteIndex + 2] = Value;
+		buffer[ByteIndex + 3] = Value;
 	}
 	const int32 Width =  CurrentTexture.Get()->GetSizeX();
 	const int32 Height = CurrentTexture.Get()->GetSizeY();
-	HighlightTexture = CreateTexture(buffer, Width, Height);
-	if(buffer)
-	{
-		delete[] buffer;
-		buffer = nullptr;
-	}
 
-	if(MapViewport)
-		MapViewport->UpdatePreviewActor();
+	if(!HighlightTexture)
+	{
+		HighlightTexture = CreateTexture(buffer, Width, Height);
+	}
+	else
+	{
+		UpdateTextureDataEditor(HighlightTexture, buffer.data(), Width, Height);
+	}
+	OnHighlightChanged.Broadcast(HighlightTexture);
 }
 
 void FMapEditorApp::LoadPreviewTexturesFromMapObject(const UMapObject* MapObject)
@@ -670,11 +614,16 @@ void FMapEditorApp::LoadPreviewTexturesFromMapObject(const UMapObject* MapObject
 	if(!MapObject)
 		return;
 
-	PreviewLookupTexture = MapObject->LookupTexture;
 	PreviewRootTexture = MapObject->GetRootTexture();
 	
+	const TSharedPtr<MapGenerator::Map> LastMapGen = MapObject->GetLastMapGen();
 	const TSharedPtr<MapGenerator::Map> MapGen = MapObject->GetMapGen();
-	if(MapGen->IsValid())
+	if(LastMapGen.IsValid())
+	{
+		const MapGenerator::TileMap& TileMap = LastMapGen->GetLookupTileMap();
+		UpdatePreviewTextures(TileMap);
+	}
+	else if(MapGen.IsValid() && MapGen->IsValid())
 	{
 		const MapGenerator::TileMap& TileMap = MapGen->GetLookupTileMap();
 		UpdatePreviewTextures(TileMap);
@@ -716,6 +665,40 @@ TWeakObjectPtr<UTexture2D> FMapEditorApp::GetCurrentTexture() const
 	return CurrentTexture;
 }
 
+void FMapEditorApp::UpdateCurrentTexture(const TWeakObjectPtr<UTexture2D> Texture)
+{
+	CurrentTexture = Texture;
+	BufferCurrentTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(CurrentTexture.Get());
+	OnCurrentTextureChanged.Broadcast(Texture);
+}
+
+void FMapEditorApp::ClearHighlightTexture()
+{
+	if(!CurrentTexture.IsValid())
+		return;
+	const int32 Width =  CurrentTexture.Get()->GetSizeX();
+	const int32 Height = CurrentTexture.Get()->GetSizeY();
+	const int32 size = Width * Height * 4;
+	std::vector<uint8_t> buffer(size);
+	for(int i = 0; i < size; i+=4)
+	{
+		buffer[i + 0] = 0;
+		buffer[i + 1] = 0;
+		buffer[i + 2] = 0;
+		buffer[i + 3] = 0;
+	}
+
+	if(!HighlightTexture)
+	{
+		HighlightTexture = CreateTexture(buffer, Width, Height);
+	}
+	else
+	{
+		UpdateTextureDataEditor(HighlightTexture, buffer.data(), Width, Height);
+	}
+	OnHighlightChanged.Broadcast(HighlightTexture);
+}
+
 TArray<TPair<FName, UTexture2D*>> FMapEditorApp::GetTexturesPairs() const
 {
 	return TArray
@@ -733,10 +716,10 @@ void FMapEditorApp::UpdatePreviewTextures(const MapGenerator::TileMap& TileMap)
 {
 	const unsigned width = TileMap.Width();
 	const unsigned height = TileMap.Height();
-	// Checks is TileMap Valid here?
+	// Maybe do not always create texture, do so only if it is null
 	PreviewLookupTextureLand   = CreateTexture(TileMap.GetLandTileMap(), width, height);
 	PreviewLookupTextureOcean  = CreateTexture(TileMap.GetOceanTileMap(), width, height);
-	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToRawBuffer(), width, height);
+	PreviewLookupTexture	   = CreateTexture(TileMap.ConvertTileMapToBuffer(), width, height);
 	// Debug
 	PreviewVisitedTilesTexture = CreateTexture(TileMap.GetCentroidTileMap(), width, height);
 	PreviewBorderTexture	   = CreateTexture(TileMap.GetBordersTileMap(), width, height);
@@ -762,26 +745,12 @@ UTexture2D* FMapEditorApp::GetLastRootTexture() const
 
 void FMapEditorApp::UpdateEntriesSelected(const TArray<int32>& Indexes) const
 {
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
+	if(IsModeCurrent(MapDataEditorModeName))
 	{
 		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
 		if(DataEditorMode.IsValid())
 		{
 			DataEditorMode->UpdateEntriesSelected(Indexes);
-		}
-	}
-}
-
-void FMapEditorApp::ClearSelection() const
-{
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
-	{
-		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-		if(DataEditorMode.IsValid())
-		{
-			DataEditorMode->EditableStructListDisplay->ClearSelection();
 		}
 	}
 }
@@ -800,19 +769,21 @@ void FMapEditorApp::UpdateMapData(const FInstancedStruct& Data) const
 		WorkingAsset->IncrementCounter();
 		WorkingAsset->MarkPackageDirty();
 	}
-
-	const FName ModeName = GetCurrentMode();
-	if(ModeName == MapDataEditorModeName)
-	{
-		TSharedPtr<FMapEditorDataAppMode> DataEditorMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
-		if(DataEditorMode.IsValid())
-		{
-			DataEditorMode->Refresh(true);
-		}
-	}
-	
 }
 
+void FMapEditorApp::RefreshMapDataEditor(const bool keepSelection) const
+{
+	if(IsModeCurrent(MapDataEditorModeName))
+	{
+		TSharedPtr<FMapEditorDataAppMode> AppMode = StaticCastSharedPtr<FMapEditorDataAppMode>(GetCurrentModePtr());
+		if(AppMode)
+		{
+			AppMode->Refresh(keepSelection);
+		}
+	}
+}
+
+// TODO - rewrite this function, it is too big
 void FMapEditorApp::LoadMapDataFromFile() const
 {
 	TArray<FString> FilePaths;
@@ -908,4 +879,37 @@ bool FMapEditorApp::IsStructTypeValid(const TArray<const UScriptStruct*>& Struct
 		}
 	}
 	return false;
+}
+
+
+void FMapEditorApp::UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Data, int32 Width, int32 Height)
+{
+	if (!Texture || !Data)
+	{
+		return;
+	}
+
+	// Lock the texture for editing
+	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
+	void* TextureData = Mip.BulkData.Lock(LOCK_READ_WRITE);
+    
+	// Copy the new data
+	const int32 DataSize = Width * Height * 4; // RGBA
+	FMemory::Memcpy(TextureData, Data, DataSize);
+    
+	// Unlock and update
+	Mip.BulkData.Unlock();
+	Texture->UpdateResource();
+}
+
+FString FMapEditorApp::GetAbsoluteDir(const UObject* Asset)
+{
+	FString AssetDirectory;
+	const FString AssetPath = Asset->GetPathName();
+	// Convert package path to filesystem path
+	FString AssetFilePath;
+	FPackageName::TryConvertLongPackageNameToFilename(AssetPath, AssetFilePath, TEXT(".uasset"));
+	FString DirPath = FPaths::GetPath(AssetFilePath);
+	FPaths::NormalizeDirectoryName(DirPath);
+	return FPaths::CreateStandardFilename(DirPath);
 }

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-// DECLARE_LOG_CATEGORY_EXTERN(LogUtilityModule, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogMapSharedModule, Log, All);
 
 class FSharedModule : public IModuleInterface
 {

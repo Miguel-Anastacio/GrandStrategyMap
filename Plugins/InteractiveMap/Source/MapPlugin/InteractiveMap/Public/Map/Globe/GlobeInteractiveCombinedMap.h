@@ -13,11 +13,7 @@ class INTERACTIVEMAP_API AGlobeInteractiveCombinedMap : public AGlobeInteractive
 
 public:
 	AGlobeInteractiveCombinedMap(const FObjectInitializer& ObjectInitializer);
-	virtual void SetMapMode_Implementation(const FName& mode) override;
 	virtual void InitializeMap_Implementation() override;
-
-protected:
-	//UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
-	//TObjectPtr<class UTexture2D> TerrainTexture;
+	
 };
 

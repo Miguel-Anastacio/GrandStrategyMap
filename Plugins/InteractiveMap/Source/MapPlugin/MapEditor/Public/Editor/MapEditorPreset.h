@@ -59,8 +59,10 @@ public:
 	UPROPERTY()
 	UMaterial* Material =nullptr;
 
+	// Struct Data for land tiles
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* TileDataStructType = nullptr;;
+	// Struct Data for ocean tiles
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct* OceanTileDataType;
 

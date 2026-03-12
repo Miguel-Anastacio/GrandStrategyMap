@@ -1,5 +1,7 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
+
+#include "UtilityModuleEditor.h"
 #if WITH_EDITOR
 #include "WidgetBlueprint.h"
 #include "Blueprint/UserWidget.h"
@@ -51,4 +53,19 @@ class UWidgetTree* UAtkWidgetEditorFunctionLibrary::GetWidgetTree(const UUserWid
 	}
 	return MainAsset->WidgetTree;
 }
+
+void UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(const TArray<UWidget*>& NewlyCreatedWidgets,
+	UWidgetBlueprint* WidgetBP)
+{
+	for(const UWidget* NewWidget : NewlyCreatedWidgets)
+	{
+		if(NewWidget && !WidgetBP->WidgetVariableNameToGuidMap.Contains(NewWidget->GetFName()))
+		{
+			FGuid NewGuid = FGuid::NewGuid();
+			WidgetBP->WidgetVariableNameToGuidMap.Add(NewWidget->GetFName(), NewGuid);
+			UE_LOG(LogUtilityModuleEditor, Log, TEXT("Added GUID for widget: %s = %s"), *NewWidget->GetFName().ToString(), *NewGuid.ToString());
+		}
+	}
+}
+
 #endif

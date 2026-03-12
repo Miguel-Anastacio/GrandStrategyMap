@@ -19,11 +19,6 @@ public:
     /** Default constructor. */
     UMapLimitComponent();
 
-    /** Initializes the limit component. */
-    UFUNCTION(BlueprintCallable, Category = "Limit")
-    void InitLimitComponent(UStaticMeshComponent* mapSelectMesh, UStaticMeshComponent* mapBorder,
-        UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
-
     /** Gets the visual component. */
     UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Visual")
     class UMapVisualComponent* GetVisualComponent();
@@ -49,6 +44,6 @@ protected:
     TObjectPtr<UBoxComponent> Box;
 
     /** Map visual component. */
-    UPROPERTY(EditAnywhere, Category = "Visual", BlueprintReadOnly)
+    UPROPERTY(VisibleAnywhere, Category = "Visual", BlueprintReadOnly)
     TObjectPtr<UMapVisualComponent> MapVisualComponent;
 };

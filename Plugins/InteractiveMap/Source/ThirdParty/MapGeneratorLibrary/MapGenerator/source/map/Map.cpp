@@ -199,8 +199,7 @@ namespace MapGenerator
 	{
 		if (component)
 			component->Clear();
-		else
-			std::cout << "ERROR - clear " << message << std::endl;
+			// std::cout << "ERROR - clear " << message << std::endl;
 	}
 
 	bool Map::IsValid() const
@@ -212,8 +211,6 @@ namespace MapGenerator
 	{
 		m_uploadBorder = true;
 		m_borderUploadedBuffer = std::make_shared<std::vector<uint8_t>>(borderBuffer);
-		std::cout << "size: ";
-		std::cout << borderBuffer.size() << std::endl;
 		LOG_INFO(m_fileLogger, "Set user border upload");
 		LOG_INFO(m_fileLogger, "Border upload size: " + std::to_string(m_borderUploadedBuffer->size()));
 	}

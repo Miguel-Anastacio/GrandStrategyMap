@@ -2,7 +2,6 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "AssetActionUtility.h"
-#include "GenericWidget/GenericStructWidget.h"
 #include "CreateWidgetAssetAction.generated.h"
 UCLASS()
 class DATABASEDWIDGETEDITOR_API UCreateWidgetFromAssetAction : public UAssetActionUtility
@@ -21,9 +20,8 @@ public:
             TSubclassOf<UUserWidget>
                 DefaultWidgetForFields = nullptr) const;
 
-protected:
     static class UPropGenWidgetMapDataAsset *CreateWidgetMapDataAsset(const FString &PackagePath, const FString &ObjectOriginName);
-    UBlueprint *CreateBlueprintDerivedFromGenericStructWidget(const FString &PackagePath, const FString &AssetName, UPropGenWidgetMapDataAsset *MapDataAsset) const;
+    static UBlueprint *CreateBlueprintDerivedFromGenericStructWidget(const FString &PackagePath, const FString &AssetName, UPropGenWidgetMapDataAsset *MapDataAsset);
 
     static UStruct *GetAssetStruct(const UObject *Asset);
 };

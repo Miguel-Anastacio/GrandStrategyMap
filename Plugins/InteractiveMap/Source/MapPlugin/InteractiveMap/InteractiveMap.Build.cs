@@ -45,7 +45,8 @@ public class InteractiveMap : ModuleRules
 				new string[]
 				{
 					"UMGEditor",
-					"UnrealEd"
+					"UnrealEd",
+					"UtilityModuleEditor"
 					// ... add private dependencies that you statically link with here ...	
 				}
 			);

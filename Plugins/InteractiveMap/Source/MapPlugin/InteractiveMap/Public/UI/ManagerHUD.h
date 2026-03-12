@@ -9,7 +9,7 @@
 
 
 class UGrandStrategyHUDWidget; 
-class UProvinceEditorWidget; 
+class UTileSelectedWidget; 
 class UEditCountriesContainerWidget; 
 
 /**
@@ -22,30 +22,21 @@ class INTERACTIVEMAP_API AManagerHUD : public AHUD
 
 public:
 	/**
-	 * Displays the province editor widget with the given province data and ID.
+	 * Displays the Tile Selected widget with the given province data and ID.
 	 *
-	 * @param provinceData The data of the province to display in the editor.
-	 * @param id The ID of the province.
+	 * @param Data The data of the province to display in the editor.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void DisplayProvinceEditorWidget(const FInstancedStruct& ProvinceData, int Id);
+	void DisplayTileSelectedWidget(const FInstancedStruct& Data);
 
 	/**
-	 * Sets the visibility of the province editor widget.
+	 * Sets the visibility of the Tile Selected widget.
 	 *
 	 * @param Visibility The visibility state to set.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetProvinceEditorVisibility(ESlateVisibility Visibility);
+	void SetTileSelectedWidgetVisibility(ESlateVisibility Visibility);
 	
-	/**
-	 * Sets the reference to the interactive map.
-	 *
-	 * @param Map Reference to the interactive map.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetInteractiveMapReference(class AClickableMap* Map);
-
 protected:
 	void BeginPlay() override;
 
@@ -53,19 +44,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Widgets")
 	TSubclassOf<UGrandStrategyHUDWidget> HudWidgetClass;
 
-	/** Class of the province editor widget. */
-	UPROPERTY(EditAnywhere, Category = "Widgets")
-	TSubclassOf<UProvinceEditorWidget> ProvincedEditorWidgetClass;
-
 	/** Reference to the HUD widget. */
 	UPROPERTY(BlueprintReadOnly, Category = "Widgets")
 	TObjectPtr<UGrandStrategyHUDWidget> HudWidget;
-
-	/** Reference to the province editor widget. */
-	UPROPERTY(BlueprintReadOnly, Category = "Widgets")
-	TObjectPtr<UProvinceEditorWidget> ProvinceEditorWidget;
-
-	/** Reference to the interactive map. */
-	UPROPERTY(Transient)
-	class AClickableMap* GameMapReference;
 };

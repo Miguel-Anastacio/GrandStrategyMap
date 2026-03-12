@@ -12,7 +12,7 @@
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/SListView.h"
 #include "Misc/EngineVersionComparison.h"
-#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/InstancedStruct.h"
 #else
 #include "InstancedStruct.h"
@@ -39,25 +39,6 @@ public:
     SLATE_END_ARGS()
 
 public:
-    virtual TSharedRef<SWidget> DisplayDropdownProperty(const FProperty *Property)
-    {
-        const TArray<FName> AvailableTagsOfType = MapObject->GetVisualPropertiesNamesOfType(Property->GetFName());
-        return SNew(SBox)
-            .Padding(FMargin(4.0f, 0.0f))
-            .VAlign(VAlign_Center)
-                [SNew(SDropDownSelectorWidget)
-                     .AvailableTags(AvailableTagsOfType)
-                     .OnTagChanged_Lambda([this](const FName &Name, const FName &NewTag)
-                                          {
-                                             if(UAtkStructUtilsFunctionLibrary::SetPropertyValueNestedInStructFromString(*Item, Name.ToString(), NewTag.ToString()))
-                                             {
-                                                 ItemChanged.ExecuteIfBound(*Item);
-                                             }
-                                          })
-                     .Text(this, &SInstancedStructListRow::GetPropertyValueText, Property)
-                     .PropertyName(Property->GetFName())];
-    }
-
     void Construct(const FArguments &InArgs, const TSharedRef<STableViewBase> &InOwnerTableView)
     {
         if (InArgs._PropertiesNotEditable)
@@ -85,19 +66,7 @@ public:
 
             if (ColumnName != PropertyName)
                 continue;
-            else if (IsPropertyDropDown(PropertyName))
-            {
-                return DisplayNotEditableProperty(Property);
-            }
-            else if (IsPropertyEditable(PropertyName))
-            {
-                // return DisplayEditableProperty(Property);
-                return DisplayNotEditableProperty(Property);
-            }
-            else
-            {
-                return DisplayNotEditableProperty(Property);
-            }
+            return DisplayNotEditableProperty(Property);
         }
 
         // default to null widget if property cannot be found
@@ -141,7 +110,7 @@ public:
     SLATE_ARGUMENT(const TSet<FName> *, NotEditableProperties)
     SLATE_ARGUMENT(const TSet<FName> *, PropertiesWithDropdown)
     SLATE_ARGUMENT(TWeakObjectPtr<UMapObject>, MapObject)
-
+    
     // called when a struct is edited by the user
     SLATE_EVENT(FItemChangedSignature, OnItemChanged)
     SLATE_EVENT(FSelectionChanged, OnSelectionChanged)

@@ -61,7 +61,7 @@ UPropGenWidgetMapDataAsset *UCreateWidgetFromAssetAction::CreateWidgetMapDataAss
 }
 
 UBlueprint *UCreateWidgetFromAssetAction::CreateBlueprintDerivedFromGenericStructWidget(const FString &PackagePath, const FString &AssetName,
-																						UPropGenWidgetMapDataAsset *MapDataAsset) const
+																						UPropGenWidgetMapDataAsset *MapDataAsset)
 {
 	UBlueprint *Blueprint = UAtkAssetCreatorFunctionLibrary::CreateBlueprintDerivedFromClass(PackagePath, UWPropGenGeneric::StaticClass(),
 																							 TEXT("/WBP_GenericWidget_") + AssetName);

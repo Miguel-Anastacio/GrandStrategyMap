@@ -226,7 +226,6 @@ void UAtkDataManagerFunctionLibrary::WriteJson(const FString& JsonFilePath, cons
 	FString JSONString;
 	UE_LOG(LogTemp, Warning, TEXT("Map Num: %d"), JsonValueArray.Num());
 	
-	// Crashes in 5.5 -> TODO: investigate
 	if (!FJsonSerializer::Serialize(JsonValueArray, TJsonWriterFactory<>::Create(&JSONString, 0)))
 	{
 		bOutSuccess = false;

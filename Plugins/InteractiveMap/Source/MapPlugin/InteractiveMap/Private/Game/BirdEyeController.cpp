@@ -13,6 +13,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/Engine.h"
 #include "InteractiveMap.h"
+#include "MapObject.h"
 #include "Engine/LocalPlayer.h"
 
 ABirdEyeController::ABirdEyeController()
@@ -92,6 +93,8 @@ void ABirdEyeController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
 #if WITH_EDITOR
 		EnhancedInputComponent->BindAction(DisplayLookupTextureAction, ETriggerEvent::Started, this, &ABirdEyeController::SetLookupTextureActive);
+		EnhancedInputComponent->BindAction(LogMapDataAction, ETriggerEvent::Started, this, &ABirdEyeController::LogMapData);
+		EnhancedInputComponent->BindAction(LogMapLookupTableAction, ETriggerEvent::Started, this, &ABirdEyeController::LogMapLookupTable);
 #endif
 		
 	}
@@ -128,13 +131,7 @@ void ABirdEyeController::MouseClick()
 			if (Data)
 			{
 				ProvinceHoveredDelegate.Broadcast(Color, ID);
-
 				ProvinceClickedDelegate.Broadcast(ID, *Data);
-				AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
-				if (ManagerHUD)
-				{
-					ManagerHUD->SetInteractiveMapReference(Map);
-				}
 			}
 			else
 			{
@@ -182,7 +179,7 @@ void ABirdEyeController::HideHUD()
 	AManagerHUD* ManagerHUD = Cast<AManagerHUD>(GetHUD());
 	if (ManagerHUD)
 	{
-		ManagerHUD->SetProvinceEditorVisibility(ESlateVisibility::Collapsed);
+		ManagerHUD->SetTileSelectedWidgetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -191,8 +188,7 @@ void ABirdEyeController::ShowProvinceInfo(int Id, const FInstancedStruct& Data)
 	AManagerHUD* HUD = Cast<AManagerHUD>(GetHUD());
 	if (HUD)
 	{
-		HUD->SetInteractiveMapReference(Map);
-		HUD->DisplayProvinceEditorWidget(Data, Id);
+		HUD->DisplayTileSelectedWidget(Data);
 		bProvinceSelected = true;
 	}
 }
@@ -205,6 +201,16 @@ void ABirdEyeController::HighlightProvince(const FColor& Color)
 void ABirdEyeController::SetLookupTextureActive()
 {
 	Map->SetMapMode("Debug");
+}
+
+void ABirdEyeController::LogMapData()
+{
+	Map->GetMapObject()->LogMapData();
+}
+
+void ABirdEyeController::LogMapLookupTable()
+{
+	Map->GetMapObject()->LogLookupTable();
 }
 #endif
 

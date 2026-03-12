@@ -46,7 +46,7 @@ public:
     FORCEINLINE void SetVerticalMovementLimits(FVector2D limits) { VerticalLimitMovement = limits; };
 
     /** Gets vertical movement limits. */
-    FORCEINLINE FVector2D GetVerticalMovementLimits() { return VerticalLimitMovement; };
+    FORCEINLINE FVector2D GetVerticalMovementLimits() const { return VerticalLimitMovement; };
 
 public:
     UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")

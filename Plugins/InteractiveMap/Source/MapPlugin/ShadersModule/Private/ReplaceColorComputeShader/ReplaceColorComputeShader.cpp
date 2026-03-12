@@ -31,7 +31,7 @@ public:
 		SHADER_PARAMETER(uint32, ChunkSize)
 		SHADER_PARAMETER(uint32, PixelCount)
 		// SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<int>, PixelBuffer)
-		SHADER_PARAMETER_RDG_BUFFER_SRV(RWStructuredBuffer<int>, PixelBuffer)
+		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<int>, PixelBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_UAV(RWStructuredBuffer<int>, OutputBuffer)
 		SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<FColourReplace>, ColorReplacementDataBuffer)
 

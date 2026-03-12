@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../../Map/MapEnums.h"
 #include "GrandStrategyHUDWidget.generated.h"
 
 /**
@@ -11,54 +10,50 @@
  * It provides functionality to interact with the game map and save data.
  */
 class UCustomButtonWidget;
+class UTileSelectedWidget;
 UCLASS(Abstract, BlueprintType)
 class INTERACTIVEMAP_API UGrandStrategyHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	/** Sets the reference to the game map. */
-	UFUNCTION(BlueprintCallable, Category = "HUD")
-	void SetGameMapReference();
 
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetTileSelectedWidgetData(const FInstancedStruct& Data) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "HUD")
+	void SetTileSelectedVisibility(const ESlateVisibility Visible) const;
+	
+#if WITH_EDITOR
+	void CreateHudElements();
+	void SetTileDisplayWidgetClass(const TSubclassOf<UUserWidget> Class);
+	void SeMapModeSelectorWidgetClass(const TSubclassOf<UUserWidget> Class);
+#endif	
+	
 protected:
 	/** Native initialization override. */
 	virtual void NativeOnInitialized() override;
-
-	/** Sets the map mode based on the clicked button. */
-	UFUNCTION()
-	void SetMapMode(UCustomButtonWidget* button);
-
-	/** Saves the data to JSON format based on the clicked button. */
-	UFUNCTION()
-	void SaveDataToJson(UCustomButtonWidget* button);
-
+	
 protected:
-	/** Button for saving general data. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<class UMapModeSelectorWidget> UMapModeSelectorWidget;
-
-	/** Button for saving general data. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> SaveDataButton;
-
-	/** Button for saving country-specific data. */
-	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Buttons")
-	TObjectPtr<UCustomButtonWidget> SaveCountryButton;
-
-	/** The directory path for saving province data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString DirectoryPath = FString("\\MapDataFiles\\");
-
-	/** The filename for saving province data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileName = FString("ProvinceCustom.json");
-
-	/** The filename for saving country data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FileSave")
-	FString FileNameCountry = FString("CountryCustom.json");
-
-	/** Reference to the interactive map. */
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Widgets")
+	UNamedSlot* SelectedSlot;
+	
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite, Category = "Widgets")
+	UNamedSlot* MapModeSelectorSlot;
+	
+	UPROPERTY(EditAnywhere, Category = "Widgets", meta = (MustImplement = "WidgetDataInterface"))
+	TSubclassOf<UUserWidget> TileDisplayWidgetClass;
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<UUserWidget> MapModeSelectorWidgetClass;
+	
+	
+	/** Hold ref to widget to handle map mode selection */
 	UPROPERTY()
-	class AClickableMap* GameMap;
-
+	TWeakObjectPtr<class UMapModeSelectorWidget> MapModeSelectorWidgetRef;
+	
+private:
+#if WITH_EDITOR
+	UNamedSlot* CreateNamedSlot(const FString& SlotName) const;
+#endif	
+	
+	
 };

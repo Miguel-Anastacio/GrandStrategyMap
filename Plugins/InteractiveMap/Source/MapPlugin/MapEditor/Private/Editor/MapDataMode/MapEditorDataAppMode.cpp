@@ -105,24 +105,13 @@ void FMapEditorDataAppMode::PostActivateMode()
 	TSharedPtr<FMapEditorApp> app = App.Pin();
 	app->RestoreTexturePreview();
 	Init();
-	const TArray<int32> Index = app->GetWorkingAsset()->GetTilesSelected();
-	if(!Index.IsEmpty())
-	{
-		UpdateEntriesSelected(Index);
-	}
-	else
-	{
-		EditableStructListDisplay->ClearSelection();
-	}
-	
+	Refresh(true);
 	FApplicationMode::PostActivateMode();
 }
 
 void FMapEditorDataAppMode::Init()
 {
 	ListFilterByType = App.Pin().Get()->GetFilterForDataList();
-	RefreshDataList();
-	
 	TWeakObjectPtr<UMapObject> CustomObject = App.Pin().Get()->GetWorkingAsset();
 	StructTypes.Emplace(CustomObject.Get()->StructType);
 	StructTypes.Emplace(CustomObject.Get()->OceanStructType);

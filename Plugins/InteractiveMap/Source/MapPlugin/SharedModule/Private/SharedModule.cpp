@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SharedModule.h"
-// DEFINE_LOG_CATEGORY(LogUtilityModule);
+DEFINE_LOG_CATEGORY(LogMapSharedModule);
 
 // #define LOCTEXT_NAMESPACE "FInteractiveMapModule"
 

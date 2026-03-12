@@ -3,8 +3,10 @@
 #include "CoreMinimal.h"
 #include "MapGenerator/source/map/Map.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
+// TODO - move static functions to separate libs grouped by subject
 
 // Application that owns the editor window
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentTextureChanged, TWeakObjectPtr<UTexture2D>);
 class FMapEditorApp : public  FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook, public FGCObject
 {
 public:
@@ -44,13 +46,11 @@ public: // FAssetEditorToolkit interface
 	void RestoreMapGenPreset() const;
 
 	void SaveGeneratedMap();
-	bool GetWorkingAssetDir(FString& OutPath) const;
 	// MapDataEditor
 	void UpdateEntriesSelected(const TArray<int32>& Indexes) const;
-	void ClearSelection() const;
 	const UScriptStruct* GetFilterForDataList() const;
 	void UpdateMapData(const struct FInstancedStruct& Data) const;
-	void UpdateMap(const FInstancedStruct& Data);
+	void RefreshMapDataEditor(const bool keepSelection) const;
 	// ====================================================
 
 	// Update MapData FilePath
@@ -59,12 +59,18 @@ public: // FAssetEditorToolkit interface
 	static bool IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType);
 	//==================================
 
-	static TObjectPtr<UTexture2D> CreateTexture(uint8* Buffer, unsigned Width, unsigned Height);
+	static TObjectPtr<UTexture2D> CreateTexture(const std::vector<uint8>& Buffer, unsigned Width, unsigned Height);
 
 	// Update Viewport
 	TWeakObjectPtr<UTexture2D> GetHighlightTexture() const;
 	void UpdateHighlightTexture(const TArray<int32>& IDs);
 	TWeakObjectPtr<UTexture2D> GetCurrentTexture() const;
+	void UpdateCurrentTexture(const TWeakObjectPtr<UTexture2D> Texture);
+
+	void ClearHighlightTexture();
+
+	FOnCurrentTextureChanged OnCurrentTextureChanged;
+	FOnCurrentTextureChanged OnHighlightChanged;
 	// ====================================================
 
 private:
@@ -103,6 +109,10 @@ private:
 	void UpdatePreviewTextures(const MapGenerator::TileMap& TileMap);
 	TSharedPtr<MapGenerator::Map> GetLastMapCreated() const;
 	UTexture2D* GetLastRootTexture() const;
+
+	static void UpdateTextureDataEditor(UTexture2D* Texture, const uint8* Data, int32 Width, int32 Height);
+	
+	static FString GetAbsoluteDir(const UObject* Asset);
 	
 	TObjectPtr<class UMapObject> WorkingAsset = nullptr;
 	TObjectPtr<class UMapEditorPreset> MapGenPreset = nullptr;
@@ -115,11 +125,11 @@ private:
 	UTexture2D* PreviewBorderTexture = nullptr;
 	UTexture2D* PreviewVisitedTilesTexture = nullptr;
 	TWeakObjectPtr<UTexture2D> CurrentTexture = nullptr;
+	TArray<uint8> BufferCurrentTextureData;
 
 	// Highlight
 	UTexture2D* HighlightTexture = nullptr;
 	
-
 	TSharedPtr<MapGenerator::Map> TempMapGenerator = nullptr;
 
 	struct FMapPreview

@@ -3,51 +3,29 @@
 #include "UI/ManagerHUD.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/Widgets/GrandStrategyHUDWidget.h"
-#include "UI/Widgets/ProvinceEditorWidget.h"
-#include "InteractiveMap.h"
-void AManagerHUD::DisplayProvinceEditorWidget(const FInstancedStruct& ProvinceData, int Id)
+void AManagerHUD::DisplayTileSelectedWidget(const FInstancedStruct& Data)
 {
-	if (!ProvinceEditorWidget)
+	if (HudWidget)
 	{
-		if (!ProvincedEditorWidgetClass)
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Province Editor Widget class not set"));
-			return;
-		}
-		ProvinceEditorWidget = CreateWidget<UProvinceEditorWidget>(GetOwningPlayerController(), ProvincedEditorWidgetClass);
-		ProvinceEditorWidget->SetInteractiveMapReference(GameMapReference);
-		ProvinceEditorWidget->AddToViewport();
-	}
-
-	ProvinceEditorWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	ProvinceEditorWidget->SetProvinceData(ProvinceData, Id);
-}
-
-void AManagerHUD::SetProvinceEditorVisibility(ESlateVisibility Visibility)
-{
-	if (ProvinceEditorWidget)
-	{
-		ProvinceEditorWidget->SetVisibility(Visibility);
+		HudWidget->SetTileSelectedWidgetData(Data);
+		HudWidget->SetTileSelectedVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 }
 
-void AManagerHUD::SetInteractiveMapReference(AClickableMap* Map)
+void AManagerHUD::SetTileSelectedWidgetVisibility(ESlateVisibility Visibility)
 {
-	GameMapReference = Map;
-	if (ProvinceEditorWidget)
+	if (HudWidget)
 	{
-		ProvinceEditorWidget->SetInteractiveMapReference(Map);
+		HudWidget->SetTileSelectedVisibility(Visibility);
 	}
 }
 
 void AManagerHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	if (HudWidgetClass)
 	{
 		HudWidget = CreateWidget<UGrandStrategyHUDWidget>(GetOwningPlayerController(), HudWidgetClass);
 		HudWidget->AddToViewport();
-
 	}
 }

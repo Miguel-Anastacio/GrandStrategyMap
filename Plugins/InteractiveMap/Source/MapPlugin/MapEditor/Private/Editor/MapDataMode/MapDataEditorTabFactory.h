@@ -11,10 +11,12 @@ public:
 	FMapDataEditorTabFactory(TSharedPtr<class FMapEditorApp> app);
 	
 	virtual TSharedRef<SWidget> CreateTabBody(const FWorkflowTabSpawnInfo& Info) const override;
+	virtual TSharedRef<SDockTab> SpawnTab(const FWorkflowTabSpawnInfo& Info) const;
 	virtual FText GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const override;
 	void SetAppMode(TSharedPtr<class FMapEditorDataAppMode> appMode);
 
 protected:
+	void HandleTabActivated(TSharedRef<SDockTab> Tab, ETabActivationCause Cause) const;
 	TWeakPtr<class FMapEditorApp> App;
 	TWeakPtr<class FMapEditorDataAppMode> AppMode;
 };

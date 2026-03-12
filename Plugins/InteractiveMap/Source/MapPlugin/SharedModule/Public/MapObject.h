@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Misc/EngineVersionComparison.h"
-#if UE_VERSION_NEWER_THAN(5, 5, 0)
+#if UE_VERSION_NEWER_THAN(5, 4, 4)
 #include "StructUtils/InstancedStruct.h"
 #else
 #include "InstancedStruct.h"
@@ -14,10 +14,12 @@
 #include "Runtime/CoreUObject/Public/Templates/SubclassOf.h"
 #include "Misc/Paths.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Engine/Texture2D.h"
 #if WITH_EDITOR
 #include "source/map/Map.h"
 #include "MapGenParamStructs.h"
 #endif
+#include <vector>
 
 
 #include "MapObject.generated.h"
@@ -108,16 +110,6 @@ struct FPopulation : public FBaseMapStruct
 	FName Culture = "BRA";
 };
 
-UENUM(BlueprintType)
-enum class EClimate : uint8
-{
-	Arctic,
-	Desert,
-	Jungle,
-	Swamp,
-	Savana,
-};
-
 USTRUCT(BlueprintType)
 struct FComplexMapDataStruct : public FBaseMapStruct
 {
@@ -146,6 +138,7 @@ struct FComplexMapDataStruct : public FBaseMapStruct
 
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 DECLARE_DELEGATE(FOnMapDetailsChange);
+DECLARE_DELEGATE_OneParam(FOnTilesSelectedChanged, const TArray<int32>&);
 UCLASS()
 class SHAREDMODULE_API UMapObject : public UObject
 {
@@ -165,23 +158,26 @@ class SHAREDMODULE_API UMapObject : public UObject
 public:
 	TSharedPtr<MapGenerator::Map> GetMapGen() const;
 	void SetMapGen(TSharedPtr<MapGenerator::Map> MapGen);
+	
 	UTexture2D*  GetRootTexture() const;
 	void SetRootTexture(UTexture2D* texture);
+
+	TSharedPtr<MapGenerator::Map> GetLastMapGen() const;
+	void SetLastMapGen(const TSharedPtr<MapGenerator::Map>& MapGen);
+	
 	FMapGenParams GetLastParamsUsed() const;
 	void SetLastParamsUsed(const FMapGenParams& Params);
+	
 	bool IsMapSaved() const;
 	void SetMapSaved(bool Saved);
 	// counter of mapGens without saving 
 	void IncrementCounter();
 	// Map Gen serialization -> move somewhere else
 	void SerializeMap(FArchive& Ar);
-	// static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
 
 	void SaveData() const;
-	void LoadDataFromFile();
 	void SetLookupTexture(UTexture2D *Texture2D);
-	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
-	void SetMapDataFilePath(const FString &FilePath, bool LoadFromFile = true);
+	void SetMapDataFilePath(const FString &FilePath);
 	void SetFilePathMapData(const FString &FilePath);
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
 	void SetLookupFilePath(const FString &FilePath)
@@ -191,32 +187,33 @@ public:
 	}
 
 	// Update In Editor only, used in Map Object Display
-	void UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
 	void UpdateDataInEditor(const FInstancedStruct &NewData, const TArray<int32>& IDs);
 	
 	void SetMaterialOverride(UMaterialInterface* MaterialInterface);
 	UMaterialInterface* GetMaterialOverride() const;
 
-	UDataTable* GetVisualPropertyTypes() const;
 
 	void AddTileSelected(int32 ID);
 	void AddTilesSelected(const TArray<int32>& IDs);
 	void RemoveTileSelected(int32 ID);
-	void ClearTilesSelected();
+	void ClearTilesSelected(const bool triggerNotification = true);
 	const TArray<int32>& GetTilesSelected() const;
 	bool IsTileSelected(int32 ID) const;
 
 	void ReplaceDataMap(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	bool ValidateStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	void ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
-	void ReadDataTables();
+	bool ValidateStructChange(UScriptStruct* NewStruct, UScriptStruct* OldStruct);
+	bool ProcessStructChange(const UScriptStruct* NewStruct, const UScriptStruct* OldStruct);
+
+	void InitLandStructType(UScriptStruct* NewStruct);
+	void InitOceanStructType(UScriptStruct* NewStruct);
 #endif
 	
-public:	
+public:
+	TWeakObjectPtr<UTexture2D> GetLookupTexture() const;
+	
 	// Logging
 	void LogLookupTable() const;
 	void LogMapData() const;
-	void LogVisualProperties() const;
 
 	// Get type of tiles, checks DataStruct used
 	bool IsTileWater(int32 ID) const;
@@ -252,12 +249,8 @@ public:
 	{
 		return LookupTable;
 	};
-	const TArray<uint8> &GetLookupTextureData() const
-	{
-		return LookupTextureData;
-	}
-	FColor GetColorFromUv(const FVector2D &Uv) const;
-
+	TArray<uint8> GetLookupTextureData();
+	void LoadLookupTextureData();
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
@@ -265,29 +258,28 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *OceanStructType;
 #if WITH_EDITORONLY_DATA
-	FOnAssetChanged OnObjectChanged;
 	FOnMapDetailsChange OnMapDetailsChange;
+	FOnTilesSelectedChanged OnTilesSelectedChanged;
+	FOnMapDetailsChange OnMapDataChanged;
 #endif
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Lookup")
-	class UTexture2D *LookupTexture;
+	TSoftObjectPtr<UTexture2D> LookupTexture;
 
-	const TMap<FVisualPropertyType, FArrayOfVisualProperties> &GetVisualPropertiesMap() const;
-	TMap<FName, FArrayOfVisualProperties> GetVisualPropertyNameMap() const;
+	TArray<TObjectPtr<UVisualProperty>> GetVisualProperties();
 
 	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
-	FVisualProperty GetVisualProperty(const FName &Type, const FName &Tag, bool &OutResult) const;
-	FVisualProperty GetVisualProperty(const FVisualPropertyType &Type, const FName &Tag, bool &OutResult) const;
 
-	TArray<FName> GetVisualPropertiesNamesOfType(const FName &Type) const;
-	TSet<FName> GetNamesOfVisualPropertiesInMapData() const;
-	
 private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
+#if WITH_EDITOR
+	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
+#endif
 
+	UPROPERTY(EditAnywhere, Category="Visual Property")
+	TArray<TSubclassOf<UVisualProperty>> VisualProperties;
 	UPROPERTY()
-	TMap<FVisualPropertyType, FArrayOfVisualProperties> VisualPropertiesMap;
-
+	TArray<TObjectPtr<UVisualProperty>> VisualPropertyInstances;
 	UPROPERTY()
 	TMap<int32, FInstancedStruct> MapData;
 
@@ -297,21 +289,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Lookup")
 	FString LookupFilePath;
 
-	UPROPERTY()
-	TArray<uint8> LookupTextureData;
-
 	UPROPERTY(VisibleAnywhere, Category = "Data")
 	FString FilePathMapData;
+	
+	TArray<uint8> LookupTextureData;
 
-	// UPROPERTY
 #if WITH_EDITORONLY_DATA
-	/** Data table for visual property types */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Property Types", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualPropertyType"))
-	UDataTable *VisualPropertyTypesDT;
-
-	/** Data table for visual properties */
-	UPROPERTY(EditAnywhere, Category = "Data", DisplayName = "Visual Properties", meta = (RequiredAssetDataTags = "RowStructure=/Script/SharedModule.VisualProperty"))
-	class UDataTable *VisualPropertiesDT;
 	// Material used to apply to MapAsset in preview
 	UPROPERTY(VisibleAnywhere, Category = "Debug")
 	class UMaterialInterface *MaterialOverride;
@@ -323,12 +306,16 @@ private:
 	
 	// Used for Map Editor
 	UPROPERTY()
-	UTexture2D* OriginTexture;
+	TSoftObjectPtr<UTexture2D> OriginTexture;
 
 	UPROPERTY()
 	FMapGenParams LastParamsUsedGen;
+
+	// Keeps ref to last saved map gen object
+	TSharedPtr<MapGenerator::Map> MapGenSaved;
 	
-	TSharedPtr<MapGenerator::Map> Map;
+	// Keeps ref to last created map gen object
+	TSharedPtr<MapGenerator::Map> LastMapGen;
 
 	UPROPERTY(VisibleAnywhere, Category = "Debug") // temp visibility
 	bool bMapSaved = true;
