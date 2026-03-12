@@ -63,7 +63,7 @@ void UAtkWidgetEditorFunctionLibrary::RegisterNewlyCreatedWidgets(const TArray<U
 		{
 			FGuid NewGuid = FGuid::NewGuid();
 			WidgetBP->WidgetVariableNameToGuidMap.Add(NewWidget->GetFName(), NewGuid);
-			// UE_LOG(LogUtilityModuleEditor, Log, TEXT("Added GUID for widget: %s = %s"), *NewWidget->GetFName().ToString(), *NewGuid.ToString());
+			UE_LOG(LogUtilityModuleEditor, Log, TEXT("Added GUID for widget: %s = %s"), *NewWidget->GetFName().ToString(), *NewGuid.ToString());
 		}
 	}
 }

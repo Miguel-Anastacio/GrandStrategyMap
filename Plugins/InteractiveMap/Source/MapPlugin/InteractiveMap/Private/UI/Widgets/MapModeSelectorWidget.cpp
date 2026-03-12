@@ -105,41 +105,9 @@ void UMapModeSelectorWidget::CreatePanelSlots() const
 
 void UMapModeSelectorWidget::CreateMainPanel() const
 {
-	UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(this);
-	UWidgetBlueprint* WidgetBP = Cast<UWidgetBlueprint>(GetClass()->ClassGeneratedBy);
-    
-	if (!MainAssetWidgetTree)
+	if (!UAtkWidgetEditorFunctionLibrary::CreateRootWidget<UGridPanel>(this, FName("GridPanel")))
 	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("WidgetTree is null!"));
-		return;
-	}
-    
-	if (!WidgetBP)
-	{
-		UE_LOG(LogInteractiveMap, Error, TEXT("WidgetBlueprint is null!"));
-		return;
-	}
-    
-	if (!MainAssetWidgetTree->RootWidget)
-	{
-		// Construct the root widget
-		UGridPanel* NewRootWidget = MainAssetWidgetTree->ConstructWidget<UGridPanel>(UGridPanel::StaticClass(), FName("GridPanel"));
-       
-		if (NewRootWidget)
-		{
-			// Generate and register a GUID for the root widget
-			FGuid NewGuid = FGuid::NewGuid();
-			WidgetBP->WidgetVariableNameToGuidMap.Add(NewRootWidget->GetFName(), NewGuid);
-          
-			// Set as root widget
-			MainAssetWidgetTree->RootWidget = NewRootWidget;
-			// Mark as modified
-			UE_LOG(LogInteractiveMap, Log, TEXT("Created MainPanel with GUID: %s"), *NewGuid.ToString());
-		}
-		else
-		{
-			UE_LOG(LogInteractiveMap, Error, TEXT("Failed to construct MainPanel widget!"));
-		}
+		UE_LOG(LogInteractiveMap, Error, TEXT("Creating GridPanel for map mode selector failed!"));
 	}
 }
 #endif

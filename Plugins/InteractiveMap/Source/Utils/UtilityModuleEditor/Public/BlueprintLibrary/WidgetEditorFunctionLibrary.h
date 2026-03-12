@@ -62,16 +62,18 @@ public:
 	
 	// T is type used for root widget
 	template <typename T>
-	static void CreateRootWidget(class UUserWidget* Widget, const FName MainPanelName)
+	static bool CreateRootWidget(const UUserWidget* Widget, const FName MainPanelName)
 	{
 		UWidgetTree* MainAssetWidgetTree = UAtkWidgetEditorFunctionLibrary::GetWidgetTree(Widget);
 		UWidgetBlueprint* WidgetBP = Cast<UWidgetBlueprint>(Widget->GetClass()->ClassGeneratedBy);
-    
+
+		if (!MainAssetWidgetTree || !WidgetBP) 
+			return false;
+
 		if (!MainAssetWidgetTree->RootWidget)
 		{
-			// Construct the root widget
 			T* NewRootWidget = MainAssetWidgetTree->ConstructWidget<T>(T::StaticClass(), MainPanelName);
-       
+
 			if (NewRootWidget)
 			{
 				// Generate and register a GUID for the root widget
@@ -80,8 +82,11 @@ public:
           
 				// Set as root widget
 				MainAssetWidgetTree->RootWidget = NewRootWidget;
+				return true;
 			}
 		}
+		
+		return false;
 	}
 	
 };
