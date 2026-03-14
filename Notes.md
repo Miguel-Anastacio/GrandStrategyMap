@@ -1,6 +1,7 @@
 DOING:
 
 TODO:
+Test packaged map for 5.6
 
 Fix build for 5.5 and 5.4
 [84/104] Compile [x64] Module.MapEditor.cpp
@@ -12,28 +13,24 @@ C:\Program Files\Epic Games\UE_5.5\Engine\Source\Editor\UMGEditor\Public\WidgetB
 C:\Dev\BuiltPlugins\UE_5.5\InteractiveMap\HostProject\Plugins\InteractiveMap\Source\Utils\UtilityModuleEditor\Public\BlueprintLibrary\WidgetEditorFunctionLibrary.h(66): note: This diagnostic occurred in the compiler generated function 'void UAtkWidgetEditorFunctionLibrary::CreateRootWidget(UUserWidget *,const FName)'
 
 Recreate all broken assets in Unreal engine 5.4 version.
-    Controllers
-    BP_Core_HUD
-    
+
+Restructrure repo to hold several uprojects for test plugin in different versions
+
 Move dev software to 5.4 version
 
-
-
-
-Test packaged map for 5.6
 
 Set up testing levels by plugin doc section
 For example:
 All set up minus UI
 All set up minus VP
 All set up minus RuntimeMap
+Redo user test after changes
+
 
 Setup for testing manual loading data
-
-Redo user test after changes
 Loading your own data files and lookup texture -> Complete docs, is this even possible?
 
-Address RuntimeMap Issues
+Address RuntimeMap Issues - Check if this is still relevant?
     Check logs in InteractiveMap runtime
         Pixel Map does not match lookup
 
