@@ -97,3 +97,8 @@ Test5_6/Content/UserTests/TestRuntimeMap/output/*
 Test5_6/Content/UserTests/TestMapGen/output/*
 Test5_6/Content/UserTests/TestUI/output/*
 Test5_6/Content/UserTests/TestVisualProperty/output/*
+
+Test5_4/Plugins/InteractiveMap/*
+Test5_5/Plugins/InteractiveMap/*
+Test5_6/Plugins/InteractiveMap/*
+
