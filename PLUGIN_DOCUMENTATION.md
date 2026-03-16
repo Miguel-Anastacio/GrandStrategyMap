@@ -270,7 +270,7 @@ Create the blueprint that will be used in your actual game levels:
    - **Set Map Object:** Select your generated `DA_MyMapData` asset
    - This links your blueprint to the pre-generated map data
 6. Set your map mesh in MapNewGameplay (TODO: change this name)
-7. Set the start map mode name (IMPORTANT)
+7. Set the start map mode name (IMPORTANT), it must match the name of the visual property that you want to be displayed by default
 
 ### Step 2: Configure Level Settings
 
