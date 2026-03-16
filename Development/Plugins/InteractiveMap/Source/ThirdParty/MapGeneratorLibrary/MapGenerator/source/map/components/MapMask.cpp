@@ -9,6 +9,7 @@ namespace MapGenerator
 		float cutOffHeight, bool mode)
 		: MapComponent(width, height, name, logger), mask(width, height)
 	{
+		LOG_INFO(m_logger, "Creating map mask: " + std::string(name) + ", cutOffHeight=" + std::to_string(cutOffHeight) + ", mode=" + std::to_string(mode));
 		m_elevation = ExtractHeightMapFromTexture(textureBuffer, width, height);
 		m_maskBuffer = CreateBuffer(m_elevation, cutOffHeight, mode);
 		mask.SetMaskData(m_maskBuffer, data::Color(255, 255, 255, 255));
@@ -73,12 +74,14 @@ namespace MapGenerator
 
 	void MapMask::RegenerateMask(float cutOffHeight, bool mode)
 	{
+		LOG_INFO(m_logger, "Regenerating mask with cutOffHeight=" + std::to_string(cutOffHeight) + ", mode=" + std::to_string(mode));
 		m_maskBuffer = CreateBuffer(m_elevation, cutOffHeight, mode);
 		mask.SetMaskData(m_maskBuffer, data::Color(255, 255, 255, 255));
 	}
 
 	void MapMask::RegenerateMask(const std::vector<uint8_t>& maskBuffer, const bool mode)
 	{
+		LOG_INFO(m_logger, "Regenerating mask from buffer, mode=" + std::to_string(mode));
 		m_maskBuffer = CreateBuffer(maskBuffer, mode);
 		mask.SetMaskData(m_maskBuffer, data::Color(255, 255, 255, 255));
 		

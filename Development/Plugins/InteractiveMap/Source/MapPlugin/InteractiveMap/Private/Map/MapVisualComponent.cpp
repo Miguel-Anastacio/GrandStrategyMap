@@ -8,18 +8,7 @@ UMapVisualComponent::UMapVisualComponent()
 {
 
 }
-UE_DISABLE_OPTIMIZATION
-void UMapVisualComponent::InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual)
-{
-    int a = 0;
-}
 
-void UMapVisualComponent::InitVisualComponents(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap)
-{
-
-}
-
-UE_ENABLE_OPTIMIZATION
 UStaticMeshComponent* UMapVisualComponent::InitMeshComponent(UStaticMeshComponent* original)
 {
     if (original)

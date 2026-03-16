@@ -130,7 +130,7 @@ protected:
 	TObjectPtr<class UMapObject> MapAsset;
 
 	// The visual representation of the map
-	UPROPERTY(EditAnywhere, Category = "Map", BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, Category = "Map", BlueprintReadOnly)
 	TObjectPtr<class UMapVisualComponent> MapVisualComponent;
 	
 

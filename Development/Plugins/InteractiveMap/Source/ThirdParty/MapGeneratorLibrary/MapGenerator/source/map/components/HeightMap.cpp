@@ -127,6 +127,7 @@ namespace MapGenerator
 
 	void HeightMap::CreateHeightTectonicPlates(const NoiseMapData &data)
 	{
+		LOG_INFO(m_logger, "Creating height tectonic plates with seed=" + std::to_string(data.seed) + ", scale=" + std::to_string(data.scale));
 		int seed = 0;
 		int lloyd = 10;
 		int points = 50;

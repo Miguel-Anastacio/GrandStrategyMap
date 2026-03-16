@@ -11,12 +11,14 @@ namespace MapGenerator
 		/*	m_terrainTypes.push_back(TerrainType(0.5, sf::Color::Blue, "Water"));
 			m_terrainTypes.push_back(TerrainType(0.85, sf::Color::Green, "Grass"));
 			m_terrainTypes.push_back(TerrainType(1.0, sf::Color::Yellow, "Rock"));*/
+		LOG_INFO(m_logger, "Creating terrain map with default types, data size=" + std::to_string(data.size()));
 		RegenerateTerrain(data);
 	}
 
 	TerrainMap::TerrainMap(const char *name, const std::vector<double> &data, unsigned width, unsigned height, const std::vector<TerrainType> &terrain, ALogger::Logger &logger)
 		: MapComponent(width, height, name, logger), m_terrainTypes(terrain)
 	{
+		LOG_INFO(m_logger, "Creating terrain map with custom types, data size=" + std::to_string(data.size()) + ", types count=" + std::to_string(terrain.size()));
 		RegenerateTerrain(data);
 	}
 

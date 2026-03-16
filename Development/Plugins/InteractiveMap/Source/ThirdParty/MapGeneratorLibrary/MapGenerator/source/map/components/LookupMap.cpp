@@ -38,7 +38,7 @@ namespace MapGenerator
 	{
 		const auto width = Width();
 		const auto height = Height();
-		LOG_INFO(m_logger, "Regenerating lookup map");
+		LOG_INFO(m_logger, "Regenerating lookup map: width=" + std::to_string(width) + ", height=" + std::to_string(height) + ", tileMapGenType=" + std::to_string(static_cast<int>(tileMapGenType)));
 		switch (tileMapGenType)
 		{
 		case TileMapGenType::UserUploadedBorderForLand:
@@ -209,7 +209,7 @@ namespace MapGenerator
 	{
 		const auto width = Width();
 		const auto height = Height();
-		LOG_INFO(m_logger, "Computing Diagram from Mask: " + std::string(mask->Name()));
+		LOG_INFO(m_logger, "Computing Diagram from Mask: " + std::string(mask->Name()) + ", tiles=" + std::to_string(data.tiles) + ", seed=" + std::to_string(data.seed) + ", lloyd=" + std::to_string(data.lloyd));
 		if(ProgressCallback)
 		{
 			ProgressCallback(2.0f, "Before Point Generation");

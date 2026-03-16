@@ -23,16 +23,11 @@ public:
     virtual void AttachMeshes(USceneComponent* root) {};
     virtual void AttachMeshesOutsideConstructor(USceneComponent* root) {};
 
-    /** Initializes the visual component from an original one. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    virtual void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual);
+    virtual void InitVisualComponentFromOriginal(UMapVisualComponent* mapVisual){};
     /** Initializes the visual component from an original one. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
     virtual void UpdateVisualComponent(UMapVisualComponent* mapVisual) {};
-
-    /** Initializes the mesh components. */
-    UFUNCTION(BlueprintCallable, Category = "MapVisual")
-    virtual void InitVisualComponents(UStaticMeshComponent* gameplayMap, UStaticMeshComponent* terrainMap);
 
     /** Initializes a mesh component. */
     UFUNCTION(BlueprintCallable, Category = "MapVisual")
