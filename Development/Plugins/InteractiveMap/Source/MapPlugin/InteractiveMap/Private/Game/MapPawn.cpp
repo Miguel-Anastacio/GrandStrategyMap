@@ -39,29 +39,6 @@ void AMapPawn::BeginPlay()
 	OldZoom = CameraBoom->TargetArmLength;
 }
 
-void AMapPawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	FVector currentPos = GetActorLocation();
-	FVector futurePos = GetActorLocation() + GetVelocity() * DeltaTime;
-	FVector currentVelocity = GetVelocity();
-	if (abs(futurePos.Y) > abs(VerticalLimitMovement.Y))
-	{
-		CollisionComponent->SetPhysicsLinearVelocity(FVector(currentVelocity.X, 0, currentVelocity.Z));
-	}
-}
-
-void AMapPawn::MoveCamera(FVector2D input)
-{
-	FVector vel = FVector(input.X, input.Y, 0) * CameraMoveSpeed;
-	CollisionComponent->SetPhysicsLinearVelocity(vel);
-}
-
-void AMapPawn::Stop()
-{
-	CollisionComponent->SetPhysicsLinearVelocity(FVector::ZeroVector);
-}
-
 void AMapPawn::ZoomCamera(float input)
 {
 	float newZoom = CameraBoom->TargetArmLength + input * ZoomSpeed;

@@ -22,13 +22,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Limit")
 	void UpdateLimits();
-
-
+	
 	/** Map limit component. */
-	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
+	UPROPERTY(Category = "Limit", BlueprintReadOnly)
 	TObjectPtr<class UMapLimitComponent> LeftMapLimit;
 	/** Map limit component. */
-	UPROPERTY(EditAnywhere, Category = "Limit", BlueprintReadOnly)
+	UPROPERTY(Category = "Limit", BlueprintReadOnly)
 	TObjectPtr<class UMapLimitComponent> RightMapLimit;
 
 	/** The size of the box overlap on X as a percentage of the map size values between 0 to 0.5*/

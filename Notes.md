@@ -1,11 +1,9 @@
 DOING:
 
-
 TODO:
 
 **Missing/Poor features**:
 Loading your own data files and lookup texture -> Complete docs, is this even possible?
-Review limits and camera movement for flat maps (when user goes to edge of screen)
 
 **BUGS**:
 
@@ -18,14 +16,12 @@ Address RuntimeMap Issues:
 
 **Test Execution**
 Test packaged map for 5.6/5.4/5.5
-Redo user test after changes
+Redo user test
 --------------------------------------------------------------------------
 
 **Otimizations**
 Check huge file size for mapobjecta
 Use softobject references whenever possible for game runtime relevant code
-Why is MapRoot a static mesh component? Check this
-Review MapVisual Component whole setup is it even adequate?
 ---------------------------------------------------------------------------
 
 **Testing Infra/Setup**
@@ -38,6 +34,8 @@ Setup for testing manual loading data
 -----------------------------------------------------------------------------
 
 **QOL Improvements**
+Why is MapRoot a static mesh component? Check this
+Review MapVisual Component whole setup is it even adequate?
 Address package warnings 
 Update PropertyDisplayGenerator plugin
 Review logs to unreal and map gen logs (Copilot)

@@ -41,17 +41,6 @@ void AFlatInteractiveMap::InitializeMap_Implementation()
 	RightMapLimit->GetVisualComponent()->InitVisualComponentFromOriginal(MapVisualComponent);
 
 	FVector size = MapVisualComponent->CalculateSizeOfMesh(MapVisualComponent->GetMapGameplayMeshComponent());
-	AMapPawn* pawn = Cast<AMapPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if (pawn)
-	{
-		// Maybe try to find a way to make it indepedent of the map orientation
-		// probably by applying the inverse of the actor transform to the vectto size
-		// or make the user set the 
-		// set vertical Limits of player movement
-
-		pawn->SetVerticalMovementLimits(FVector2D(size.Y * 0.5, -size.Y * 0.5));
-	}
-
 	size /= GetActorScale();
 
 	BoxPercentageOfMap = FMath::Clamp(BoxPercentageOfMap, 0.05, 0.5);

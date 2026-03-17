@@ -25,9 +25,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapClickedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnProvinceHoveredSignature, FColor, Color, int, ProvinceID);
 
 /**
- * Base Controller class for interactive maps, handles input for mouse clicks, camera movement, menus and camera zoom
+ * Base Controller class for interactive maps, handles input for mouse clicks and camera zoom
  */
-UCLASS()
+UCLASS(Abstract, NotBlueprintable)
 class INTERACTIVEMAP_API ABirdEyeController : public APlayerController
 {
     GENERATED_BODY()
@@ -40,10 +40,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputMappingContext *DefaultMappingContext;
 
-    /** Action for moving the camera. */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-    UInputAction *CameraMoveAction;
-
     /** Action for selecting objects. */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction *SelectAction;
@@ -52,9 +48,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
     UInputAction *MouseScrollAction;
 
-    /** Action for opening the country editor UI. */
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-    UInputAction *OpenCountryEditorAction;
 #if WITH_EDITORONLY_DATA
     // Debug actions
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input| Debug", meta = (AllowPrivateAccess = "true"))
@@ -89,17 +82,9 @@ protected:
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
     void MouseClick();
 
-    /** Handles camera movement events. */
-    UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void CameraMovement(const FInputActionInstance &Instance);
-
     /** Handles camera zoom events. */
     UFUNCTION(BlueprintCallable, Category = "Input Actions")
     void CameraZoom(const FInputActionInstance &Instance);
-
-    /** Starts movement based on mouse position. */
-    UFUNCTION(BlueprintCallable, Category = "Input Actions")
-    void StartMovement(const FVector2D &MousePos);
 
     UFUNCTION(BlueprintCallable, Category = "Input Reactions")
     void HideHUD();
@@ -133,18 +118,6 @@ protected:
 
     /** Flag indicating if a province is selected. */
     bool bProvinceSelected = false;
-
-    /** Flag indicating camera movement. */
-    UPROPERTY(BlueprintReadWrite, Category = "Movement")
-    bool bMoveCamera;
-
-    /** Input for camera movement. */
-    UPROPERTY(BlueprintReadWrite, Category = "Movement")
-    FVector2D MoveInput;
-
-    /** Center of the viewport. */
-    UPROPERTY(BlueprintReadWrite, Category = "Movement")
-    FVector2D ViewportCenter;
 
     /** Reference to the interactive map. */
     UPROPERTY(Transient, BlueprintReadOnly, Category="Map")

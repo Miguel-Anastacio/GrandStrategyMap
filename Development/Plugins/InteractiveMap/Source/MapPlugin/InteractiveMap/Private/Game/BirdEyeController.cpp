@@ -68,15 +68,6 @@ void ABirdEyeController::Tick(float DeltaTime)
 		if (Map && !bProvinceSelected)
 			Map->UpdateProvinceHovered(FColor(0, 0, 0, 0));
 	}
-
-	if (bMoveCamera)
-	{
-		MapPawn->MoveCamera(MoveInput);
-	}
-	else
-	{
-		MapPawn->Stop();
-	}
 }
 
 void ABirdEyeController::SetupInputComponent()
@@ -88,7 +79,6 @@ void ABirdEyeController::SetupInputComponent()
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
-		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraMovement);
 
 		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
 #if WITH_EDITOR
@@ -146,32 +136,12 @@ void ABirdEyeController::MouseClick()
 	}
 }
 
-void ABirdEyeController::CameraMovement(const FInputActionInstance& Instance)
-{
-	FVector2D Input = Instance.GetValue().Get<FVector2D>();
-	Input.Y *= -1;
-	AMapPawn* pawn = GetPawn<AMapPawn>();
-	pawn->MoveCamera(Input);
-
-}
-
 void ABirdEyeController::CameraZoom(const FInputActionInstance& Instance)
 {
 	float Input = Instance.GetValue().Get<float>();
 	Input *= -1;
 	AMapPawn* pawn = GetPawn<AMapPawn>();
 	pawn->ZoomCamera(Input);
-}
-
-void ABirdEyeController::StartMovement(const FVector2D& MousePos)
-{
-	bMoveCamera = true;
-	const FVector2D ViewportSize = FVector2D(GEngine->GameUserSettings->GetLastConfirmedScreenResolution());
-	ViewportCenter = ViewportSize * 0.5f;
-
-	MoveInput = MousePos - ViewportCenter; 
-	MoveInput.Normalize();
-
 }
 
 void ABirdEyeController::HideHUD()

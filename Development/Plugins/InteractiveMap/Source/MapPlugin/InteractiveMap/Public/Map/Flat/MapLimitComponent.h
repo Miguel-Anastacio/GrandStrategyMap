@@ -40,10 +40,10 @@ protected:
 protected:
 
     /** Box component for the limit. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Limit")
+    UPROPERTY(BlueprintReadWrite, Category = "Limit")
     TObjectPtr<UBoxComponent> Box;
 
     /** Map visual component. */
-    UPROPERTY(VisibleAnywhere, Category = "Visual", BlueprintReadOnly)
+    UPROPERTY(Category = "Visual", BlueprintReadOnly)
     TObjectPtr<UMapVisualComponent> MapVisualComponent;
 };

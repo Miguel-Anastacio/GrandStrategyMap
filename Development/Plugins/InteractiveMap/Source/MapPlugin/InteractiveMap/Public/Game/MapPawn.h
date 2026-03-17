@@ -24,16 +24,6 @@ public:
     /** Default constructor. */
     AMapPawn();
 
-    /** Called every frame. */
-    virtual void Tick(float DeltaTime) override;
-
-    /** Moves the camera based on input. */
-    UFUNCTION(BlueprintCallable, Category = "Map Pawn")
-    void MoveCamera(FVector2D input);
-
-    /** Stops camera movement. */
-    void Stop();
-
     /** Zooms the camera based on input. */
     UFUNCTION(BlueprintCallable, Category = "Map Pawn")
     void ZoomCamera(float input);
@@ -41,12 +31,6 @@ public:
     /** Sets the interactive map reference. */
     UFUNCTION(BlueprintCallable, Category = "Map Pawn")
     void SetInteractiveMap(AClickableMap* map);
-
-    /** Sets vertical movement limits. */
-    FORCEINLINE void SetVerticalMovementLimits(FVector2D limits) { VerticalLimitMovement = limits; };
-
-    /** Gets vertical movement limits. */
-    FORCEINLINE FVector2D GetVerticalMovementLimits() const { return VerticalLimitMovement; };
 
 public:
     UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Map")
@@ -71,10 +55,6 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Camera")
     TObjectPtr<UCameraComponent> Camera;
 
-    /** Camera movement speed. */
-    UPROPERTY(EditAnywhere, Category = "Camera|Movement")
-    float CameraMoveSpeed = 10.0f;
-
     /** Camera zoom speed. */
     UPROPERTY(EditAnywhere, Category = "Camera|Zoom")
     float ZoomSpeed = 10.0f;
@@ -96,9 +76,6 @@ protected:
     float MaxSphereScale = 5;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
     float MinSphereScale = 0.1;
-    /** Vertical movement limits. (x top, y bottom) */
-    UPROPERTY(BlueprintReadWrite, Category = "Camera|Movement")
-    FVector2D VerticalLimitMovement = FVector2D(-3000, 3000);
 
     /** Weak reference to the interactive map. */
     UPROPERTY()
