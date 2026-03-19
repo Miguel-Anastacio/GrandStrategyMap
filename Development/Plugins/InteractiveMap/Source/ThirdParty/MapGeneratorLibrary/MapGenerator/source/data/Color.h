@@ -34,6 +34,11 @@ namespace MapGenerator
 				return R == other.R && G == other.G && B == other.B && A == other.A;
 			}
 
+			bool operator!=(const Color &other) const
+			{
+				return !(*this == other);
+			}
+
 			void RandColor()
 			{
 				R = static_cast<uint8_t>(rand() % 255);

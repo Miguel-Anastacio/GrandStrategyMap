@@ -1,32 +1,28 @@
 [
 	{
-		"population": 10000,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 0,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 1,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 2,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -36,7 +32,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -46,7 +42,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -56,13 +52,17 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 6,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -72,7 +72,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -82,13 +82,17 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 9,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -98,7 +102,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -108,7 +112,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -118,17 +122,13 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 13,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -138,7 +138,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -148,7 +148,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -158,13 +158,17 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 17,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -174,7 +178,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -184,7 +188,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -194,7 +198,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -204,7 +208,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -214,7 +218,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -224,7 +228,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -234,7 +238,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -244,7 +248,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -254,7 +258,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -264,7 +268,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -274,7 +278,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -284,7 +288,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -294,7 +298,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -304,7 +308,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -314,7 +318,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -324,7 +328,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -334,7 +338,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -344,7 +348,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -354,7 +358,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -364,7 +368,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -374,7 +378,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -384,17 +388,13 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 40,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -404,7 +404,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -414,7 +414,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -424,7 +424,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -434,7 +434,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -444,7 +444,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -454,7 +454,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -464,7 +464,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -474,7 +474,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -484,7 +484,7 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 10000,
+		"population": 0,
 		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
@@ -494,10 +494,6 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 51,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -505,7 +501,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 52,
@@ -515,7 +511,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 53,
@@ -525,7 +521,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 54,
@@ -535,7 +531,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 55,
@@ -545,7 +541,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 56,
@@ -555,7 +551,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 57,
@@ -565,7 +561,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 58,
@@ -575,7 +571,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 59,
@@ -585,7 +581,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 60,
@@ -595,7 +591,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 61,
@@ -605,7 +601,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 62,
@@ -615,7 +611,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 63,
@@ -625,7 +621,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 64,
@@ -635,7 +631,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 65,
@@ -645,7 +641,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 66,
@@ -655,7 +651,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 67,
@@ -665,7 +661,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 68,
@@ -675,7 +671,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 69,
@@ -685,7 +681,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 70,
@@ -695,7 +691,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 71,
@@ -705,7 +701,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 72,
@@ -715,7 +711,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 73,
@@ -725,7 +721,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 74,
@@ -735,7 +731,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 75,
@@ -744,6 +740,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 76,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -751,7 +751,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 77,
@@ -760,10 +760,6 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 78,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -771,7 +767,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 79,
@@ -781,7 +777,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 80,
@@ -790,6 +786,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 81,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -797,7 +797,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 82,
@@ -807,7 +807,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 83,
@@ -817,7 +817,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 84,
@@ -826,10 +826,6 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 85,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -837,7 +833,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 86,
@@ -853,7 +849,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 88,
@@ -863,7 +859,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 89,
@@ -872,16 +868,16 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 90,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 91,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -889,7 +885,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 92,
@@ -899,7 +895,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 93,
@@ -908,6 +904,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 94,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -915,7 +915,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 95,
@@ -924,10 +924,6 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 96,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -935,7 +931,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 97,
@@ -945,7 +941,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 98,
@@ -954,6 +950,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 99,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -961,7 +961,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 100,
@@ -970,10 +970,6 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "XEN",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 101,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -981,7 +977,7 @@
 	},
 	{
 		"population": 0,
-		"country": "XEN",
+		"country": "POR",
 		"religion": "CAT",
 		"culture": "BAS",
 		"iD": 102,
@@ -990,6 +986,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 103,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1042,6 +1042,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 109,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1354,6 +1358,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 141,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1410,6 +1418,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 147,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1496,6 +1508,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 156,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1512,6 +1528,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 158,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1534,20 +1554,12 @@
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 161,
 		"name": "NO NAME",
 		"area": "NO AREA",
 		"region": "NO REGION"
 	},
 	{
-		"population": 0,
-		"country": "POR",
-		"religion": "CAT",
-		"culture": "BAS",
 		"iD": 162,
 		"name": "NO NAME",
 		"area": "NO AREA",
@@ -1644,6 +1656,10 @@
 		"region": "NO REGION"
 	},
 	{
+		"population": 0,
+		"country": "POR",
+		"religion": "CAT",
+		"culture": "BAS",
 		"iD": 172,
 		"name": "NO NAME",
 		"area": "NO AREA",

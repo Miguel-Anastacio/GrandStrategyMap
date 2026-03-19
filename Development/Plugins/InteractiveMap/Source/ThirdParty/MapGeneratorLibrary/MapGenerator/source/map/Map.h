@@ -94,8 +94,6 @@ private:
 	std::unique_ptr<LookupMap> m_lookupmap;
 	std::unique_ptr<HeightMap> m_heightmap;
 	std::unique_ptr<TerrainMap> m_terrainmap;
-	// to be removed
-	std::unique_ptr<MapMask> m_maskmap;
 	std::unique_ptr<MapMask> m_landMask;
 	std::unique_ptr<MapMask> m_oceanMask;
 

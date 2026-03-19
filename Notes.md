@@ -2,27 +2,20 @@ DOING:
 
 TODO:
 
+
 **Missing/Poor features**:
 Loading your own data files and lookup texture -> Complete docs, is this even possible?
+---------------------------------------------------------------------------
 
-**BUGS**:
-
-Address RuntimeMap Issues:
-    LogInteractiveMap: Warning: Dynamic Texture tried to Update Texture but Data is Null
-    LogInteractiveMap: Error: Pixel Map does not match lookup
-    LogInteractiveMap: Error: Pixel Map size 229
-    LogInteractiveMap: Error: Lookup size 223
+**Otimizations**
+Check huge file size for mapobjecta
+Use softobject references whenever possible for game runtime relevant code
 ---------------------------------------------------------------------------
 
 **Test Execution**
 Test packaged map for 5.6/5.4/5.5
 Redo user test
 --------------------------------------------------------------------------
-
-**Otimizations**
-Check huge file size for mapobjecta
-Use softobject references whenever possible for game runtime relevant code
----------------------------------------------------------------------------
 
 **Testing Infra/Setup**
 Set up testing levels by plugin doc section
@@ -35,7 +28,7 @@ Setup for testing manual loading data
 
 **QOL Improvements**
 Why is MapRoot a static mesh component? Check this
-Review MapVisual Component whole setup is it even adequate?
+Review MapVisual Component whole setup, is it even adequate?
 Address package warnings 
 Update PropertyDisplayGenerator plugin
 Review logs to unreal and map gen logs (Copilot)
@@ -44,9 +37,9 @@ Check names output by asset action should be based on origin asset name and not 
 ----------------------------------------------------------------------------------
 
 **Cleanup**
-Cleanup example structs
 Cleanup files of plugin
 Cleanup asset actions code (low prio, not necessary for shipping)
+Cleanup example structs (low prio, not necessary)
 -----------------------------------------------------------------------------------
 
 **Features**

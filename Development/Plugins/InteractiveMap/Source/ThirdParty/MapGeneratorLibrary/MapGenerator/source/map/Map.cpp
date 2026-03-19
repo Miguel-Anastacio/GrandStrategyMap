@@ -12,13 +12,12 @@ namespace MapGenerator
 	{
 		m_fileLogger.SetMinLogLevel(ALogger::LogLevel::INFO);
 		geomt::m_logger = &m_fileLogger;
-		LOG_INFO(m_fileLogger, "Map initialized: width=" + std::to_string(width) + ", height=" + std::to_string(height) + ", log path=" + path.string());
+		LOG_DEBUG(m_fileLogger, "Map initialized: width=" + std::to_string(width) + ", height=" + std::to_string(height) + ", log path=" + path.string());
 	}
 
 	Map::~Map()
 	{
 		// m_lookUpTexture->WriteTextureToFile();
-		// m_maskmap->SaveToFile("untitledmask.png");
 		// m_heightmap->SaveToFile("untitledHeight.png");
 		// m_terrainmap->SaveToFile("untitledTerrain.png");
 	}
@@ -131,7 +130,6 @@ namespace MapGenerator
 		LOG_INFO(m_fileLogger, "Starting map generation from height map, buffer size=" + std::to_string(textureBuffer.size()) + ", cutOffHeight=" + std::to_string(cutOffHeight));
 		auto start = std::chrono::steady_clock::now();
 		cutOffHeight = 0.001f;
-		// m_maskmap = std::make_unique<MapMask>("LandmassMaskTest.png", textureBuffer, Width(), Height(), cutOffHeight);
 		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight);
 		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, false);
 		RegenerateMasks(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, cutOffHeight));
@@ -166,6 +164,22 @@ namespace MapGenerator
 
 		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
 		LOG_INFO(m_fileLogger, "Map generation from height map with lookup data completed in " + std::to_string(duration.count()) + "ms");
+		LOG_INFO(m_fileLogger, "Cell map size: " + std::to_string(GetLookupTileMap().GetCellMap().size()));
+		
+		int id = 0;
+		for (const std::pair<mygal::Vector2<int>, data::Color> &cell : GetLookupTileMap().GetCellMap())
+		{
+			std::string message = "ID: " + std::to_string(id) + "	Position: " + std::to_string(cell.first.x) + "," + std::to_string(cell.first.y) + "    Color: " + cell.second.ConvertToHex();
+			LOG_DEBUG(m_fileLogger, message);
+			id++;
+		}
+
+		std::unordered_set<data::Color> colorsInUse = GetLookupTileMap().GetColors();
+		LOG_DEBUG(m_fileLogger, "Colors in use count: " + std::to_string(colorsInUse.size()));
+		for (const data::Color &color : colorsInUse)
+		{
+			LOG_DEBUG(m_fileLogger, "Color in use: " + color.ConvertToHex());
+		}
 	}
 
 	void Map::RegenerateMasks(const LookupMapData& data)
@@ -193,7 +207,6 @@ namespace MapGenerator
 		ClearMapComponent(m_heightmap.get());
 		ClearMapComponent(m_terrainmap.get());
 		ClearMapComponent(m_landMask.get());
-		ClearMapComponent(m_maskmap.get());
 		ClearMapComponent(m_oceanMask.get());
 
 		// m_terrainTypes.

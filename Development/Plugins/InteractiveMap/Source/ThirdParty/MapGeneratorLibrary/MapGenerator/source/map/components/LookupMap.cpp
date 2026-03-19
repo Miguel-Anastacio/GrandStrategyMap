@@ -68,7 +68,6 @@ namespace MapGenerator
 		
 		TileMap lookUpTileMap = TileMap::BlendTileMap(landTileMap, TileType::LAND, oceanTileMap, TileType::WATER);
 		m_lookUpTileMap = std::make_unique<TileMap>(std::move(lookUpTileMap));
-
 	}
 
 	TileMap LookupMap::GenerateLandTileMapFromMask(const LookupMapData &data, std::unordered_set<data::Color> &colorsInUse,

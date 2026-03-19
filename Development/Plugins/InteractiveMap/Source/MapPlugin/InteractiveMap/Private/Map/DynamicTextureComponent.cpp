@@ -187,10 +187,8 @@ void UDynamicTextureComponent::InitializeTexture(uint32 width, uint32 height)
 
 	//Create Update Region Struct Instance
 	TextureRegion = new FUpdateTextureRegion2D(0, 0, 0, 0, TextureWidth, TextureHeight);
-
-	// FillTexture(FLinearColor::Red);
-	UpdateTexture();
 }
+
 void UDynamicTextureComponent::DrawFromDataBuffer(int32 startX, int32 startY, UTexture2D* texture, uint8* dataBuffer, FLinearColor filter)
 {
 	if(DynamicTextureData)

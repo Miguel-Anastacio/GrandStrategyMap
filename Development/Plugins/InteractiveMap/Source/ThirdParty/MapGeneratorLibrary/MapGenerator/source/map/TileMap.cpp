@@ -64,7 +64,7 @@ namespace MapGenerator
 					else
 					{
 						const data::Color color = data::GetRandomColorNotInSet(m_colors);
-						mygal::Vector2<int> point = algo::fillGetCentroidOfPoints(x, y, m_tiles, color, width, height);
+						algo::fillGetCentroidOfPoints(x, y, m_tiles, color, width, height);
 					}
 				}
 			}
@@ -294,7 +294,7 @@ namespace MapGenerator
 			auto index = bufferIndex / 4;
 
 			// DEBUG STUFF
-			if(tile.type == TileType::LAND && centroidIndex < m_tiles.size() && centroidIndex >= 0)
+			if(centroidIndex < m_tiles.size() && centroidIndex >= 0)
 			{
 				data::Color centroidColor = m_tiles[centroidIndex].color;
 				fillBufferPosWithColor(bufferIndex, buffer, centroidColor);
@@ -324,6 +324,36 @@ namespace MapGenerator
 		return buffer;
 	}
 
+    std::vector<uint8_t> TileMap::GetMapOfPointsWhereColorDifferentThanCentroid(const data::Color& different,  const data::Color& same) const
+    {
+        return GetTileMap([&](const Tile& tile)
+        {
+            auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
+            if(centroidIndex < m_tiles.size() && centroidIndex >= 0)
+            {
+                return tile.color != m_tiles[centroidIndex].color;
+            }
+        }, different, same);
+    }
+
+	std::vector<mygal::Vector2<int>> TileMap::GetPointsWhereTileDoesNotMatchCentroid() const
+    {
+        std::vector<mygal::Vector2<int>> pointsWhereTileDoesNotMatchCentroid;
+        forEachTile([&](const Tile& tile, unsigned bufferIndex)
+        {
+            auto centroidIndex = tile.centroid.y * Width() + tile.centroid.x;
+            if(centroidIndex < m_tiles.size() && centroidIndex >= 0)
+            {
+                if(tile.color != m_tiles[centroidIndex].color)
+                {
+                    pointsWhereTileDoesNotMatchCentroid.emplace_back(bufferIndex % Width(), bufferIndex / Width());
+                }
+            }
+        });
+        return pointsWhereTileDoesNotMatchCentroid;
+    }
+		
+
 	std::vector<uint8_t> TileMap::GetTileMapOfType(TileType type) const
 	{
 		return GetTileMap([type](const Tile &tile)
@@ -338,40 +368,6 @@ namespace MapGenerator
 			{
 				return tile.type == TileType::UNDEFINED;
 			}, undefined, defined);
-	}
-
-	std::vector<uint8_t> TileMap::GetTileMap(std::function<bool(const Tile&)> predicate) const
-	{
-		std::vector<uint8_t> buffer(m_tiles.size() * 4);
-		forEachTile([&](const Tile& tile, unsigned bufferIndex)
-		{
-			if (predicate(tile))
-			{
-				fillBufferPosWithColor(bufferIndex, buffer, tile.color);
-			}
-			else
-			{
-				fillBufferPosWithColor(bufferIndex, buffer, data::Color(0, 0, 0, 0));
-			}
-		});
-		return buffer;
-	}
-
-	std::vector<uint8_t> TileMap::GetTileMap(std::function<bool(const Tile&)> predicate, const data::Color& colorOnFullfil, const data::Color& colorOnNotFullfil) const
-	{
-		std::vector<uint8_t> buffer(m_tiles.size() * 4);
-		forEachTile([&](const Tile& tile, unsigned bufferIndex)
-		{
-			if (predicate(tile))
-			{
-				fillBufferPosWithColor(bufferIndex, buffer, colorOnFullfil);
-			}
-			else
-			{
-				fillBufferPosWithColor(bufferIndex, buffer, colorOnNotFullfil);
-			}
-		});
-		return buffer;
 	}
 
 	void TileMap::MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer,  const TileType type, const data::Color& borderColor)
