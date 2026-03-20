@@ -21,7 +21,7 @@ public:
 	static void OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFileNames);
 
 	UFUNCTION(BlueprintCallable, Category = "FilePicker")
-	static void OpenFileDialogJson(const FString& DefaultPath, TArray<FString>& OutFileNames);
+	static void OpenFileDialogJson(const FString& DialogTitle, const FString& DefaultPath, TArray<FString>& OutFileNames);
 
 	UFUNCTION(BlueprintCallable, Category = "FilePicker")
 	static void OpenDirectoryDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderName);

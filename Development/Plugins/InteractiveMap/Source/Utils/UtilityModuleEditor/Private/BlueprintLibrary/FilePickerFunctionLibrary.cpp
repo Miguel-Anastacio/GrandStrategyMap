@@ -38,9 +38,9 @@ void UAtkFilePickerFunctionLibrary::OpenFileDialog(const FString& DialogTitle, c
     #endif
 }
 
-void UAtkFilePickerFunctionLibrary::OpenFileDialogJson(const FString& DefaultPath, TArray<FString>& OutFileNames)
+void UAtkFilePickerFunctionLibrary::OpenFileDialogJson(const FString& DialogTitle, const FString& DefaultPath, TArray<FString>& OutFileNames)
 {
-	OpenFileDialog("Select Data File", DefaultPath, FString("JSon Files|*.json"), OutFileNames);
+	OpenFileDialog(DialogTitle, DefaultPath, FString("JSon Files|*.json"), OutFileNames);
 }
 
 void UAtkFilePickerFunctionLibrary::OpenDirectoryDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderName)
