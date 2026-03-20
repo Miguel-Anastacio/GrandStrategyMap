@@ -464,12 +464,14 @@ void UMapObject::LoadLookupTextureData()
 
 void UMapObject::LoadLookupMap(const FString& FilePath)
 {
-	const TArray<FLookupEntry> Lookup = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(FilePath);
-	LookupTable.Empty();
-	for(const auto& Entry : Lookup)
+	bool bOutResult = false;
+	const TArray<FLookupEntry> Lookup = UAtkDataManagerFunctionLibrary::LoadCustomDataFromJson<FLookupEntry>(FilePath, bOutResult);
+	if (!bOutResult)
 	{
-		LookupTable.Emplace(UAtkMiscFunctionLibrary::ConvertHexStringToRGB(Entry.Color), FCString::Atoi(*Entry.Name));
+		UE_LOG(LogMapSharedModule, Error, TEXT("Failed to load lookup map from %s"), *FilePath);
+		return;
 	}
+	SetLookupTableFromEntries(Lookup);
 }
 
 #if WITH_EDITOR
@@ -485,6 +487,15 @@ bool UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32
 		}
 	}
 	return false;
+}
+
+void UMapObject::SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries)
+{
+	LookupTable.Empty();
+	for(const auto& [Color, Name] : LookupEntries)
+	{
+		LookupTable.Emplace(UAtkMiscFunctionLibrary::ConvertHexStringToRGB(Color), FCString::Atoi(*Name));
+	}
 }
 
 void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const TArray<int32>& IDs)

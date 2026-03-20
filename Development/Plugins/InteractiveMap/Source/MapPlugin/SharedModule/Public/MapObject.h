@@ -180,11 +180,13 @@ public:
 	void SetMapDataFilePath(const FString &FilePath);
 	void SetFilePathMapData(const FString &FilePath);
 	void SetMapData(const TArray<FInstancedStruct>& NewData);
-	void SetLookupFilePath(const FString &FilePath)
+	void SetLookupFilePathAndLoad(const FString &FilePath)
 	{
 		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
 		LoadLookupMap(FilePath);
 	}
+	
+	void SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries);
 
 	// Update In Editor only, used in Map Object Display
 	void UpdateDataInEditor(const FInstancedStruct &NewData, const TArray<int32>& IDs);
@@ -221,8 +223,6 @@ public:
 	bool IsStructValid(const FInstancedStruct &Struct) const;
 	bool IsStructValid(const UScriptStruct *Struct) const;
 
-	void LoadLookupMap(const FString &FilePath);
-
 	FString GetFilePath() const
 	{
 		return this->FilePathMapData;
@@ -258,7 +258,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 	UScriptStruct *OceanStructType;
 #if WITH_EDITORONLY_DATA
-	FOnMapDetailsChange OnMapDetailsChange;
 	FOnTilesSelectedChanged OnTilesSelectedChanged;
 	FOnMapDetailsChange OnMapDataChanged;
 #endif
@@ -271,6 +270,7 @@ public:
 	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
 
 private:
+	void LoadLookupMap(const FString &FilePath);
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 #if WITH_EDITOR
 	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
