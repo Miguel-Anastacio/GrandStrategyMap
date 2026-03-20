@@ -18,10 +18,10 @@ public:
 
 	void CreateFromData(UStruct* BaseStruct, const TSubclassOf<UUserWidget>& DefaultWidgetType);
 	bool IsValid() const;
-	const UStruct* GetDataClass() const;
 	const UScriptStruct* GetClassAsScriptStruct() const;
 	const UClass* GetClassAsUClass() const;
 #endif
+	const UStruct* GetDataClass() const;
 
 	// Widget used by default
 	UPROPERTY(EditAnywhere, Category=StructWidgetMap, meta=(MustImplement="/Script/DataBasedWidget.GenericUserWidgetInterface"))

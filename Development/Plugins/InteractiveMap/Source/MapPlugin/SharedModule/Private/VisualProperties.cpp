@@ -11,7 +11,13 @@ FColor UVisualProperty::GetColorForProperty_Implementation(const FInstancedStruc
 
 UMaterialInterface* UVisualProperty::GetMaterial() const
 {
-	return  MaterialInstance;
+	UMaterialInterface* Mat = MaterialInstance.Get();
+	if (!Mat)
+	{
+		// need to load it first
+		Mat = MaterialInstance.LoadSynchronous();
+	}
+	return Mat;
 }
 
 FColor UNumericVisualProperty::GetColorForProperty_Implementation(const FInstancedStruct& Data)

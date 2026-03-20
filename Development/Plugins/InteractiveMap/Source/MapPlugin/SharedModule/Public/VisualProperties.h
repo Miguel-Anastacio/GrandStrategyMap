@@ -10,6 +10,7 @@
 #else
 #include "InstancedStruct.h"
 #endif
+#include "Materials/MaterialInterface.h"
 #include "VisualProperties.generated.h"
 
 UENUM(BlueprintType)
@@ -32,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Visual Property")
 	UMaterialInterface* GetMaterial() const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual Property")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual Property")	
 	FString Name;
 
 protected:
@@ -40,7 +41,7 @@ protected:
 	FColor DefaultColor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual Property")
-	class UMaterialInterface* MaterialInstance = nullptr;
+	TSoftObjectPtr<UMaterialInterface> MaterialInstance = nullptr;
 };
 
 template<typename  T>

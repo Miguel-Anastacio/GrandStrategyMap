@@ -93,7 +93,6 @@ void UWPropGenGeneric::InitFromObject(const UObject* Object)
 		}
 	}
 }
-#if WITH_EDITOR
 const UStruct* UWPropGenGeneric::GetDataClass() const
 {
 	if(!DataAssetWidgetMap)
@@ -101,7 +100,7 @@ const UStruct* UWPropGenGeneric::GetDataClass() const
 	
 	return DataAssetWidgetMap->GetDataClass();
 }
-#endif
+
 void UWPropGenGeneric::InitFromData(const UStruct* ClassType, const void* Data)
 {
 	for(TPair<FName, UUserWidget*>& WidgetPair : WidgetFields)

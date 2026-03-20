@@ -42,8 +42,6 @@ struct FBaseMapStruct
 		return FString::Printf(TEXT("ID: %d - Name: %s - Area: %s - Region - %s"), ID, *Name, *Area, *Region);
 	}
 };
-#include <vector>
-
 
 USTRUCT(BlueprintType)
 struct FLookupEntry
@@ -276,9 +274,9 @@ public:
 	FColor GetPropertyColorFromInstancedStruct(const FInstancedStruct &InstancedStruct, const FName &PropertyName, bool &OutResult) const;
 
 private:
-	void LoadLookupMap(const FString &FilePath);
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 #if WITH_EDITOR
+	void LoadLookupMap(const FString &FilePath);
 	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
 	
 	void SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries);

@@ -261,6 +261,7 @@ void UMapObject::SetLookupTexture(UTexture2D* Texture2D)
 	LookupTexture = Texture2D;
 	LoadLookupTextureData();
 }
+#endif
 
 TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
 {
@@ -271,6 +272,7 @@ TWeakObjectPtr<UTexture2D> UMapObject::GetLookupTexture() const
 	return LookupTexture.Get();
 }
 
+#if WITH_EDITOR
 void UMapObject::SetMapDataFilePath(const FString& FilePath)
 {
 	FilePathMapData = FPaths::CreateStandardFilename(FilePath);
@@ -359,6 +361,8 @@ void UMapObject::LoadLookupTextureData()
 	LookupTextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(GetLookupTexture().Get());
 }
 
+
+#if WITH_EDITOR
 void UMapObject::LoadLookupMap(const FString& FilePath)
 {
 	bool bOutResult = false;
@@ -371,7 +375,6 @@ void UMapObject::LoadLookupMap(const FString& FilePath)
 	SetLookupTableFromEntries(Lookup);
 }
 
-#if WITH_EDITOR
 bool UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32 ID)
 {
 	if(FInstancedStruct* Data = GetTileData(ID))

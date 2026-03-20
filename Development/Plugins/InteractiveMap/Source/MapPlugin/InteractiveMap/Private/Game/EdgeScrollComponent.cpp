@@ -1,7 +1,9 @@
 // Copyright 2024 An@stacioDev All rights reserved.
 #include "Game/EdgeScrollComponent.h"
-
-#include "InteractiveMap.h"
+#include "GameFramework/PlayerController.h"
+#include "Engine/Engine.h"
+#include "GameFramework/Pawn.h"
+#include "Engine/GameViewportClient.h"
 
 UEdgeScrollComponent::UEdgeScrollComponent()
 {

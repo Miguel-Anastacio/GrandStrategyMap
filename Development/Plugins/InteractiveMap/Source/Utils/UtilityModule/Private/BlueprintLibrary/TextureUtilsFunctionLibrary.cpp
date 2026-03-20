@@ -19,12 +19,17 @@ TArray<uint8> UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(UTexture2D* Te
 #if WITH_EDITOR
 	FTextureCompilingManager::Get().FinishCompilation({Texture});
 #endif
-	// Lock the texture for reading
+	// Lock the texture for reading	
+	if (Texture->GetPlatformData()->Mips.IsEmpty())
+	{
+		UE_LOG(LogUtilityModule, Warning, TEXT("Texture has no mipmaps %s"), *Texture->GetName());
+		return DataArray;
+	}
 	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
 	void* TextureData = Mip.BulkData.Lock(LOCK_READ_ONLY);
 
 	// Copy the texture data into the TArray
-	const uint8* Data = static_cast<const uint8*>(TextureData);
+	const uint8* Data = static_cast<const uint8*>(TextureData);	
 	DataArray.Append(Data, Mip.BulkData.GetBulkDataSize()); // Append data to the TArray
 
 	// Unlock the texture
