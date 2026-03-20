@@ -5,8 +5,10 @@
 #include "MapDataValidation.h"
 #include "MapEditor.h"
 #include "MapObject.h"
+#include "BlueprintLibrary/AssetCreatorFunctionLibrary.h"
 #include "BlueprintLibrary/DataManagerFunctionLibrary.h"
 #include "BlueprintLibrary/FilePickerFunctionLibrary.h"
+#include "Materials/MaterialInstanceConstant.h"
 
 #define LOCTEXT_NAMESPACE "CustomAssetActions"
 
@@ -14,6 +16,11 @@
 UMapObjectUserUploadAction::UMapObjectUserUploadAction()
 {
 	SupportedClasses.Add(UMapObject::StaticClass());
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialFinder(TEXT("/Script/Engine.Material'/InteractiveMap/GSMap/Editor/M_PoliticalMapEditor.M_PoliticalMapEditor'"));
+	if(MaterialFinder.Succeeded())
+	{
+		Material = MaterialFinder.Object;
+	}
 }
 
 void UMapObjectUserUploadAction::UploadFiles(UScriptStruct* StructLandTiles, UScriptStruct* StructOceanTiles, UTexture2D* LookupTexture) const
@@ -69,16 +76,43 @@ void UMapObjectUserUploadAction::UploadFiles(UScriptStruct* StructLandTiles, USc
 	for (UObject *Asset : SelectedAssets)
 	{
 		UMapObject* MapObject = Cast<UMapObject>(Asset);
+		if (!MapObject)
+			continue;
 		
 		MapObject->InitLandStructType(StructLandTiles);
 		MapObject->InitOceanStructType(StructOceanTiles);
 		
-		MapObject->SetLookupTableFromEntries(LookupEntries);
+		MapObject->SetLookupFilePath(FilePathLookup, LookupEntries);
 		
 		// Load map data
 		MapObject->SetFilePathMapData(FilePath);
 		MapObject->SetMapData(NewMapData);
 		
 		MapObject->SetLookupTexture(LookupTexture);
+		MapObject->ReconstructMapGenSavedFromData();
+		
+		if (bCreateMaterialForPreview)
+		{
+			UMaterialInstanceConstant* MaterialInstance = CreateMaterialInstance(LookupTexture, MapObject);
+			MapObject->SetMaterialOverride(MaterialInstance);
+		}
+		
+		MapObject->Modify();
 	}
+	
+	FString Message;
+	UAtkAssetCreatorFunctionLibrary::SaveModifiedAssets(true, Message);
+}
+
+UMaterialInstanceConstant* UMapObjectUserUploadAction::CreateMaterialInstance(UTexture2D* Texture, UMapObject* MapObject) const
+{
+	const FString PackagePath = FPackageName::GetLongPackagePath(MapObject->GetPathName()) + "/";
+	
+	UObject* Asset = UAtkAssetCreatorFunctionLibrary::CreateAssetInPackageWithUniqueName(PackagePath, UMaterialInstanceConstant::StaticClass(), "MI_LookupMaterial");
+	UMaterialInstanceConstant* MaterialInstance= Cast<UMaterialInstanceConstant>(Asset);
+	MaterialInstance->SetParentEditorOnly(Material);
+	MaterialInstance->SetTextureParameterValueEditorOnly(FName("DynamicTexture"), Texture);
+	MaterialInstance->SetTextureParameterValueEditorOnly(FName("LookupTexture"), Texture);
+	MaterialInstance->PostEditChange();
+	return MaterialInstance;
 }

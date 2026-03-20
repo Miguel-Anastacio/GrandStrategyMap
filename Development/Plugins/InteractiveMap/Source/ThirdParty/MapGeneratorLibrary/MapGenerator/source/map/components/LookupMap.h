@@ -46,6 +46,7 @@ namespace MapGenerator
 		
 
 		const TileMap& GetTileMap() const;
+		TileMap& GetTileMap();
 		std::vector<Tile> GetTiles() const;
 		void SetTileMap(const std::vector<Tile>& tiles);
 		void SetBorderBufferRef(const std::shared_ptr<std::vector<uint8_t>>& borderDataBuffer);

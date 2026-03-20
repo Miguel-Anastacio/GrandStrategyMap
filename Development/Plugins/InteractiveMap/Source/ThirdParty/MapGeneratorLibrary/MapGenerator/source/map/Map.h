@@ -35,6 +35,19 @@ public:
 	{
 		return m_lookupmap->GetTileMap();
 	}
+	
+	void CreateLookupMap()
+	{
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
+	}
+	
+	template <typename Func>
+	void forEachTileInLookUpMap(Func&& func)
+	{
+		assert(m_lookupmap != nullptr);
+		m_lookupmap->GetTileMap().forEachTile(std::forward<Func>(func));
+	}
+	
 	inline const std::vector<double> NoiseMap() const
 	{
 		assert(m_heightmap != nullptr);

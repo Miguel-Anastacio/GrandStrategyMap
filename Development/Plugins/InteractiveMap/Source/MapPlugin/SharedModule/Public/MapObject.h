@@ -19,10 +19,8 @@
 #include "source/map/Map.h"
 #include "MapGenParamStructs.h"
 #endif
-#include <vector>
-
-
 #include "MapObject.generated.h"
+
 USTRUCT(BlueprintType)
 struct FBaseMapStruct
 {
@@ -44,6 +42,8 @@ struct FBaseMapStruct
 		return FString::Printf(TEXT("ID: %d - Name: %s - Area: %s - Region - %s"), ID, *Name, *Area, *Region);
 	}
 };
+#include <vector>
+
 
 USTRUCT(BlueprintType)
 struct FLookupEntry
@@ -136,6 +136,14 @@ struct FComplexMapDataStruct : public FBaseMapStruct
 	// }
 };
 
+UENUM(BlueprintType)
+enum class EMapOrigin : uint8
+{
+	Generated,
+	UserUpload
+};
+
+
 DECLARE_MULTICAST_DELEGATE(FOnAssetChanged);
 DECLARE_DELEGATE(FOnMapDetailsChange);
 DECLARE_DELEGATE_OneParam(FOnTilesSelectedChanged, const TArray<int32>&);
@@ -151,7 +159,6 @@ class SHAREDMODULE_API UMapObject : public UObject
 #endif
 	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
 	virtual void PostLoad() override;
-	virtual void Serialize(FArchive& Ar) override;
 	// ======================================================
 	
 #if WITH_EDITOR
@@ -172,8 +179,6 @@ public:
 	void SetMapSaved(bool Saved);
 	// counter of mapGens without saving 
 	void IncrementCounter();
-	// Map Gen serialization -> move somewhere else
-	void SerializeMap(FArchive& Ar);
 
 	void SaveData() const;
 	void SetLookupTexture(UTexture2D *Texture2D);
@@ -185,8 +190,7 @@ public:
 		this->LookupFilePath = FPaths::CreateStandardFilename(FilePath);
 		LoadLookupMap(FilePath);
 	}
-	
-	void SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries);
+	void SetLookupFilePath(const FString &FilePath, const TArray<FLookupEntry>& LookupEntries);
 
 	// Update In Editor only, used in Map Object Display
 	void UpdateDataInEditor(const FInstancedStruct &NewData, const TArray<int32>& IDs);
@@ -208,6 +212,8 @@ public:
 
 	void InitLandStructType(UScriptStruct* NewStruct);
 	void InitOceanStructType(UScriptStruct* NewStruct);
+	
+	void ReconstructMapGenSavedFromData();
 #endif
 	
 public:
@@ -274,6 +280,8 @@ private:
 	bool IsTileOfType(int32 ID, const UScriptStruct *ScriptStruct) const;
 #if WITH_EDITOR
 	bool UpdateDataInEditor(const FInstancedStruct &NewData, const int32 ID);
+	
+	void SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries);
 #endif
 
 	UPROPERTY(EditAnywhere, Category="Visual Property")
@@ -331,25 +339,3 @@ private:
 	
 };
 
-#if WITH_EDITOR
-static void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar);
-
-template <typename T>
-static void SerializeParallel(const int NumThreads, TArray<TArray<uint8>>& ThreadBuffers, std::vector<MapGenerator::Tile>& tiles)
-{
-	ParallelFor(NumThreads, [&](int32 Index)
-	{
-		TArray<uint8>& Buffer = ThreadBuffers[Index];
-		T Target(Buffer);
-
-		int32 ChunkSize = tiles.size() / NumThreads;
-		int32 Start = Index * ChunkSize;
-		int32 End = (Index == NumThreads - 1) ? tiles.size() : Start + ChunkSize;
-
-		for (int32 i = Start; i < End; ++i)
-		{
-			SerializeTile(tiles[i], Target);  // Manual serialize per field
-		}
-	});
-}
-#endif

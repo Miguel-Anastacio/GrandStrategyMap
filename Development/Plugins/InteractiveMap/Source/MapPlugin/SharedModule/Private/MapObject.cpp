@@ -128,103 +128,6 @@ void UMapObject::IncrementCounter()
 	Counter++;
 }
 
-// Lag probably due to this
-void UMapObject::SerializeMap(FArchive& Ar)
-{
-	// Skip serialization during editor operations that don't need it
-	if (Ar.IsTransacting() || Ar.IsPersistent() == false)
-	{
-		return; // Don't serialize during undo/redo or temporary operations
-	}
-	
-	int32 Version = 2;
-	Ar << Version;
-
-	if(Version >= 2)
-	{
-		unsigned width = MapGenSaved->Width();  
-		unsigned height = MapGenSaved->Height();
-		Ar << width;
-		Ar << height;
-		int32 NumThreads = 8;
-		Ar << NumThreads;
-
-		if(Ar.IsSaving())
-		{
-			std::vector<MapGenerator::Tile> tiles = MapGenSaved->GetTiles();
-			int32 count = static_cast<int32>(tiles.size());
-			Ar << count;
-			
-			TArray<TArray<uint8>> ThreadBuffers;
-			ThreadBuffers.SetNum(NumThreads);
-			
-			SerializeParallel<FMemoryWriter>(NumThreads, ThreadBuffers, tiles);
-			for (int32 i = 0; i < NumThreads; ++i)
-			{
-				int32 Size = ThreadBuffers[i].Num();
-				Ar << Size;
-				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
-			}
-		}
-		else if(Ar.IsLoading())
-		{
-			int count = 0;
-			Ar << count;
-
-			std::vector<MapGenerator::Tile> tiles;
-			tiles.resize(count);
-
-			TArray<TArray<uint8>> ThreadBuffers;
-			ThreadBuffers.SetNum(NumThreads);
-
-			// Step 1: Read each chunk
-			for (int32 i = 0; i < NumThreads; ++i)
-			{
-				int32 Size = 0;
-				Ar << Size;
-				ThreadBuffers[i].SetNumUninitialized(Size);
-				Ar.Serialize(ThreadBuffers[i].GetData(), Size);
-			}
-			SerializeParallel<FMemoryReader>(NumThreads, ThreadBuffers, tiles);
-			
-			MapGenSaved->SetSize(width, height);
-			MapGenSaved->SetLookupTileMap(tiles);
-		}
-	}
-}
-
-void SerializeTile(MapGenerator::Tile& Tile, FArchive& Ar)
-{
-	uint8 r, g, b, a;
-	int32 cx, cy;
-	int32 type = static_cast<int32>(Tile.type); // store enum as int
-
-	if (Ar.IsSaving())
-	{
-		r = Tile.color.R;
-		g = Tile.color.G;
-		b = Tile.color.B;
-		a = Tile.color.A;
-
-		cx = Tile.centroid.x;
-		cy = Tile.centroid.y;
-	}
-
-	Ar << r << g << b << a;
-	Ar << Tile.visited;
-	Ar << type;
-	Ar << Tile.isBorder;
-	Ar << cx << cy;
-
-	if (Ar.IsLoading())
-	{
-		Tile.color = MapGenerator::Color(r, g, b, a);
-		Tile.type = static_cast<MapGenerator::TileType>(type);
-		Tile.centroid = mygal::Vector2<int>(cx, cy);
-	}
-
-}
-
 #endif
 void UMapObject::PreSave(FObjectPreSaveContext SaveContext)
 {
@@ -240,19 +143,13 @@ void UMapObject::PostLoad()
 #if WITH_EDITOR
 	LoadLookupMap(LookupFilePath);
 	SetMapDataFilePath(FilePathMapData);
+	ReconstructMapGenSavedFromData();
 	bMapSaved = true;
 	StructTypePrevious = StructType;
 	OceanStructTypePrevious = OceanStructType;
 #endif
 }
 
-void UMapObject::Serialize(FArchive& Ar)
-{
-	Super::Serialize(Ar);
-#if WITH_EDITOR
-	SerializeMap(Ar);
-#endif
-}
 
 TArray<TObjectPtr<UVisualProperty>> UMapObject::GetVisualProperties()
 {
@@ -489,6 +386,37 @@ bool UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const int32
 	return false;
 }
 
+void UMapObject::ReconstructMapGenSavedFromData()
+{
+	const TArray<uint8> TextureData = UAtkTextureUtilsFunctionLibrary::ReadTextureToArray(LookupTexture.Get());
+	if (!LookupTexture)
+		return;
+	
+	MapGenSaved->SetSize(LookupTexture->GetSizeX(), LookupTexture->GetSizeY());
+	MapGenSaved->CreateLookupMap();
+	MapGenSaved->forEachTileInLookUpMap([&](MapGenerator::Tile& tile, unsigned bufferIndex)
+	{
+		const FColor Color = UAtkTextureUtilsFunctionLibrary::GetColorFromIndex(bufferIndex, TextureData);
+		const int32 ID = FindID(Color);
+		const FInstancedStruct* Data = GetTileData(ID);
+		if(!Data)
+			return;
+		
+		tile.color = MapGenerator::Color(Color.R, Color.G, Color.B, Color.A);
+		
+		if(Data->GetScriptStruct() == StructType)
+		{
+			tile.type = MapGenerator::TileType::LAND;
+		}
+		else if (Data->GetScriptStruct() == OceanStructType)
+		{
+			tile.type = MapGenerator::TileType::WATER;
+		}
+	});
+	
+	OnMapDataChanged.ExecuteIfBound();
+}
+
 void UMapObject::SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEntries)
 {
 	LookupTable.Empty();
@@ -496,6 +424,12 @@ void UMapObject::SetLookupTableFromEntries(const TArray<FLookupEntry>& LookupEnt
 	{
 		LookupTable.Emplace(UAtkMiscFunctionLibrary::ConvertHexStringToRGB(Color), FCString::Atoi(*Name));
 	}
+}
+
+void UMapObject::SetLookupFilePath(const FString& FilePath, const TArray<FLookupEntry>& LookupEntries)
+{
+	LookupFilePath = FilePath;
+	SetLookupTableFromEntries(LookupEntries);
 }
 
 void UMapObject::UpdateDataInEditor(const FInstancedStruct& NewData, const TArray<int32>& IDs)

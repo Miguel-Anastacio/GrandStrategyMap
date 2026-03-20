@@ -25,10 +25,16 @@ public:
 		UPARAM(meta = (AllowedClasses = "Texture2D"))
 			UTexture2D* LookupTexture = nullptr) const;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Upload Map Files")
+	bool bCreateMaterialForPreview = true;
+	
+	UPROPERTY()
+	UMaterial* Material;
+	
 private:
 	static void UploadLookupTexture(UTexture2D* Texture);
 	static void UploadLookupTable();
 	static void UploadMapDataFile();
-	static void CreateMaterialInstance(UTexture2D* Texture);
+	class UMaterialInstanceConstant* CreateMaterialInstance(UTexture2D* Texture, class UMapObject* MapObject) const;
 	
 };
