@@ -55,8 +55,6 @@ public: // FAssetEditorToolkit interface
 
 	// Update MapData FilePath
 	void LoadMapDataFromFile() const;
-	static void ErrorOnLoadMapDataFilePath(const FText& Message);
-	static bool IsStructTypeValid(const TArray<const UScriptStruct*>& Structs, const UScriptStruct* StructType);
 	//==================================
 
 	static TObjectPtr<UTexture2D> CreateTexture(const std::vector<uint8>& Buffer, unsigned Width, unsigned Height);

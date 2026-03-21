@@ -215,13 +215,28 @@ The example materials provided with this plugin are basic implementations offere
 ---
 ## Loading your own data files and lookup texture
 
-TODO: Add section here
+To populate your `UMapObject` with custom data from JSON files and a specific lookup texture, you can use the **Asset Action** provided by the plugin. 
+### Prerequisite
 
+Before running the action, ensure you have:
+1.  **Custom Structs:** The `UScriptStruct` definitions for your Land and Ocean data types.
+2.  **JSON Files:**
+   *   A **Map Data** JSON file containing your tile configurations.
+   *   A **Lookup Table** JSON file containing with the tile IDs and colors
+3.  **Lookup Texture:** A `UTexture2D` asset  used to map colors to your data.
 
----
+### Steps
+
+1.  **Select Asset:**
+In the Content Browser, select the `UMapObject` asset you wish to update.
+
+2.  **Access Context Menu:**
+Right-click the selected asset to open the context menu.
+
+3.  **Select Asset Action:**
+Navigate to the **Asset Actions** section and select **Upload Map Files**.
 
 ## Integrating Map into Project
-
 
 ### Choosing Your Map Type
 
@@ -351,4 +366,3 @@ Usage: Bind to know when visualization changes
 Parameters: Old and new mode names
 ```
 
-TODO: Add events of controller

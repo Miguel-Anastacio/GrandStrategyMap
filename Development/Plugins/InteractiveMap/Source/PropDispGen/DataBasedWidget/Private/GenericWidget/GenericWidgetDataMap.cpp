@@ -91,10 +91,6 @@ bool UPropGenWidgetMapDataAsset::IsValid() const
 	return ClassType != nullptr;
 }
 
-const UStruct* UPropGenWidgetMapDataAsset::GetDataClass() const
-{
-	return ClassType;
-}
 
 const UScriptStruct* UPropGenWidgetMapDataAsset::GetClassAsScriptStruct() const
 {
@@ -110,3 +106,7 @@ const UClass* UPropGenWidgetMapDataAsset::GetClassAsUClass() const
 	return Cast<UClass>(ClassType);
 }
 #endif
+const UStruct* UPropGenWidgetMapDataAsset::GetDataClass() const
+{
+	return ClassType;
+}

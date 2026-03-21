@@ -61,11 +61,9 @@ public:
     UPROPERTY(meta = (BindWidget), BlueprintReadOnly, Category = "Struct Panel Display")
     class UGridPanel* MainPanel;
 
-#if WITH_EDITORONLY_DATA
     /** Data asset that maps property types to widget classes */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Generic Struct Widget")
     class UPropGenWidgetMapDataAsset* DataAssetWidgetMap;
-#endif
     
     /** Map of property names to their corresponding widgets */
     UPROPERTY(BlueprintReadOnly, Category = "Generic Struct Widget")

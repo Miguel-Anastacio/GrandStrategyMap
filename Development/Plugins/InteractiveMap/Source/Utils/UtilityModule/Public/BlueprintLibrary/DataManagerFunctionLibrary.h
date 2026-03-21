@@ -95,7 +95,7 @@ public:
     }
 
     template <class T>
-    static TArray<T> LoadCustomDataFromJson(const FString &FilePath)
+    static TArray<T> LoadCustomDataFromJson(const FString &FilePath, bool& bResult)
     {
         TArray<TSharedPtr<FJsonValue>> JsonArray = ReadJsonFileArray(FilePath);
         TArray<T> OutArray;
@@ -108,8 +108,14 @@ public:
                 TSharedPtr<FJsonObject> JsonObject = JsonValue->AsObject();
                 if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), T::StaticStruct(), &StructInstance, 0, 0, true))
                 {
-                    ObjectHasMissingFields(JsonObject, T::StaticStruct());
+                    if (ObjectHasMissingFields(JsonObject, T::StaticStruct()))
+                    {
+                        LogReadJsonFailed(FilePath);
+                        bResult = false;
+                        return TArray<T>();
+                    }
                     OutArray.Emplace(StructInstance);
+                    bResult = true;
                 }
                 else
                 {
@@ -117,6 +123,8 @@ public:
                     // make sure that the struct members are marked as UPROPERTY
                     LogReadJsonFailed(FilePath);
                     OutArray.Empty();
+                    bResult = false;
+                    return TArray<T>();
                 }
                 Index++;
             }

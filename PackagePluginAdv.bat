@@ -323,10 +323,8 @@ mkdir "%TEST_PROJECT_PATH%" 2>nul
 echo Copying new plugin files (without Binaries/Intermediate)...
 for /d %%d in ("%OUTPUT_PATH%\*") do (
     set "FOLDER_NAME=%%~nxd"
-    if /i not "!FOLDER_NAME!"=="Binaries" (
-        if /i not "!FOLDER_NAME!"=="Intermediate" (
-            robocopy "%%d" "%TEST_PROJECT_PATH%\!FOLDER_NAME!" /e /nfl /ndl /njh /njs
-        )
+    if /i not "!FOLDER_NAME!"=="Intermediate" (
+        robocopy "%%d" "%TEST_PROJECT_PATH%\!FOLDER_NAME!" /e /nfl /ndl /njh /njs
     )
 )
 for %%f in ("%OUTPUT_PATH%\*.*") do (

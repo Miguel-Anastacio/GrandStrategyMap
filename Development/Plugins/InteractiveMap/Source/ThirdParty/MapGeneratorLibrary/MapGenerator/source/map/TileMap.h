@@ -140,7 +140,35 @@ namespace MapGenerator
 
 		void MarkBorderOnTileMap(const std::vector<uint8_t>& borderBuffer, const TileType type, const data::Color& borderColor = data::Color(0, 0, 255, 255));
 	
+		template <typename Func>
+		void forEachTile(Func&& func)
+		{
+			for (unsigned i = 0; i < Height(); i++)
+			{
+				for (unsigned j = 0; j < Width(); j++)
+				{
+					const int tileIndex = (i * Width() + j);
+					const int index = tileIndex * 4;
+					func(m_tiles[tileIndex], index);
+				}
+			}
+		}
+		
 	private:
+		template <typename Func>
+		void forEachTile(Func&& func) const
+		{
+			for (unsigned i = 0; i < Height(); i++)
+			{
+				for (unsigned j = 0; j < Width(); j++)
+				{
+					const int tileIndex = (i * Width() + j);
+					const int index = tileIndex * 4;
+					func(m_tiles[tileIndex], index);
+				}
+			}
+		}
+		
 		std::vector<Tile> m_tiles;
 		std::unordered_map<mygal::Vector2<int>, data::Color> m_cells;
 		
@@ -160,33 +188,7 @@ namespace MapGenerator
 		}
 
 		static void fillBufferPosWithColor(int index, std::vector<uint8_t>& buffer, const data::Color& color);
-		template <typename Func>
-		void forEachTile(Func&& func)
-		{
-			for (unsigned i = 0; i < Height(); i++)
-			{
-				for (unsigned j = 0; j < Width(); j++)
-				{
-					const int tileIndex = (i * Width() + j);
-					const int index = tileIndex * 4;
-					func(m_tiles[tileIndex], index);
-				}
-			}
-		}
 		
-		template <typename Func>
-		void forEachTile(Func&& func) const
-		{
-			for (unsigned i = 0; i < Height(); i++)
-			{
-				for (unsigned j = 0; j < Width(); j++)
-				{
-					const int tileIndex = (i * Width() + j);
-					const int index = tileIndex * 4;
-					func(m_tiles[tileIndex], index);
-				}
-			}
-		}
 
 		template <typename Func>
 		std::vector<uint8_t> GetTileMap(Func&& predicate) const

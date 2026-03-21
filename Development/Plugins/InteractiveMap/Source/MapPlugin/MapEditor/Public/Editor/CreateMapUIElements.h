@@ -4,9 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/WidgetTree.h"
-#include "BlueprintLibrary/WidgetEditorFunctionLibrary.h"
 #include "Editor/Blutility/Classes/AssetActionUtility.h"
-#include "Editor/UMGEditor/Public/WidgetBlueprint.h"
 #include "CreateMapUIElements.generated.h"
 
 class UMapObject;

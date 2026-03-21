@@ -14,6 +14,7 @@ namespace MapGenerator
 	LookupMap::LookupMap(const char *name, unsigned width, unsigned height, ALogger::Logger& logger)
 		: MapComponent(width, height, name, logger)
 	{
+		m_lookUpTileMap = std::make_unique<TileMap>(Width(), Height());
 	}
 
 	void LookupMap::RegenerateLookUp(const LookupMapData &data, MapMask *landMask, MapMask *oceanMask,  std::function<void(float, std::string_view)> progressCallback)
@@ -198,6 +199,12 @@ namespace MapGenerator
 	}
 
 	const TileMap& LookupMap::GetTileMap() const
+	{
+		assert(m_lookUpTileMap != nullptr);
+		return *m_lookUpTileMap;
+	}
+	
+	TileMap& LookupMap::GetTileMap()
 	{
 		assert(m_lookUpTileMap != nullptr);
 		return *m_lookUpTileMap;

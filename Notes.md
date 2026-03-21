@@ -1,19 +1,22 @@
 DOING:
+Test packaged map for 5.6/5.4/5.5
 
-TODO:
+Set up testing levels by plugin doc section
+For example:
+All set up minus UI
+All set up minus VP
+All set up minus RuntimeMap
+Setup for testing manual loading data
 
+# TODO:
 
 **Missing/Poor features**:
-Loading your own data files and lookup texture -> Complete docs, is this even possible?
 ---------------------------------------------------------------------------
 
 **Otimizations**
-Check huge file size for mapobjecta
-Use softobject references whenever possible for game runtime relevant code
 ---------------------------------------------------------------------------
 
 **Test Execution**
-Test packaged map for 5.6/5.4/5.5
 Redo user test
 --------------------------------------------------------------------------
 
@@ -32,7 +35,7 @@ Review MapVisual Component whole setup, is it even adequate?
 Address package warnings 
 Update PropertyDisplayGenerator plugin
 Review logs to unreal and map gen logs (Copilot)
-Maybe not so many save confirmations to user? Only one
+Maybe not so many save confirmations to user when creating map widgets? Only one
 Check names output by asset action should be based on origin asset name and not its type
 ----------------------------------------------------------------------------------
 
