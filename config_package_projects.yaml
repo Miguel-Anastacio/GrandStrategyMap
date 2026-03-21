@@ -1,0 +1,34 @@
+# Project Packaging Configuration
+# Each project is paired with the Unreal Engine version it should be packaged with.
+
+projects:
+  - path: "C:/Dev/GrandStrategyMap/Test5_4/Test5_4.uproject"
+    name: ""                # Auto-derived from filename
+    unreal_engine_path: "C:/Program Files/Epic Games/UE_5.4"
+  # - path: "C:/Dev/GrandStrategyMap/Development/ClickableMap.uproject"
+  #   name: ""                # Auto-derived from filename
+  #   unreal_engine_path: "C:/Program Files/Epic Games/UE_5.4"
+
+  # - path: "C:/Dev/GrandStrategyMap/Test5_5/Test5_5.uproject"
+  #   name: ""                # Auto-derived from filename
+  #   unreal_engine_path: "C:/Program Files/Epic Games/UE_5.5"
+
+  # - path: "C:/Dev/GrandStrategyMap/Test5_6/Test5_6.uproject"
+  #   name: ""                # Auto-derived from filename
+  #   unreal_engine_path: "C:/Program Files/Epic Games/UE_5.6"
+
+
+
+
+# Base output directory where packaged projects will be saved
+# Structure: output_directory/ProjectName/UE_5.X/
+output_directory: "C:/Dev/BuiltProjects"
+
+# Build configuration: Development, Shipping, DebugGame
+build_configuration: "Shipping"
+
+# Target platform(s) to package for
+target_platform: "Win64"
+
+# Whether to cook all maps or only maps listed in project settings
+cook_all: false

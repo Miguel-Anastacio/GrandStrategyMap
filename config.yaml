@@ -4,8 +4,8 @@ plugin_path: "C:/Dev/GrandStrategyMap/Development/Plugins/InteractiveMap/Interac
 # List of Unreal Engine installation paths to build against
 unreal_engine_paths:
   - "C:/Program Files/Epic Games/UE_5.4"
-  - "C:/Program Files/Epic Games/UE_5.5"
-  - "C:/Program Files/Epic Games/UE_5.6"
+  # - "C:/Program Files/Epic Games/UE_5.5"
+  # - "C:/Program Files/Epic Games/UE_5.6"
 # - "C:/Program Files/Epic Games/UE_5.7"
 
 # Base output directory where packaged plugins will be saved
@@ -15,6 +15,6 @@ output_directory: "C:/Dev/BuiltPlugins"
 # Leave empty string "" to skip deployment for that version
 test_project_paths:
   - "C:/Dev/GrandStrategyMap/Test5_4/Plugins/InteractiveMap"
-  - "C:/Dev/GrandStrategyMap/Test5_5/Plugins/InteractiveMap"
-  - "C:/Dev/GrandStrategyMap/Test5_6/Plugins/InteractiveMap"
+  # - "C:/Dev/GrandStrategyMap/Test5_5/Plugins/InteractiveMap"
+  # - "C:/Dev/GrandStrategyMap/Test5_6/Plugins/InteractiveMap"
 # - "C:/Dev/GrandStrategyMap/Test5_7/Plugins/InteractiveMap"
