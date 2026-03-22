@@ -80,7 +80,7 @@ void ABirdEyeController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(SelectAction, ETriggerEvent::Started, this, &ABirdEyeController::MouseClick);
 
-		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Started, this, &ABirdEyeController::CameraZoom);
+		EnhancedInputComponent->BindAction(MouseScrollAction, ETriggerEvent::Triggered, this, &ABirdEyeController::CameraZoom);
 #if WITH_EDITOR
 		EnhancedInputComponent->BindAction(DisplayLookupTextureAction, ETriggerEvent::Started, this, &ABirdEyeController::SetLookupTextureActive);
 		EnhancedInputComponent->BindAction(LogMapDataAction, ETriggerEvent::Started, this, &ABirdEyeController::LogMapData);
