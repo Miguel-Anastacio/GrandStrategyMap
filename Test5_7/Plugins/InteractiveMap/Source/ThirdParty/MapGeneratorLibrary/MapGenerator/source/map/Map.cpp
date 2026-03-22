@@ -1,0 +1,277 @@
+#include "Map.h"
+#include "../utils/ComputeGeometry.h"
+#include "../../thirdParty/fastNoiseLite/FastNoiseLite.h"
+#include "components/HeightMap.h"
+namespace MapGenerator
+{
+
+	Map::Map(unsigned width, unsigned height, const std::filesystem::path &path)
+		: Dimensions(width, height)
+		, m_uploadBorder(false)
+		, m_fileLogger(path)
+	{
+		m_fileLogger.SetMinLogLevel(ALogger::LogLevel::INFO);
+		geomt::m_logger = &m_fileLogger;
+		LOG_DEBUG(m_fileLogger, "Map initialized: width=" + std::to_string(width) + ", height=" + std::to_string(height) + ", log path=" + path.string());
+	}
+
+	Map::~Map()
+	{
+		// m_lookUpTexture->WriteTextureToFile();
+		// m_heightmap->SaveToFile("untitledHeight.png");
+		// m_terrainmap->SaveToFile("untitledTerrain.png");
+	}
+
+	void Map::GenerateHeightMap(const NoiseMapData &data)
+	{
+		LOG_INFO(m_fileLogger, "Starting height map generation with noise data: width=" + std::to_string(data.width) + ", height=" + std::to_string(data.height));
+		auto start = std::chrono::steady_clock::now();
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data, m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), data.width, data.height, m_terrainTypes, m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Height map generation completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::GenerateHeightMapTectonic()
+	{
+		LOG_INFO(m_fileLogger, "Starting tectonic height map generation");
+		auto start = std::chrono::steady_clock::now();
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", NoiseMapData(), m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Tectonic height map generation completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::GenerateHeightMapTectonic(const NoiseMapData &data)
+	{
+		LOG_INFO(m_fileLogger, "Starting tectonic height map generation with data: width=" + std::to_string(data.width) + ", height=" + std::to_string(data.height));
+		auto start = std::chrono::steady_clock::now();
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", data, m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Tectonic height map generation completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::GenerateTerrainMap(const std::vector<double> &noiseMap)
+	{
+		LOG_INFO(m_fileLogger, "Starting terrain map generation from noise map, size=" + std::to_string(noiseMap.size()));
+		auto start = std::chrono::steady_clock::now();
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), m_terrainTypes, m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Terrain map generation completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::GenerateTerrainMap(const std::vector<double> &noiseMap, const std::vector<TerrainType> &types)
+	{
+		LOG_INFO(m_fileLogger, "Starting terrain map generation with custom types, noise size=" + std::to_string(noiseMap.size()) + ", types count=" + std::to_string(types.size()));
+		auto start = std::chrono::steady_clock::now();
+		m_terrainTypes = types;
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), m_heightmap->Width(), m_heightmap->Height(), types, m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Terrain map generation with custom types completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::SetProgressCallback(const std::function<void(float, std::string_view)>& progressCallback)
+	{
+		m_progressCallback = progressCallback;
+	}
+	void Map::RegenerateLookUp(const LookupMapData &data)
+	{
+		assert(m_lookupmap != nullptr);
+		assert(m_landMask != nullptr);
+		assert(m_oceanMask != nullptr);
+		
+		if(m_progressCallback)
+		{
+			m_progressCallback(10.0f, "Generated Land and Ocean Masks");
+		}
+		
+		if(m_uploadBorder)
+		{
+			m_lookupmap->SetBorderBufferRef(m_borderUploadedBuffer);
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get(), TileMapGenType::UserUploadedBorderForLand);
+		}
+		else
+		{
+			m_lookupmap->RegenerateLookUp(data, m_landMask.get(), m_oceanMask.get());
+		}
+		m_cutOffHeight = data.cutOffHeight;
+	}
+
+	void Map::RegenerateLookupBorders(const LookupMapData &data)
+	{
+		assert(m_lookupmap != nullptr);
+		assert(m_landMask != nullptr);
+		assert(m_oceanMask != nullptr);
+
+		m_lookupmap->RegenerateBorders(data, m_landMask.get(), m_oceanMask.get());
+	}
+
+	void Map::GenerateMap(const std::vector<uint8_t> &textureBuffer, unsigned width, unsigned height)
+	{
+		setDimensions(width, height);
+		GenerateMapFromHeigthMap(textureBuffer, m_cutOffHeight);
+	}
+
+	void Map::GenerateMap(const std::vector<uint8_t>& textureBuffer, unsigned width, unsigned height,
+		const LookupMapData& data, const MapModeGen mode)
+	{
+		setDimensions(width, height);
+		switch (mode)
+		{
+		case MapModeGen::FromHeightMap:
+			GenerateMapFromHeigthMap(textureBuffer, data.cutOffHeight, data);
+			break;
+		default:
+			break;
+		}
+	}
+
+	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t> &textureBuffer, float cutOffHeight)
+	{
+		LOG_INFO(m_fileLogger, "Starting map generation from height map, buffer size=" + std::to_string(textureBuffer.size()) + ", cutOffHeight=" + std::to_string(cutOffHeight));
+		auto start = std::chrono::steady_clock::now();
+		cutOffHeight = 0.001f;
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, false);
+		RegenerateMasks(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, cutOffHeight));
+		
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
+		RegenerateLookUp(LookupMapData(NoiseData(), LookupFeatures(), LookupFeatures(), Width(), Height(), 1.0f, cutOffHeight));
+
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation(), m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Map generation from height map completed in " + std::to_string(duration.count()) + "ms");
+	}
+
+	void Map::GenerateMapFromHeigthMap(const std::vector<uint8_t>& textureBuffer, float cutOffHeight, const LookupMapData& data)
+	{
+		if(m_progressCallback)
+		{
+			m_progressCallback(0.0f, "GenerateMapFromHeigthMap");
+		}
+		LOG_INFO(m_fileLogger, "Starting map generation from height map with lookup data, buffer size=" + std::to_string(textureBuffer.size()) + ", cutOffHeight=" + std::to_string(cutOffHeight));
+		auto start = std::chrono::steady_clock::now();
+		
+		m_landMask = std::make_unique<MapMask>("landMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, !data.flipMask);
+		m_oceanMask = std::make_unique<MapMask>("oceamMask.png", textureBuffer, Width(), Height(), m_fileLogger, cutOffHeight, data.flipMask);
+		RegenerateMasks(data);
+		
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
+		RegenerateLookUp(data);
+
+		m_heightmap = std::make_unique<HeightMap>("heightMap1.png", Width(), Height(), m_landMask->GetElevation(), m_fileLogger);
+		m_terrainmap = std::make_unique<TerrainMap>("terrainMap.png", m_heightmap->NoiseMap(), Width(), Height(), m_terrainTypes, m_fileLogger);
+
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
+		LOG_INFO(m_fileLogger, "Map generation from height map with lookup data completed in " + std::to_string(duration.count()) + "ms");
+		LOG_INFO(m_fileLogger, "Cell map size: " + std::to_string(GetLookupTileMap().GetCellMap().size()));
+		
+		int id = 0;
+		for (const std::pair<mygal::Vector2<int>, data::Color> &cell : GetLookupTileMap().GetCellMap())
+		{
+			std::string message = "ID: " + std::to_string(id) + "	Position: " + std::to_string(cell.first.x) + "," + std::to_string(cell.first.y) + "    Color: " + cell.second.ConvertToHex();
+			LOG_DEBUG(m_fileLogger, message);
+			id++;
+		}
+
+		std::unordered_set<data::Color> colorsInUse = GetLookupTileMap().GetColors();
+		LOG_DEBUG(m_fileLogger, "Colors in use count: " + std::to_string(colorsInUse.size()));
+		for (const data::Color &color : colorsInUse)
+		{
+			LOG_DEBUG(m_fileLogger, "Color in use: " + color.ConvertToHex());
+		}
+	}
+
+	void Map::RegenerateMasks(const LookupMapData& data)
+	{
+		if (std::abs(data.cutOffHeight - m_cutOffHeight) > 0.00001)
+		{
+			LOG_INFO(m_fileLogger, "Regenerating masks with cutOffHeight=" + std::to_string(data.cutOffHeight) + ", flipMask=" + std::to_string(data.flipMask));
+			m_landMask->RegenerateMask(data.cutOffHeight, !data.flipMask);
+			m_oceanMask->RegenerateMask(data.cutOffHeight, data.flipMask);
+		}
+		else
+		{
+			LOG_DEBUG(m_fileLogger, "Masks regeneration skipped: cutOffHeight unchanged");
+		}
+	}
+
+	void Map::SaveMap(const std::string &filePath) const
+	{
+
+	}
+
+	void Map::Reset()
+	{
+		ClearMapComponent(m_lookupmap.get());
+		ClearMapComponent(m_heightmap.get());
+		ClearMapComponent(m_terrainmap.get());
+		ClearMapComponent(m_landMask.get());
+		ClearMapComponent(m_oceanMask.get());
+
+		// m_terrainTypes.
+		m_cutOffHeight = 0.01f;
+	}
+	
+	void Map::SetSize(unsigned width, unsigned height)
+	{
+		Reset();
+		setDimensions(width, height);
+	}
+	void Map::SetLookupTileMap(const std::vector<Tile>& tiles)
+	{
+		m_lookupmap = std::make_unique<LookupMap>("lookupTexture.png", Width(), Height(), m_fileLogger);
+		m_lookupmap->SetTileMap(tiles);
+	}
+	
+	std::vector<Tile> Map::GetTiles() const
+	{
+		if(m_lookupmap == nullptr)
+		{
+			return std::vector<Tile>();
+		}
+
+		return m_lookupmap->GetTiles();
+	}
+
+	void Map::SaveMapComponent(MapComponent *component, const std::string &filePath, const char *message) const
+	{
+		/*if (component)
+			component->SaveToFile(filePath);
+		else
+			std::cout << "ERROR - save " << message << std::endl;*/
+	}
+
+	void Map::ClearMapComponent(MapComponent *component, const char *message)
+	{
+		if (component)
+			component->Clear();
+			// std::cout << "ERROR - clear " << message << std::endl;
+	}
+
+	bool Map::IsValid() const
+	{
+		return m_lookupmap != nullptr && m_lookupmap->GetTiles().size() > 0;
+	}
+
+	void Map::SetBorderUpload(const std::vector<uint8_t>& borderBuffer)
+	{
+		m_uploadBorder = true;
+		m_borderUploadedBuffer = std::make_shared<std::vector<uint8_t>>(borderBuffer);
+		LOG_INFO(m_fileLogger, "Set user border upload");
+		LOG_INFO(m_fileLogger, "Border upload size: " + std::to_string(m_borderUploadedBuffer->size()));
+	}
+
+	void Map::SetBorderUpload(const uint8_t* borderBuffer, const unsigned width, const unsigned height)
+	{
+		SetBorderUpload(std::vector(&borderBuffer[0], &borderBuffer[width * height * 4]));
+	}
+
+	void Map::ClearBorderUpload()
+	{
+		LOG_INFO(m_fileLogger, "Clearing User Uploaded Borders");
+		m_uploadBorder = false;
+		m_borderUploadedBuffer->clear();
+		m_borderUploadedBuffer = nullptr;
+	}
+}

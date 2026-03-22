@@ -1,0 +1,27 @@
+{
+	"landDetails":
+	{
+		"numberOfTiles": 300,
+		"seed": 10,
+		"lloydIteration": 10,
+		"searchRadiusBeforeNewTile": 100
+	},
+	"oceanDetails":
+	{
+		"numberOfTiles": 10,
+		"seed": 10,
+		"lloydIteration": 10,
+		"searchRadiusBeforeNewTile": 100
+	},
+	"noiseDetails":
+	{
+		"seed": 12002943,
+		"octaves": 4,
+		"frequency": 0.05000000074505806,
+		"scale": 1,
+		"lineThickness": 1
+	},
+	"cutoffHeight": 0.0010000000474974513,
+	"landTiles": 213,
+	"oceanTiles": 16
+}
